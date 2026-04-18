@@ -140,17 +140,17 @@ QUARTERLY_REBOOT=
 # End config section
 # ===================
 
-has_pkg() {
-	ls /*/apk/*/*"${1}"*.list 2>/dev/null ||
-	ls /*/*/opkg/*/*"${1}"*.list 2>/dev/null
-}
+cat > /lib/functions/wrtnova.sh << 'EOF'
+# WrtNova shared functions
 
-duid_gen() { printf '0004'; tr -d '-' < /proc/sys/kernel/random/uuid; }
+# uci_section <pkg> <type> <name> [key=val ...]
+# key=val  -> uci set
+# -key     -> uci del
+# +key=val -> uci add_list
+# ^key=val -> uci del_list
+# ~old=new -> uci rename
 
 uci_section() {
-	# +key=val -> uci add_list
-	# ^key=val -> uci del_list
-	# key=val  -> uci set
 	local pkg="$1" type="$2" name="$3"; shift 3
 	if [ -n "$name" ]; then
 		uci set "${pkg}.${name}=${type}"
@@ -162,15 +162,29 @@ uci_section() {
 	for arg; do
 		case "$arg" in
 			+*) uci add_list "${pkg}.${ref}.${arg#+}" ;;
-			^*) uci del_list "${pkg}.${ref}.${arg#^}" ;;
-			*)  uci set	 "${pkg}.${ref}.${arg}" ;;
+			^*) uci -q del_list "${pkg}.${ref}.${arg#^}" ;;
+			~*) uci rename "${pkg}.${arg#\~}" ;;
+			-*) uci -q del "${pkg}.${ref}.${arg#-}" ;;
+			*)  uci set "${pkg}.${ref}.${arg}" ;;
 		esac
 	done
 }
 
+# has_pkg <name> - check if package is installed
+has_pkg() {
+	ls /*/apk/*/*"${1}"*.list 2>/dev/null ||
+	ls /*/*/opkg/*/*"${1}"*.list 2>/dev/null
+}
+
+# duid_gen - generate a DUID-UUID
+duid_gen() { printf '0004'; tr -d '-' < /proc/sys/kernel/random/uuid; }
+
+# add_luci_command <cmd> [param] - add a command to luci-app-commands
 add_luci_command() {
 	uci_section luci command "" command="$1" param="${2:-1}"
 }
+EOF
+. /lib/functions/wrtnova.sh
 
 # === System ===
 [ -x /bin/run_cmd.sh ] && exit 0
@@ -648,7 +662,9 @@ fi
 
 # === mwan3 ===
 cat > /sbin/mwan3-iface-add << 'EOF'
-#!/bin/sh -e
+#!/bin/sh
+. /lib/functions/wrtnova.sh
+
 IFACE=$(echo "$1" | tr '-' '_')
 BASE_IFACE=$(echo "$IFACE" | sed 's/_6$//')
 METRIC=${2:-1}
@@ -672,17 +688,13 @@ Usage: mwan3-iface-add <interface> [metric] [weight] [family] [balanced] [track_
 	exit 1
 fi
 
-uci set mwan3.${IFACE}=interface
-uci set mwan3.${IFACE}.enabled=1
-uci set mwan3.${IFACE}.family=$FAMILY
-uci add_list mwan3.${IFACE}.track_ip=$TRACK_IP
-uci set mwan3.${IFACE}_m${METRIC}_w${WEIGHT}=member
-uci set mwan3.${IFACE}_m${METRIC}_w${WEIGHT}.interface=$IFACE
-uci set mwan3.${IFACE}_m${METRIC}_w${WEIGHT}.metric=$METRIC
-uci set mwan3.${IFACE}_m${METRIC}_w${WEIGHT}.weight=$WEIGHT
-uci set mwan3.${BASE_IFACE}_only=policy
-uci add_list mwan3.${BASE_IFACE}_only.use_member=${IFACE}_m${METRIC}_w${WEIGHT}
-[ "$LOAD_BALANCED" = 1 ] && uci add_list mwan3.balanced.use_member=${IFACE}_m${METRIC}_w${WEIGHT}
+uci_section mwan3 interface "$IFACE" enabled=1 family=$FAMILY "-track_ip" "+track_ip=$TRACK_IP"
+
+uci_section mwan3 member "${IFACE}_m${METRIC}_w${WEIGHT}" interface=$IFACE metric=$METRIC weight=$WEIGHT
+
+uci_section mwan3 policy "${BASE_IFACE}_only" "+use_member=${IFACE}_m${METRIC}_w${WEIGHT}"
+
+[ "$LOAD_BALANCED" = 1 ] && uci_section mwan3 policy balanced "+use_member=${IFACE}_m${METRIC}_w${WEIGHT}"
 EOF
 chmod +x /sbin/mwan3-iface-add
 
@@ -749,14 +761,9 @@ calc_dhcp_limit() {
 }
 
 cat > /sbin/dhcp-instance-add << 'EOF'
-#!/bin/sh -e
-IFACE=$1
-TIME=${2:-12h}
-DOMAIN=${3:-${IFACE}.lan}
-LOCAL=${4:-lan}
-IPV6=${5:-1}
-START=${6:-100}
-
+#!/bin/sh
+. /lib/functions/wrtnova.sh
+IFACE=$1 TIME=${2:-12h} DOMAIN=${3:-${IFACE}.lan} LOCAL=${4:-lan} IPV6=${5:-1} START=${6:-100}
 if [ -z "$IFACE" ]; then
 	cat <<-USAGE
 
@@ -776,38 +783,16 @@ fi
 BITS=$(uci -q get network.${IFACE}.ipaddr | grep -o '/[0-9]*$' | tr -d '/')
 LIMIT=${7:-$(( (1 << (32 - ${BITS:-24})) - 156 ))}
 
-uci batch <<-EOF1
-set dhcp.${IFACE}_dns=dnsmasq
-set dhcp.${IFACE}_dns.domainneeded=1
-set dhcp.${IFACE}_dns.localise_queries=1
-set dhcp.${IFACE}_dns.rebind_protection=1
-set dhcp.${IFACE}_dns.rebind_localhost=1
-set dhcp.${IFACE}_dns.local=/${LOCAL}/
-set dhcp.${IFACE}_dns.domain=$DOMAIN
-set dhcp.${IFACE}_dns.expandhosts=1
-set dhcp.${IFACE}_dns.authoritative=1
-set dhcp.${IFACE}_dns.readethers=1
-set dhcp.${IFACE}_dns.leasefile=/tmp/dhcp.leases.${IFACE}
-set dhcp.${IFACE}_dns.localservice=1
-set dhcp.${IFACE}_dns.dnsforwardmax=500
-set dhcp.${IFACE}_dns.dhcpleasemax=$(( LIMIT + 50 ))
-add_list dhcp.${IFACE}_dns.interface=$IFACE
-add_list dhcp.${IFACE}_dns.notinterface=loopback
-set dhcp.${IFACE}=dhcp
-set dhcp.${IFACE}.instance=${IFACE}_dns
-set dhcp.${IFACE}.interface=$IFACE
-set dhcp.${IFACE}.start=$START
-set dhcp.${IFACE}.limit=$LIMIT
-set dhcp.${IFACE}.leasetime=$TIME
-EOF1
+uci_section dhcp dnsmasq "${IFACE}_dns" domainneeded=1 localise_queries=1 rebind_protection=1 \
+	rebind_localhost=1 "local=/${LOCAL}/" domain=$DOMAIN expandhosts=1 authoritative=1 \
+	readethers=1 leasefile=/tmp/dhcp.leases.${IFACE} localservice=1 dnsforwardmax=500 \
+	dhcpleasemax=$(( LIMIT + 50 )) "-interface" "-notinterface" "+interface=$IFACE" "+notinterface=loopback"
 
-if [ "$IPV6" = 1 ]; then
-	uci set dhcp.${IFACE}.ra=server
-	uci set dhcp.${IFACE}.dhcpv6=server
-	uci set dhcp.${IFACE}.ra_default=1
-	uci set dhcp.${IFACE}.ra_flags="managed-config other-config"
-	uci add_list dhcp.${IFACE}.dns=$(ip -6 a s dev eth0 scope link | sed -e's/^.*inet6 \([^ ]*\)\/.*$/\1/;t;d')
-fi
+uci_section dhcp dhcp "$IFACE" instance=${IFACE}_dns interface=$IFACE start=$START limit=$LIMIT leasetime=$TIME
+
+[ "$IPV6" = 1 ] && uci_section dhcp dhcp "$IFACE" ra=server dhcpv6=server ra_default=1 \
+	"ra_flags=managed-config other-config" "-dns" \
+	"+dns=$(ip -6 a s dev eth0 scope link | sed -e's/^.*inet6 \([^ ]*\)\/.*$/\1/;t;d')"
 EOF
 chmod +x /sbin/dhcp-instance-add
 
@@ -824,9 +809,6 @@ setup_dnsmasq_upstream() {
 while uci -q del dhcp.@dnsmasq[0]; do :; done
 while uci -q del dhcp.@dhcp[0]; do :; done
 
-LAN_DHCP_LIMIT=${LAN_DHCP_LIMIT:-$(calc_dhcp_limit "$LAN_SUBNET")}
-GUEST_DHCP_LIMIT=${GUEST_DHCP_LIMIT:-$(calc_dhcp_limit "$GUEST_SUBNET")}
-
 /sbin/dhcp-instance-add lan 24h lan "" 1 "$LAN_DHCP_START" "$LAN_DHCP_LIMIT" && uci del dhcp.lan_dns.notinterface
 [ "$GUEST_NET_ENABLE" = 1 ] && /sbin/dhcp-instance-add guest 1h "" "" 0 "$GUEST_DHCP_START" "$GUEST_DHCP_LIMIT"
 [ "$IOT_ENABLE" = 1 ] && /sbin/dhcp-instance-add iot "" "" "" 0
@@ -840,22 +822,15 @@ DDNS_HOSTNAME=${DDNS_HOSTNAME:-docker-host}
 STATIC_LEASE_ID=${STATIC_LEASE_ID:-20}
 DUID=${DUID:-$(duid_gen)}
 
-uci batch <<-EOF
-set dhcp.odhcpd.loglevel=3
+uci_section dhcp host "" name="$DDNS_HOSTNAME" dns=1 \
+	ip="${LAN_IP_PREFIX}.${STATIC_LEASE_ID}" \
+	hostid="$STATIC_LEASE_ID" duid="$DUID"
 
-add dhcp host
-set dhcp.@host[-1].name=$DDNS_HOSTNAME
-set dhcp.@host[-1].dns=1
-set dhcp.@host[-1].ip=${LAN_IP_PREFIX}.${STATIC_LEASE_ID}
-set dhcp.@host[-1].hostid=$STATIC_LEASE_ID
-set dhcp.@host[-1].duid=$DUID
-
-# Ensure NTP can work without DNS
-del system.ntp.server
-add_list system.ntp.server=time1.google.com
-add_list system.ntp.server=time2.google.com
-add_list system.ntp.server=time.cloudflare.com
-EOF
+uci del system.ntp.server
+uci_section system timeserver ntp \
+	"+server=time1.google.com" \
+	"+server=time2.google.com" \
+	"+server=time.cloudflare.com"
 
 IPV6_LINK_LOCAL=$(ip l s eth0 up && ip -6 a s dev eth0 scope link | sed -e's/^.*inet6 \([^ ]*\)\/.*$/\1/;t;d')
 cat >> /etc/hosts <<-EOF
@@ -931,26 +906,23 @@ EOF
 # Mini AdguardHome
 if [ -x "/usr/bin/dnsproxy" ] && [ "$SETUP_ADGUARDHOME" != 1 ] && [ "$AP_MODE" != 1 ]; then
 	setup_dnsmasq_upstream
-	uci batch <<-EOF
-	set dnsproxy.global.enabled=1
-	set dnsproxy.global.log_file=/dev/null
-	set dnsproxy.global.rate_limit=500
-	del dnsproxy.global.listen_port
-	add_list dnsproxy.global.listen_port=5354
-	set dnsproxy.cache.enabled=1
-	set dnsproxy.cache.cache_optimistic=1
-	set dnsproxy.cache.size=4194304
-	set dnsproxy.edns.enabled=1
-	del dnsproxy.servers.upstream
-	del dnsproxy.servers.bootstrap
-	del dnsproxy.servers.fallback
-	add_list dnsproxy.servers.upstream=https://dns.adguard-dns.com/dns-query
-	add_list dnsproxy.servers.upstream=quic://dns.adguard-dns.com
-	add_list dnsproxy.servers.bootstrap=9.9.9.9
-	add_list dnsproxy.servers.bootstrap=2606:4700:4700::1111
-	add_list dnsproxy.servers.fallback=1.1.1.1
-	add_list dnsproxy.servers.fallback=2620:fe::9
-	EOF
+	uci_section dnsproxy global global \
+		enabled=1 log_file=/dev/null rate_limit=500 \
+		"-listen_port" "+listen_port=5354"
+
+	uci_section dnsproxy cache cache \
+		enabled=1 cache_optimistic=1 size=4194304
+
+	uci_section dnsproxy edns edns enabled=1
+
+	uci_section dnsproxy servers servers \
+		"-upstream" "-bootstrap" "-fallback" \
+		"+upstream=https://dns.adguard-dns.com/dns-query" \
+		"+upstream=quic://dns.adguard-dns.com" \
+		"+bootstrap=9.9.9.9" \
+		"+bootstrap=2606:4700:4700::1111" \
+		"+fallback=1.1.1.1" \
+		"+fallback=2620:fe::9"
 fi
 
 # === Firewall ===
@@ -1028,7 +1000,7 @@ fw_prevent_dns_leaks() {
 }
 
 fw_redirect_ntp() {
-	fw_add_redirect "${1}-Redirect-NTP" "$1" 123 any udp "" "" "" 1
+	fw_add_redirect "${1}-Redirect-NTP" "$1" 123 any udp
 }
 
 fw_add_port_forwarding() {
@@ -1090,10 +1062,14 @@ add_cf_ddns() {
 	local interface="$1" use_ipv6="$2" ip_source="$3"
 	local network_or_script="$4" lookup_host="${5:-ddns.example.com}"
 	local family; family=$([ "$use_ipv6" = 1 ] && echo ipv6 || echo ipv4)
-	local name="${interface}_${family}"
 	local domain="${lookup_host%%.*}@${lookup_host#*.}"
-	local ip_key; [ "$ip_source" = script ] && ip_key=ip_script || ip_key=ip_network
-	[ "$ip_source" = script ] && name="${DDNS_HOSTNAME//-/_}_${family}"
+	local name="${interface}_${family}" ip_key=ip_network
+
+	if [ "$ip_source" = script ]; then
+		ip_key=ip_script
+		name="${network_or_script//-/_}_${family}"
+		network_or_script="ip6host ${network_or_script}"
+	fi
 
 	uci_section ddns service "$name" \
 		service_name=cloudflare.com-v4 \
@@ -1107,15 +1083,15 @@ add_cf_ddns() {
 if [ -x /usr/bin/ddns ]; then
 	while uci -q del ddns.@service[0]; do :; done
 	add_cf_ddns wan   0 network wan "$LOOKUP_HOST"
-	add_cf_ddns wan_6 1 script "ipv6-fetcher ${DDNS_HOSTNAME}" "$LOOKUP_HOST"
+	add_cf_ddns wan_6 1 script "$DDNS_HOSTNAME" "$LOOKUP_HOST"
 fi
 
 # IPv6 DDNS helper script
-cat > /sbin/ipv6-fetcher << 'EOF'
+cat > /sbin/ip6host << 'EOF'
 #!/bin/sh
 HOST=$1 LAN_IF="${2:-lan}" WAN_IF6="${3:-wan_6}"
 
-[ -z "$HOST" ] && { echo "Usage: ipv6-fetcher <hostname> [lan|guest|...] [wan_6|wanb_6|...]"; exit 1; }
+[ -z "$HOST" ] && { echo "Usage: ip6host <hostname> [lan|guest|...] [wan_6|wanb_6|...]"; exit 1; }
 
 eval "$(ubus call network.interface dump | jsonfilter \
 	-e "PREFIX=@.interface[@.interface='${WAN_IF6}']['ipv6-prefix'][0].address" \
@@ -1125,4 +1101,4 @@ ubus call dhcp ipv6leases \
 	| jsonfilter -e "@.device['${LAN_DEV}'].leases[@.hostname='${HOST}']['ipv6-addr'][*].address" \
 	| grep "^${PREFIX%??}"
 EOF
-chmod +x /sbin/ipv6-fetcher
+chmod +x /sbin/ip6host
