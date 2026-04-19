@@ -143,7 +143,7 @@ QUARTERLY_REBOOT=
 cat > /lib/functions/wrtnova.sh << 'EOF'
 # WrtNova shared functions
 
-# uci_section <pkg> <type> <name> [key=val ...]
+# uci_section <config> <type> <name> [key=val ...]
 # key=val  -> uci set
 # -key     -> uci del
 # +key=val -> uci add_list
@@ -151,21 +151,21 @@ cat > /lib/functions/wrtnova.sh << 'EOF'
 # ~old=new -> uci rename
 
 uci_section() {
-	local pkg="$1" type="$2" name="$3"; shift 3
+	local config="$1" type="$2" name="$3"; shift 3
 	if [ -n "$name" ]; then
-		uci set "${pkg}.${name}=${type}"
+		uci set "${config}.${name}=${type}"
 	else
-		uci add "$pkg" "$type"
+		uci add "$config" "$type"
 	fi
 
 	local ref="${name:-@${type}[-1]}"
 	for arg; do
 		case "$arg" in
-			+*) uci add_list "${pkg}.${ref}.${arg#+}" ;;
-			^*) uci -q del_list "${pkg}.${ref}.${arg#^}" ;;
-			~*) uci rename "${pkg}.${arg#\~}" ;;
-			-*) uci -q del "${pkg}.${ref}.${arg#-}" ;;
-			*)  uci set "${pkg}.${ref}.${arg}" ;;
+			+*) uci add_list "${config}.${ref}.${arg#+}" ;;
+			^*) uci -q del_list "${config}.${ref}.${arg#^}" ;;
+			~*) uci rename "${config}.${arg#\~}" ;;
+			-*) uci -q del "${config}.${ref}.${arg#-}" ;;
+			*) uci set "${config}.${ref}.${arg}" ;;
 		esac
 	done
 }
@@ -187,12 +187,12 @@ EOF
 . /lib/functions/wrtnova.sh
 
 # === System ===
-[ -x /bin/run_cmd.sh ] && exit 0
+[ -x /bin/run-cmd ] && exit 0
 
-cat > /bin/run_cmd.sh <<'EOF'
+cat > /bin/run-cmd <<'EOF'
 #!/bin/sh
 ALLOW="
-	ip iw nft bridge
+	ip iw nft bridge ip6host
 	ping arp traceroute nslookup
 	cat ls df du ps grep
 	logread dmesg
@@ -211,15 +211,15 @@ done
 echo -n "Not allowed: $1" >&2
 exit 1
 EOF
-chmod +x /bin/run_cmd.sh
+chmod +x /bin/run-cmd
 
 if has_pkg luci-app-commands; then
-	add_luci_command '/bin/run_cmd.sh'
+	add_luci_command '/bin/run-cmd'
 	add_luci_command 'mwan3-iface-add'
 	add_luci_command 'dhcp-instance-add'
 fi
 
-passwd root >/dev/null 2>&1 <<EOF
+[ -n "$ROOT_PASSWD" ] && passwd root >/dev/null 2>&1 <<-EOF
 $ROOT_PASSWD
 $ROOT_PASSWD
 EOF
@@ -242,7 +242,7 @@ if [ -x /usr/bin/wg ] && [ -x /usr/sbin/mwan3 ] && [ -n "$WG_IFACE" ] && [ "$AP_
 	echo "*/10 * * * * [ -d /sys/class/net/${WG_IFACE} ] && { ping -c2 -W2 -I ${WG_IFACE} 9.9.9.9 || \
 	{ ifdown ${WG_IFACE}; sleep 3; ifup ${WG_IFACE}; }; }" >> /etc/crontabs/root
 
-	echo "*/2 * * * * /usr/bin/wireguard_watchdog" >> /etc/crontabs/root && uci set system.@system[0].cronloglevel=9
+	echo "*/2 * * * * wireguard_watchdog" >> /etc/crontabs/root && uci set system.@system[0].cronloglevel=9
 
 	cat > /etc/hotplug.d/iface/98-"${WG_IFACE}" <<-EOF
 	[ ifup = "\$ACTION" ] || exit 0; [ ${WG_IFACE} = "\$INTERFACE" ] || exit 0
@@ -379,9 +379,8 @@ add_bridge_vlan() {
 	local vlan_id="$1" ports="$2" iface="$3"
 	
 	add_network bridge-vlan "br_vlan${vlan_id}" \
-		device=br-vlan vlan="$vlan_id"
+		device=br-vlan vlan="$vlan_id" ports="$ports"
 
-	uci set "network.br_vlan${vlan_id}.ports=$ports"
 	[ -n "$iface" ] && uci set "network.${iface}.device=br-vlan.${vlan_id}"
 }
 
@@ -394,10 +393,9 @@ add_bridge() {
 add_swconfig_vlan() {
 	local vlan_id="$1" ports="$2" iface="$3" eth="${4:-$lan_eth}"
 
-	add_network switch_vlan "sw_vlan${vlan_id}" \
-		device="$switch_dev" vlan="$vlan_id" vid="$vlan_id"
+	add_network switch_vlan "sw_vlan${vlan_id}" device="$switch_dev" \
+		vlan="$vlan_id" vid="$vlan_id" ports="$ports"
 
-	uci set "network.sw_vlan${vlan_id}.ports=$ports"
 	[ -n "$iface" ] && uci set "network.br_${iface}.ports=${eth}.${vlan_id}"
 }
 
@@ -681,19 +679,16 @@ Usage: mwan3-iface-add <interface> [metric] [weight] [family] [balanced] [track_
   interface	Logical interface name (required)
   metric	Lower metric used first, same metric load-balanced, default 1
   weight	Load-balanced interfaces: higher weights distribute more traffic, default 1
-  family	'ipv4' or 'ipv6', default ipv4
-  balanced	'1' = add to the default balanced policy, '0' = only_policy only, default 1
+  family	ipv4 or ipv6, default ipv4
+  balanced	1 = add to the default balanced policy, '0' = only_policy only, default 1
   track_ip	IP to track, default 1.1.1.1 (ipv4) or 2620:fe::fe (ipv6)
 	USAGE
 	exit 1
 fi
 
 uci_section mwan3 interface "$IFACE" enabled=1 family=$FAMILY "-track_ip" "+track_ip=$TRACK_IP"
-
 uci_section mwan3 member "${IFACE}_m${METRIC}_w${WEIGHT}" interface=$IFACE metric=$METRIC weight=$WEIGHT
-
 uci_section mwan3 policy "${BASE_IFACE}_only" "+use_member=${IFACE}_m${METRIC}_w${WEIGHT}"
-
 [ "$LOAD_BALANCED" = 1 ] && uci_section mwan3 policy balanced "+use_member=${IFACE}_m${METRIC}_w${WEIGHT}"
 EOF
 chmod +x /sbin/mwan3-iface-add
@@ -783,31 +778,32 @@ fi
 BITS=$(uci -q get network.${IFACE}.ipaddr | grep -o '/[0-9]*$' | tr -d '/')
 LIMIT=${7:-$(( (1 << (32 - ${BITS:-24})) - 156 ))}
 
-uci_section dhcp dnsmasq "${IFACE}_dns" domainneeded=1 localise_queries=1 rebind_protection=1 \
-	rebind_localhost=1 "local=/${LOCAL}/" domain=$DOMAIN expandhosts=1 authoritative=1 \
-	readethers=1 leasefile=/tmp/dhcp.leases.${IFACE} localservice=1 dnsforwardmax=500 \
-	dhcpleasemax=$(( LIMIT + 50 )) "-interface" "-notinterface" "+interface=$IFACE" "+notinterface=loopback"
+uci_section dhcp dnsmasq "${IFACE}_dns" domainneeded=1 localise_queries=1 \
+	rebind_protection=1 rebind_localhost=1 "local=/${LOCAL}/" domain=$DOMAIN \
+	expandhosts=1 authoritative=1 readethers=1 leasefile=/tmp/dhcp.leases.${IFACE} \
+	localservice=1 dnsforwardmax=500 dhcpleasemax=$(( LIMIT + 50 )) \
+	"-interface" "-notinterface" "+interface=$IFACE" "+notinterface=loopback"
 
-uci_section dhcp dhcp "$IFACE" instance=${IFACE}_dns interface=$IFACE start=$START limit=$LIMIT leasetime=$TIME
+uci_section dhcp dhcp "$IFACE" instance=${IFACE}_dns interface=$IFACE \
+	start=$START limit=$LIMIT leasetime=$TIME
 
 [ "$IPV6" = 1 ] && uci_section dhcp dhcp "$IFACE" ra=server dhcpv6=server ra_default=1 \
 	"ra_flags=managed-config other-config" "-dns" \
-	"+dns=$(ip -6 a s dev eth0 scope link | sed -e's/^.*inet6 \([^ ]*\)\/.*$/\1/;t;d')"
+	"+dns=$(ip -6 a s dev eth0 | grep -o 'fe80[^/]*')"
 EOF
 chmod +x /sbin/dhcp-instance-add
 
 setup_dnsmasq_upstream() {
 	for iface in lan "${GUEST_NET_ENABLE:+guest}" "${IOT_ENABLE:+iot}" "${WG_IFACE:+lan_${WG_IFACE}}"; do
 		[ -z "$iface" ] && continue
-		uci set dhcp."${iface}"_dns.noresolv=1
-		uci set dhcp."${iface}"_dns.cachesize=0
-		uci add_list dhcp."${iface}"_dns.server=127.0.0.1#5354
-		uci add_list dhcp."${iface}"_dns.server=::1#5354
+		uci_section dhcp dnsmasq "${iface}_dns" noresolv=1 cachesize=0 \
+			"+server=127.0.0.1#5354" "+server=::1#5354"
 	done
 }
 
 while uci -q del dhcp.@dnsmasq[0]; do :; done
 while uci -q del dhcp.@dhcp[0]; do :; done
+IPV6_LINK_LOCAL=$(ip l s eth0 up && ip -6 a s dev eth0 | grep -o 'fe80[^/]*')
 
 /sbin/dhcp-instance-add lan 24h lan "" 1 "$LAN_DHCP_START" "$LAN_DHCP_LIMIT" && uci del dhcp.lan_dns.notinterface
 [ "$GUEST_NET_ENABLE" = 1 ] && /sbin/dhcp-instance-add guest 1h "" "" 0 "$GUEST_DHCP_START" "$GUEST_DHCP_LIMIT"
@@ -832,7 +828,6 @@ uci_section system timeserver ntp \
 	"+server=time2.google.com" \
 	"+server=time.cloudflare.com"
 
-IPV6_LINK_LOCAL=$(ip l s eth0 up && ip -6 a s dev eth0 scope link | sed -e's/^.*inet6 \([^ ]*\)\/.*$/\1/;t;d')
 cat >> /etc/hosts <<-EOF
 
 $IPV6_LINK_LOCAL	$HOSTNAME
@@ -919,10 +914,8 @@ if [ -x "/usr/bin/dnsproxy" ] && [ "$SETUP_ADGUARDHOME" != 1 ] && [ "$AP_MODE" !
 		"-upstream" "-bootstrap" "-fallback" \
 		"+upstream=https://dns.adguard-dns.com/dns-query" \
 		"+upstream=quic://dns.adguard-dns.com" \
-		"+bootstrap=9.9.9.9" \
-		"+bootstrap=2606:4700:4700::1111" \
-		"+fallback=1.1.1.1" \
-		"+fallback=2620:fe::9"
+		"+bootstrap=9.9.9.9" "+bootstrap=2606:4700:4700::1111" \
+		"+fallback=1.1.1.1" "+fallback=2620:fe::9"
 fi
 
 # === Firewall ===
@@ -973,11 +966,11 @@ fw_allow_base_services() {
 
 fw_add_forward_rule() {
 	local name="$1" dest_ip="$2" proto="${3:-all}" dest_port="$4"
-	local src="${5:-wan}" dest="${6:-lan}" family="${7:-ipv6}" enabled="$8"
+	local enabled="$5" src="${6:-wan}" dest="${7:-lan}"
 
 	uci_section firewall rule "" \
 		name="$name" target=ACCEPT src="$src" dest="$dest" \
-		family="$family" dest_ip="$dest_ip" proto="$proto" \
+		family=ipv6 dest_ip="$dest_ip" proto="$proto" \
 		${dest_port:+dest_port="$dest_port"} \
 		${enabled:+enabled="$enabled"}
 }
@@ -987,7 +980,8 @@ fw_add_redirect() {
 	local dest="$6" dest_ip="$7" dest_port="$8" enabled="$9"
 
 	uci_section firewall redirect "" \
-		name="$name" src="$src" src_dport="$sport" target=DNAT proto="$proto" \
+		name="$name" src="$src" src_dport="$sport" \
+		target=DNAT proto="$proto" \
 		${family:+family="$family"} \
 		${dest:+dest="$dest"} \
 		${dest_ip:+dest_ip="$dest_ip"} \
@@ -1052,7 +1046,7 @@ fi
 fw_add_forward_rule "Forward-80-443-$DDNS_HOSTNAME" "::${STATIC_LEASE_ID}/-64" "tcp udp" "80 443"
 
 # IPv6: Forward everything (VPS-like, disabled)
-fw_add_forward_rule "Forward-Everything-$DDNS_HOSTNAME" "::${STATIC_LEASE_ID}/-64" "all" "" "" "" "" 0
+fw_add_forward_rule "Forward-Everything-$DDNS_HOSTNAME" "::${STATIC_LEASE_ID}/-64" "all" "" 0
 
 fw_add_port_forwarding "HTTP-${DDNS_HOSTNAME}" 80 "${LAN_IP_PREFIX}.${STATIC_LEASE_ID}"
 fw_add_port_forwarding "HTTPS-${DDNS_HOSTNAME}" 443 "${LAN_IP_PREFIX}.${STATIC_LEASE_ID}"
@@ -1060,15 +1054,15 @@ fw_add_port_forwarding "HTTPS-${DDNS_HOSTNAME}" 443 "${LAN_IP_PREFIX}.${STATIC_L
 # === Cloudflare DDNS ===
 add_cf_ddns() {
 	local interface="$1" use_ipv6="$2" ip_source="$3"
-	local network_or_script="$4" lookup_host="${5:-ddns.example.com}"
+	local network_or_hostname="$4" lookup_host="${5:-ddns.example.com}"
 	local family; family=$([ "$use_ipv6" = 1 ] && echo ipv6 || echo ipv4)
 	local domain="${lookup_host%%.*}@${lookup_host#*.}"
 	local name="${interface}_${family}" ip_key=ip_network
 
 	if [ "$ip_source" = script ]; then
-		ip_key=ip_script
-		name="${network_or_script//-/_}_${family}"
-		network_or_script="ip6host ${network_or_script}"
+		ip_key=ip_script 
+		name="${network_or_hostname//-/_}_${family}"
+		network_or_hostname="ip6host $network_or_hostname"
 	fi
 
 	uci_section ddns service "$name" \
@@ -1076,7 +1070,7 @@ add_cf_ddns() {
 		lookup_host="$lookup_host" domain="$domain" \
 		username=Bearer password="${CLOUDFLARE_API_KEY:-cloudflare_api_key}" \
 		use_ipv6="$use_ipv6" interface="$interface" \
-		ip_source="$ip_source" "${ip_key}=${network_or_script}" \
+		ip_source="$ip_source" "${ip_key}=$network_or_hostname" \
 		cacert=/etc/ssl/certs use_https=1 enabled="${DDNS_ENABLE:-0}"
 }
 
