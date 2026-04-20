@@ -516,7 +516,7 @@ fi
 
 lan_ports="$(uci -q get network.@device[0].ports)"
 wan_port="$(uci -q get network.wan.device)"
-all_ports="$lan_ports $wan_port"
+all_ports="$lan_ports${wan_port:+ $wan_port}"
 
 USE_BRIDGE_VLAN=1
 BRIDGE_WAN_PORT=1
@@ -532,57 +532,49 @@ elif swconfig list 2>/dev/null | grep -q '^Found:'; then
 else
 	# x86/SBC: always use bridge VLAN filtering
 	# Single NIC: reuse lan port as tagged WAN since no dedicated WAN port exists
-	if [ -z "$wan_port" ]; then
-		WAN_IS_TAGGED=1
-	fi
+	[ -z "$wan_port" ] && WAN_IS_TAGGED=1
 fi
 
 # LAN ports untagged on LAN VLAN, WAN ports untagged on WAN VLAN (unless WAN_IS_TAGGED),
 # all ports tagged (trunk) on guest/iot/wanb/wireguard VLANs.
 # AP mode: all ports untagged on LAN VLAN, tagged on all other VLANs.
 if [ "$USE_BRIDGE_VLAN" = 1 ]; then
-	if [ "$AP_MODE" = 1 ]; then
-		if [ "$wan_port" = br-wan ]; then
-			all_ports="$lan_ports $(uci -q get network.@device[1].ports)"
-			uci del network.@device[1]
-		fi
+	if [ "$AP_MODE" = 1 ] && [ "$wan_port" = br-wan ]; then
+		all_ports="$lan_ports $(uci -q get network.@device[1].ports)"
+		uci del network.@device[1]
+	fi
 
-		for port in $all_ports; do
-			lan_vlan_ports="${lan_vlan_ports:+$lan_vlan_ports }$port:u*"
-			tagged_vlan_ports="${tagged_vlan_ports:+$tagged_vlan_ports }$port:t"
-			wan_vlan_ports="${wan_vlan_ports:+$wan_vlan_ports }$port:t"
-		done
-	else
-		for port in $lan_ports; do
-			lan_vlan_ports="${lan_vlan_ports:+$lan_vlan_ports }$port:u*"
-			tagged_vlan_ports="${tagged_vlan_ports:+$tagged_vlan_ports }$port:t"
-			wan_vlan_ports="${wan_vlan_ports:+$wan_vlan_ports }$port:t"
-		done
+	src_ports="$lan_ports"
+	[ "$AP_MODE" = 1 ] && src_ports="$all_ports"
 
-		if [ "$BRIDGE_WAN_PORT" = 1 ] && [ -n "$wan_port" ]; then
-			lan_vlan_ports="$lan_vlan_ports $wan_port:t"
-			tagged_vlan_ports="$tagged_vlan_ports $wan_port:t"
-			if [ "$WAN_IS_TAGGED" = 1 ]; then
-				wan_vlan_ports="$wan_vlan_ports $wan_port:t"
-			else
-				wan_vlan_ports="$wan_vlan_ports $wan_port:u*"
-			fi
+	for port in $src_ports; do
+		lan_vlan_ports="${lan_vlan_ports:+$lan_vlan_ports }$port:u*"
+		tagged_vlan_ports="${tagged_vlan_ports:+$tagged_vlan_ports }$port:t"
+		wan_vlan_ports="${wan_vlan_ports:+$wan_vlan_ports }$port:t"
+	done
+
+	if [ "$AP_MODE" != 1 ] && [ "$BRIDGE_WAN_PORT" = 1 ] && [ -n "$wan_port" ]; then
+		lan_vlan_ports="$lan_vlan_ports $wan_port:t"
+		tagged_vlan_ports="$tagged_vlan_ports $wan_port:t"
+		if [ "$WAN_IS_TAGGED" = 1 ]; then
+			wan_vlan_ports="$wan_vlan_ports $wan_port:t"
+		else
+			wan_vlan_ports="$wan_vlan_ports $wan_port:u*"
 		fi
 	fi
 
 	uci set network.@device[0].name=br-vlan
 	uci set network.@device[0].ports="$all_ports"
 
+	vlan_add() { add_bridge_vlan "$@"; }
+	trunk_ports="$tagged_vlan_ports"
+
 	add_bridge_vlan "$LAN_VLAN_ID" "$lan_vlan_ports" lan
-	[ -n "$WG_IFACE" ] && add_bridge_vlan "$LAN_WG_VLAN_ID" "$tagged_vlan_ports" lan_"${WG_IFACE}"
-	[ "$GUEST_NET_ENABLE" = 1 ] && add_bridge_vlan "$GUEST_VLAN_ID" "$tagged_vlan_ports" guest
-	[ "$IOT_ENABLE" = 1 ] && add_bridge_vlan "$IOT_VLAN_ID" "$tagged_vlan_ports" iot
-	[ "$BRIDGE_WAN_PORT" = 1 ] && add_bridge_vlan "$WAN_VLAN_ID" "$wan_vlan_ports" wan
-	[ "$WAN_B_ENABLE" = 1 ] && add_bridge_vlan "$WAN_B_VLAN_ID" "$tagged_vlan_ports" wanb
 
 	if [ "$WAN_IS_TAGGED" = 1 ] && [ "$BRIDGE_WAN_PORT" != 1 ]; then
 		uci set network.wan.device="${wan_port}.${WAN_VLAN_ID}"
 	fi
+
 else
 	add_bridge lan
 	[ "$GUEST_NET_ENABLE" = 1 ] && add_bridge guest
@@ -602,7 +594,7 @@ else
 		esac
 	done
 
-	if uci -q get network.@switch_vlan[1].ports; then
+	if uci -q get network.@switch_vlan[1].ports > /dev/null; then
 		for port in $(uci -q get network.@switch_vlan[1].ports); do
 			case "$port" in
 				*t) [ "$port" != "$lan_cpu_port" ] && wan_cpu_port="$port" ;;
@@ -615,16 +607,16 @@ else
 	for port in $untagged_lan; do tagged_lan="${tagged_lan:+$tagged_lan }${port}t"; done
 	for port in $untagged_wan; do tagged_wan="${tagged_wan:+$tagged_wan }${port}t"; done
 	cpu_ports="${lan_cpu_port}${wan_cpu_port:+ $wan_cpu_port}"
-	all_tagged="$tagged_lan $tagged_wan $cpu_ports"
+	all_tagged="${tagged_lan}${tagged_wan:+ $tagged_wan} $cpu_ports"
 
 	uci del network.@device[0]
 	while uci -q del network.@switch_vlan[0]; do :; done
 
 	if [ "$AP_MODE" = 1 ]; then
-		add_swconfig_vlan "$LAN_VLAN_ID" "$untagged_lan $untagged_wan $cpu_ports" lan
+		add_swconfig_vlan "$LAN_VLAN_ID" "${untagged_lan}${untagged_wan:+ $untagged_wan} $cpu_ports" lan
 		add_swconfig_vlan "$WAN_VLAN_ID" "$all_tagged"
 	else
-		add_swconfig_vlan "$LAN_VLAN_ID" "$untagged_lan $tagged_wan $cpu_ports" lan
+		add_swconfig_vlan "$LAN_VLAN_ID" "${untagged_lan}${tagged_wan:+ $tagged_wan} $cpu_ports" lan
 		if [ -n "$untagged_wan" ]; then
 			if [ "$WAN_IS_TAGGED" = 1 ]; then
 				add_swconfig_vlan "$WAN_VLAN_ID" "$tagged_lan $tagged_wan $cpu_ports"
@@ -634,15 +626,19 @@ else
 		fi
 	fi
 
-	[ "$GUEST_NET_ENABLE" = 1 ] && add_swconfig_vlan "$GUEST_VLAN_ID" "$all_tagged" guest
-	[ "$IOT_ENABLE" = 1 ] && add_swconfig_vlan "$IOT_VLAN_ID" "$all_tagged" iot
-	[ "$WAN_B_ENABLE" = 1 ] && add_swconfig_vlan "$WAN_B_VLAN_ID" "$all_tagged" wanb
-	[ -n "$WG_IFACE" ] && add_swconfig_vlan "$LAN_WG_VLAN_ID" "$all_tagged" lan_"${WG_IFACE}"
+	vlan_add() { add_swconfig_vlan "$@"; }
+	trunk_ports="$all_tagged"
 
 	if [ "$WAN_IS_TAGGED" = 1 ] || [ -n "$untagged_wan" ]; then
 		uci set network.wan.device="${wan_eth}.${WAN_VLAN_ID}"
 	fi
 fi
+
+[ -n "$WG_IFACE" ] && vlan_add "$LAN_WG_VLAN_ID" "$trunk_ports" lan_"${WG_IFACE}"
+[ "$GUEST_NET_ENABLE" = 1 ] && vlan_add "$GUEST_VLAN_ID" "$trunk_ports" guest
+[ "$IOT_ENABLE" = 1 ] && vlan_add "$IOT_VLAN_ID" "$trunk_ports" iot
+[ "$BRIDGE_WAN_PORT" = 1 ] && [ -n "$wan_vlan_ports" ] && vlan_add "$WAN_VLAN_ID" "$wan_vlan_ports" wan
+[ "$WAN_B_ENABLE" = 1 ] && vlan_add "$WAN_B_VLAN_ID" "$trunk_ports" wanb
 
 if [ "$AP_MODE" = 1 ]; then
 	/etc/init.d/dnsmasq disable
@@ -1042,14 +1038,16 @@ if [ -n "$WG_IFACE" ]; then
 	fw_add_forwarding lan wan_nat6
 fi
 
-# IPv6: Forward ports 80 and 443
-fw_add_forward_rule "Forward-80-443-$DDNS_HOSTNAME" "::${STATIC_LEASE_ID}/-64" "tcp udp" "80 443"
+if [ "$AP_MODE" = 1 ]; then
+	# IPv6: Forward ports 80 and 443
+	fw_add_forward_rule "Forward-80-443-$DDNS_HOSTNAME" "::${STATIC_LEASE_ID}/-64" "tcp udp" "80 443"
 
-# IPv6: Forward everything (VPS-like, disabled)
-fw_add_forward_rule "Forward-Everything-$DDNS_HOSTNAME" "::${STATIC_LEASE_ID}/-64" "all" "" 0
+	# IPv6: Forward everything (VPS-like, disabled)
+	fw_add_forward_rule "Forward-Everything-$DDNS_HOSTNAME" "::${STATIC_LEASE_ID}/-64" "all" "" 0
 
-fw_add_port_forwarding "HTTP-${DDNS_HOSTNAME}" 80 "${LAN_IP_PREFIX}.${STATIC_LEASE_ID}"
-fw_add_port_forwarding "HTTPS-${DDNS_HOSTNAME}" 443 "${LAN_IP_PREFIX}.${STATIC_LEASE_ID}"
+	fw_add_port_forwarding "HTTP-${DDNS_HOSTNAME}" 80 "${LAN_IP_PREFIX}.${STATIC_LEASE_ID}"
+	fw_add_port_forwarding "HTTPS-${DDNS_HOSTNAME}" 443 "${LAN_IP_PREFIX}.${STATIC_LEASE_ID}"
+fi
 
 # === Cloudflare DDNS ===
 add_cf_ddns() {
