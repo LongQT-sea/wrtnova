@@ -81,18 +81,30 @@ WAN_B_VLAN_ID=		# Default 31
 # Additional VLANs to trunk through this device (individual or range, e.g. "66 77 88" or "66-99" or "60-90 100 900")
 ADDITIONAL_VLAN_LIST=""
 
+# === IPv4 Port Forwarding ===
+# Format: hostname | last_octet | ports
+# Creates a static DHCPv4 lease and NAT port forward from WAN for each port.
+# Note: ports must be unique across all entries.
+PORT_FORWARD_LIST="
+	docker-host | 20 | 80 443
+	rdp-server  | 21 | 3389
+"
+
+# === IPv6 Server Exposure ===
+# Format: hostname | last_octet | ports (empty = expose all)
+# Creates a static DHCP lease, IPv6 firewall forward rule, and Cloudflare DDNS entry per host.
+IPV6_SERVER_LIST="
+	docker-host | 20 | 80 443
+	rdp-server  | 21 | 3389
+	api-server  | 22 | 80 443
+	vps-host    | 23 |
+"
+
 # Default DHCP range: START=100, LIMIT=auto (192.168.0.100 - 192.168.X.199)
 LAN_DHCP_START=
 LAN_DHCP_LIMIT=
 GUEST_DHCP_START=
 GUEST_DHCP_LIMIT=
-
-# Statically assign host with hostname "docker-host" to 192.168.X.20 (no MAC addr needed)
-# After first boot, go to Network > DHCP > Static Leases and set the correct DUID for the host named "docker-host"
-# The DUID ensures "docker-host" always gets an IPv6 address ending in ::20 (see firewall rule)
-DDNS_HOSTNAME="docker-host"
-STATIC_LEASE_ID="20"
-DUID=
 
 # === WAN / Multi-WAN ===
 PPPOE_USERNAME=""	# Set this to use PPPoE instead of DHCP on the wan interface
@@ -149,14 +161,14 @@ mkdir /usr/share/wrtnova
 cat > /usr/share/wrtnova/functions.sh << 'EOF'
 # WrtNova shared functions
 
-# uci_section <config> <type> <name> [key=val ...]
+# _uci <config> <type> <name> [key=val ...]
 # key=val  -> uci set
 # -key     -> uci del
 # +key=val -> uci add_list
 # ^key=val -> uci del_list
 # ~old=new -> uci rename
 
-uci_section() {
+_uci() {
 	local config="$1" type="$2" name="$3"; shift 3
 	if [ -n "$name" ]; then
 		uci set "${config}.${name}=${type}"
@@ -166,6 +178,7 @@ uci_section() {
 
 	local ref="${name:-@${type}[-1]}"
 	for arg; do
+		[ -z "$arg" ] && continue
 		case "$arg" in
 			+*) uci add_list "${config}.${ref}.${arg#+}" ;;
 			^*) uci -q del_list "${config}.${ref}.${arg#^}" ;;
@@ -186,7 +199,7 @@ has_pkg() {
 duid_gen() { printf '0004'; tr -d '-' < /proc/sys/kernel/random/uuid; }
 
 # add_luci_command <cmd> [param] - add a command to luci-app-commands
-add_luci_command() { uci_section luci command "" command="$1" param="${2:-1}"; }
+add_luci_command() { _uci luci command "" command="$1" param="${2:-1}"; }
 EOF
 . /usr/share/wrtnova/functions.sh
 
@@ -318,12 +331,12 @@ setup_radio() {
 add_wifi_iface() {
 	local name="$1" device="$2" ssid="$3" key="$4" network="$5" enc="${6:-psk2}"
 
-	uci_section wireless wifi-iface "$name" \
+	_uci wireless wifi-iface "$name" \
 		device="$device" mode=ap ssid="$ssid" \
 		encryption="$enc" key="$key" network="$network"
 
 	if ! has_pkg wpad-basic; then
-		uci_section wireless wifi-iface "$name" \
+		_uci wireless wifi-iface "$name" \
 			ieee80211r=1 ft_over_ds=0 \
 			ieee80211k=1 bss_transition=1
 		[ "$enc" = psk2 ] && uci set wireless."${name}".ft_psk_generate_local=1
@@ -397,7 +410,7 @@ done
 # === Network ===
 add_network() {
 	local type="$1" name="$2"; shift 2
-	uci_section network "$type" "$name" "$@"
+	_uci network "$type" "$name" "$@"
 }
 
 add_bridge_vlan() {
@@ -498,11 +511,8 @@ del network.lan.netmask
 set network.lan.ipaddr=${LAN_IP_PREFIX}.1${LAN_SUBNET}
 set network.lan.ip6assign=64
 
-set network.wan.metric=5
-
 rename network.wan6=wan_6
 set network.wan_6.device=@wan
-set network.wan_6.metric=10
 EOF
 
 [ -n "$PPPOE_USERNAME" ] && {
@@ -511,16 +521,16 @@ EOF
 }
 
 [ "$WAN_B_ENABLE" = 1 ] && {
-	add_network interface wanb proto=dhcp metric=15
-	add_network interface wanb_6 proto=dhcpv6 metric=20 device=@wanb
+	add_network interface wanb proto=dhcp
+	add_network interface wanb_6 proto=dhcpv6 device=@wanb
 }
 
 [ -n "$WWAN_PATH" ] && {
-	add_network interface wwan0 proto=modemmanager metric=25 device="$WWAN_PATH" iptype=ipv4v6 apn="${WWAN_APN:-internet}"
+	add_network interface wwan0 proto=modemmanager device="$WWAN_PATH" iptype=ipv4v6 apn="${WWAN_APN:-internet}"
 	uci add_list network.lan.ip6class=wwan0_6
 }
 
-[ -n "$USB_TETHER_DEV" ] && add_network interface "$USB_TETHER_DEV" proto=dhcp metric=30 device="$USB_TETHER_DEV"
+[ -n "$USB_TETHER_DEV" ] && add_network interface "$USB_TETHER_DEV" proto=dhcp device="$USB_TETHER_DEV"
 
 [ "$WG_ENABLE" = 1 ] && {
 	WG_VLAN_HEX=$(printf '%x' "$LAN_WG_VLAN_ID")
@@ -533,7 +543,7 @@ EOF
 	uci add_list firewall.lan.network="lan_${WG_IFACE}"
 
 	[ "$AP_MODE" != 1 ] && {
-		add_network interface "${WG_IFACE}" proto=wireguard metric=35 \
+		add_network interface "${WG_IFACE}" proto=wireguard \
 			private_key="${WG_PRIVATE_KEY:-$(wg genkey)}" \
 			"+addresses=${WG_IPV4:-172.16.0.2/32}" \
 			"+addresses=${WG_IPV6:-fd88::/128}"
@@ -550,10 +560,10 @@ EOF
 		}
 
 		# WG IPv6 anchor for mwan3
-		add_network interface "${WG_IFACE}_6" proto=none metric=40 device="@${WG_IFACE}"
+		add_network interface "${WG_IFACE}_6" proto=none device="@${WG_IFACE}"
 
 		# Fix router IPv6 internet access
-		uci_section network rule6 "" in=loopback lookup=main priority=999
+		_uci network rule6 "" in=loopback lookup=main priority=999
 	}
 }
 
@@ -710,8 +720,8 @@ cat > /sbin/mwan3-iface-add << 'EOF'
 #!/bin/sh
 . /usr/share/wrtnova/functions.sh
 
-IFACE=$(echo "$1" | tr '-' '_')
-BASE_IFACE=$(echo "$IFACE" | sed 's/_6$//')
+IFACE="${1//-/_}"
+BASE_IFACE="${IFACE%%_6}"
 METRIC=${2:-1}
 WEIGHT=${3:-1}
 FAMILY=${4:-ipv4}
@@ -733,17 +743,33 @@ Usage: mwan3-iface-add <interface> [metric] [weight] [family] [balanced] [track_
 	exit 1
 fi
 
-uci_section mwan3 interface "$IFACE" \
+uci -q get network.${IFACE} > /dev/null || {
+	echo "'$IFACE' interface not found in network config" >&2
+	exit 1
+}
+
+calc_next_metric() {
+	local max=0 metric iface
+	for iface in $(uci show network | awk -F'[.=]' '/=interface$/{print $2}'); do
+		metric=$(uci -q get network.${iface}.metric)
+		[ -n "$metric" ] && [ "$metric" -gt "$max" ] && max=$metric
+	done
+	[ "$max" -eq 0 ] && echo 5 || echo $((max + 5))
+}
+
+uci set "network.${IFACE}.metric=$(calc_next_metric)"
+
+_uci mwan3 interface "$IFACE" \
 	enabled=1 family=$FAMILY \
 	"-track_ip" "+track_ip=$TRACK_IP"
 
-uci_section mwan3 member "${IFACE}_m${METRIC}_w${WEIGHT}" \
+_uci mwan3 member "${IFACE}_m${METRIC}_w${WEIGHT}" \
 	interface=$IFACE metric=$METRIC weight=$WEIGHT
 
-uci_section mwan3 policy "${BASE_IFACE}_only" \
+_uci mwan3 policy "${BASE_IFACE}_only" \
 	"^use_member" "+use_member=${IFACE}_m${METRIC}_w${WEIGHT}"
 
-[ "$LOAD_BALANCED" = 1 ] && uci_section mwan3 policy balanced \
+[ "$LOAD_BALANCED" = 1 ] && _uci mwan3 policy balanced \
 	"^use_member" "+use_member=${IFACE}_m${METRIC}_w${WEIGHT}"
 EOF
 chmod +x /sbin/mwan3-iface-add
@@ -808,7 +834,7 @@ config rule 'default_rule_v6'
 cat > /sbin/dhcp-instance-add << 'EOF'
 #!/bin/sh
 . /usr/share/wrtnova/functions.sh
-IFACE=$1 TIME=${2:-12h} DOMAIN=${3:-${IFACE}.lan} LOCAL=${4:-lan} IPV6=${5:-1} START=${6:-100}
+IFACE=$1 TIME=${2:-12h} DOMAIN=${3:-${IFACE}.lan} LOCAL=${4:-$DOMAIN} IPV6=${5:-1} START=${6:-100}
 if [ -z "$IFACE" ]; then
 	cat <<-USAGE
 
@@ -825,22 +851,24 @@ Usage: dhcp-instance-add <iface> [time] [domain] [local] [ipv6] [start] [limit]
 	exit 1
 fi
 
-proto=$(uci -q get network.${IFACE}.proto)
-[ "$proto" != static ] && { echo "Make sure '$IFACE' interface protocol is static" >&2; exit 1; }
+uci -q get network.${IFACE} > /dev/null || {
+	echo "'$IFACE' interface not found in network config" >&2
+	exit 1
+}
 
 BITS=$(uci -q get network.${IFACE}.ipaddr | grep -o '/[0-9]*$' | tr -d '/')
 LIMIT=${7:-$(( (1 << (32 - ${BITS:-24})) - 156 ))}
 
-uci_section dhcp dnsmasq "${IFACE}_dns" domainneeded=1 localise_queries=1 \
+_uci dhcp dnsmasq "${IFACE}_dns" domainneeded=1 localise_queries=1 \
 	rebind_protection=1 rebind_localhost=1 "local=/${LOCAL}/" domain=$DOMAIN \
 	expandhosts=1 authoritative=1 readethers=1 leasefile=/tmp/dhcp.leases.${IFACE} \
 	localservice=1 dnsforwardmax=500 dhcpleasemax=$(( LIMIT + 50 )) \
 	"-interface" "-notinterface" "+interface=$IFACE" "+notinterface=loopback"
 
-uci_section dhcp dhcp "$IFACE" instance=${IFACE}_dns interface=$IFACE \
+_uci dhcp dhcp "$IFACE" instance=${IFACE}_dns interface=$IFACE \
 	start=$START limit=$LIMIT leasetime=$TIME
 
-[ "$IPV6" = 1 ] && uci_section dhcp dhcp "$IFACE" ra=server dhcpv6=server \
+[ "$IPV6" = 1 ] && _uci dhcp dhcp "$IFACE" ra=server dhcpv6=server \
 	ra_default=1 "ra_flags=managed-config other-config" \
 	"-dns" "+dns=$(ip -6 a s dev eth0 | grep -o 'fe80[^/]*')"
 EOF
@@ -849,7 +877,7 @@ chmod +x /sbin/dhcp-instance-add
 setup_dnsmasq_upstream() {
 	for iface in lan "${GUEST_NET_ENABLE:+guest}" "${IOT_ENABLE:+iot}" "${WG_IFACE:+lan_${WG_IFACE}}"; do
 		[ -z "$iface" ] && continue
-		uci_section dhcp dnsmasq "${iface}_dns" noresolv=1 cachesize=0 \
+		_uci dhcp dnsmasq "${iface}_dns" noresolv=1 cachesize=0 \
 			"+server=127.0.0.1#5354" "+server=::1#5354"
 	done
 }
@@ -858,28 +886,25 @@ while uci -q del dhcp.@dnsmasq[0]; do :; done
 while uci -q del dhcp.@dhcp[0]; do :; done
 IPV6_LINK_LOCAL=$(ip l s eth0 up && ip -6 a s dev eth0 | grep -o 'fe80[^/]*')
 
-dhcp-instance-add lan 24h lan "" 1 "$LAN_DHCP_START" "$LAN_DHCP_LIMIT" && uci del dhcp.lan_dns.notinterface
+dhcp-instance-add lan 24h lan lan 1 "$LAN_DHCP_START" "$LAN_DHCP_LIMIT" && uci del dhcp.lan_dns.notinterface
+
+[ "$WG_ENABLE" = 1 ] && {
+	_uci dhcp dnsmasq lan_dns \
+		"+rebind_domain=lan" \
+		"+server=/${WG_IFACE}.lan/${LAN_WG_IP_PREFIX}.1"
+
+	dhcp-instance-add lan_"${WG_IFACE}" 24h "${WG_IFACE}.lan"
+	_uci dhcp dnsmasq lan_"${WG_IFACE}"_dns \
+		"+rebind_domain=lan" \
+		"+server=/lan/127.0.0.1"
+}
 
 [ "$GUEST_NET_ENABLE" = 1 ] && dhcp-instance-add guest 1h "" "" 0 "$GUEST_DHCP_START" "$GUEST_DHCP_LIMIT"
 
 [ "$IOT_ENABLE" = 1 ] && dhcp-instance-add iot "" "" "" 0
 
-[ "$WG_ENABLE" = 1 ] && {
-	dhcp-instance-add lan_"${WG_IFACE}" 24h "${WG_IFACE}.lan"
-	uci add_list dhcp.lan_"${WG_IFACE}"_dns.rebind_domain=lan
-	uci add_list dhcp.lan_"${WG_IFACE}"_dns.server=/lan/127.0.0.1
-}
-
-DDNS_HOSTNAME=${DDNS_HOSTNAME:-docker-host}
-STATIC_LEASE_ID=${STATIC_LEASE_ID:-20}
-DUID=${DUID:-$(duid_gen)}
-
-uci_section dhcp host "" name="$DDNS_HOSTNAME" dns=1 \
-	ip="${LAN_IP_PREFIX}.${STATIC_LEASE_ID}" \
-	hostid="$STATIC_LEASE_ID" duid="$DUID"
-
 uci del system.ntp.server
-uci_section system timeserver ntp \
+_uci system timeserver ntp \
 	"+server=time1.google.com" \
 	"+server=time2.google.com" \
 	"+server=time.cloudflare.com"
@@ -959,16 +984,16 @@ EOF
 # Mini AdguardHome
 [ -x "/usr/bin/dnsproxy" ] && [ "$SETUP_ADGUARDHOME" != 1 ] && {
 	setup_dnsmasq_upstream
-	uci_section dnsproxy global global \
+	_uci dnsproxy global global \
 		enabled=1 log_file=/dev/null rate_limit=500 \
 		"-listen_port" "+listen_port=5354"
 
-	uci_section dnsproxy cache cache \
+	_uci dnsproxy cache cache \
 		enabled=1 cache_optimistic=1 size=4194304
 
-	uci_section dnsproxy edns edns enabled=1
+	_uci dnsproxy edns edns enabled=1
 
-	uci_section dnsproxy servers servers \
+	_uci dnsproxy servers servers \
 		"-upstream" "-bootstrap" "-fallback" \
 		"+upstream=https://dns.adguard-dns.com/dns-query" \
 		"+upstream=quic://dns.adguard-dns.com" \
@@ -981,37 +1006,40 @@ fw_add_zone() {
 	local name="$1" network="$2" masq="$3" masq6="$4" mtu_fix="$5"
 	local input="${6:-REJECT}" output="${7:-ACCEPT}" forward="${8:-REJECT}"
 
-	uci_section firewall zone "$name" \
-		name="$name" input="$input" output="$output" forward="$forward" \
-		network="$network" masq="$masq" masq6="$masq6" mtu_fix="$mtu_fix"
+	_uci firewall zone "$name" \
+		name="$name" input="$input" output="$output" \
+		forward="$forward" network="$network" \
+		"${masq:+masq=$masq}" \
+		"${masq6:+masq6=$masq6}" \
+		"${mtu_fix:+mtu_fix=$mtu_fix}"
 }
 
 fw_add_forwarding() {
-	uci_section firewall forwarding "${1}_${2}" src="$1" dest="$2"
+	_uci firewall forwarding "${1}_${2}" src="$1" dest="$2"
 }
 
 fw_allow_base_services() {
 	local src="$1"
 
-	uci_section firewall rule "" \
+	_uci firewall rule "" \
 		name="${src}-Allow-DNS-DHCP-NTP" src="$src" \
 		target=ACCEPT proto="tcp udp" dest_port="53 67 123"
 
-	uci_section firewall rule "" \
+	_uci firewall rule "" \
 		name="${src}-Allow-Ping" src="$src" \
 		target=ACCEPT "+proto=icmp" "+icmp_type=echo-request"
 
-	uci_section firewall rule "" \
+	_uci firewall rule "" \
 		name="${src}-Allow-DHCPv6" src="$src" \
 		target=ACCEPT proto=udp family=ipv6 dest_port=546
 
-	uci_section firewall rule "" \
+	_uci firewall rule "" \
 		name="${src}-Allow-MLD" src="$src" \
 		target=ACCEPT proto=icmp family=ipv6 src_ip=fe80::/10 \
 		"+icmp_type=130/0" "+icmp_type=131/0" \
 		"+icmp_type=132/0" "+icmp_type=143/0"
 
-	uci_section firewall rule "" \
+	_uci firewall rule "" \
 		name="${src}-Allow-ICMPv6-Input" src="$src" \
 		target=ACCEPT proto=icmp family=ipv6 limit="1000/sec" \
 		"+icmp_type=echo-request" "+icmp_type=echo-reply" \
@@ -1026,25 +1054,25 @@ fw_add_forward_rule() {
 	local name="$1" dest_ip="$2" proto="${3:-all}" dest_port="$4"
 	local enabled="$5" src="${6:-wan}" dest="${7:-lan}"
 
-	uci_section firewall rule "" \
+	_uci firewall rule "" \
 		name="$name" target=ACCEPT src="$src" dest="$dest" \
 		family=ipv6 dest_ip="$dest_ip" proto="$proto" \
-		${dest_port:+dest_port="$dest_port"} \
-		${enabled:+enabled="$enabled"}
+		"${dest_port:+dest_port=$dest_port}" \
+		"${enabled:+enabled=$enabled}"
 }
 
 fw_add_redirect() {
 	local name="$1" src="$2" sport="$3" family="$4" proto="$5"
 	local dest="$6" dest_ip="$7" dest_port="$8" enabled="$9"
 
-	uci_section firewall redirect "" \
+	_uci firewall redirect "" \
 		name="$name" src="$src" src_dport="$sport" \
 		target=DNAT proto="$proto" \
-		${family:+family="$family"} \
-		${dest:+dest="$dest"} \
-		${dest_ip:+dest_ip="$dest_ip"} \
-		${dest_port:+dest_port="$dest_port"} \
-		${enabled:+enabled="$enabled"}
+		"${family:+family=$family}" \
+		"${dest:+dest=$dest}" \
+		"${dest_ip:+dest_ip=$dest_ip}" \
+		"${dest_port:+dest_port=$dest_port}" \
+		"${enabled:+enabled=$enabled}"
 }
 
 fw_prevent_dns_leaks() {
@@ -1074,7 +1102,7 @@ WAN_ZONE="wan wan_6"
 uci rename firewall.@zone[1]=wan
 uci set firewall.wan.network="$WAN_ZONE"
 
-uci_section firewall rule "" name=Block-DoT-DoQ src="*" dest="*" dest_port=853 target=REJECT
+_uci firewall rule "" name=Block-DoT-DoQ src="*" dest="*" dest_port=853 target=REJECT
 
 fw_prevent_dns_leaks lan
 
@@ -1096,15 +1124,6 @@ fw_prevent_dns_leaks lan
 }
 
 [ "$AP_MODE" != 1 ] && {
-	# IPv6: Forward ports 80 and 443
-	fw_add_forward_rule "Forward-80-443-$DDNS_HOSTNAME" "::${STATIC_LEASE_ID}/-64" "tcp udp" "80 443"
-
-	# IPv6: Forward everything (VPS-like, disabled)
-	fw_add_forward_rule "Forward-Everything-$DDNS_HOSTNAME" "::${STATIC_LEASE_ID}/-64" "all" "" 0
-
-	fw_add_port_forwarding "HTTP-${DDNS_HOSTNAME}" 80 "${LAN_IP_PREFIX}.${STATIC_LEASE_ID}"
-	fw_add_port_forwarding "HTTPS-${DDNS_HOSTNAME}" 443 "${LAN_IP_PREFIX}.${STATIC_LEASE_ID}"
-
 	[ "$WG_ENABLE" = 1 ] && {
 		fw_add_zone wan_nat6 "$WG_IFACE" 1 1 1
 		fw_add_forwarding lan wan_nat6
@@ -1125,7 +1144,7 @@ add_cf_ddns() {
 		network_or_hostname="ip6host $network_or_hostname"
 	}
 
-	uci_section ddns service "$name" \
+	_uci ddns service "$name" \
 		service_name=cloudflare.com-v4 \
 		lookup_host="$lookup_host" domain="$domain" \
 		username=Bearer password="${CLOUDFLARE_API_KEY:-cloudflare_api_key}" \
@@ -1136,8 +1155,7 @@ add_cf_ddns() {
 
 [ -x /usr/bin/ddns ] && [ "$AP_MODE" != 1 ] && {
 	while uci -q del ddns.@service[0]; do :; done
-	add_cf_ddns wan   0 network wan "$LOOKUP_HOST"
-	add_cf_ddns wan_6 1 script "$DDNS_HOSTNAME" "$LOOKUP_HOST"
+	add_cf_ddns wan 0 network wan "$LOOKUP_HOST"
 }
 
 # IPv6 DDNS helper script
@@ -1156,3 +1174,53 @@ ubus call dhcp ipv6leases \
 	| head -1
 EOF
 chmod +x /sbin/ip6host
+
+# === Static Leases & Port Forwarding ===
+process_host_list() {
+	local hostname octet ports name
+
+	while IFS='|' read -r hostname octet ports; do
+		hostname=$(echo "$hostname" | tr -d ' \t')
+		octet=$(echo "$octet" | tr -d ' \t')
+		ports="${ports# }"
+		[ -z "$hostname" ] && continue
+
+		name="${hostname//-/_}"
+		uci -q get "dhcp.${name}" > /dev/null || \
+			_uci dhcp host "$name" \
+				name="$hostname" dns=1 \
+				ip="${LAN_IP_PREFIX}.${octet}" \
+				hostid="$octet" duid="$(duid_gen)"
+
+		[ "$1" = ipv4 ] && {
+			for port in $ports; do
+				fw_add_port_forwarding \
+					"${hostname} ${port}" "$port" \
+					"${LAN_IP_PREFIX}.${octet}"
+			done
+		}
+
+		[ "$1" = ipv6 ] && {
+			[ -x /usr/bin/ddns ] && [ "$AP_MODE" != 1 ] && \
+				add_cf_ddns wan_6 1 script "$hostname" "$LOOKUP_HOST"
+			if [ -z "$ports" ]; then
+				fw_add_forward_rule \
+					"Forward everything ${hostname}" \
+					"::${octet}/-64" all
+			else
+				fw_add_forward_rule \
+					"Forward $ports $hostname" \
+					"::${octet}/-64" "tcp udp" "$ports"
+			fi
+		}
+	done
+}
+
+process_host_list ipv4 <<-EOF
+$PORT_FORWARD_LIST
+EOF
+
+process_host_list ipv6 <<-EOF
+$IPV6_SERVER_LIST
+EOF
+:
