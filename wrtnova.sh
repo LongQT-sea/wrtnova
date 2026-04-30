@@ -71,12 +71,15 @@ LAN_WG_SUBNET=
 GUEST_SUBNET=
 IOT_SUBNET=
 
-LAN_VLAN_ID=
-LAN_WG_VLAN_ID=
-GUEST_VLAN_ID=
-IOT_VLAN_ID=
-WAN_VLAN_ID=
-WAN_B_VLAN_ID=
+LAN_VLAN_ID=		# Default 10
+LAN_WG_VLAN_ID=		# Default 15
+GUEST_VLAN_ID=		# Default 20
+IOT_VLAN_ID=		# Default 25
+WAN_VLAN_ID=		# Default 30
+WAN_B_VLAN_ID=		# Default 31
+
+# Additional VLANs to trunk through this device (individual or range, e.g. "66 77 88" or "66-99" or "60-90 100 900")
+ADDITIONAL_VLAN_LIST=""
 
 # Default DHCP range: START=100, LIMIT=auto (192.168.0.100 - 192.168.X.199)
 LAN_DHCP_START=
@@ -84,7 +87,7 @@ LAN_DHCP_LIMIT=
 GUEST_DHCP_START=
 GUEST_DHCP_LIMIT=
 
-# Statically assign host with hostname "docker-host" to 192.168.X.20
+# Statically assign host with hostname "docker-host" to 192.168.X.20 (no MAC addr needed)
 # After first boot, go to Network > DHCP > Static Leases and set the correct DUID for the host named "docker-host"
 # The DUID ensures "docker-host" always gets an IPv6 address ending in ::20 (see firewall rule)
 DDNS_HOSTNAME="docker-host"
@@ -121,7 +124,7 @@ WWAN_APN="internet"
 AP_MODE=		# Set 1 to enable AP mode (disable DHCP, device acts as access point + managed switch)
 AP_INDEX=2		# AP management IP last octet (2-99)
 
-HARDWARE_OFFLOAD=1
+HARDWARE_OFFLOAD=
 SOFTWARE_OFFLOAD=
 
 DDNS_ENABLE=		# Set 1 to enable Cloudflare DDNS
@@ -253,6 +256,8 @@ if [ -x /usr/bin/wg ] && [ -x /usr/sbin/mwan3 ] && [ "$WG_ENABLE" = 1 ] && [ "$A
 	ping -c2 -W2 -I $WG_IFACE 9.9.9.9 || { ifdown $WG_IFACE; sleep 2; ifup ${WG_IFACE}; }
 	rmdir "\$L"
 	EOF
+elif [ "$WG_ENABLE" = 1 ] && [ "$AP_MODE" = 1 ]; then
+	WG_IFACE=${WG_IFACE:-wg0}
 else
 	WG_ENABLE=
 fi
@@ -398,10 +403,13 @@ add_network() {
 add_bridge_vlan() {
 	local vlan_id="$1" ports="$2" iface="$3"
 	
-	add_network bridge-vlan "vlan${vlan_id}" \
-		device=br-vlan vlan="$vlan_id" ports="$ports"
+	add_network bridge-vlan "" \
+		device=br-vlan vlan="$vlan_id" ports="$ports" local=0
 
-	[ -n "$iface" ] && uci set "network.${iface}.device=br-vlan.${vlan_id}"
+	[ -n "$iface" ] && {
+		uci set "network.${iface}.device=br-vlan.${vlan_id}"
+		uci set network.@bridge-vlan[-1].local=1
+	}
 }
 
 add_bridge() {
@@ -414,10 +422,19 @@ add_bridge() {
 add_swconfig_vlan() {
 	local vlan_id="$1" ports="$2" iface="$3" eth="${4:-$lan_eth}"
 
-	add_network switch_vlan "vlan${vlan_id}" device="$switch_dev" \
+	add_network switch_vlan "" device="$switch_dev" \
 		vlan="$vlan_id" vid="$vlan_id" ports="$ports"
 
 	[ -n "$iface" ] && uci set "network.br_${iface}.ports=${eth}.${vlan_id}"
+}
+
+expand_vlan_list() {
+	for entry in $1; do
+		case "$entry" in
+			*-*) seq "${entry%-*}" "${entry#*-}" ;;
+			*) printf '%s\n' "$entry" ;;
+		esac
+	done
 }
 
 resolve_vlans() {
@@ -512,30 +529,32 @@ EOF
 		ipaddr="${LAN_WG_IP_PREFIX}.1${LAN_WG_SUBNET}" \
 		ip6assign=64 ip6class=local ip6hint="$WG_VLAN_HEX"
 
-	add_network interface "${WG_IFACE}" proto=wireguard metric=35 \
-		private_key="${WG_PRIVATE_KEY:-$(wg genkey)}" \
-		"+addresses=${WG_IPV4:-172.16.0.2/32}" \
-		"+addresses=${WG_IPV6:-fd88::/128}"
-
-	[ -n "$PEER_PUBLIC_KEY" ] && {
-		add_network "wireguard_${WG_IFACE}" "" \
-			public_key="$PEER_PUBLIC_KEY" \
-			preshared_key="$PRESHARED_KEY" \
-			endpoint_host="${ENDPOINT:-1.2.3.4}" \
-			endpoint_port="${ENDPOINT_PORT:-51820}" \
-			allowed_ips="${ALLOWED_IPS:-0.0.0.0/0 ::/0}" \
-			persistent_keepalive=25 \
-			route_allowed_ips=1
-	}
-
-	# WG IPv6 anchor for mwan3
-	add_network interface "${WG_IFACE}_6" proto=none metric=40 device="@${WG_IFACE}"
-
-	# Fix router IPv6 internet access
-	uci_section network rule6 "" in=loopback lookup=main priority=999
-
 	uci rename firewall.@zone[0]=lan
 	uci add_list firewall.lan.network="lan_${WG_IFACE}"
+
+	[ "$AP_MODE" != 1 ] && {
+		add_network interface "${WG_IFACE}" proto=wireguard metric=35 \
+			private_key="${WG_PRIVATE_KEY:-$(wg genkey)}" \
+			"+addresses=${WG_IPV4:-172.16.0.2/32}" \
+			"+addresses=${WG_IPV6:-fd88::/128}"
+
+		[ -n "$PEER_PUBLIC_KEY" ] && {
+			add_network "wireguard_${WG_IFACE}" "" \
+				public_key="$PEER_PUBLIC_KEY" \
+				preshared_key="$PRESHARED_KEY" \
+				endpoint_host="${ENDPOINT:-1.2.3.4}" \
+				endpoint_port="${ENDPOINT_PORT:-51820}" \
+				allowed_ips="${ALLOWED_IPS:-0.0.0.0/0 ::/0}" \
+				persistent_keepalive=25 \
+				route_allowed_ips=1
+		}
+
+		# WG IPv6 anchor for mwan3
+		add_network interface "${WG_IFACE}_6" proto=none metric=40 device="@${WG_IFACE}"
+
+		# Fix router IPv6 internet access
+		uci_section network rule6 "" in=loopback lookup=main priority=999
+	}
 }
 
 lan_ports="$(uci -q get network.@device[0].ports)"
@@ -664,6 +683,13 @@ fi
 [ "$BRIDGE_WAN_PORT" = 1 ] && [ -n "$wan_vlan_ports" ] && vlan_add "$WAN_VLAN_ID" "$wan_vlan_ports" wan
 [ "$WAN_B_ENABLE" = 1 ] && vlan_add "$WAN_B_VLAN_ID" "$trunk_ports" wanb
 
+set +x
+for vid in $(expand_vlan_list "$ADDITIONAL_VLAN_LIST"); do
+	vlan_add "$vid" "$trunk_ports"
+done >/dev/null
+
+[ "$LOG" = 1 ] && set -x
+
 [ "$AP_MODE" = 1 ] && {
 	/etc/init.d/dnsmasq disable
 	/etc/init.d/odhcpd disable
@@ -674,6 +700,7 @@ fi
 		gateway="${LAN_IP_PREFIX}.1" \
 		dns="${LAN_IP_PREFIX}.1" \
 		metric=88
+	[ "$WG_ENABLE" = 1 ] && uci set "network.lan_${WG_IFACE}.ipaddr=${LAN_WG_IP_PREFIX}.${AP_INDEX:-2}${LAN_WG_SUBNET}"
 	[ "$GUEST_NET_ENABLE" = 1 ] && uci set network.guest.ipaddr="${GUEST_IP_PREFIX}.${AP_INDEX:-2}${GUEST_SUBNET}"
 	[ "$IOT_ENABLE" = 1 ] && uci set network.iot.ipaddr="${IOT_IP_PREFIX}.${AP_INDEX:-2}${IOT_SUBNET}"
 }
@@ -706,10 +733,18 @@ Usage: mwan3-iface-add <interface> [metric] [weight] [family] [balanced] [track_
 	exit 1
 fi
 
-uci_section mwan3 interface "$IFACE" enabled=1 family=$FAMILY "-track_ip" "+track_ip=$TRACK_IP"
-uci_section mwan3 member "${IFACE}_m${METRIC}_w${WEIGHT}" interface=$IFACE metric=$METRIC weight=$WEIGHT
-uci_section mwan3 policy "${BASE_IFACE}_only" "+use_member=${IFACE}_m${METRIC}_w${WEIGHT}"
-[ "$LOAD_BALANCED" = 1 ] && uci_section mwan3 policy balanced "+use_member=${IFACE}_m${METRIC}_w${WEIGHT}"
+uci_section mwan3 interface "$IFACE" \
+	enabled=1 family=$FAMILY \
+	"-track_ip" "+track_ip=$TRACK_IP"
+
+uci_section mwan3 member "${IFACE}_m${METRIC}_w${WEIGHT}" \
+	interface=$IFACE metric=$METRIC weight=$WEIGHT
+
+uci_section mwan3 policy "${BASE_IFACE}_only" \
+	"^use_member" "+use_member=${IFACE}_m${METRIC}_w${WEIGHT}"
+
+[ "$LOAD_BALANCED" = 1 ] && uci_section mwan3 policy balanced \
+	"^use_member" "+use_member=${IFACE}_m${METRIC}_w${WEIGHT}"
 EOF
 chmod +x /sbin/mwan3-iface-add
 
@@ -750,15 +785,17 @@ config rule 'default_rule_v6'
 	[ -n "$WWAN_PATH" ] && mwan3-iface-add wwan0 2 2
 	[ -n "$USB_TETHER_DEV" ] && mwan3-iface-add "$USB_TETHER_DEV" 2 2
 
-	[ "$WG_ENABLE" = 1 ] && {
+	[ "$WG_ENABLE" = 1 ] && [ "$AP_MODE" != 1 ] && {
 		mwan3-iface-add "${WG_IFACE}" 1 1 ipv4 0
 		mwan3-iface-add "${WG_IFACE}_6" 1 1 ipv6 0
+
 		ULA="$(uci -q get network.globals.ula_prefix)"
 		uci batch <<-EOF
 		set mwan3.lan_${WG_IFACE}_ipv4=rule
 		set mwan3.lan_${WG_IFACE}_ipv4.src_ip="${LAN_WG_IP_PREFIX}.0${LAN_WG_SUBNET}"
 		set mwan3.lan_${WG_IFACE}_ipv4.use_policy="${WG_IFACE}_only"
 		reorder mwan3.lan_${WG_IFACE}_ipv4=2
+
 		set mwan3.lan_${WG_IFACE}_ipv6=rule
 		set mwan3.lan_${WG_IFACE}_ipv6.src_ip="${ULA%::*}:${WG_VLAN_HEX}::/64"
 		set mwan3.lan_${WG_IFACE}_ipv6.use_policy="${WG_IFACE}_only"
@@ -768,13 +805,6 @@ config rule 'default_rule_v6'
 }
 
 # === DHCP/DNS ===
-calc_dhcp_limit() {
-	local subnet="$1" bits total
-	bits="${subnet#/}"
-	total=$((1 << (32 - bits)))
-	echo $(( total - 156 ))
-}
-
 cat > /sbin/dhcp-instance-add << 'EOF'
 #!/bin/sh
 . /usr/share/wrtnova/functions.sh
@@ -795,6 +825,9 @@ Usage: dhcp-instance-add <iface> [time] [domain] [local] [ipv6] [start] [limit]
 	exit 1
 fi
 
+proto=$(uci -q get network.${IFACE}.proto)
+[ "$proto" != static ] && { echo "Make sure '$IFACE' interface protocol is static" >&2; exit 1; }
+
 BITS=$(uci -q get network.${IFACE}.ipaddr | grep -o '/[0-9]*$' | tr -d '/')
 LIMIT=${7:-$(( (1 << (32 - ${BITS:-24})) - 156 ))}
 
@@ -807,9 +840,9 @@ uci_section dhcp dnsmasq "${IFACE}_dns" domainneeded=1 localise_queries=1 \
 uci_section dhcp dhcp "$IFACE" instance=${IFACE}_dns interface=$IFACE \
 	start=$START limit=$LIMIT leasetime=$TIME
 
-[ "$IPV6" = 1 ] && uci_section dhcp dhcp "$IFACE" ra=server dhcpv6=server ra_default=1 \
-	"ra_flags=managed-config other-config" "-dns" \
-	"+dns=$(ip -6 a s dev eth0 | grep -o 'fe80[^/]*')"
+[ "$IPV6" = 1 ] && uci_section dhcp dhcp "$IFACE" ra=server dhcpv6=server \
+	ra_default=1 "ra_flags=managed-config other-config" \
+	"-dns" "+dns=$(ip -6 a s dev eth0 | grep -o 'fe80[^/]*')"
 EOF
 chmod +x /sbin/dhcp-instance-add
 
@@ -868,7 +901,7 @@ EOF
 
 # Skip setup Adguard Home if AP mode or less than 230MB RAM
 SETUP_ADGUARDHOME=
-[ -x "/usr/bin/AdGuardHome" ] && [ "$AP_MODE" != 1 ] && {
+[ -x "/usr/bin/AdGuardHome" ] && {
 	read -r _ TOTAL_RAM_KB _ < /proc/meminfo
 	[ "$TOTAL_RAM_KB" -ge 235520 ] && SETUP_ADGUARDHOME=1 || /etc/init.d/adguardhome disable
 }
@@ -924,7 +957,7 @@ schema_version: 28
 EOF
 
 # Mini AdguardHome
-[ -x "/usr/bin/dnsproxy" ] && [ "$SETUP_ADGUARDHOME" != 1 ] && [ "$AP_MODE" != 1 ] && {
+[ -x "/usr/bin/dnsproxy" ] && [ "$SETUP_ADGUARDHOME" != 1 ] && {
 	setup_dnsmasq_upstream
 	uci_section dnsproxy global global \
 		enabled=1 log_file=/dev/null rate_limit=500 \
@@ -1062,11 +1095,6 @@ fw_prevent_dns_leaks lan
 	[ "$IOT_INTERNET" = 1 ] && fw_add_forwarding iot wan
 }
 
-[ "$WG_ENABLE" = 1 ] && {
-	fw_add_zone wan_nat6 "$WG_IFACE" 1 1 1
-	fw_add_forwarding lan wan_nat6
-}
-
 [ "$AP_MODE" != 1 ] && {
 	# IPv6: Forward ports 80 and 443
 	fw_add_forward_rule "Forward-80-443-$DDNS_HOSTNAME" "::${STATIC_LEASE_ID}/-64" "tcp udp" "80 443"
@@ -1076,6 +1104,11 @@ fw_prevent_dns_leaks lan
 
 	fw_add_port_forwarding "HTTP-${DDNS_HOSTNAME}" 80 "${LAN_IP_PREFIX}.${STATIC_LEASE_ID}"
 	fw_add_port_forwarding "HTTPS-${DDNS_HOSTNAME}" 443 "${LAN_IP_PREFIX}.${STATIC_LEASE_ID}"
+
+	[ "$WG_ENABLE" = 1 ] && {
+		fw_add_zone wan_nat6 "$WG_IFACE" 1 1 1
+		fw_add_forwarding lan wan_nat6
+	}
 }
 
 # === Cloudflare DDNS ===
@@ -1101,7 +1134,7 @@ add_cf_ddns() {
 		cacert=/etc/ssl/certs use_https=1 enabled="${DDNS_ENABLE:-0}"
 }
 
-[ -x /usr/bin/ddns ] && {
+[ -x /usr/bin/ddns ] && [ "$AP_MODE" != 1 ] && {
 	while uci -q del ddns.@service[0]; do :; done
 	add_cf_ddns wan   0 network wan "$LOOKUP_HOST"
 	add_cf_ddns wan_6 1 script "$DDNS_HOSTNAME" "$LOOKUP_HOST"
@@ -1119,6 +1152,7 @@ eval "$(ubus call network.interface dump | jsonfilter \
 
 ubus call dhcp ipv6leases \
 	| jsonfilter -e "@.device['${LAN_DEV}'].leases[@.hostname='${HOST}']['ipv6-addr'][*].address" \
-	| grep "${PREFIX%????}" | head -1
+	| grep "${PREFIX%????}" \
+	| head -1
 EOF
 chmod +x /sbin/ip6host
