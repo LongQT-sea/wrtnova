@@ -8,7 +8,8 @@
 # Router LAN IP is derived from NET_PREFIX.VLAN.1, e.g. 192.168.1.1 or 192.168.1.2 if AP mode
 
 # REQUIRES THESE ADDITIONAL PACKAGES:
-# Essential:	 luci-app-ddns ddns-scripts-cloudflare luci-app-mwan3 curl ip-full adguardhome -dnsproxy 
+# Essential:	 luci-app-ddns ddns-scripts-cloudflare curl ip-full adguardhome -dnsproxy 
+# Multi WAN:	 luci-app-mwan3 
 # Full WiFi:	 -wpad-basic-mbedtls wpad-mbedtls luci-app-usteer 
 # WireGuard:	 luci-proto-wireguard 
 # MBIM modem:	 luci-proto-modemmanager kmod-usb-net-cdc-mbim 
@@ -162,7 +163,7 @@ QUARTERLY_REBOOT=
 [ -x /bin/run-cmd ] && exit 0
 
 mkdir /usr/share/wrtnova
-cat > /usr/share/wrtnova/functions.sh << 'EOF'
+cat > /usr/share/wrtnova/functions.sh <<'EOF'
 # WrtNova shared functions
 
 # _uci <config> <type> <name> [key=val ...]
@@ -222,12 +223,11 @@ EOF
 cat > /bin/run-cmd <<'EOF'
 #!/bin/sh
 ALLOW="
-	ping arp traceroute nslookup netstat
 	ifup ifdown ifstatus wifi iwinfo
-	ip iw nft bridge ip6host
+	ip iw nft bridge netstat
 	cat ls df du ps grep
-	logread dmesg
-	service
+	dmesg service
+	ip6host
 	uci
 "
 
@@ -248,7 +248,7 @@ exit 1
 EOF
 chmod +x /bin/run-cmd
 
-[ -n "$ROOT_PASSWD" ] && passwd root <<-EOF
+[ -n "$ROOT_PASSWD" ] && passwd root << EOF
 $ROOT_PASSWD
 $ROOT_PASSWD
 EOF
@@ -265,7 +265,7 @@ has_pkg luci-app-commands && {
 }
 
 mkdir -p /etc/profile.d
-cat > /etc/profile.d/custom_alias.sh <<-EOF
+cat > /etc/profile.d/custom_alias.sh << EOF
 alias cl=clear
 alias df='df -h'
 alias top='top -d 1'
@@ -295,7 +295,7 @@ uci set uhttpd.main.redirect_https=1
 
 [ -x /etc/init.d/zram ] && echo vm.swappiness=70 > /etc/sysctl.d/13-zram.conf
 
-cat > /etc/hotplug.d/iface/96-custom-ifup-wan <<-'EOF'
+cat > /etc/hotplug.d/iface/96-custom-ifup-wan <<'EOF'
 [ ifup = "$ACTION" ] || exit 0
 . /lib/functions/network.sh
 sleep 5
@@ -321,6 +321,12 @@ WG_IFACE=${WG_IFACE:-vpn}
 	cat > /etc/hotplug.d/iface/98-custom-"${WG_IFACE}" <<-EOF
 	[ ifup = "\$ACTION" ] || exit 0
 	[ $WG_IFACE = "\$INTERFACE" ] || exit 0
+
+	[ -x /usr/sbin/mwan3 ] && {
+		ip -6 ru | grep '^999:' ||
+		ip -6 ru add iif lo lookup 2 prio 999
+	}
+
 	sleep 2
 	wg-check $WG_IFACE
 	EOF
@@ -373,20 +379,6 @@ add_wifi_iface() {
 	}
 }
 
-# Fields: name|mode|ssid|key|network|bands|enabled|enc_override
-# - bands	: space-separated subset of "2g 5g 6g"
-# - enabled	: 1 = create, 0 = skip
-# - enc_override : empty = use band default
-
-wifi_networks() {
-	cat <<-EOF
-	lan||$LAN_WIFI_SSID|$LAN_WIFI_PASSWD|lan|2g 5g 6g|1|
-	guest||$GUEST_WIFI_SSID|$GUEST_WIFI_PASSWD|guest|2g 5g 6g|${GUEST_ENABLE:-0}|
-	iot||$IOT_WIFI_SSID|$IOT_WIFI_PASSWD|iot|2g|${IOT_ENABLE:-0}|
-	lan_wg||$LAN_WG_WIFI_SSID|$LAN_WG_WIFI_PASSWD|lan_${WG_IFACE}|2g 5g 6g|${WG_ENABLE:-0}|
-	EOF
-}
-
 DEFAULT_WIFI_PASSWD="${DEFAULT_WIFI_PASSWD:-12345678}"
 LAN_WIFI_SSID="${LAN_WIFI_SSID:-WrtNova}"
 LAN_WIFI_PASSWD="${LAN_WIFI_PASSWD:-$DEFAULT_WIFI_PASSWD}"
@@ -396,6 +388,18 @@ IOT_WIFI_SSID="${IOT_WIFI_SSID:-WrtNova_IoT}"
 IOT_WIFI_PASSWD="${IOT_WIFI_PASSWD:-$DEFAULT_WIFI_PASSWD}"
 LAN_WG_WIFI_SSID="${LAN_WG_WIFI_SSID:-WrtNova_VPN}"
 LAN_WG_WIFI_PASSWD="${LAN_WG_WIFI_PASSWD:-$DEFAULT_WIFI_PASSWD}"
+
+# Fields: name|mode|ssid|key|network|bands|enabled|enc_override
+# - bands	: space-separated subset of "2g 5g 6g"
+# - enabled	: 1 = create, 0 = skip
+# - enc_override : empty = use band default
+
+wifi_networks="
+lan|ap|$LAN_WIFI_SSID|$LAN_WIFI_PASSWD|lan|2g 5g 6g|1|
+guest|ap|$GUEST_WIFI_SSID|$GUEST_WIFI_PASSWD|guest|2g 5g 6g|${GUEST_ENABLE:-0}|
+iot|ap|$IOT_WIFI_SSID|$IOT_WIFI_PASSWD|iot|2g|${IOT_ENABLE:-0}|
+lan_wg|ap|$LAN_WG_WIFI_SSID|$LAN_WG_WIFI_PASSWD|lan_${WG_IFACE}|2g 5g 6g|${WG_ENABLE:-0}|
+"
 
 while uci -q del wireless.@wifi-iface[0]; do :; done
 
@@ -411,12 +415,14 @@ for radio in radio0 radio1 radio2 radio3; do
 
 	setup_radio "$radio" "$channel"
 
-	wifi_networks | while IFS='|' read -r name mode ssid key network bands enabled enc_over; do
+	while IFS='|' read -r name mode ssid key network bands enabled enc_over; do
 		[ -n "$name" ] && [ "$enabled" = 1 ] && {
 			case " $bands " in *" $band "*) ;; *) continue ;; esac
-			add_wifi_iface "$name" "$radio" "${mode:-ap}" "$ssid" "$key" "$network" "${enc_over:-$enc}"
+			add_wifi_iface "$name" "$radio" "$mode" "$ssid" "$key" "$network" "${enc_over:-$enc}"
 		}
-	done
+	done <<-EOF
+	$wifi_networks
+	EOF
 done
 
 # https://openwrt.org/docs/guide-user/network/wifi/usteer
@@ -580,26 +586,24 @@ uci -q get network.wan || {
 	_uci network interface wan6 proto=dhcpv6
 }
 
-_uci network interface wan6 device=@wan "~wan6=wan_6"
+_uci network interface wan6 device=@wan ~wan6=wan_6
 
 [ -n "$PPPOE_USERNAME" ] && \
 	_uci network interface wan proto=pppoe ipv6=0 username="$PPPOE_USERNAME" password="$PPPOE_PASSWD"
 
+[ -x /usr/sbin/mwan3 ] || no_mwan3=1
+
 [ "$WAN_B_ENABLE" = 1 ] && {
-	_uci network interface wanb proto=dhcp
-	_uci network interface wanb_6 proto=dhcpv6 device=@wanb
+	_uci network interface wanb proto=dhcp "${no_mwan3:+metric=2}"
+	_uci network interface wanb_6 proto=dhcpv6 device=@wanb "${no_mwan3:+metric=2}"
 }
 
 [ "$WWAN_ENABLE" = 1 ] && \
-	_uci network interface wwan0 proto=modemmanager iptype=ipv4v6 device="$WWAN_PATH" apn="${WWAN_APN:-internet}"
+	_uci network interface wwan0 proto=modemmanager \
+		iptype=ipv4v6 device="$WWAN_PATH" apn="${WWAN_APN:-internet}" "${no_mwan3:+metric=3}"
 
-[ "$USB_TETHERING" = 1 ] && _uci network interface usb0 proto=dhcp device=usb0
-
-[ "$WAN_B_ENABLE" = 1 ] || [ "$WWAN_ENABLE" = 1 ] || [ "$USB_TETHERING" = 1 ] && {
-	[ -x /usr/sbin/mwan3 ] && use_mwan3=1
-}
-
-[ -x /usr/sbin/mwan3 ] && [ "$use_mwan3" != 1 ] && /etc/init.d/mwan3 disable
+[ "$USB_TETHERING" = 1 ] && \
+	_uci network interface usb0 proto=dhcp device=usb0 "${no_mwan3:+metric=4}"
 
 [ "$WG_ENABLE" = 1 ] && {
 	_uci network interface "lan_${WG_IFACE}" proto=static \
@@ -613,24 +617,22 @@ _uci network interface wan6 device=@wan "~wan6=wan_6"
 			private_key="${WG_PRIVATE_KEY:-$(wg genkey)}" \
 			+addresses="${WG_IPV4:-172.16.0.2/32}" \
 			+addresses="${WG_IPV6:-fd88::/128}" \
-			ip4table=5 ip6table=5
+			ip4table=20 ip6table=20
 
-		# mwan3 policy already has kill switch
-		if [ "$use_mwan3" = 1 ]; then
+		if [ "$no_mwan3" = 1 ]; then
+			for f in '' 6; do
+				_uci network rule$f "" in="lan_${WG_IFACE}" lookup=20 priority=990
+				_uci network rule$f "" in="lan_${WG_IFACE}" action=prohibit priority=991
+			done
+		else
+			# mwan3 already handles PBR and kill switch
 			_uci network interface "${WG_IFACE}" -ip4table -ip6table
 
 			# WG IPv6 anchor for mwan3
 			_uci network interface "${WG_IFACE}_6" proto=none device="@${WG_IFACE}"
 
 			# Fix router IPv6 internet access
-			_uci network rule6 "" in=loopback lookup=main priority=999
-
-		else
-			_uci network rule "" in="lan_${WG_IFACE}" lookup=5 priority=30000
-			_uci network rule6 "" in="lan_${WG_IFACE}" lookup=5 priority=30000
-
-			_uci network rule "" in="lan_${WG_IFACE}" action=prohibit priority=30001
-			_uci network rule6 "" in="lan_${WG_IFACE}" action=prohibit priority=30001
+			_uci network rule6 "" in=loopback lookup=2 priority=999
 		fi
 
 		[ -n "$PEER_PUBLIC_KEY" ] && {
@@ -640,8 +642,7 @@ _uci network interface wan6 device=@wan "~wan6=wan_6"
 				endpoint_host="${ENDPOINT:-1.2.3.4}" \
 				endpoint_port="${ENDPOINT_PORT:-51820}" \
 				allowed_ips="${ALLOWED_IPS:-0.0.0.0/0 ::/0}" \
-				persistent_keepalive=25 \
-				route_allowed_ips=1
+				persistent_keepalive=25 route_allowed_ips=1
 		}
 	}
 }
@@ -729,7 +730,7 @@ else
 		for port in $(uci -q get network.@switch_vlan[1].ports); do
 			case "$port" in
 				*t) [ "$port" != "$lan_cpu_port" ] && wan_cpu_port="$port" ;;
-				*) sw_wan_port="${sw_wan_port:+$sw_wan_port }$port" ;;
+				*) sw_wan_port="$port" ;;
 			esac
 		done
 
@@ -779,7 +780,7 @@ done >/dev/null
 	if [ "$wan_port" = br-wan ]; then
 		uci set network.@device[1].macaddr="$WAN_MAC_ADDR"
 	else
-		_uci network device wan_mac \
+		_uci network device "" \
 			macaddr="$WAN_MAC_ADDR" "${src_ports:+name=$wan_port}" "${wan_eth:+name=$wan_eth}"
 	fi
 }
@@ -802,7 +803,7 @@ done >/dev/null
 }
 
 # === mwan3 ===
-cat > /sbin/mwan3-iface-add << 'EOF'
+cat > /sbin/mwan3-iface-add <<'EOF'
 #!/bin/sh
 . /usr/share/wrtnova/functions.sh
 
@@ -859,8 +860,7 @@ _uci mwan3 policy "${BASE_IFACE:0:10}_only" ^use_member="$NAME" +use_member="$NA
 EOF
 chmod +x /sbin/mwan3-iface-add
 
-[ "$use_mwan3" = 1 ] && {
-cat > /etc/config/mwan3 <<-EOF
+cat > /etc/config/mwan3 << EOF
 
 config globals 'globals'
 	option mmx_mask '0x3F00'
@@ -886,33 +886,34 @@ config rule 'default_rule_v6'
 	option family 'ipv6'
 EOF
 
-	mwan3-iface-add wan
-	mwan3-iface-add wan_6 ipv6
+mwan3-iface-add wan
+mwan3-iface-add wan_6 ipv6
 
-	[ "$WAN_B_ENABLE" = 1 ] && {
-		mwan3-iface-add wanb
-		mwan3-iface-add wanb_6 ipv6
-	}
-
-	[ "$WWAN_ENABLE" = 1 ] && mwan3-iface-add wwan0 "" 2 2
-	[ "$USB_TETHERING" = 1 ] && mwan3-iface-add usb0 "" 2 2
-
-	[ "$WG_ENABLE" = 1 ] && {
-		mwan3-iface-add "${WG_IFACE}" "" 1 1 0
-		mwan3-iface-add "${WG_IFACE}_6" ipv6 1 1 0
-
-		ula_prefix="$(uci -q get network.globals.ula_prefix)"
-
-		_uci mwan3 rule "lan_${WG_IFACE:0:5}_ipv4" \
-			src_ip="${LAN_WG_IP_PREFIX}.0${LAN_WG_SUBNET}" use_policy="${WG_IFACE}_only" @2
-
-		_uci mwan3 rule "lan_${WG_IFACE:0:5}_ipv6" \
-			src_ip="${ula_prefix%::*}:10::/60" use_policy="${WG_IFACE}_only" @3
-	}
+[ "$WAN_B_ENABLE" = 1 ] && {
+	mwan3-iface-add wanb
+	mwan3-iface-add wanb_6 ipv6
 }
 
+[ "$WWAN_ENABLE" = 1 ] && mwan3-iface-add wwan0 "" 2 2
+[ "$USB_TETHERING" = 1 ] && mwan3-iface-add usb0 "" 2 2
+
+[ "$WG_ENABLE" = 1 ] && [ -z "$no_mwan3" ] && {
+	mwan3-iface-add "${WG_IFACE}" "" 1 1 0
+	mwan3-iface-add "${WG_IFACE}_6" ipv6 1 1 0
+
+	ula_prefix="$(uci -q get network.globals.ula_prefix)"
+
+	_uci mwan3 rule "lan_${WG_IFACE:0:5}_ipv4" \
+		src_ip="${LAN_WG_IP_PREFIX}.0${LAN_WG_SUBNET}" use_policy="${WG_IFACE}_only" @2
+
+	_uci mwan3 rule "lan_${WG_IFACE:0:5}_ipv6" \
+		src_ip="${ula_prefix%::*}:10::/60" use_policy="${WG_IFACE}_only" @3
+}
+
+[ "$AP_MODE" = 1 ] && [ -x /usr/sbin/mwan3 ] && /etc/init.d/mwan3 disable
+
 # === DHCP/DNS ===
-cat > /sbin/dhcp-instance-add << 'EOF'
+cat > /sbin/dhcp-instance-add <<'EOF'
 #!/bin/sh
 . /usr/share/wrtnova/functions.sh
 
@@ -975,7 +976,7 @@ setup_dnsmasq_upstream() {
 	for iface in lan $ifaces; do
 		[ -z "$iface" ] && continue
 		_uci dhcp dnsmasq "${iface}_dns" \
-			noresolv=1 cachesize=0 "+server=127.0.0.1#5354" "+server=::1#5354"
+			noresolv=1 cachesize=0 +server=127.0.0.1#5354 +server=::1#5354
 	done
 }
 
@@ -999,9 +1000,9 @@ uci del dhcp.lan_dns.notinterface
 }
 
 _uci system timeserver ntp -server \
-	enable_server=1 "+server=time1.google.com" "+server=time2.google.com" "+server=time.cloudflare.com"
+	enable_server=1 +server=time1.google.com +server=time2.google.com +server=time.cloudflare.com
 
-cat >> /etc/hosts <<-EOF
+cat >> /etc/hosts << EOF
 
 $IPV6_LINK_LOCAL	$HOST_NAME
 
@@ -1030,7 +1031,7 @@ EOF
 
 ADGUARD_PASSWD=${ADGUARD_PASSWD:-\$2y\$10\$aRfh9IbImR8PIf/FWlLvkeW6wiyp47BjY0KqW/FD/F14QloYuV00a}
 [ "$OS_VERSION" = "25" ] && { mkdir -p /etc/adguardhome; adguard_dir=/etc/adguardhome; }
-cat > "${adguard_dir:-/etc}"/adguardhome.yaml <<-EOF
+cat > "${adguard_dir:-/etc}"/adguardhome.yaml << EOF
 http:
   address: 0.0.0.0:3000
 users:
@@ -1099,25 +1100,25 @@ fw_add_forwarding() {
 
 fw_add_base_rules() {
 	_uci firewall rule "" \
-		name="${1}-Allow-DNS-DHCP-NTP" src="$1" \
+		name="$1 Allow-DNS-DHCP-NTP" src="$1" \
 		target=ACCEPT proto="tcp udp" dest_port="53 67 123"
 
 	_uci firewall rule "" \
-		name="${1}-Allow-Ping" src="$1" \
+		name="$1 Allow-Ping" src="$1" \
 		target=ACCEPT proto=icmp family=ipv4 +icmp_type=echo-request
 
 	_uci firewall rule "" \
-		name="${1}-Allow-DHCPv6" src="$1" \
+		name="$1 Allow-DHCPv6" src="$1" \
 		target=ACCEPT proto=udp family=ipv6 dest_port=546
 
 	_uci firewall rule "" \
-		name="${1}-Allow-MLD" src="$1" \
+		name="$1 Allow-MLD" src="$1" \
 		target=ACCEPT proto=icmp family=ipv6 src_ip=fe80::/10 \
 		+icmp_type=130/0 +icmp_type=131/0 \
 		+icmp_type=132/0 +icmp_type=143/0
 
 	_uci firewall rule "" \
-		name="${1}-Allow-ICMPv6-Input" src="$1" \
+		name="$1 Allow-ICMPv6-Input" src="$1" \
 		target=ACCEPT proto=icmp family=ipv6 limit=1000/sec \
 		+icmp_type=echo-request +icmp_type=echo-reply \
 		+icmp_type=destination-unreachable +icmp_type=packet-too-big \
@@ -1148,7 +1149,7 @@ _uci firewall defaults @defaults[0] \
 	"${SOFTWARE_OFFLOAD:+flow_offloading=1}" "${HARDWARE_OFFLOAD:+flow_offloading_hw=1}"
 
 WAN_ZONE="wan wan_6${WAN_B_ENABLE:+ wanb wanb_6}${WWAN_ENABLE:+ wwan0}${USB_TETHERING:+ usb0}"
-_uci firewall zone "@zone[1]" "network=$WAN_ZONE" "~@zone[1]=wan"
+_uci firewall zone @zone[1] network="$WAN_ZONE" ~@zone[1]=wan
 
 [ "$BLOCK_DOT_DOQ" = 1 ] && \
 	_uci firewall rule "" name=Block-DoT-DoQ src="*" dest="*" dest_port=853 target=REJECT
@@ -1206,7 +1207,7 @@ add_cf_ddns() {
 }
 
 # IPv6 DDNS helper script
-cat > /sbin/ip6host << 'EOF'
+cat > /sbin/ip6host <<'EOF'
 #!/bin/sh
 HOST=$1
 LAN_IF="${2:-lan}"
@@ -1249,7 +1250,7 @@ process_host_list() {
 		[ "$1" = ipv4 ] && {
 			for port in $ports; do
 				_uci firewall redirect "" \
-					name="$hostname $port" target=DNAT src=wan src_dport="$port" \
+					name="$hostname | $port" target=DNAT src=wan src_dport="$port" \
 					dest=lan dest_port="$port" dest_ip="${LAN_IP_PREFIX}.${octet}"
 			done
 		}
@@ -1261,9 +1262,9 @@ process_host_list() {
 			}
 
 			if [ -z "$ports" ]; then
-				fw_add_forward_rule "Forward everything $hostname" "::${octet}/-64"
+				fw_add_forward_rule "$hostname | Forward any protocol" "::${octet}/-64"
 			else
-				fw_add_forward_rule "Forward $ports $hostname" "::${octet}/-64" "tcp udp" "$ports"
+				fw_add_forward_rule "$hostname | Forward $ports" "::${octet}/-64" "tcp udp" "$ports"
 			fi
 		}
 	done
