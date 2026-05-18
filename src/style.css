@@ -1,0 +1,46 @@
+/* ── Tailwind directives ─────────────────────────────────────────── */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── IBM Plex Mono: self-hosted woff2 ───────────────────────────── */
+/*
+ * Font-face declarations live here (not in tailwind.config.js) because
+ * @font-face rules are not utilities — they belong in @layer base so
+ * Tailwind doesn't tree-shake them and they always appear in the output.
+ */
+@layer base {
+  @font-face {
+    font-family: 'IBM Plex Mono';
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+    src: url('/fonts/ibm-plex-mono-v20-latin-regular.woff2') format('woff2');
+  }
+
+  @font-face {
+    font-family: 'IBM Plex Mono';
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+    src: url('/fonts/ibm-plex-mono-v20-latin-500.woff2') format('woff2');
+  }
+
+  @font-face {
+    font-family: 'IBM Plex Mono';
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+    src: url('/fonts/ibm-plex-mono-v20-latin-600.woff2') format('woff2');
+  }
+}
+
+/* ── Custom layer ────────────────────────────────────────────────── */
+/*
+ * Add component or utility overrides here that cannot be expressed as
+ * Tailwind utility classes. Keep this section small — prefer utilities
+ * in the HTML. See PLAN.md § Design System for rationale.
+ */
+@layer components {
+  /* Placeholder — populated in the next prompt when index.html is refactored. */
+}
