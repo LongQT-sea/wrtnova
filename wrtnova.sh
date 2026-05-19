@@ -17,7 +17,7 @@
 # Optional:	 zram-swap luci-ssl luci-app-commands ip-bridge
 
 # === System ===
-HOST_NAME=""
+HOST_NAME=""		# Default to WrtNova
 ROOT_PASSWD=""
 SSH_PUBLIC_KEY=""
 SSH_PASSWD_AUTH=""	# off = disable password login (SSH keys auth only)
@@ -31,16 +31,16 @@ DEFAULT_WIFI_PASSWD=""	# Default to 12345678
 WIFI_COUNTRY_CODE=
 WIFI_DENSE=		# Set 1 to optimize roaming and steering for high-interference areas
 
-LAN_WIFI_SSID=""	# Default to WrtNova
+LAN_WIFI_SSID=""	# Default to HOST_NAME
 LAN_WIFI_PASSWD=""
 
-GUEST_WIFI_SSID=""	# Default to WrtNova_Guest
+GUEST_WIFI_SSID=""	# Default to HOST_NAME_Guest
 GUEST_WIFI_PASSWD=""
 
-IOT_WIFI_SSID=""	# Default to WrtNova_IoT
+IOT_WIFI_SSID=""	# Default to HOST_NAME_IoT
 IOT_WIFI_PASSWD=""
 
-LAN_WG_WIFI_SSID=""	# Default to WrtNova_VPN
+LAN_WG_WIFI_SSID=""	# Default to HOST_NAME_VPN
 LAN_WG_WIFI_PASSWD=""
 
 # Only if you know what you’re doing
@@ -200,19 +200,16 @@ _uci() {
 	done
 }
 
-# has_pkg <name> - check if package is installed
 has_pkg() {
 	ls /*/apk/*/*"${1}"*.list 2>/dev/null ||
 	ls /*/*/opkg/*/*"${1}"*.list 2>/dev/null
 }
 
-# duid_gen - generate a DUID-UUID
 duid_gen() {
 	printf '0004'
 	tr -d '-' < /proc/sys/kernel/random/uuid
 }
 
-# add_luci_command <cmd> [param] - add a command to luci-app-commands
 add_luci_command() {
 	_uci luci command "" command="$1" param="${2:-1}"
 }
@@ -295,7 +292,7 @@ uci set uhttpd.main.redirect_https=1
 
 [ -x /etc/init.d/zram ] && echo vm.swappiness=70 > /etc/sysctl.d/13-zram.conf
 
-cat > /etc/hotplug.d/iface/96-custom-ifup-wan <<'EOF'
+cat > /etc/hotplug.d/iface/96-ifup-wan <<'EOF'
 [ ifup = "$ACTION" ] || exit 0
 . /lib/functions/network.sh
 sleep 5
@@ -316,9 +313,9 @@ WG_IFACE=${WG_IFACE:-vpn}
 [ "$WG_ENABLE" = 1 ] && [ "$AP_MODE" != 1 ] && {
 	echo "*/2 * * * * wireguard_watchdog" >> /etc/crontabs/root
 	echo "*/10 * * * * wg-check $WG_IFACE" >> /etc/crontabs/root
-	uci set system.@system[0].cronloglevel=9
+	_uci system "" "@system[0]" cronloglevel=9
 
-	cat > /etc/hotplug.d/iface/98-custom-"${WG_IFACE}" <<-EOF
+	cat > /etc/hotplug.d/iface/98-wg-"${WG_IFACE}" <<-EOF
 	[ ifup = "\$ACTION" ] || exit 0
 	[ $WG_IFACE = "\$INTERFACE" ] || exit 0
 
@@ -380,13 +377,13 @@ add_wifi_iface() {
 }
 
 DEFAULT_WIFI_PASSWD="${DEFAULT_WIFI_PASSWD:-12345678}"
-LAN_WIFI_SSID="${LAN_WIFI_SSID:-WrtNova}"
+LAN_WIFI_SSID="${LAN_WIFI_SSID:-$HOST_NAME}"
 LAN_WIFI_PASSWD="${LAN_WIFI_PASSWD:-$DEFAULT_WIFI_PASSWD}"
-GUEST_WIFI_SSID="${GUEST_WIFI_SSID:-WrtNova_Guest}"
+GUEST_WIFI_SSID="${GUEST_WIFI_SSID:-${HOST_NAME}_Guest}"
 GUEST_WIFI_PASSWD="${GUEST_WIFI_PASSWD:-$DEFAULT_WIFI_PASSWD}"
-IOT_WIFI_SSID="${IOT_WIFI_SSID:-WrtNova_IoT}"
+IOT_WIFI_SSID="${IOT_WIFI_SSID:-${HOST_NAME}_IoT}"
 IOT_WIFI_PASSWD="${IOT_WIFI_PASSWD:-$DEFAULT_WIFI_PASSWD}"
-LAN_WG_WIFI_SSID="${LAN_WG_WIFI_SSID:-WrtNova_VPN}"
+LAN_WG_WIFI_SSID="${LAN_WG_WIFI_SSID:-${HOST_NAME}_VPN}"
 LAN_WG_WIFI_PASSWD="${LAN_WG_WIFI_PASSWD:-$DEFAULT_WIFI_PASSWD}"
 
 # Fields: name|mode|ssid|key|network|bands|enabled|enc_override
@@ -428,21 +425,25 @@ done
 # https://openwrt.org/docs/guide-user/network/wifi/usteer
 # Dense mode tightens all thresholds for high-interference environments
 [ -x /sbin/usteerd ] && {
-	_uci usteer "" "@usteer[0]" \
-		roam_scan_snr='-68' \
-		signal_diff_threshold='8' \
-		roam_trigger_snr='-72'
-
-	[ "$WIFI_DENSE" = 1 ] && {
+	if uci -q get wireless.radio0; then
 		_uci usteer "" "@usteer[0]" \
-			roam_scan_snr='-60' \
-			signal_diff_threshold='6' \
-			band_steering_interval='30000' \
-			band_steering_min_snr='-50' \
-			roam_trigger_snr='-65' \
-			roam_kick_delay='3000' \
-			min_snr='-80'
-	}
+			roam_scan_snr='-68' \
+			signal_diff_threshold='8' \
+			roam_trigger_snr='-72'
+
+		[ "$WIFI_DENSE" = 1 ] && {
+			_uci usteer "" "@usteer[0]" \
+				roam_scan_snr='-60' \
+				signal_diff_threshold='6' \
+				band_steering_interval='30000' \
+				band_steering_min_snr='-50' \
+				roam_trigger_snr='-65' \
+				roam_kick_delay='3000' \
+				min_snr='-80'
+		}
+	else
+		/etc/init.d/usteer disable
+	fi
 }
 
 # === Network ===
@@ -578,6 +579,8 @@ LAN_WG_SUBNET=${LAN_WG_SUBNET:-$DEFAULT_SUBNET}
 [ "$IOT_ENABLE" = 1 ] && \
 	_uci network interface iot proto=static +ipaddr="${IOT_IP_PREFIX}.1${IOT_SUBNET}"
 
+has_pkg modemmanager || WWAN_ENABLE=
+
 _uci network interface lan -netmask -ipaddr \
 	+ipaddr="${LAN_IP_PREFIX}.1${LAN_SUBNET}" +ip6class=wan_6 "${WWAN_ENABLE:++ip6class=wwan0_6}"
 
@@ -704,7 +707,10 @@ if [ "$use_bridge_vlan" = 1 ]; then
 		fi
 	}
 
-	_uci network device @device[0] name=br-vlan ports="$all_ports"
+	_uci network device @device[0] name=br-vlan -ports
+	for p in $all_ports; do
+		_uci network device @device[0] +ports="$p"
+	done
 
 	[ "$WAN_IS_TAGGED" = 1 ] && [ "$bridge_wan_port" != 1 ] && \
 		uci set network.wan.device="${wan_port}.${WAN_VLAN_ID}"
@@ -1021,7 +1027,7 @@ EOF
 	if [ "$TOTAL_RAM_KB" -ge 235520 ]; then
 		setup_dnsmasq_upstream
 		echo "0 3 */3 * * /etc/init.d/adguardhome restart" >> /etc/crontabs/root
-		echo "sleep 30; /etc/init.d/adguardhome restart &" >> /etc/hotplug.d/iface/96-custom-ifup-wan
+		echo "sleep 30; /etc/init.d/adguardhome restart &" >> /etc/hotplug.d/iface/96-ifup-wan
 
 		[ -x "/usr/bin/dnsproxy" ] && /etc/init.d/dnsproxy disable
 	else
@@ -1090,12 +1096,12 @@ EOF
 # === Firewall ===
 fw_add_zone() {
 	_uci firewall zone "$1" \
-		name="$1" network="$2" "${3:+masq=$3}" "${4:+masq6=$4}" "${5:+mtu_fix=$5}" \
+		name="$1" +network="${2:-$1}" "${3:+masq=$3}" "${4:+masq6=$4}" "${5:+mtu_fix=$5}" \
 		input="${6:-REJECT}" output="${7:-ACCEPT}" forward="${8:-REJECT}"
 }
 
 fw_add_forwarding() {
-	_uci firewall forwarding "${1}_${2}" src="$1" dest="$2"
+	_uci firewall forwarding "${1}_to_${2}" src="$1" dest="$2"
 }
 
 fw_add_base_rules() {
@@ -1120,51 +1126,46 @@ fw_add_base_rules() {
 	_uci firewall rule "" \
 		name="$1 Allow-ICMPv6-Input" src="$1" \
 		target=ACCEPT proto=icmp family=ipv6 limit=1000/sec \
-		+icmp_type=echo-request +icmp_type=echo-reply \
-		+icmp_type=destination-unreachable +icmp_type=packet-too-big \
-		+icmp_type=time-exceeded +icmp_type=bad-header \
-		+icmp_type=unknown-header-type +icmp_type=router-solicitation \
-		+icmp_type=neighbour-solicitation +icmp_type=router-advertisement \
-		+icmp_type=neighbour-advertisement
+		+icmp_type=bad-header +icmp_type=destination-unreachable \
+		+icmp_type=echo-reply +icmp_type=echo-request \
+		+icmp_type=neighbour-advertisement +icmp_type=neighbour-solicitation \
+		+icmp_type=packet-too-big +icmp_type=router-advertisement \
+		+icmp_type=router-solicitation +icmp_type=time-exceeded \
+		+icmp_type=unknown-header-type
 }
 
-fw_add_forward_rule() {
+fw_accept_to_lan() {
 	_uci firewall rule "" \
-		name="$1" dest_ip="$2" proto="${3:-all}" "${4:+dest_port=$4}" \
+		name="$1" +dest_ip="$2" proto="${3:-all}" "${4:+dest_port=$4}" \
 		src="${5:-wan}" dest="${6:-lan}" family="${7:-ipv6}" target=ACCEPT
+}
+
+fw_port_forwarding() {
+	_uci firewall redirect "" \
+		name="$1" dest_ip="$2" src_dport="$3" dest_port="$3" src=wan dest=lan
 }
 
 fw_redirect_dns() {
 	_uci firewall redirect "" \
-		name="$1 Intercept-DNS" src="$1" src_dport=53 target=DNAT family=any
+		name="$1 Intercept-DNS" src="$1" src_dport=53 family=any
 }
 
 fw_redirect_ntp() {
 	_uci firewall redirect "" \
-		name="$1 Redirect-NTP" src="$1" src_dport=123 target=DNAT family=any proto=udp
+		name="$1 Redirect-NTP" src="$1" src_dport=123 family=any proto=udp
 }
-
-[ "$HARDWARE_OFFLOAD" = 1 ] && SOFTWARE_OFFLOAD=1
-_uci firewall defaults @defaults[0] \
-	"${SOFTWARE_OFFLOAD:+flow_offloading=1}" "${HARDWARE_OFFLOAD:+flow_offloading_hw=1}"
-
-WAN_ZONE="wan wan_6${WAN_B_ENABLE:+ wanb wanb_6}${WWAN_ENABLE:+ wwan0}${USB_TETHERING:+ usb0}"
-_uci firewall zone @zone[1] network="$WAN_ZONE" ~@zone[1]=wan
-
-[ "$BLOCK_DOT_DOQ" = 1 ] && \
-	_uci firewall rule "" name=Block-DoT-DoQ src="*" dest="*" dest_port=853 target=REJECT
 
 fw_redirect_dns lan
 
 [ "$GUEST_ENABLE" = 1 ] && {
-	fw_add_zone guest guest
+	fw_add_zone guest
 	fw_add_base_rules guest
 	fw_redirect_dns guest
 	fw_add_forwarding guest wan
 }
 
 [ "$IOT_ENABLE" = 1 ] && {
-	fw_add_zone iot iot
+	fw_add_zone iot
 	fw_add_base_rules iot
 	fw_redirect_dns iot
 	fw_redirect_ntp iot
@@ -1178,6 +1179,18 @@ fw_redirect_dns lan
 	fw_add_forwarding lan wan_nat6
 }
 
+_uci firewall zone @zone[1] ~@zone[1]=wan ^network=wan6
+for i in wan_6 ${WAN_B_ENABLE:+wanb wanb_6} ${WWAN_ENABLE:+wwan0} ${USB_TETHERING:+usb0}; do
+	_uci firewall zone wan +network="$i"
+done
+
+[ "$HARDWARE_OFFLOAD" = 1 ] && SOFTWARE_OFFLOAD=1
+_uci firewall defaults @defaults[0] \
+	"${SOFTWARE_OFFLOAD:+flow_offloading=1}" "${HARDWARE_OFFLOAD:+flow_offloading_hw=1}"
+
+[ "$BLOCK_DOT_DOQ" = 1 ] && \
+	_uci firewall rule "" name=Block-DoT-DoQ src="*" dest="*" dest_port=853 target=REJECT
+
 # === Cloudflare DDNS ===
 add_cf_ddns() {
 	local interface="$1" use_ipv6="$2" ip_source="$3"
@@ -1186,7 +1199,7 @@ add_cf_ddns() {
 	local name="${interface}_ipv4" ip_key=ip_network
 
 	[ "$ip_source" = script ] && {
-		ip_key=ip_script 
+		ip_key=ip_script
 		name="${network_or_hostname//-/_}_ipv6"
 		network_or_hostname="ip6host $network_or_hostname"
 	}
@@ -1223,35 +1236,34 @@ eval "$(ubus call network.interface dump | jsonfilter \
 	-e "PREFIX=@.interface[@.proto='dhcpv6']['ipv6-prefix'][@.assigned['$LAN_IF']].address")"
 
 # Get HOST IPv6 lease, match against the PREFIX, %???? is enough for /56 -> /64 PD
-ubus call dhcp ipv6leases \
-	| jsonfilter -e "@.device['${LAN_DEV}'].leases[@.hostname='${HOST}']['ipv6-addr'][*].address" \
-	| grep "${PREFIX%????}" \
-	| head -1
+ubus call dhcp ipv6leases | jsonfilter \
+	-e "@.device['${LAN_DEV}'].leases[@.hostname='${HOST}']['ipv6-addr'][*].address" \
+	| grep "${PREFIX%????}" | head -1
 EOF
 chmod +x /sbin/ip6host
 
 # === Static Leases & Port Forwarding ===
 process_host_list() {
-	local hostname octet ports name idx
+	local hostname octet ports duid name idx
 
-	while IFS='|' read -r hostname octet ports; do
+	while IFS='|' read -r hostname octet ports duid; do
 		hostname=$(echo "$hostname" | tr -d ' \t')
 		octet=$(echo "$octet" | tr -d ' \t')
+		duid=$(echo "$duid" | tr -d ' \t')
 		ports="${ports# }"
 		[ -z "$hostname" ] && continue
 
 		name="${hostname//-/_}"
-		uci -q get "dhcp.${name}" > /dev/null || {
+		uci -q get "dhcp.${name}" || {
 			_uci dhcp host "$name" \
 				name="$hostname" ip="${LAN_IP_PREFIX}.${octet}" \
-				hostid="$octet" duid="$(duid_gen)" dns=1
+				hostid="$octet" duid="${duid:-$(duid_gen)}" dns=1
 		}
 
 		[ "$1" = ipv4 ] && {
 			for port in $ports; do
-				_uci firewall redirect "" \
-					name="$hostname | $port" target=DNAT src=wan src_dport="$port" \
-					dest=lan dest_port="$port" dest_ip="${LAN_IP_PREFIX}.${octet}"
+				[ -z "$port" ] && continue
+				fw_port_forwarding "$hostname | $port" "${LAN_IP_PREFIX}.${octet}" "$port"
 			done
 		}
 
@@ -1261,10 +1273,10 @@ process_host_list() {
 				idx=1
 			}
 
-			if [ -z "$ports" ]; then
-				fw_add_forward_rule "$hostname | Forward any protocol" "::${octet}/-64"
+			if [ -n "$ports" ]; then
+				fw_accept_to_lan "$hostname | Forward $ports" "::${octet}/-64" "tcp udp" "$ports"
 			else
-				fw_add_forward_rule "$hostname | Forward $ports" "::${octet}/-64" "tcp udp" "$ports"
+				fw_accept_to_lan "$hostname | Forward any protocol" "::${octet}/-64"
 			fi
 		}
 	done
