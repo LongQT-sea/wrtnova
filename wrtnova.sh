@@ -1,6 +1,5 @@
 #!/bin/sh
 # shellcheck disable=SC3043,SC3060,SC3057,SC1091
-# SPDX-License-Identifier: MIT OR Apache-2.0
 # Copyright (C) 2024 - 2026 Tieu Long <https://github.com/LongQT-sea>
 
 # WrtNova — Zero-touch provisioning and orchestration framework for OpenWrt
@@ -10,14 +9,14 @@
 # REQUIRES THESE ADDITIONAL PACKAGES:
 # Essential:	 luci-app-ddns ddns-scripts-cloudflare curl ip-full adguardhome -dnsproxy 
 # Multi WAN:	 luci-app-mwan3 
-# Full WiFi:	 -wpad-basic-mbedtls wpad-mbedtls luci-app-usteer 
+# Full WiFi:	 -wpad-basic-mbedtls wpad-mbedtls luci-app-usteer luci-proto-batman-adv 
 # WireGuard:	 luci-proto-wireguard 
 # MBIM modem:	 luci-proto-modemmanager kmod-usb-net-cdc-mbim 
 # Tethering:	 kmod-usb-net-rndis kmod-usb-net-cdc-ncm kmod-usb-net-ipheth 
-# Optional:	 zram-swap luci-ssl luci-app-commands ip-bridge
+# Optional:	 zram-swap luci-ssl luci-app-commands ip-bridge umdns
 
 # === System ===
-HOST_NAME=""		# Default to WrtNova
+HOST_NAME=""		# Default: WrtNova
 ROOT_PASSWD=""
 SSH_PUBLIC_KEY=""
 SSH_PASSWD_AUTH=""	# off = disable password login (SSH keys auth only)
@@ -27,57 +26,63 @@ ZONE_NAME=""
 TIME_ZONE=""
 
 # === WiFi ===
-DEFAULT_WIFI_PASSWD=""	# Default to 12345678
+DEFAULT_WIFI_PASSWD=""	# Default: 12345678
 WIFI_COUNTRY_CODE=
-WIFI_DENSE=		# Set 1 to optimize roaming and steering for high-interference areas
+WIFI_DENSE=		# 1 = optimize roaming and steering for high-interference areas
 
-LAN_WIFI_SSID=""	# Default to HOST_NAME
+LAN_WIFI_SSID=""	# Default: HOST_NAME
 LAN_WIFI_PASSWD=""
 
-GUEST_WIFI_SSID=""	# Default to HOST_NAME_Guest
+GUEST_WIFI_SSID=""	# Default: HOST_NAME_Guest
 GUEST_WIFI_PASSWD=""
 
-IOT_WIFI_SSID=""	# Default to HOST_NAME_IoT
+IOT_WIFI_SSID=""	# Default: HOST_NAME_IoT
 IOT_WIFI_PASSWD=""
 
-LAN_WG_WIFI_SSID=""	# Default to HOST_NAME_VPN
+LAN_WG_WIFI_SSID=""	# Default: HOST_NAME_VPN
 LAN_WG_WIFI_PASSWD=""
 
-# Only if you know what you’re doing
+# NOTE: Wired backhaul is always better when feasible
+WIRELESS_MESH=		# 1 = use wireless mesh backhaul (802.11s)
+BATMAN_ADV=		# 1 = use batman-adv on top of 802.11s meshpoint
+MESH_ID=
+MESH_PASSWD=""
+
+# NOTE: Only if you know what you’re doing
 WIFI_2G_CHANNEL=
 WIFI_5G_CHANNEL=
 WIFI_6G_CHANNEL=
 WIFI_LOG_LEVEL=
 
 # === Network ===
-DEFAULT_NET_PREFIX="192.168"
+BASE_NET_PREFIX="192.168"
 DEFAULT_SUBNET="/24"	# /24 to /22
 
-# Set to 1 to enable
+# 1 = enable guest network
 GUEST_ENABLE=1
 
-# Set to 1 to enable
+# 1 = enable IoT network
 IOT_ENABLE=
 IOT_INTERNET=
 
-# Default to DEFAULT_NET_PREFIX
-LAN_NET_PREFIX=
-GUEST_NET_PREFIX=
-IOT_NET_PREFIX=
-LAN_WG_NET_PREFIX=
+# Default: BASE_NET_PREFIX
+LAN_BASE_PREFIX=
+GUEST_BASE_PREFIX=
+IOT_BASE_PREFIX=
+LAN_WG_BASE_PREFIX=
 
-# Default to DEFAULT_SUBNET
+# Default: DEFAULT_SUBNET
 LAN_SUBNET=
 GUEST_SUBNET=
 IOT_SUBNET=
 LAN_WG_SUBNET=
 
-LAN_VLAN_ID=		# Default 1
-GUEST_VLAN_ID=		# Default 5
-IOT_VLAN_ID=		# Default 10
-LAN_WG_VLAN_ID=		# Default 15
-WAN_VLAN_ID=		# Default 20
-WAN_B_VLAN_ID=		# Default 21
+LAN_VLAN_ID=		# Default: 1
+GUEST_VLAN_ID=		# Default: 5
+IOT_VLAN_ID=		# Default: 10
+LAN_WG_VLAN_ID=		# Default: 15
+WAN_VLAN_ID=		# Default: 20
+WAN_B_VLAN_ID=		# Default: 21
 
 # Additional VLANs to trunk through this device (e.g. "25 30 40" or "30-50"), ranges must be low-high
 ADDITIONAL_VLAN_LIST=""
@@ -98,7 +103,7 @@ IPV6_SERVER_LIST="
 "
 
 # === DDNS ===
-DDNS_ENABLE=		# Set 1 to enable Cloudflare DDNS
+DDNS_ENABLE=		# 1 = enable Cloudflare DDNS
 LOOKUP_HOSTNAME=	# e.g. ddns.example.com
 CLOUDFLARE_API_KEY=
 
@@ -106,14 +111,14 @@ CLOUDFLARE_API_KEY=
 PPPOE_USERNAME=""	# Set this to use PPPoE instead of DHCP on the wan interface
 PPPOE_PASSWD=""
 
-WAN_IS_TAGGED=		# Set 1 to tag VLAN on wan interface
+WAN_IS_TAGGED=		# 1 = tag WAN_VLAN_ID on wan interface
 WAN_MAC_ADDR=
-BRIDGE_WAN_PORT=	# Set 1 to force non-DSA wan port into br-vlan bridge
+BRIDGE_WAN_PORT=	# 1 = force non-DSA wan port into br-vlan bridge
 
 WAN_B_ENABLE=
 
 # WireGuard Client
-WG_ENABLE=		# Set 1 to enable WireGuard Client
+WG_ENABLE=		# 1 = enable WireGuard Client
 WG_IFACE=		# e.g. vpn, wg0, ...
 WG_PRIVATE_KEY=
 WG_IPV4=
@@ -121,15 +126,15 @@ WG_IPV6=
 PEER_PUBLIC_KEY=
 PRESHARED_KEY=
 ENDPOINT=
-ENDPOINT_PORT=		# Default 51820
-ALLOWED_IPS=""		# Default "0.0.0.0/0 ::/0"
+ENDPOINT_PORT=		# Default: 51820
+ALLOWED_IPS=""		# Default: "0.0.0.0/0 ::/0"
 
-# Set 1 to enable MBIM modem failover (prefill path is MT7621-specific), this can change later in LuCI)
-WWAN_ENABLE=
-WWAN_PATH="/sys/devices/platform/1e1c0000.xhci/usb2/2-1"
-WWAN_APN="internet"
+# 1 = enable MBIM modem failover (prefill path is MT7621-specific), this can change later in LuCI)
+CELLULAR_MODEM=
+MODEM_PATH="/sys/devices/platform/1e1c0000.xhci/usb2/2-1"
+MODEM_APN="internet"
 
-# Set 1 to enable USB tethering failover (Android/iPhone)
+# 1 = enable USB tethering failover (Android/iPhone)
 USB_TETHERING=
 
 # === DHCP ===
@@ -138,23 +143,23 @@ LAN_DHCP_START=
 GUEST_DHCP_START=
 
 # === Misc ===
-AP_MODE=		# Set 1 to enable AP mode (disable DHCP, device acts as access point + managed switch)
+AP_MODE=		# 1 = enable AP mode (disable DHCP, device acts as access point + managed switch)
 AP_INDEX=2		# AP management IP last octet (2-99)
 
-# Set 1 to enable Routing/NAT Offloading
-HARDWARE_OFFLOAD=	# Do not set if using QoS/SQM
+# 1 = enable Routing/NAT Offloading
+HARDWARE_OFFLOAD=	# NOTE: Do not set if using QoS/SQM
 SOFTWARE_OFFLOAD=
 
-# Set 1 to block DNS over TLS/QUIC
+# 1 = block DNS over TLS/QUIC
 BLOCK_DOT_DOQ=
 
 # AdGuardHome admin passwd in bcrypt hash (default 12345678)
 ADGUARD_PASSWD=''
 
-# Set 1 to log to /root/99-asu-defaults.log
+# 1 = log to /root/99-asu-defaults.log
 LOG=
 
-# Set 1 to enable quarterly auto-reboot at 3:30 AM
+# 1 = enable quarterly auto-reboot at 3:30 AM
 QUARTERLY_REBOOT=
 
 # ===================
@@ -201,8 +206,12 @@ _uci() {
 }
 
 has_pkg() {
-	ls /*/apk/*/*"${1}"*.list 2>/dev/null ||
-	ls /*/*/opkg/*/*"${1}"*.list 2>/dev/null
+	local pkg
+	for pkg; do
+		ls /*/apk/*/*"${pkg}"*.list >/dev/null 2>&1 && return 0
+		ls /*/*/opkg/*/*"${pkg}"*.list >/dev/null 2>&1 && return 0
+	done
+	return 1
 }
 
 duid_gen() {
@@ -280,10 +289,11 @@ EOF
 OS_VERSION=$(. /etc/os-release; echo "${VERSION%%.*}")
 [ "$OS_VERSION" = 25 ] && ZONE_NAME="${ZONE_NAME// /_}"
 
-HOST_NAME="${HOST_NAME:-WrtNova}${AP_MODE:+-${AP_INDEX:-2}}"
+HOST_NAME="${HOST_NAME:-WrtNova}"
 
 _uci system "" "@system[0]" \
-	hostname="$HOST_NAME" "${ZONE_NAME:+zonename=$ZONE_NAME}" "${TIME_ZONE:+timezone=$TIME_ZONE}"
+	hostname="${HOST_NAME}${AP_MODE:+-${AP_INDEX:=2}}" \
+	"${ZONE_NAME:+zonename=$ZONE_NAME}" "${TIME_ZONE:+timezone=$TIME_ZONE}"
 
 uci set uhttpd.main.redirect_https=1
 
@@ -309,15 +319,15 @@ EOF
 	[ -x /usr/bin/wg ] || WG_ENABLE=
 }
 
-WG_IFACE=${WG_IFACE:-vpn}
+wg_iface=${WG_IFACE:-vpn}
 [ "$WG_ENABLE" = 1 ] && [ "$AP_MODE" != 1 ] && {
 	echo "*/2 * * * * wireguard_watchdog" >> /etc/crontabs/root
-	echo "*/10 * * * * wg-check $WG_IFACE" >> /etc/crontabs/root
+	echo "*/10 * * * * wg-check $wg_iface" >> /etc/crontabs/root
 	_uci system "" "@system[0]" cronloglevel=9
 
-	cat > /etc/hotplug.d/iface/98-wg-"${WG_IFACE}" <<-EOF
+	cat > /etc/hotplug.d/iface/98-wg-"${wg_iface}" <<-EOF
 	[ ifup = "\$ACTION" ] || exit 0
-	[ $WG_IFACE = "\$INTERFACE" ] || exit 0
+	[ $wg_iface = "\$INTERFACE" ] || exit 0
 
 	[ -x /usr/sbin/mwan3 ] && {
 		ip -6 ru | grep '^999:' ||
@@ -325,7 +335,7 @@ WG_IFACE=${WG_IFACE:-vpn}
 	}
 
 	sleep 2
-	wg-check $WG_IFACE
+	wg-check $wg_iface
 	EOF
 }
 
@@ -333,7 +343,7 @@ cat > /sbin/wg-check <<'EOF'
 #!/bin/sh
 IFACE="$1"
 PING_IP="${2:-9.9.9.9}"
-PING_IP6="${3:-2620:fe::9}"
+PING_IP6="${3:-2600::}"
 [ -z "$IFACE" ] && exit 0
 [ -d /sys/class/net/"$IFACE" ] || exit 0
 
@@ -361,41 +371,52 @@ setup_radio() {
 }
 
 add_wifi_iface() {
-	local name="${1}_${2}" ft_psk
+	local dev="$1" mode="$2" ssid="$3" key="$4" net="$5" enc="$6"
 
-	_uci wireless wifi-iface "$name" \
-		device="$2" mode="$3" ssid="$4" key="$5" network="$6" encryption="$7"
+	set -- device="$dev" mode="$mode" ssid="$ssid" key="$key" network="$net" encryption="$enc"
 
-	[ "$1" != iot ] && {
-		if has_pkg wpad-mbedtls || has_pkg wpad-openssl || has_pkg wpad-wolfssl; then
-			[ "$7" = psk2 ] && ft_psk=ft_psk_generate_local=1
+	[ "$mode" = mesh ] && set -- "$@" -ssid mesh_id="$ssid" ifname="$net" "${BATMAN_ADV:+mesh_fwding=0}"
 
-			_uci wireless wifi-iface "$name" \
-				ieee80211r=1 ft_over_ds=0 "$ft_psk" ieee80211k=1 bss_transition=1
-		fi
+	[ "$mode" = ap ] && [ "$net" != iot ] && has_pkg wpad-mbed wpad-open wpad-wolf && {
+		[ "$enc" = psk2 ] && set -- "$@" ft_psk_generate_local=1
+		set -- "$@" ieee80211r=1 ft_over_ds=0 ieee80211k=1 bss_transition=1
 	}
+
+	_uci wireless wifi-iface "${dev}_${net}" "$@"
 }
 
-DEFAULT_WIFI_PASSWD="${DEFAULT_WIFI_PASSWD:-12345678}"
-LAN_WIFI_SSID="${LAN_WIFI_SSID:-$HOST_NAME}"
-LAN_WIFI_PASSWD="${LAN_WIFI_PASSWD:-$DEFAULT_WIFI_PASSWD}"
-GUEST_WIFI_SSID="${GUEST_WIFI_SSID:-${HOST_NAME}_Guest}"
-GUEST_WIFI_PASSWD="${GUEST_WIFI_PASSWD:-$DEFAULT_WIFI_PASSWD}"
-IOT_WIFI_SSID="${IOT_WIFI_SSID:-${HOST_NAME}_IoT}"
-IOT_WIFI_PASSWD="${IOT_WIFI_PASSWD:-$DEFAULT_WIFI_PASSWD}"
-LAN_WG_WIFI_SSID="${LAN_WG_WIFI_SSID:-${HOST_NAME}_VPN}"
-LAN_WG_WIFI_PASSWD="${LAN_WG_WIFI_PASSWD:-$DEFAULT_WIFI_PASSWD}"
+def_pass="${DEFAULT_WIFI_PASSWD:-12345678}"
+lan_ssid="${LAN_WIFI_SSID:-$HOST_NAME}"
+lan_pass="${LAN_WIFI_PASSWD:-$def_pass}"
+guest_ssid="${GUEST_WIFI_SSID:-${HOST_NAME}_Guest}"
+guest_pass="${GUEST_WIFI_PASSWD:-$def_pass}"
+iot_ssid="${IOT_WIFI_SSID:-${HOST_NAME}_IoT}"
+iot_pass="${IOT_WIFI_PASSWD:-$def_pass}"
+lan_wg_ssid="${LAN_WG_WIFI_SSID:-${HOST_NAME}_VPN}"
+lan_wg_pass="${LAN_WG_WIFI_PASSWD:-$def_pass}"
+mesh_id="${MESH_ID:-mesh0_5ghz}"
+mesh_pass="${MESH_PASSWD:-$def_pass}"
 
-# Fields: name|mode|ssid|key|network|bands|enabled|enc_override
+uci -q get wireless || {
+	no_wifi=1
+	WIRELESS_MESH=
+	BATMAN_ADV=
+}
+
+has_pkg wpad-mbed wpad-open wpad-wolf wpad-mesh || WIRELESS_MESH=
+has_pkg luci-proto-batman || BATMAN_ADV=
+
+# Fields: mode|ssid|key|network|bands|enabled|enc_override
 # - bands	: space-separated subset of "2g 5g 6g"
 # - enabled	: 1 = create, 0 = skip
 # - enc_override : empty = use band default
 
 wifi_networks="
-lan|ap|$LAN_WIFI_SSID|$LAN_WIFI_PASSWD|lan|2g 5g 6g|1|
-guest|ap|$GUEST_WIFI_SSID|$GUEST_WIFI_PASSWD|guest|2g 5g 6g|${GUEST_ENABLE:-0}|
-iot|ap|$IOT_WIFI_SSID|$IOT_WIFI_PASSWD|iot|2g|${IOT_ENABLE:-0}|
-lan_wg|ap|$LAN_WG_WIFI_SSID|$LAN_WG_WIFI_PASSWD|lan_${WG_IFACE}|2g 5g 6g|${WG_ENABLE:-0}|
+ap|$lan_ssid|$lan_pass|lan|2g 5g 6g|1|
+ap|$guest_ssid|$guest_pass|guest|2g 5g 6g|${GUEST_ENABLE:-0}|
+ap|$iot_ssid|$iot_pass|iot|2g|${IOT_ENABLE:-0}|
+ap|$lan_wg_ssid|$lan_wg_pass|lan_${wg_iface}|2g 5g 6g|${WG_ENABLE:-0}|
+mesh|$mesh_id|$mesh_pass|${BATMAN_ADV:+bat0_}mesh0|5g|${WIRELESS_MESH:-0}|sae
 "
 
 while uci -q del wireless.@wifi-iface[0]; do :; done
@@ -412,10 +433,10 @@ for radio in radio0 radio1 radio2 radio3; do
 
 	setup_radio "$radio" "$channel"
 
-	while IFS='|' read -r name mode ssid key network bands enabled enc_over; do
-		[ -n "$name" ] && [ "$enabled" = 1 ] && {
+	while IFS='|' read -r mode ssid key network bands enabled enc_over; do
+		[ -n "$mode" ] && [ "$enabled" = 1 ] && {
 			case " $bands " in *" $band "*) ;; *) continue ;; esac
-			add_wifi_iface "$name" "$radio" "$mode" "$ssid" "$key" "$network" "${enc_over:-$enc}"
+			add_wifi_iface "$radio" "$mode" "$ssid" "$key" "$network" "${enc_over:-$enc}"
 		}
 	done <<-EOF
 	$wifi_networks
@@ -425,25 +446,23 @@ done
 # https://openwrt.org/docs/guide-user/network/wifi/usteer
 # Dense mode tightens all thresholds for high-interference environments
 [ -x /sbin/usteerd ] && {
-	if uci -q get wireless.radio0; then
-		_uci usteer "" "@usteer[0]" \
-			roam_scan_snr='-68' \
-			signal_diff_threshold='8' \
-			roam_trigger_snr='-72'
+	_uci usteer "" "@usteer[0]" \
+		roam_scan_snr='-68' \
+		signal_diff_threshold='8' \
+		roam_trigger_snr='-72'
 
-		[ "$WIFI_DENSE" = 1 ] && {
-			_uci usteer "" "@usteer[0]" \
-				roam_scan_snr='-60' \
-				signal_diff_threshold='6' \
-				band_steering_interval='30000' \
-				band_steering_min_snr='-50' \
-				roam_trigger_snr='-65' \
-				roam_kick_delay='3000' \
-				min_snr='-80'
-		}
-	else
-		/etc/init.d/usteer disable
-	fi
+	[ "$WIFI_DENSE" = 1 ] && {
+		_uci usteer "" "@usteer[0]" \
+			roam_scan_snr='-60' \
+			signal_diff_threshold='6' \
+			band_steering_interval='30000' \
+			band_steering_min_snr='-50' \
+			roam_trigger_snr='-65' \
+			roam_kick_delay='3000' \
+			min_snr='-80'
+	}
+
+	[ "$no_wifi" = 1 ] && /etc/init.d/usteer disable
 }
 
 # === Network ===
@@ -455,9 +474,13 @@ detect_hw() {
 
 add_bridge_vlan() {
 	local vlan_id="$1" ports="$2" iface="$3"
-	
-	_uci network bridge-vlan "" \
-		device=br-vlan vlan="$vlan_id" ports="$ports" local=0 "${iface:+-local}"
+
+	_uci network bridge-vlan "vlan_${vlan_id}" \
+		device=br-vlan vlan="$vlan_id" local=0 "${iface:+-local}"
+
+	for p in $ports; do
+		uci add_list "network.vlan_${vlan_id}.ports=$p"
+	done
 
 	[ -n "$iface" ] && uci set "network.${iface}.device=br-vlan.${vlan_id}"
 }
@@ -472,14 +495,20 @@ add_bridges() {
 }
 
 add_switch_vlan() {
-	local vlan_id="$1" ports="$2" iface="$3"
+	local vlan_id="$1" ports="$2" iface="$3" sfx
 
 	vlan_idx=$((vlan_idx + 1))
 
 	_uci network switch_vlan "" \
 		device="$switch_dev" vlan="$vlan_idx" ports="$ports" "${sw_has_vid:+vid=$vlan_id}"
 
-	[ -n "$iface" ] && uci add_list "network.br_${iface}.ports=${lan_eth}.${vlan_id}"
+	[ -z "$iface" ] && return
+	uci add_list "network.br_${iface}.ports=${lan_eth}.${vlan_id}"
+
+	[ "$WIRELESS_MESH" = 1 ] && [ "$BATMAN_ADV" != 1 ] && {
+		[ "$vlan_id" = "$lan_vid" ] || sfx=".${vlan_id}"
+		uci add_list "network.br_${iface}.ports=mesh0${sfx}"
+	}
 }
 
 expand_vlan() {
@@ -529,12 +558,19 @@ resolve_vlans() {
 	[ "$LOG" = 1 ] && set -x
 }
 
-resolve_vlans "LAN_VLAN_ID:1:255 \
-		GUEST_VLAN_ID:5:255 \
-		IOT_VLAN_ID:10:255 \
-		LAN_WG_VLAN_ID:15:255 \
-		WAN_VLAN_ID:20:4094 \
-		WAN_B_VLAN_ID:21:4094"
+lan_vid=$LAN_VLAN_ID
+guest_vid=$GUEST_VLAN_ID
+iot_vid=$IOT_VLAN_ID
+wg_vid=$LAN_WG_VLAN_ID
+wan_vid=$WAN_VLAN_ID
+wanb_vid=$WAN_B_VLAN_ID
+
+resolve_vlans "lan_vid:1:255 \
+		guest_vid:5:255 \
+		iot_vid:10:255 \
+		wg_vid:15:255 \
+		wan_vid:20:4094 \
+		wanb_vid:21:4094"
 
 hw_type=$(detect_hw)
 [ "$hw_type" = swconfig ] && {
@@ -542,18 +578,18 @@ hw_type=$(detect_hw)
 	switch_dev="$(uci -q get network.@switch_vlan[0].device)"
 
 	# swconfig uses vlan= as a VLAN table index. On chips with vid attribute
-	# support (mt7620, mt7628, etc.), vid= sets the actual 802.1Q tag.
+	# support (e.g. mt7620, mt7628, etc.), vid= sets the actual 802.1Q tag.
 	# Without vid support, netifd falls back to vlan= as the tag, so VLAN IDs
 	# must be sequential to match the VLAN table index (see add_switch_vlan()).
 	swconfig dev "$switch_dev" help | grep -q 'Attribute .*: vid' || {
 		sw_has_vid=
 
-		LAN_VLAN_ID=1
-		GUEST_VLAN_ID=2
-		IOT_VLAN_ID=3
-		LAN_WG_VLAN_ID=4
-		WAN_VLAN_ID=5
-		WAN_B_VLAN_ID=6
+		lan_vid=1
+		guest_vid=2
+		iot_vid=3
+		wg_vid=4
+		wan_vid=5
+		wanb_vid=6
 
 		LAN_SUBNET=/24
 		GUEST_SUBNET=/24
@@ -562,27 +598,29 @@ hw_type=$(detect_hw)
 	}
 }
 
-DEFAULT_NET_PREFIX=${DEFAULT_NET_PREFIX:-192.168}
-DEFAULT_SUBNET=${DEFAULT_SUBNET:-/24}
-LAN_IP_PREFIX=${LAN_NET_PREFIX:-$DEFAULT_NET_PREFIX}.${LAN_VLAN_ID}
-GUEST_IP_PREFIX=${GUEST_NET_PREFIX:-$DEFAULT_NET_PREFIX}.${GUEST_VLAN_ID}
-IOT_IP_PREFIX=${IOT_NET_PREFIX:-$DEFAULT_NET_PREFIX}.${IOT_VLAN_ID}
-LAN_WG_IP_PREFIX=${LAN_WG_NET_PREFIX:-$DEFAULT_NET_PREFIX}.${LAN_WG_VLAN_ID}
-LAN_SUBNET=${LAN_SUBNET:-$DEFAULT_SUBNET}
-GUEST_SUBNET=${GUEST_SUBNET:-$DEFAULT_SUBNET}
-IOT_SUBNET=${IOT_SUBNET:-$DEFAULT_SUBNET}
-LAN_WG_SUBNET=${LAN_WG_SUBNET:-$DEFAULT_SUBNET}
+base_pfx=${BASE_NET_PREFIX:-192.168}
+def_subnet=${DEFAULT_SUBNET:-/24}
+
+lan_net_pfx=${LAN_BASE_PREFIX:-$base_pfx}.${lan_vid}
+guest_net_pfx=${GUEST_BASE_PREFIX:-$base_pfx}.${guest_vid}
+iot_net_pfx=${IOT_BASE_PREFIX:-$base_pfx}.${iot_vid}
+wg_net_pfx=${LAN_WG_BASE_PREFIX:-$base_pfx}.${wg_vid}
+
+lan_subnet=${LAN_SUBNET:-$def_subnet}
+guest_subnet=${GUEST_SUBNET:-$def_subnet}
+iot_subnet=${IOT_SUBNET:-$def_subnet}
+wg_subnet=${LAN_WG_SUBNET:-$def_subnet}
 
 [ "$GUEST_ENABLE" = 1 ] && \
-	_uci network interface guest proto=static +ipaddr="${GUEST_IP_PREFIX}.1${GUEST_SUBNET}"
+	_uci network interface guest proto=static +ipaddr="${guest_net_pfx}.1${guest_subnet}"
 
 [ "$IOT_ENABLE" = 1 ] && \
-	_uci network interface iot proto=static +ipaddr="${IOT_IP_PREFIX}.1${IOT_SUBNET}"
+	_uci network interface iot proto=static +ipaddr="${iot_net_pfx}.1${iot_subnet}"
 
-has_pkg modemmanager || WWAN_ENABLE=
+has_pkg modemmanager || CELLULAR_MODEM=
 
 _uci network interface lan -netmask -ipaddr \
-	+ipaddr="${LAN_IP_PREFIX}.1${LAN_SUBNET}" +ip6class=wan_6 "${WWAN_ENABLE:++ip6class=wwan0_6}"
+	+ipaddr="${lan_net_pfx}.1${lan_subnet}" +ip6class=wan_6 "${CELLULAR_MODEM:++ip6class=cellular_6}"
 
 uci -q get network.wan || {
 	_uci network interface wan proto=dhcp
@@ -601,21 +639,21 @@ _uci network interface wan6 device=@wan ~wan6=wan_6
 	_uci network interface wanb_6 proto=dhcpv6 device=@wanb "${no_mwan3:+metric=2}"
 }
 
-[ "$WWAN_ENABLE" = 1 ] && \
-	_uci network interface wwan0 proto=modemmanager \
-		iptype=ipv4v6 device="$WWAN_PATH" apn="${WWAN_APN:-internet}" "${no_mwan3:+metric=3}"
+[ "$CELLULAR_MODEM" = 1 ] && \
+	_uci network interface cellular proto=modemmanager \
+		iptype=ipv4v6 device="$MODEM_PATH" apn="${MODEM_APN:-internet}" "${no_mwan3:+metric=3}"
 
 [ "$USB_TETHERING" = 1 ] && \
 	_uci network interface usb0 proto=dhcp device=usb0 "${no_mwan3:+metric=4}"
 
 [ "$WG_ENABLE" = 1 ] && {
-	_uci network interface "lan_${WG_IFACE}" proto=static \
-		+ipaddr="${LAN_WG_IP_PREFIX}.1${LAN_WG_SUBNET}" ip6assign=60 +ip6class=local ip6hint=10
+	_uci network interface "lan_${wg_iface}" proto=static \
+		+ipaddr="${wg_net_pfx}.1${wg_subnet}" ip6assign=60 +ip6class=local ip6hint=10
 
-	_uci firewall zone @zone[0] +network="lan_${WG_IFACE}" ~@zone[0]=lan
+	_uci firewall zone @zone[0] +network="lan_${wg_iface}" ~@zone[0]=lan
 
 	[ "$AP_MODE" != 1 ] && {
-		_uci network interface "${WG_IFACE}" proto=wireguard \
+		_uci network interface "${wg_iface}" proto=wireguard \
 			disabled=1 "${PEER_PUBLIC_KEY:+-disabled}" \
 			private_key="${WG_PRIVATE_KEY:-$(wg genkey)}" \
 			+addresses="${WG_IPV4:-172.16.0.2/32}" \
@@ -624,22 +662,22 @@ _uci network interface wan6 device=@wan ~wan6=wan_6
 
 		if [ "$no_mwan3" = 1 ]; then
 			for f in '' 6; do
-				_uci network rule$f "" in="lan_${WG_IFACE}" lookup=20 priority=990
-				_uci network rule$f "" in="lan_${WG_IFACE}" action=prohibit priority=991
+				_uci network rule$f "" in="lan_${wg_iface}" lookup=20 priority=990
+				_uci network rule$f "" in="lan_${wg_iface}" action=prohibit priority=991
 			done
 		else
 			# mwan3 already handles PBR and kill switch
-			_uci network interface "${WG_IFACE}" -ip4table -ip6table
+			_uci network interface "${wg_iface}" -ip4table -ip6table
 
 			# WG IPv6 anchor for mwan3
-			_uci network interface "${WG_IFACE}_6" proto=none device="@${WG_IFACE}"
+			_uci network interface "${wg_iface}_6" proto=none device="@${wg_iface}"
 
 			# Fix router IPv6 internet access
 			_uci network rule6 "" in=loopback lookup=2 priority=999
 		fi
 
 		[ -n "$PEER_PUBLIC_KEY" ] && {
-			_uci network "wireguard_${WG_IFACE}" "" \
+			_uci network "wireguard_${wg_iface}" "" \
 				public_key="$PEER_PUBLIC_KEY" \
 				preshared_key="$PRESHARED_KEY" \
 				endpoint_host="${ENDPOINT:-1.2.3.4}" \
@@ -652,7 +690,6 @@ _uci network interface wan6 device=@wan ~wan6=wan_6
 
 lan_ports="$(uci -q get network.@device[0].ports)"
 wan_port="$(uci -q get network.wan.device)"
-all_ports="$lan_ports${wan_port:+ $wan_port}"
 
 # DSA/x86/SBC: always use bridge VLAN filtering
 use_bridge_vlan=1
@@ -666,10 +703,7 @@ bridge_wan_port=1
 
 if [ "$hw_type" = "dsa" ] && [ "$AP_MODE" != 1 ] && [ "$BRIDGE_WAN_PORT" != 1 ]; then
 	# Avoid adding non-DSA WAN port to br-vlan due to performance penalty.
-	grep -sq DEVTYPE=dsa /sys/class/net/"${wan_port}"/uevent || {
-		all_ports="$lan_ports"
-		bridge_wan_port=
-	}
+	grep -sq DEVTYPE=dsa /sys/class/net/"${wan_port}"/uevent || bridge_wan_port=
 
 elif [ "$hw_type" = "swconfig" ]; then
 	use_bridge_vlan=
@@ -683,12 +717,14 @@ fi
 # AP mode: all ports are untagged on the LAN VLAN and tagged on all other VLANs.
 if [ "$use_bridge_vlan" = 1 ]; then
 	[ "$AP_MODE" = 1 ] && [ "$wan_port" = br-wan ] && {
-		all_ports="$lan_ports $(uci -q get network.@device[1].ports)"
+		wan_port="$(uci -q get network.@device[1].ports)"
 		uci del network.@device[1]
 	}
 
+	[ "$WIRELESS_MESH" = 1 ] && [ "$BATMAN_ADV" != 1 ] && lan_ports="$lan_ports mesh0"
+
 	src_ports="$lan_ports"
-	[ "$AP_MODE" = 1 ] && src_ports="$all_ports"
+	[ "$AP_MODE" = 1 ] && src_ports="$lan_ports $wan_port"
 
 	for port in $src_ports; do
 		lan_vlan_ports="${lan_vlan_ports:+$lan_vlan_ports }$port:u*"
@@ -707,18 +743,18 @@ if [ "$use_bridge_vlan" = 1 ]; then
 		fi
 	}
 
-	_uci network device @device[0] name=br-vlan -ports
-	for p in $all_ports; do
+	_uci network device @device[0] name=br-vlan -ports "${WIRELESS_MESH:+stp=1}"
+	for p in $lan_ports ${bridge_wan_port:+$wan_port}; do
 		_uci network device @device[0] +ports="$p"
 	done
 
 	[ "$WAN_IS_TAGGED" = 1 ] && [ "$bridge_wan_port" != 1 ] && \
-		uci set network.wan.device="${wan_port}.${WAN_VLAN_ID}"
+		uci set network.wan.device="${wan_port}.${wan_vid}"
 
 	add_vlan() { add_bridge_vlan "$@"; }
 
 else
-	add_bridges lan ${GUEST_ENABLE:+guest} ${IOT_ENABLE:+iot} ${WG_ENABLE:+lan_${WG_IFACE}}
+	add_bridges lan ${GUEST_ENABLE:+guest} ${IOT_ENABLE:+iot} ${WG_ENABLE:+lan_${wg_iface}}
 
 	# switch_vlan[0] is LAN, and switch_vlan[1] is WAN (see config_generate and uci-defaults.sh)
 	for port in $(uci -q get network.@switch_vlan[0].ports); do
@@ -758,10 +794,10 @@ else
 	[ -n "$sw_wan_port" ] && [ "$WAN_IS_TAGGED" = 1 ] && wan_vlan_ports="$trunk_ports"
 
 	if [ "$WAN_IS_TAGGED" = 1 ] || [ -n "$sw_wan_port" ]; then
-		uci set network.wan.device="${wan_eth}.${WAN_VLAN_ID}"
+		uci set network.wan.device="${wan_eth}.${wan_vid}"
 	fi
 
-	[ "$WAN_B_ENABLE" = 1 ] && uci set network.wanb.device="${lan_eth}.${WAN_B_VLAN_ID}"
+	[ "$WAN_B_ENABLE" = 1 ] && uci set network.wanb.device="${lan_eth}.${wanb_vid}"
 
 	uci del network.@device[0]
 	while uci -q del network.@switch_vlan[0]; do :; done
@@ -769,12 +805,12 @@ else
 	add_vlan() { add_switch_vlan "$@"; }
 fi
 
-add_vlan "$LAN_VLAN_ID" "$lan_vlan_ports" lan
-[ "$GUEST_ENABLE" = 1 ] && add_vlan "$GUEST_VLAN_ID" "$trunk_ports" guest
-[ "$IOT_ENABLE" = 1 ] && add_vlan "$IOT_VLAN_ID" "$trunk_ports" iot
-[ "$WG_ENABLE" = 1 ] && add_vlan "$LAN_WG_VLAN_ID" "$trunk_ports" lan_"${WG_IFACE}"
-[ "$bridge_wan_port" = 1 ] && add_vlan "$WAN_VLAN_ID" "$wan_vlan_ports" "${src_ports:+wan}"
-[ "$WAN_B_ENABLE" = 1 ] && add_vlan "$WAN_B_VLAN_ID" "$trunk_ports" "${src_ports:+wanb}"
+add_vlan "$lan_vid" "$lan_vlan_ports" lan
+[ "$GUEST_ENABLE" = 1 ] && add_vlan "$guest_vid" "$trunk_ports" guest
+[ "$IOT_ENABLE" = 1 ] && add_vlan "$iot_vid" "$trunk_ports" iot
+[ "$WG_ENABLE" = 1 ] && add_vlan "$wg_vid" "$trunk_ports" lan_"${wg_iface}"
+[ "$bridge_wan_port" = 1 ] && add_vlan "$wan_vid" "$wan_vlan_ports" "${src_ports:+wan}"
+[ "$WAN_B_ENABLE" = 1 ] && add_vlan "$wanb_vid" "$trunk_ports" "${src_ports:+wanb}"
 
 set +x
 for vid in $(expand_vlan "$ADDITIONAL_VLAN_LIST"); do
@@ -795,17 +831,38 @@ done >/dev/null
 	/etc/init.d/dnsmasq disable
 	/etc/init.d/odhcpd disable
 
-	for i in wan ${WAN_B_ENABLE:+wanb} ${WWAN_ENABLE:+wwan0} ${USB_TETHERING:+usb0}; do
+	for i in wan ${WAN_B_ENABLE:+wanb} ${CELLULAR_MODEM:+cellular} ${USB_TETHERING:+usb0}; do
 		uci set network."${i}".disabled=1
 	done
 
 	_uci network interface lan -ipaddr \
-		+ipaddr="${LAN_IP_PREFIX}.${AP_INDEX:-2}${LAN_SUBNET}" \
-		gateway="${LAN_IP_PREFIX}.1" dns="${LAN_IP_PREFIX}.1" metric=5
+		+ipaddr="${lan_net_pfx}.${AP_INDEX}${lan_subnet}" \
+		gateway="${lan_net_pfx}.1" dns="${lan_net_pfx}.1" metric=5
 
 	[ "$GUEST_ENABLE" = 1 ] && _uci network interface guest proto=none -ipaddr
 	[ "$IOT_ENABLE" = 1 ] && _uci network interface iot proto=none -ipaddr
-	[ "$WG_ENABLE" = 1 ] && _uci network interface lan_"${WG_IFACE}" proto=none -ipaddr -ip6assign
+	[ "$WG_ENABLE" = 1 ] && _uci network interface lan_"${wg_iface}" proto=none -ipaddr -ip6assign
+}
+
+# === batman-adv ===
+[ "$WIRELESS_MESH" = 1 ] && [ "$BATMAN_ADV" = 1 ] && {
+	_uci network interface bat0 proto=batadv aggregated_ogms=1 bridge_loop_avoidance=1
+	_uci network interface bat0_mesh0 proto=batadv_hardif mtu=2304 master=bat0
+
+	set --	lan $lan_vid \
+		${GUEST_ENABLE:+guest $guest_vid} \
+		${IOT_ENABLE:+iot $iot_vid} \
+		${WG_ENABLE:+lan_${wg_iface} $wg_vid}
+
+	while [ $# -ge 2 ]; do
+		if [ "$use_bridge_vlan" = 1 ]; then
+			uci add_list "network.@device[0].ports=bat0.$2"
+			uci add_list "network.vlan_${2}.ports=bat0.${2}:u*"
+		else
+			uci add_list "network.br_${1}.ports=bat0.$2"
+		fi
+		shift 2
+	done
 }
 
 # === mwan3 ===
@@ -821,7 +878,7 @@ WEIGHT=${4:-1}
 LOAD_BALANCED=${5:-1}
 TRACK_IP=${6:-1.1.1.1}
 NAME="${IFACE}_m${METRIC}_w${WEIGHT}"
-[ "$FAMILY" = ipv6 ] && TRACK_IP=${6:-2620:fe::fe}
+[ "$FAMILY" = ipv6 ] && TRACK_IP=${6:-2600::}
 
 [ -z "$IFACE" ] && {
 	cat <<-USAGE
@@ -900,20 +957,20 @@ mwan3-iface-add wan_6 ipv6
 	mwan3-iface-add wanb_6 ipv6
 }
 
-[ "$WWAN_ENABLE" = 1 ] && mwan3-iface-add wwan0 "" 2 2
+[ "$CELLULAR_MODEM" = 1 ] && mwan3-iface-add cellular "" 2 2
 [ "$USB_TETHERING" = 1 ] && mwan3-iface-add usb0 "" 2 2
 
-[ "$WG_ENABLE" = 1 ] && [ -z "$no_mwan3" ] && {
-	mwan3-iface-add "${WG_IFACE}" "" 1 1 0
-	mwan3-iface-add "${WG_IFACE}_6" ipv6 1 1 0
+[ "$WG_ENABLE" = 1 ] && [ -z "$no_mwan3" ] && [ "$AP_MODE" != 1 ] && {
+	mwan3-iface-add "${wg_iface}" "" 1 1 0
+	mwan3-iface-add "${wg_iface}_6" ipv6 1 1 0
 
 	ula_prefix="$(uci -q get network.globals.ula_prefix)"
 
-	_uci mwan3 rule "lan_${WG_IFACE:0:5}_ipv4" \
-		src_ip="${LAN_WG_IP_PREFIX}.0${LAN_WG_SUBNET}" use_policy="${WG_IFACE}_only" @2
+	_uci mwan3 rule "lan_${wg_iface:0:5}_ipv4" \
+		src_ip="${wg_net_pfx}.0${wg_subnet}" use_policy="${wg_iface}_only" @2
 
-	_uci mwan3 rule "lan_${WG_IFACE:0:5}_ipv6" \
-		src_ip="${ula_prefix%::*}:10::/60" use_policy="${WG_IFACE}_only" @3
+	_uci mwan3 rule "lan_${wg_iface:0:5}_ipv6" \
+		src_ip="${ula_prefix%::*}:10::/60" use_policy="${wg_iface}_only" @3
 }
 
 [ "$AP_MODE" = 1 ] && [ -x /usr/sbin/mwan3 ] && /etc/init.d/mwan3 disable
@@ -978,7 +1035,7 @@ EOF
 chmod +x /sbin/dhcp-instance-add
 
 setup_dnsmasq_upstream() {
-	local ifaces="${WG_ENABLE:+lan_${WG_IFACE}} ${GUEST_ENABLE:+guest} ${IOT_ENABLE:+iot}"
+	local ifaces="${WG_ENABLE:+lan_${wg_iface}} ${GUEST_ENABLE:+guest} ${IOT_ENABLE:+iot}"
 	for iface in lan $ifaces; do
 		[ -z "$iface" ] && continue
 		_uci dhcp dnsmasq "${iface}_dns" \
@@ -990,27 +1047,27 @@ while uci -q del dhcp.@dnsmasq[0]; do :; done
 while uci -q del dhcp.@dhcp[0]; do :; done
 IPV6_LINK_LOCAL=$(ip l s eth0 up && ip -6 a s dev eth0 | grep -o 'fe80[^/]*')
 
-dhcp-instance-add lan 24h lan lan 1 "$LAN_DHCP_START"
-uci del dhcp.lan_dns.notinterface
-
 [ "$GUEST_ENABLE" = 1 ] && dhcp-instance-add guest 1h "" "" 0 "$GUEST_DHCP_START"
 
 [ "$IOT_ENABLE" = 1 ] && dhcp-instance-add iot "" "" "" 0
 
 [ "$WG_ENABLE" = 1 ] && {
-	_uci dhcp dnsmasq lan_dns +rebind_domain=lan +server="/${WG_IFACE}.lan/${LAN_WG_IP_PREFIX}.1"
-
-	dhcp-instance-add "lan_${WG_IFACE}" 24h "${WG_IFACE}.lan"
-
-	_uci dhcp dnsmasq "lan_${WG_IFACE}_dns" +rebind_domain=lan +server=/lan/127.0.0.1
+	dhcp-instance-add "lan_${wg_iface}" 24h "${wg_iface}.lan"
+	_uci dhcp dnsmasq "lan_${wg_iface}_dns" +rebind_domain=lan +server=/lan/127.0.0.1
 }
+
+dhcp-instance-add lan 24h lan lan 1 "$LAN_DHCP_START"
+uci del dhcp.lan_dns.notinterface
+
+[ "$WG_ENABLE" = 1 ] && \
+	_uci dhcp dnsmasq lan_dns +rebind_domain=lan +server="/${wg_iface}.lan/${wg_net_pfx}.1"
 
 _uci system timeserver ntp -server \
 	enable_server=1 +server=time1.google.com +server=time2.google.com +server=time.cloudflare.com
 
 cat >> /etc/hosts << EOF
 
-$IPV6_LINK_LOCAL	$HOST_NAME
+$IPV6_LINK_LOCAL	"${HOST_NAME}${AP_MODE:+-$AP_INDEX}"
 
 216.239.35.0		time1.google.com
 216.239.35.4		time2.google.com
@@ -1175,12 +1232,12 @@ fw_redirect_dns lan
 }
 
 [ "$AP_MODE" != 1 ] && [ "$WG_ENABLE" = 1 ] && {
-	fw_add_zone wan_nat6 "$WG_IFACE" 1 1 1
+	fw_add_zone wan_nat6 "$wg_iface" 1 1 1
 	fw_add_forwarding lan wan_nat6
 }
 
 _uci firewall zone @zone[1] ~@zone[1]=wan ^network=wan6
-for i in wan_6 ${WAN_B_ENABLE:+wanb wanb_6} ${WWAN_ENABLE:+wwan0} ${USB_TETHERING:+usb0}; do
+for i in wan_6 ${WAN_B_ENABLE:+wanb wanb_6} ${CELLULAR_MODEM:+cellular} ${USB_TETHERING:+usb0}; do
 	_uci firewall zone wan +network="$i"
 done
 
@@ -1256,14 +1313,14 @@ process_host_list() {
 		name="${hostname//-/_}"
 		uci -q get "dhcp.${name}" || {
 			_uci dhcp host "$name" \
-				name="$hostname" ip="${LAN_IP_PREFIX}.${octet}" \
+				name="$hostname" ip="${lan_net_pfx}.${octet}" \
 				hostid="$octet" duid="${duid:-$(duid_gen)}" dns=1
 		}
 
 		[ "$1" = ipv4 ] && {
 			for port in $ports; do
 				[ -z "$port" ] && continue
-				fw_port_forwarding "$hostname | $port" "${LAN_IP_PREFIX}.${octet}" "$port"
+				fw_port_forwarding "$hostname | $port" "${lan_net_pfx}.${octet}" "$port"
 			done
 		}
 
