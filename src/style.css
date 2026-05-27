@@ -70,7 +70,7 @@
     line-height: 1.4;
     color: #71717a;
   }
-  .dark .form-help { color: #71717a; }
+  .dark .form-help { color: #a1a1aa; /* zinc-400: 6.91:1 on zinc-900, passes WCAG AA */ }
 
   /* ── Inputs ───────────────────────────────────────────────────── */
   .input-base {
@@ -313,7 +313,7 @@
   }
   .radio-seg input[type="radio"]:checked + span {
     background-color: #f6821f;
-    color: #ffffff;
+    color: #18181b; /* zinc-900: 7.12:1 on #f6821f — white was only 2.58:1 */
   }
   .radio-seg input[type="radio"]:focus-visible + span {
     outline: 2px solid #f6821f;
@@ -577,7 +577,7 @@
     color: #71717a;
     margin-bottom: 0.25rem;
   }
-  .dark .sub-section-title { color: #71717a; }
+  .dark .sub-section-title { color: #a1a1aa; /* zinc-400: 6.91:1 on zinc-900, passes WCAG AA */ }
 
   /* ── Inline checkbox (for table/misc) ────────────────────────── */
   .inline { display: flex; gap: 0.5rem; align-items: center; }
