@@ -220,7 +220,7 @@
                 </label>
               </div>
             </div>
-            <label class="toggle-label router-only">
+            <label class="toggle-label">
               <span class="toggle-wrap">
                 <input type="checkbox" id="WG_ENABLE" name="WG_ENABLE" value="1" class="toggle-input">
                 <span class="toggle-track"></span>
@@ -229,7 +229,8 @@
               <span class="toggle-text">WireGuard VPN network</span>
             </label>
           </div>
-          <p class="form-help mt-2">WireGuard VPN network creates a VLAN, a WiFi SSID, and activates the WireGuard client section. Leave WG fields blank to auto-register Cloudflare WARP.</p>
+          <p class="form-help mt-2 wg-help-router">WireGuard VPN network creates a VLAN, a WiFi SSID, and activates the WireGuard client section. Leave WG fields blank to auto-register Cloudflare WARP.</p>
+          <p class="form-help mt-2 wg-help-ap hidden">In AP mode, WireGuard VPN network creates the VLAN and WiFi SSID only — the AP trunks tagged traffic back to the main router. No WireGuard client config is needed here.</p>
         </div>
       </div>
     </details>

@@ -102,9 +102,16 @@
       const guest = ui.$('#GUEST_ENABLE').checked;
       ui.$$('.wifi-guest').forEach(el => el.classList.toggle('hidden', !guest));
 
-      const wg = ui.$('#WG_ENABLE').checked && !ap;
-      ui.$$('.wifi-wg').forEach(el => el.classList.toggle('hidden', !wg));
-      ui.$$('.wg-only').forEach(el => el.classList.toggle('hidden', !wg));
+      const wgEnabled = ui.$('#WG_ENABLE').checked;
+      // WiFi WG SSID row: visible whenever WG_ENABLE is on, regardless of mode.
+      // (AP mode still needs the SSID — it trunks WG-tagged traffic to the router.)
+      ui.$$('.wifi-wg').forEach(el => el.classList.toggle('hidden', !wgEnabled));
+      // WireGuard client card: router-only — AP trunks back, no client config needed.
+      const wgRouter = wgEnabled && !ap;
+      ui.$$('.wg-only').forEach(el => el.classList.toggle('hidden', !wgRouter));
+      // Help text: swap between router and AP explanation when WG_ENABLE is on.
+      ui.$$('.wg-help-router').forEach(el => el.classList.toggle('hidden', ap && wgEnabled));
+      ui.$$('.wg-help-ap').forEach(el => el.classList.toggle('hidden', !(ap && wgEnabled)));
 
       const hasKeys = ui.$('#SSH_PUBLIC_KEY').value.trim().length > 0;
       ui.$$('.ssh-pw-row').forEach(el => el.classList.toggle('hidden', !hasKeys));
