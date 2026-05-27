@@ -5,12 +5,12 @@ compatibility_flags = ["nodejs_compat"]
 
 # Cloudflare Pages build step — runs before the public/ directory is published.
 # Both CSS compilation and script embedding must complete before deploy.
-[build]
-command = "npm run build:css && node scripts/embed-wrtnova.mjs"
+#[build]
+#command = "npm run build:css && node scripts/embed-wrtnova.mjs"
 
 [vars]
 # ASU_URL = "https://sysupgrade.openwrt.org"  # uncomment to override; defaults to official ASU
 
 [[kv_namespaces]]
 binding = "wrtnova_kv"
-id = ""  # Set via `wrangler kv namespace create` per developer (see README.md)
+id = "8b7fded68a9f47698e73b6ca5e5306cb"  # Set via `wrangler kv namespace create` per developer (see README.md)

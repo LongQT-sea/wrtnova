@@ -1,4 +1,5 @@
-// DOM helpers: collapsibles, status bar, dynamic table rows, status dots, AP-mode gating.
+// DOM helpers: status bar, dynamic table rows, status dots, conditional visibility.
+// Native <details>/<summary> handles collapsible open/close — no custom logic needed.
 (function () {
   'use strict';
 
@@ -7,19 +8,6 @@
   // ---------------------------------------------------------------- shorthand
   ui.$  = (sel, root) => (root || document).querySelector(sel);
   ui.$$ = (sel, root) => Array.from((root || document).querySelectorAll(sel));
-
-  // ---------------------------------------------------- collapsible card cards
-  ui.initCollapsibles = function () {
-    ui.$$('.card-header').forEach(h => {
-      h.addEventListener('click', e => {
-        // ignore clicks on form controls inside header
-        if (e.target.closest('input, button, select, textarea, a')) return;
-        h.parentElement.classList.toggle('collapsed');
-        const chev = h.querySelector('.chev');
-        if (chev) chev.textContent = h.parentElement.classList.contains('collapsed') ? '▸' : '▾';
-      });
-    });
-  };
 
   // -------------------------------------------------------- section status dots
   // states: 'untouched' | 'touched' | 'valid'
@@ -65,18 +53,18 @@
     const tbody = document.querySelector('#' + kind + '-table tbody');
     const tr = document.createElement('tr');
     tr.innerHTML =
-      '<td><input type="text" data-col="host" placeholder="docker-host"></td>' +
-      '<td><input type="number" data-col="octet" min="2" max="254" placeholder="20"></td>' +
-      '<td><input type="text" data-col="ports" placeholder="80 443"></td>' +
-      '<td><button class="btn btn-icon" type="button" data-remove="1">×</button></td>';
+      '<td data-label="Hostname"><input type="text" data-col="host" class="input-base" placeholder="docker-host"></td>' +
+      '<td data-label="Last octet"><input type="number" data-col="octet" class="input-base" min="2" max="254" placeholder="20"></td>' +
+      '<td data-label="Ports"><input type="text" data-col="ports" class="input-base" placeholder="80 443"></td>' +
+      '<td><button class="btn btn-icon" type="button" data-remove="1" aria-label="Remove row">×</button></td>';
     tbody.appendChild(tr);
     tr.querySelector('[data-remove]').addEventListener('click', () => tr.remove());
     return tr;
   }
   ui.addRow = addRow;
   ui.initDynamicRows = function () {
-    addRow('portfwd'); addRow('portfwd');
-    addRow('ipv6');    addRow('ipv6');
+    addRow('portfwd');
+    addRow('ipv6');
     document.body.addEventListener('click', e => {
       const btn = e.target.closest('[data-add]');
       if (btn) addRow(btn.dataset.add);
@@ -118,15 +106,14 @@
       ui.$$('.wifi-wg').forEach(el => el.classList.toggle('hidden', !wg));
       ui.$$('.wg-only').forEach(el => el.classList.toggle('hidden', !wg));
 
-      const ddns = ui.$('#DDNS_ENABLE').checked;
-      ui.$$('.ddns-only').forEach(el => el.classList.toggle('hidden', !ddns));
-
       const hasKeys = ui.$('#SSH_PUBLIC_KEY').value.trim().length > 0;
       ui.$$('.ssh-pw-row').forEach(el => el.classList.toggle('hidden', !hasKeys));
 
-      const wgMode = (ui.$('input[name="wg_mode"]:checked') || {}).value;
-      ui.$$('.wg-disabled-note').forEach(el => el.classList.toggle('hidden', wgMode !== 'disabled'));
-      ui.$$('.wg-warp-note').forEach(el => el.classList.toggle('hidden', wgMode !== 'warp'));
+      const mesh = ui.$('#WIRELESS_MESH') && ui.$('#WIRELESS_MESH').checked;
+      ui.$$('.mesh-only').forEach(el => el.classList.toggle('hidden', !mesh));
+
+      const modem = ui.$('#CELLULAR_MODEM') && ui.$('#CELLULAR_MODEM').checked;
+      ui.$$('.modem-only').forEach(el => el.classList.toggle('hidden', !modem));
     }
     document.body.addEventListener('change', refresh);
     document.body.addEventListener('input', refresh);
@@ -134,13 +121,22 @@
   };
 
   // ----------------------------------- show/hide password toggle buttons
+  // Toggles input type between password/text. Does NOT alter button content
+  // (SVG icons stay intact). Updates aria-label for screen reader context.
   ui.initPasswordToggles = function () {
-    [['toggle-rootpw', 'ROOT_PASSWD'], ['toggle-cfkey', 'CLOUDFLARE_API_KEY']].forEach(([btn, inp]) => {
-      const b = document.getElementById(btn), i = document.getElementById(inp);
+    [
+      ['toggle-rootpw',     'ROOT_PASSWD'],
+      ['toggle-wg-privkey', 'WG_PRIVATE_KEY'],
+      ['toggle-wg-psk',     'PRESHARED_KEY'],
+      ['toggle-cfkey',      'CLOUDFLARE_API_KEY'],
+    ].forEach(([btnId, inpId]) => {
+      const b = document.getElementById(btnId);
+      const i = document.getElementById(inpId);
       if (!b || !i) return;
       b.addEventListener('click', () => {
-        i.type = i.type === 'password' ? 'text' : 'password';
-        b.textContent = i.type === 'password' ? 'show' : 'hide';
+        const showing = i.type !== 'password';
+        i.type = showing ? 'password' : 'text';
+        b.setAttribute('aria-label', showing ? 'Show' : 'Hide');
       });
     });
   };

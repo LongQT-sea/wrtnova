@@ -1,11 +1,12 @@
 // Entry point: wire UI, load static data, kick session.
+// Theme toggle is handled by theme.js (loaded separately).
+// Collapsible open/close is handled natively by <details>/<summary>.
 (function () {
   'use strict';
   const ui = window.WrtNova = window.WrtNova || {};
   const $ = ui.$;
 
   async function init() {
-    ui.initCollapsibles();
     ui.initDynamicRows();
     ui.initConditionalVisibility();
     ui.initPasswordToggles();

@@ -1,368 +1,727 @@
-<!-- Copyright (C) 2026 LongQT-sea -->
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="en" class="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="WrtNova — generate a ready-to-flash OpenWrt firmware image with WrtNova baked in.">
-  <link rel="icon" type="image/png" href="/favicon-64.png">
   <title>WrtNova Firmware Builder</title>
-  <style>
-    :root {
-      --bg: #f7f7f7;
-      --surface: #ffffff;
-      --border: #d8d8d8;
-      --muted: #6b7280;
-      --text: #1f2937;
-      --accent: #f6821f;
-      --green: #2f9e54;
-      --red: #c0392b;
-    }
-    * { box-sizing: border-box; }
-    body { margin: 0; padding: 24px; font: 14px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; background: var(--bg); color: var(--text); }
-    main { max-width: 880px; margin: 0 auto; }
-    h1 { font-size: 20px; margin: 0 0 4px; }
-    .lead { color: var(--muted); margin: 0 0 16px; }
-    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; margin-bottom: 12px; }
-    .card-header { padding: 10px 14px; cursor: pointer; display: flex; align-items: center; gap: 10px; user-select: none; }
-    .card-header h2 { margin: 0; font-size: 14px; font-weight: 600; flex: 1; }
-    .dot { width: 10px; height: 10px; border-radius: 50%; background: #cbd5e1; flex-shrink: 0; }
-    .dot.touched { background: var(--accent); }
-    .dot.valid { background: var(--green); }
-    .card-body { padding: 0 14px 14px; display: block; }
-    .card.collapsed .card-body { display: none; }
-    .card-header .chev { color: var(--muted); font-size: 12px; }
-    .row { display: grid; grid-template-columns: 200px 1fr; gap: 10px 16px; align-items: center; margin-top: 10px; }
-    .row label { font-size: 13px; color: var(--muted); }
-    .row .help { grid-column: 2; font-size: 12px; color: var(--muted); margin-top: -6px; }
-    input[type="text"], input[type="password"], input[type="number"], select, textarea {
-      width: 100%; padding: 6px 8px; border: 1px solid var(--border); border-radius: 4px; font: inherit; background: #fff; color: var(--text);
-    }
-    textarea { resize: vertical; min-height: 64px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; }
-    input[type="checkbox"] { width: 16px; height: 16px; }
-    .inline { display: flex; gap: 8px; align-items: center; }
-    .inline > label { color: var(--text); cursor: pointer; }
-    .hidden { display: none !important; }
-    .radio-group { display: flex; gap: 14px; }
-    .radio-group label { color: var(--text); cursor: pointer; }
-    .table { width: 100%; border-collapse: collapse; margin-top: 8px; }
-    .table th, .table td { padding: 6px 4px; text-align: left; font-size: 12px; }
-    .table th { color: var(--muted); font-weight: 500; border-bottom: 1px solid var(--border); }
-    .table input { padding: 4px 6px; font-size: 12px; }
-    .btn { padding: 6px 12px; border: 1px solid var(--border); background: #fff; border-radius: 4px; cursor: pointer; font: inherit; }
-    .btn:hover { background: #f1f3f5; }
-    .btn-primary { background: var(--accent); color: #fff; border-color: var(--accent); }
-    .btn-primary:hover { background: #e3741a; }
-    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
-    .btn-icon { padding: 2px 8px; }
-    .status { margin: 16px 0; padding: 10px 14px; border: 1px solid var(--border); border-radius: 4px; background: var(--surface); font-size: 13px; }
-    .status.error { border-color: var(--red); color: var(--red); }
-    .status.success { border-color: var(--green); color: var(--green); }
-    .progress-bar { height: 6px; background: #eee; border-radius: 3px; overflow: hidden; margin-top: 8px; }
-    .progress-fill { height: 100%; background: var(--accent); transition: width 0.3s; }
-    pre.config-preview { background: #1f2937; color: #e5e7eb; padding: 12px; border-radius: 4px; font-size: 12px; overflow-x: auto; max-height: 320px; }
-    .combo { position: relative; }
-    .combo-list { position: absolute; top: 100%; left: 0; right: 0; background: #fff; border: 1px solid var(--border); border-top: none; max-height: 280px; overflow-y: auto; z-index: 10; }
-    .combo-list div { padding: 6px 8px; cursor: pointer; font-size: 13px; }
-    .combo-list div:hover, .combo-list div.active { background: #eef2f7; }
-    .pkg-hint { font-size: 11px; color: var(--muted); margin-top: 6px; font-family: ui-monospace, monospace; }
-    .actions { margin-top: 20px; display: flex; gap: 10px; align-items: center; }
-  </style>
+  <!-- Anti-FOUC: apply stored theme before any paint -->
+  <script>
+    (function(){
+      var s=localStorage.getItem('theme');
+      if(s==='light'||(!s&&!window.matchMedia('(prefers-color-scheme: dark)').matches)){
+        document.documentElement.classList.remove('dark');
+      }
+    })();
+  </script>
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="/fonts/ibm-plex-mono-v20-latin-regular.woff2">
+  <link rel="stylesheet" href="/style.css">
 </head>
 
-<body>
-  <main>
-    <h1>WrtNova firmware builder</h1>
-    <p class="lead">Pick a device, fill in the config, get a custom-built OpenWrt image with WrtNova pre-installed.</p>
+<body class="bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 font-mono text-sm min-h-screen pb-24 md:pb-0">
 
-    <!-- 0. Firmware Target -->
-    <section class="card" id="card-target" data-section="target">
-      <header class="card-header"><span class="dot"></span><h2>Firmware target</h2><span class="chev">▾</span></header>
+  <!-- ─── Header ──────────────────────────────────────────────────── -->
+  <header class="sticky top-0 z-40 bg-zinc-50/90 dark:bg-zinc-950/90 backdrop-blur-sm border-b border-zinc-200 dark:border-zinc-800">
+    <div class="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
+      <div>
+        <h1 class="text-base font-semibold tracking-tight leading-tight">
+          WrtNova <span class="text-zinc-500 dark:text-zinc-400 font-normal">firmware builder</span>
+        </h1>
+        <p class="hidden sm:block text-xs text-zinc-500 dark:text-zinc-500 mt-0.5">
+          Pick a device, fill in the config, get a custom-built OpenWrt image with WrtNova pre-installed.
+        </p>
+      </div>
+      <button id="theme-toggle" type="button"
+              class="p-2 rounded-md text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors focus:outline-none focus:ring-2 focus:ring-accent"
+              aria-label="Toggle color theme">
+        <!-- Sun: shown in dark mode (click to go light) -->
+        <svg class="icon-sun w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        <!-- Moon: shown in light mode (click to go dark) -->
+        <svg class="icon-moon w-5 h-5 hidden" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- ─── Main ────────────────────────────────────────────────────── -->
+  <main class="max-w-3xl mx-auto px-4 py-6">
+
+    <!-- ── 0. Firmware Target ──────────────────────────────────────── -->
+    <details class="group card" id="card-target" data-section="target" open>
+      <summary class="card-header">
+        <span class="dot" aria-label="Not started"></span>
+        <h2 class="flex-1 text-sm font-semibold">Firmware target</h2>
+        <span class="chev sr-only" aria-hidden="true">▾</span>
+        <svg class="w-4 h-4 text-zinc-400 transition-transform duration-200 group-open:rotate-180 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+      </summary>
       <div class="card-body">
-        <div class="row"><label for="version">OpenWrt version</label>
-          <select id="version"><option value="">Loading…</option></select>
+        <div class="form-row">
+          <label for="version" class="form-label">OpenWrt version</label>
+          <select id="version" class="input-base">
+            <option value="">Loading…</option>
+          </select>
         </div>
-        <div class="row"><label for="device">Device</label>
+        <div class="form-row">
+          <label for="device" class="form-label">Device</label>
           <div class="combo">
-            <input type="text" id="device" placeholder="Type to search (e.g. Archer C7)" autocomplete="off" disabled>
-            <div class="combo-list hidden" id="device-list"></div>
+            <input type="text" id="device" class="input-base" placeholder="Type to search (e.g. Archer C7)" autocomplete="off" disabled aria-autocomplete="list" aria-controls="device-list">
+            <div class="combo-list hidden" id="device-list" role="listbox" aria-label="Device suggestions"></div>
           </div>
         </div>
-        <div class="row"><label></label><div class="pkg-hint" id="device-info"></div></div>
-      </div>
-    </section>
-
-    <!-- 1. Device Mode -->
-    <section class="card" id="card-mode" data-section="mode">
-      <header class="card-header"><span class="dot"></span><h2>Device mode</h2><span class="chev">▾</span></header>
-      <div class="card-body">
-        <div class="row"><label>Mode</label>
-          <div class="radio-group">
-            <label><input type="radio" name="AP_MODE" value="" checked> Router</label>
-            <label><input type="radio" name="AP_MODE" value="1"> Access point</label>
-          </div>
-        </div>
-        <div class="row ap-only hidden"><label for="AP_INDEX">AP management IP last octet</label>
-          <input type="number" id="AP_INDEX" name="AP_INDEX" min="2" max="99" value="2">
-          <div class="help">Integer 2–99. Router LAN IP becomes 192.168.1.&lt;this&gt;.</div>
+        <div class="form-row">
+          <span class="form-label"></span>
+          <p id="device-info" class="form-help mt-0"></p>
         </div>
       </div>
-    </section>
+    </details>
 
-    <!-- 2. System -->
-    <section class="card" id="card-system" data-section="system">
-      <header class="card-header"><span class="dot"></span><h2>System</h2><span class="chev">▾</span></header>
+    <!-- ── 1. Device Mode ──────────────────────────────────────────── -->
+    <details class="group card" id="card-mode" data-section="mode" open>
+      <summary class="card-header">
+        <span class="dot" aria-label="Not started"></span>
+        <h2 class="flex-1 text-sm font-semibold">Device mode</h2>
+        <span class="chev sr-only" aria-hidden="true">▾</span>
+        <svg class="w-4 h-4 text-zinc-400 transition-transform duration-200 group-open:rotate-180 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+      </summary>
       <div class="card-body">
-        <div class="row"><label for="HOST_NAME">Hostname</label>
-          <input type="text" id="HOST_NAME" name="HOST_NAME" placeholder="WrtNova">
-        </div>
-        <div class="row"><label for="ROOT_PASSWD">Root password</label>
-          <div class="inline"><input type="password" id="ROOT_PASSWD" name="ROOT_PASSWD" autocomplete="new-password">
-            <button class="btn btn-icon" type="button" id="toggle-rootpw">show</button></div>
-          <div class="help">Used for SSH login and AdGuard Home admin (hashed client-side).</div>
-        </div>
-        <div class="row"><label for="SSH_PUBLIC_KEY">SSH public keys</label>
-          <textarea id="SSH_PUBLIC_KEY" name="SSH_PUBLIC_KEY" placeholder="ssh-ed25519 AAAA... user@host"></textarea>
-          <div class="help">One key per line.</div>
-        </div>
-        <div class="row ssh-pw-row hidden"><label>SSH password auth</label>
-          <div class="radio-group">
-            <label><input type="radio" name="SSH_PASSWD_AUTH" value="" checked> On (keys + password)</label>
-            <label><input type="radio" name="SSH_PASSWD_AUTH" value="off"> Off (keys only)</label>
+        <div class="form-row">
+          <label class="form-label">Mode</label>
+          <div class="radio-seg" role="radiogroup" aria-label="Device mode">
+            <label>
+              <input type="radio" name="AP_MODE" value="" checked>
+              <span>Router</span>
+            </label>
+            <label>
+              <input type="radio" name="AP_MODE" value="1">
+              <span>Access point</span>
+            </label>
           </div>
         </div>
-        <div class="row"><label for="timezone">Timezone</label>
-          <div class="combo">
-            <input type="text" id="timezone" placeholder="Type to search (e.g. Ho_Chi_Minh)" autocomplete="off">
-            <div class="combo-list hidden" id="tz-list"></div>
+        <div class="form-row ap-only hidden">
+          <label for="AP_INDEX" class="form-label">AP management IP</label>
+          <div>
+            <input type="number" id="AP_INDEX" name="AP_INDEX" class="input-base" min="2" max="99" value="2" style="max-width:120px">
+            <p class="form-help">Last octet 2–99. Router LAN IP becomes 192.168.1.&lt;this&gt;.</p>
           </div>
-          <div class="help" id="tz-help"></div>
         </div>
       </div>
-    </section>
+    </details>
 
-    <!-- 3. WAN -->
-    <section class="card router-only" id="card-wan" data-section="wan">
-      <header class="card-header"><span class="dot"></span><h2>WAN</h2><span class="chev">▾</span></header>
+    <!-- ── 2. System ───────────────────────────────────────────────── -->
+    <details class="group card" id="card-system" data-section="system" open>
+      <summary class="card-header">
+        <span class="dot" aria-label="Not started"></span>
+        <h2 class="flex-1 text-sm font-semibold">System</h2>
+        <span class="chev sr-only" aria-hidden="true">▾</span>
+        <svg class="w-4 h-4 text-zinc-400 transition-transform duration-200 group-open:rotate-180 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+      </summary>
       <div class="card-body">
-        <div class="row"><label>Connection type</label>
-          <div class="radio-group">
-            <label><input type="radio" name="wan_type" value="dhcp" checked> DHCP</label>
-            <label><input type="radio" name="wan_type" value="pppoe"> PPPoE</label>
+        <div class="form-row">
+          <label for="HOST_NAME" class="form-label">Hostname</label>
+          <input type="text" id="HOST_NAME" name="HOST_NAME" class="input-base" placeholder="WrtNova">
+        </div>
+        <div class="form-row">
+          <label for="ROOT_PASSWD" class="form-label">Root password</label>
+          <div>
+            <div class="relative">
+              <input type="password" id="ROOT_PASSWD" name="ROOT_PASSWD" class="input-base" style="padding-right:2.5rem" autocomplete="new-password">
+              <button type="button" id="toggle-rootpw"
+                      class="btn btn-ghost btn-icon absolute right-1.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
+                      aria-label="Show password">
+                <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
+            <p class="form-help">Used for SSH login and AdGuard Home admin (hashed client-side).</p>
           </div>
         </div>
-        <div class="pppoe-only hidden">
-          <div class="row"><label for="PPPOE_USERNAME">PPPoE username</label>
-            <input type="text" id="PPPOE_USERNAME" name="PPPOE_USERNAME">
+        <div class="form-row">
+          <label for="SSH_PUBLIC_KEY" class="form-label">SSH public keys</label>
+          <div>
+            <textarea id="SSH_PUBLIC_KEY" name="SSH_PUBLIC_KEY" class="input-base" placeholder="ssh-ed25519 AAAA… user@host" rows="3"></textarea>
+            <p class="form-help">One key per line.</p>
           </div>
-          <div class="row"><label for="PPPOE_PASSWD">PPPoE password</label>
-            <input type="password" id="PPPOE_PASSWD" name="PPPOE_PASSWD" autocomplete="new-password">
+        </div>
+        <div class="form-row ssh-pw-row hidden">
+          <label class="form-label">SSH password auth</label>
+          <div class="radio-seg" role="radiogroup" aria-label="SSH password auth">
+            <label>
+              <input type="radio" name="SSH_PASSWD_AUTH" value="" checked>
+              <span>On (keys + password)</span>
+            </label>
+            <label>
+              <input type="radio" name="SSH_PASSWD_AUTH" value="off">
+              <span>Off (keys only)</span>
+            </label>
           </div>
         </div>
-        <div class="row"><label for="WAN_MAC_ADDR">WAN MAC address</label>
-          <input type="text" id="WAN_MAC_ADDR" name="WAN_MAC_ADDR" placeholder="optional, e.g. aa:bb:cc:dd:ee:ff">
-        </div>
-        <div class="row"><label>Tagged WAN VLAN</label>
-          <label class="inline"><input type="checkbox" id="WAN_IS_TAGGED" name="WAN_IS_TAGGED" value="1"> Required by some ISPs</label>
-        </div>
-        <div class="row"><label>Secondary WAN</label>
-          <label class="inline"><input type="checkbox" id="WAN_B_ENABLE" name="WAN_B_ENABLE" value="1"> Enable WAN-B</label>
+        <div class="form-row">
+          <label for="timezone" class="form-label">Timezone</label>
+          <div>
+            <div class="combo">
+              <input type="text" id="timezone" class="input-base" placeholder="Type to search (e.g. Ho_Chi_Minh)" autocomplete="off" aria-autocomplete="list" aria-controls="tz-list">
+              <div class="combo-list hidden" id="tz-list" role="listbox" aria-label="Timezone suggestions"></div>
+            </div>
+            <p class="form-help" id="tz-help"></p>
+          </div>
         </div>
       </div>
-    </section>
+    </details>
 
-    <!-- 4. Network -->
-    <section class="card" id="card-network" data-section="network">
-      <header class="card-header"><span class="dot"></span><h2>Network</h2><span class="chev">▾</span></header>
+    <!-- ── 3. Network ──────────────────────────────────────────────── -->
+    <details class="group card" id="card-network" data-section="network" open>
+      <summary class="card-header">
+        <span class="dot" aria-label="Not started"></span>
+        <h2 class="flex-1 text-sm font-semibold">Network</h2>
+        <span class="chev sr-only" aria-hidden="true">▾</span>
+        <svg class="w-4 h-4 text-zinc-400 transition-transform duration-200 group-open:rotate-180 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+      </summary>
       <div class="card-body">
-        <div class="row"><label for="BASE_NET_PREFIX">Default IP prefix</label>
-          <input type="text" id="BASE_NET_PREFIX" name="BASE_NET_PREFIX" placeholder="192.168">
+        <div class="form-row">
+          <label for="BASE_NET_PREFIX" class="form-label">Default IP prefix</label>
+          <input type="text" id="BASE_NET_PREFIX" name="BASE_NET_PREFIX" class="input-base" placeholder="192.168" style="max-width:180px">
         </div>
-        <div class="row"><label for="DEFAULT_SUBNET">Default subnet</label>
-          <select id="DEFAULT_SUBNET" name="DEFAULT_SUBNET">
+        <div class="form-row">
+          <label for="DEFAULT_SUBNET" class="form-label">Default subnet</label>
+          <select id="DEFAULT_SUBNET" name="DEFAULT_SUBNET" class="input-base" style="max-width:180px">
             <option value="">/24 (default)</option>
             <option value="/22">/22</option>
             <option value="/23">/23</option>
             <option value="/24">/24</option>
           </select>
         </div>
-        <div class="row"><label>Networks</label>
+
+        <div class="sub-section">
+          <p class="sub-section-title">Networks</p>
+          <div class="space-y-2 mt-2">
+            <label class="toggle-label">
+              <span class="toggle-wrap">
+                <input type="checkbox" id="GUEST_ENABLE" name="GUEST_ENABLE" value="1" class="toggle-input" checked>
+                <span class="toggle-track"></span>
+                <span class="toggle-thumb"></span>
+              </span>
+              <span class="toggle-text">Guest network</span>
+            </label>
+            <div>
+              <label class="toggle-label">
+                <span class="toggle-wrap">
+                  <input type="checkbox" id="IOT_ENABLE" name="IOT_ENABLE" value="1" class="toggle-input">
+                  <span class="toggle-track"></span>
+                  <span class="toggle-thumb"></span>
+                </span>
+                <span class="toggle-text">IoT network</span>
+              </label>
+              <div class="iot-only hidden ml-10 mt-1">
+                <label class="toggle-label">
+                  <span class="toggle-wrap">
+                    <input type="checkbox" id="IOT_INTERNET" name="IOT_INTERNET" value="1" class="toggle-input">
+                    <span class="toggle-track"></span>
+                    <span class="toggle-thumb"></span>
+                  </span>
+                  <span class="toggle-text text-xs">Allow internet access</span>
+                </label>
+              </div>
+            </div>
+            <label class="toggle-label router-only">
+              <span class="toggle-wrap">
+                <input type="checkbox" id="WG_ENABLE" name="WG_ENABLE" value="1" class="toggle-input">
+                <span class="toggle-track"></span>
+                <span class="toggle-thumb"></span>
+              </span>
+              <span class="toggle-text">WireGuard VPN network</span>
+            </label>
+          </div>
+          <p class="form-help mt-2">WireGuard VPN network creates a VLAN, a WiFi SSID, and activates the WireGuard client section. Leave WG fields blank to auto-register Cloudflare WARP.</p>
+        </div>
+      </div>
+    </details>
+
+    <!-- ── 4. WireGuard VPN client ─────────────────────────────────── -->
+    <details class="group card router-only wg-only hidden" id="card-wg" data-section="wg" open>
+      <summary class="card-header">
+        <span class="dot" aria-label="Not started"></span>
+        <h2 class="flex-1 text-sm font-semibold">WireGuard VPN client</h2>
+        <span class="chev sr-only" aria-hidden="true">▾</span>
+        <svg class="w-4 h-4 text-zinc-400 transition-transform duration-200 group-open:rotate-180 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+      </summary>
+      <div class="card-body">
+        <div class="form-row">
+          <label for="WG_PRIVATE_KEY" class="form-label">Private key</label>
           <div>
-            <label class="inline"><input type="checkbox" id="GUEST_ENABLE" name="GUEST_ENABLE" value="1" checked> Guest</label><br>
-            <label class="inline"><input type="checkbox" id="IOT_ENABLE" name="IOT_ENABLE" value="1"> IoT</label>
-            <label class="inline iot-only hidden" style="margin-left:14px"><input type="checkbox" id="IOT_INTERNET" name="IOT_INTERNET" value="1"> Allow internet</label><br>
-            <label class="inline router-only"><input type="checkbox" id="WG_ENABLE" name="WG_ENABLE" value="1"> WireGuard VLAN</label>
+            <div class="relative">
+              <input type="password" id="WG_PRIVATE_KEY" name="WG_PRIVATE_KEY" class="input-base" style="padding-right:2.5rem" autocomplete="off" placeholder="leave blank for WARP auto-register">
+              <button type="button" id="toggle-wg-privkey"
+                      class="btn btn-ghost btn-icon absolute right-1.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
+                      aria-label="Show private key">
+                <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="form-row">
+          <label for="PEER_PUBLIC_KEY" class="form-label">Peer public key</label>
+          <input type="text" id="PEER_PUBLIC_KEY" name="PEER_PUBLIC_KEY" class="input-base" placeholder="leave blank for WARP auto-register" autocomplete="off">
+        </div>
+        <div class="form-row">
+          <label for="ENDPOINT" class="form-label">Endpoint</label>
+          <input type="text" id="ENDPOINT" name="ENDPOINT" class="input-base" placeholder="engage.cloudflareclient.com" autocomplete="off">
+        </div>
+        <div class="form-row">
+          <label for="ENDPOINT_PORT" class="form-label">Endpoint port</label>
+          <input type="number" id="ENDPOINT_PORT" name="ENDPOINT_PORT" class="input-base" placeholder="51820" min="1" max="65535" style="max-width:160px">
+        </div>
+        <div class="form-row">
+          <label for="PRESHARED_KEY" class="form-label">Preshared key</label>
+          <div class="relative">
+            <input type="password" id="PRESHARED_KEY" name="PRESHARED_KEY" class="input-base" style="padding-right:2.5rem" autocomplete="off" placeholder="optional">
+            <button type="button" id="toggle-wg-psk"
+                    class="btn btn-ghost btn-icon absolute right-1.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
+                    aria-label="Show preshared key">
+              <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="form-row">
+          <label for="WG_IPV4" class="form-label">Client IPv4</label>
+          <input type="text" id="WG_IPV4" name="WG_IPV4" class="input-base" placeholder="e.g. 172.16.0.2/32">
+        </div>
+        <div class="form-row">
+          <label for="WG_IPV6" class="form-label">Client IPv6</label>
+          <input type="text" id="WG_IPV6" name="WG_IPV6" class="input-base" placeholder="e.g. fd88::/128">
+        </div>
+        <div class="form-row">
+          <label for="ALLOWED_IPS" class="form-label">Allowed IPs</label>
+          <input type="text" id="ALLOWED_IPS" name="ALLOWED_IPS" class="input-base" placeholder="0.0.0.0/0, ::/0">
+        </div>
+
+        <div class="info-note" role="note">
+          You can switch to a different provider or paste a different WireGuard config later via
+          <strong>LuCI → Network → Interfaces → vpn → Edit</strong>.
+          When importing a config, remember to enable <em>Route Allowed IPs</em> so the tunnel
+          actually carries traffic.
+        </div>
+      </div>
+    </details>
+
+    <!-- ── 5. WAN ───────────────────────────────────────────────────── -->
+    <details class="group card router-only" id="card-wan" data-section="wan" open>
+      <summary class="card-header">
+        <span class="dot" aria-label="Not started"></span>
+        <h2 class="flex-1 text-sm font-semibold">WAN</h2>
+        <span class="chev sr-only" aria-hidden="true">▾</span>
+        <svg class="w-4 h-4 text-zinc-400 transition-transform duration-200 group-open:rotate-180 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+      </summary>
+      <div class="card-body">
+        <div class="form-row">
+          <label class="form-label">Connection type</label>
+          <div class="radio-seg" role="radiogroup" aria-label="WAN connection type">
+            <label>
+              <input type="radio" name="wan_type" value="dhcp" checked>
+              <span>DHCP</span>
+            </label>
+            <label>
+              <input type="radio" name="wan_type" value="pppoe">
+              <span>PPPoE</span>
+            </label>
+          </div>
+        </div>
+        <div class="pppoe-only hidden">
+          <div class="form-row">
+            <label for="PPPOE_USERNAME" class="form-label">PPPoE username</label>
+            <input type="text" id="PPPOE_USERNAME" name="PPPOE_USERNAME" class="input-base" autocomplete="username">
+          </div>
+          <div class="form-row">
+            <label for="PPPOE_PASSWD" class="form-label">PPPoE password</label>
+            <input type="password" id="PPPOE_PASSWD" name="PPPOE_PASSWD" class="input-base" autocomplete="current-password">
+          </div>
+        </div>
+        <div class="form-row">
+          <label for="WAN_MAC_ADDR" class="form-label">WAN MAC address</label>
+          <div>
+            <input type="text" id="WAN_MAC_ADDR" name="WAN_MAC_ADDR" class="input-base" placeholder="aa:bb:cc:dd:ee:ff (optional)">
+          </div>
+        </div>
+        <div class="sub-section">
+          <p class="sub-section-title">WAN options</p>
+          <div class="space-y-2 mt-2">
+            <label class="toggle-label">
+              <span class="toggle-wrap">
+                <input type="checkbox" id="WAN_IS_TAGGED" name="WAN_IS_TAGGED" value="1" class="toggle-input">
+                <span class="toggle-track"></span>
+                <span class="toggle-thumb"></span>
+              </span>
+              <span class="toggle-text">Tagged WAN VLAN <span class="text-zinc-500">(required by some ISPs)</span></span>
+            </label>
+            <label class="toggle-label">
+              <span class="toggle-wrap">
+                <input type="checkbox" id="WAN_B_ENABLE" name="WAN_B_ENABLE" value="1" class="toggle-input">
+                <span class="toggle-track"></span>
+                <span class="toggle-thumb"></span>
+              </span>
+              <span class="toggle-text">Enable secondary WAN (WAN-B)</span>
+            </label>
           </div>
         </div>
       </div>
-    </section>
+    </details>
 
-    <!-- 5. WiFi -->
-    <section class="card" id="card-wifi" data-section="wifi">
-      <header class="card-header"><span class="dot"></span><h2>WiFi</h2><span class="chev">▾</span></header>
+    <!-- ── 6. WiFi ─────────────────────────────────────────────────── -->
+    <details class="group card" id="card-wifi" data-section="wifi" open>
+      <summary class="card-header">
+        <span class="dot" aria-label="Not started"></span>
+        <h2 class="flex-1 text-sm font-semibold">WiFi</h2>
+        <span class="chev sr-only" aria-hidden="true">▾</span>
+        <svg class="w-4 h-4 text-zinc-400 transition-transform duration-200 group-open:rotate-180 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+      </summary>
       <div class="card-body">
-        <div class="row"><label for="COUNTRY_CODE">Country code</label>
-          <input type="text" id="COUNTRY_CODE" name="COUNTRY_CODE" maxlength="2" placeholder="VN" style="text-transform:uppercase">
+        <div class="form-row">
+          <label for="COUNTRY_CODE" class="form-label">Country code</label>
+          <input type="text" id="COUNTRY_CODE" name="COUNTRY_CODE" class="input-base" maxlength="2" placeholder="VN" style="max-width:80px;text-transform:uppercase">
         </div>
-        <div class="row"><label>Dense mode</label>
-          <label class="inline"><input type="checkbox" id="DENSE_ENV" name="DENSE_ENV" value="1"> Tighten roaming/steering for high-interference areas</label>
+        <div class="form-row">
+          <label class="form-label">Dense environment</label>
+          <label class="toggle-label">
+            <span class="toggle-wrap">
+              <input type="checkbox" id="DENSE_ENV" name="DENSE_ENV" value="1" class="toggle-input">
+              <span class="toggle-track"></span>
+              <span class="toggle-thumb"></span>
+            </span>
+            <span class="toggle-text">Tighten roaming/steering thresholds</span>
+          </label>
         </div>
-
-        <div class="row wifi-lan"><label for="LAN_WIFI_SSID">LAN SSID / password</label>
-          <div class="inline" style="gap:8px">
-            <input type="text" id="LAN_WIFI_SSID" name="LAN_WIFI_SSID" placeholder="WrtNova">
-            <input type="password" id="LAN_WIFI_PASSWD" name="LAN_WIFI_PASSWD" placeholder="password" autocomplete="new-password">
-          </div>
-        </div>
-        <div class="row wifi-guest hidden"><label for="GUEST_WIFI_SSID">Guest SSID / password</label>
-          <div class="inline" style="gap:8px">
-            <input type="text" id="GUEST_WIFI_SSID" name="GUEST_WIFI_SSID" placeholder="WrtNova_Guest">
-            <input type="password" id="GUEST_WIFI_PASSWD" name="GUEST_WIFI_PASSWD" placeholder="password" autocomplete="new-password">
-          </div>
-        </div>
-        <div class="row wifi-iot hidden"><label for="IOT_WIFI_SSID">IoT SSID / password</label>
-          <div class="inline" style="gap:8px">
-            <input type="text" id="IOT_WIFI_SSID" name="IOT_WIFI_SSID" placeholder="WrtNova_IoT">
-            <input type="password" id="IOT_WIFI_PASSWD" name="IOT_WIFI_PASSWD" placeholder="password" autocomplete="new-password">
-          </div>
-        </div>
-        <div class="row wifi-wg hidden"><label for="LAN_WG_WIFI_SSID">WireGuard VPN SSID / password</label>
-          <div class="inline" style="gap:8px">
-            <input type="text" id="LAN_WG_WIFI_SSID" name="LAN_WG_WIFI_SSID" placeholder="WrtNova_VPN">
-            <input type="password" id="LAN_WG_WIFI_PASSWD" name="LAN_WG_WIFI_PASSWD" placeholder="password" autocomplete="new-password">
+        <div class="form-row">
+          <label class="form-label">Wireless mesh backhaul</label>
+          <div>
+            <label class="toggle-label">
+              <span class="toggle-wrap">
+                <input type="checkbox" id="WIRELESS_MESH" name="WIRELESS_MESH" value="1" class="toggle-input">
+                <span class="toggle-track"></span>
+                <span class="toggle-thumb"></span>
+              </span>
+              <span class="toggle-text">Enable wireless mesh</span>
+            </label>
+            <p class="form-help">Enable only when this device can't be wired to its parent. Wired backhaul is preferred.</p>
           </div>
         </div>
 
-        <details style="margin-top:10px">
-          <summary style="cursor:pointer;color:var(--muted);font-size:12px">Advanced channels &amp; logging</summary>
-          <div class="row"><label for="CHANNEL_2G">2.4 GHz channel</label><input type="text" id="CHANNEL_2G" name="CHANNEL_2G"></div>
-          <div class="row"><label for="CHANNEL_5G">5 GHz channel</label><input type="text" id="CHANNEL_5G" name="CHANNEL_5G"></div>
-          <div class="row"><label for="CHANNEL_6G">6 GHz channel</label><input type="text" id="CHANNEL_6G" name="CHANNEL_6G"></div>
-          <div class="row"><label for="WIFI_LOG_LVL">WiFi log level</label><input type="text" id="WIFI_LOG_LVL" name="WIFI_LOG_LVL"></div>
+        <!-- Mesh fields: shown only when WIRELESS_MESH=1 (JS wires this next prompt) -->
+        <div class="mesh-only hidden">
+          <div class="form-row">
+            <label for="MESH_ID" class="form-label">Mesh ID</label>
+            <input type="text" id="MESH_ID" name="MESH_ID" class="input-base" placeholder="mesh0_5ghz">
+          </div>
+          <div class="form-row">
+            <label for="MESH_PASSWD" class="form-label">Mesh password</label>
+            <input type="password" id="MESH_PASSWD" name="MESH_PASSWD" class="input-base" autocomplete="new-password">
+          </div>
+        </div>
+
+        <div class="sub-section">
+          <p class="sub-section-title">Network SSIDs</p>
+          <!-- LAN (always visible) -->
+          <div class="form-row wifi-lan mt-2">
+            <label class="form-label">LAN</label>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <input type="text" id="LAN_WIFI_SSID" name="LAN_WIFI_SSID" class="input-base" placeholder="WrtNova">
+              <input type="password" id="LAN_WIFI_PASSWD" name="LAN_WIFI_PASSWD" class="input-base" placeholder="password" autocomplete="new-password">
+            </div>
+          </div>
+          <!-- Guest (shown when GUEST_ENABLE) -->
+          <div class="form-row wifi-guest hidden">
+            <label class="form-label">Guest</label>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <input type="text" id="GUEST_WIFI_SSID" name="GUEST_WIFI_SSID" class="input-base" placeholder="WrtNova_Guest">
+              <input type="password" id="GUEST_WIFI_PASSWD" name="GUEST_WIFI_PASSWD" class="input-base" placeholder="password" autocomplete="new-password">
+            </div>
+          </div>
+          <!-- IoT (shown when IOT_ENABLE) -->
+          <div class="form-row wifi-iot hidden">
+            <label class="form-label">IoT</label>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <input type="text" id="IOT_WIFI_SSID" name="IOT_WIFI_SSID" class="input-base" placeholder="WrtNova_IoT">
+              <input type="password" id="IOT_WIFI_PASSWD" name="IOT_WIFI_PASSWD" class="input-base" placeholder="password" autocomplete="new-password">
+            </div>
+          </div>
+          <!-- WireGuard VPN (shown when WG_ENABLE) -->
+          <div class="form-row wifi-wg hidden">
+            <label class="form-label">WireGuard VPN</label>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <input type="text" id="LAN_WG_WIFI_SSID" name="LAN_WG_WIFI_SSID" class="input-base" placeholder="WrtNova_VPN">
+              <input type="password" id="LAN_WG_WIFI_PASSWD" name="LAN_WG_WIFI_PASSWD" class="input-base" placeholder="password" autocomplete="new-password">
+            </div>
+          </div>
+        </div>
+
+        <!-- Advanced channels -->
+        <details class="mt-4">
+          <summary class="text-xs text-zinc-500 dark:text-zinc-400 cursor-pointer hover:text-zinc-700 dark:hover:text-zinc-200 select-none flex items-center gap-1">
+            <svg class="w-3 h-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+            Advanced channels &amp; logging
+          </summary>
+          <div class="mt-2 pl-4 border-l-2 border-zinc-200 dark:border-zinc-700">
+            <div class="form-row">
+              <label for="CHANNEL_2G" class="form-label">2.4 GHz channel</label>
+              <input type="text" id="CHANNEL_2G" name="CHANNEL_2G" class="input-base" placeholder="auto" style="max-width:120px">
+            </div>
+            <div class="form-row">
+              <label for="CHANNEL_5G" class="form-label">5 GHz channel</label>
+              <input type="text" id="CHANNEL_5G" name="CHANNEL_5G" class="input-base" placeholder="auto" style="max-width:120px">
+            </div>
+            <div class="form-row">
+              <label for="CHANNEL_6G" class="form-label">6 GHz channel</label>
+              <input type="text" id="CHANNEL_6G" name="CHANNEL_6G" class="input-base" placeholder="auto" style="max-width:120px">
+            </div>
+            <div class="form-row">
+              <label for="WIFI_LOG_LVL" class="form-label">WiFi log level</label>
+              <input type="text" id="WIFI_LOG_LVL" name="WIFI_LOG_LVL" class="input-base" placeholder="driver default" style="max-width:160px">
+            </div>
+          </div>
         </details>
       </div>
-    </section>
+    </details>
 
-    <!-- 6. Port Forwarding -->
-    <section class="card router-only" id="card-portfwd" data-section="portfwd">
-      <header class="card-header"><span class="dot"></span><h2>Port forwarding (IPv4)</h2><span class="chev">▾</span></header>
+    <!-- ── 7. Port Forwarding (IPv4) ───────────────────────────────── -->
+    <details class="group card router-only" id="card-portfwd" data-section="portfwd" open>
+      <summary class="card-header">
+        <span class="dot" aria-label="Not started"></span>
+        <h2 class="flex-1 text-sm font-semibold">Port forwarding <span class="font-normal text-zinc-400">(IPv4)</span></h2>
+        <span class="chev sr-only" aria-hidden="true">▾</span>
+        <svg class="w-4 h-4 text-zinc-400 transition-transform duration-200 group-open:rotate-180 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+      </summary>
       <div class="card-body">
-        <table class="table" id="portfwd-table">
-          <thead><tr><th>Hostname</th><th>Last octet</th><th>Ports (space-sep)</th><th></th></tr></thead>
+        <table class="responsive-table" id="portfwd-table">
+          <thead>
+            <tr>
+              <th>Hostname</th>
+              <th>Last octet</th>
+              <th>Ports (space-separated)</th>
+              <th></th>
+            </tr>
+          </thead>
           <tbody></tbody>
         </table>
-        <button class="btn btn-icon" type="button" data-add="portfwd">+ Add row</button>
+        <button class="btn mt-2 text-xs" type="button" data-add="portfwd">
+          <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add row
+        </button>
       </div>
-    </section>
+    </details>
 
-    <!-- 7. IPv6 Exposure -->
-    <section class="card router-only" id="card-ipv6" data-section="ipv6">
-      <header class="card-header"><span class="dot"></span><h2>IPv6 exposure</h2><span class="chev">▾</span></header>
+    <!-- ── 8. IPv6 Exposure ────────────────────────────────────────── -->
+    <details class="group card router-only" id="card-ipv6" data-section="ipv6" open>
+      <summary class="card-header">
+        <span class="dot" aria-label="Not started"></span>
+        <h2 class="flex-1 text-sm font-semibold">IPv6 exposure</h2>
+        <span class="chev sr-only" aria-hidden="true">▾</span>
+        <svg class="w-4 h-4 text-zinc-400 transition-transform duration-200 group-open:rotate-180 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+      </summary>
       <div class="card-body">
-        <table class="table" id="ipv6-table">
-          <thead><tr><th>Hostname</th><th>Last octet</th><th>Ports (empty = all)</th><th></th></tr></thead>
+        <table class="responsive-table" id="ipv6-table">
+          <thead>
+            <tr>
+              <th>Hostname</th>
+              <th>Last octet</th>
+              <th>Ports (empty = all)</th>
+              <th></th>
+            </tr>
+          </thead>
           <tbody></tbody>
         </table>
-        <button class="btn btn-icon" type="button" data-add="ipv6">+ Add row</button>
+        <button class="btn mt-2 text-xs" type="button" data-add="ipv6">
+          <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add row
+        </button>
       </div>
-    </section>
+    </details>
 
-    <!-- 8. DDNS -->
-    <section class="card router-only" id="card-ddns" data-section="ddns">
-      <header class="card-header"><span class="dot"></span><h2>DDNS (Cloudflare)</h2><span class="chev">▾</span></header>
+    <!-- ── 9. DDNS ─────────────────────────────────────────────────── -->
+    <details class="group card router-only" id="card-ddns" data-section="ddns" open>
+      <summary class="card-header">
+        <span class="dot" aria-label="Not started"></span>
+        <h2 class="flex-1 text-sm font-semibold">DDNS <span class="font-normal text-zinc-400">(Cloudflare)</span></h2>
+        <span class="chev sr-only" aria-hidden="true">▾</span>
+        <svg class="w-4 h-4 text-zinc-400 transition-transform duration-200 group-open:rotate-180 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+      </summary>
       <div class="card-body">
-        <div class="row"><label>Enable DDNS</label>
-          <label class="inline"><input type="checkbox" id="DDNS_ENABLE" name="DDNS_ENABLE" value="1"></label>
+        <div class="form-row">
+          <label class="form-label">Enable DDNS</label>
+          <label class="toggle-label">
+            <span class="toggle-wrap">
+              <input type="checkbox" id="DDNS_ENABLE" name="DDNS_ENABLE" value="1" class="toggle-input">
+              <span class="toggle-track"></span>
+              <span class="toggle-thumb"></span>
+            </span>
+            <span class="toggle-text">Start DDNS service on boot</span>
+          </label>
         </div>
-        <div class="ddns-only hidden">
-          <div class="row"><label for="LOOKUP_HOSTNAME">Lookup hostname</label>
-            <input type="text" id="LOOKUP_HOSTNAME" name="LOOKUP_HOSTNAME" placeholder="ddns.example.com">
+        <!-- Always visible regardless of DDNS_ENABLE toggle -->
+        <div class="form-row">
+          <label for="LOOKUP_HOSTNAME" class="form-label">Lookup hostname</label>
+          <input type="text" id="LOOKUP_HOSTNAME" name="LOOKUP_HOSTNAME" class="input-base" placeholder="ddns.example.com">
+        </div>
+        <div class="form-row">
+          <label for="CLOUDFLARE_API_KEY" class="form-label">Cloudflare API token</label>
+          <div>
+            <div class="relative">
+              <input type="password" id="CLOUDFLARE_API_KEY" name="CLOUDFLARE_API_KEY" class="input-base" style="padding-right:2.5rem" autocomplete="off">
+              <button type="button" id="toggle-cfkey"
+                      class="btn btn-ghost btn-icon absolute right-1.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
+                      aria-label="Show API token">
+                <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
+            <p class="form-help">DDNS entries for IPv6-exposed hosts are derived from the IPv6 Exposure table — no extra config needed.</p>
           </div>
-          <div class="row"><label for="CLOUDFLARE_API_KEY">Cloudflare API token</label>
-            <div class="inline"><input type="password" id="CLOUDFLARE_API_KEY" name="CLOUDFLARE_API_KEY" autocomplete="off">
-              <button class="btn btn-icon" type="button" id="toggle-cfkey">show</button></div>
+        </div>
+      </div>
+    </details>
+
+    <!-- ── 10. Failover ────────────────────────────────────────────── -->
+    <details class="group card router-only" id="card-failover" data-section="failover">
+      <!-- no 'open' — collapsed by default -->
+      <summary class="card-header">
+        <span class="dot" aria-label="Not started"></span>
+        <h2 class="flex-1 text-sm font-semibold">Failover</h2>
+        <span class="chev sr-only" aria-hidden="true">▾</span>
+        <svg class="w-4 h-4 text-zinc-400 transition-transform duration-200 group-open:rotate-180 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+      </summary>
+      <div class="card-body">
+        <div class="sub-section" style="margin-top:0;padding-top:0;border-top:none">
+          <p class="sub-section-title">Cellular modem (MBIM)</p>
+          <div class="space-y-2 mt-2">
+            <label class="toggle-label">
+              <span class="toggle-wrap">
+                <input type="checkbox" id="CELLULAR_MODEM" name="CELLULAR_MODEM" value="1" class="toggle-input">
+                <span class="toggle-track"></span>
+                <span class="toggle-thumb"></span>
+              </span>
+              <span class="toggle-text">Enable modem failover</span>
+            </label>
+          </div>
+          <!-- Modem fields: shown when CELLULAR_MODEM=1 (JS wires this next prompt) -->
+          <div class="modem-only hidden">
+            <div class="form-row">
+              <label for="MODEM_PATH" class="form-label">Modem path</label>
+              <div>
+                <input type="text" id="MODEM_PATH" name="MODEM_PATH" class="input-base" placeholder="/sys/devices/platform/…/usb2/2-1">
+                <p class="form-help">Hardware-specific sysfs path. Default suits most boards; override only if your device path differs.</p>
+              </div>
+            </div>
+            <div class="form-row">
+              <label for="MODEM_APN" class="form-label">APN</label>
+              <input type="text" id="MODEM_APN" name="MODEM_APN" class="input-base" placeholder="internet" style="max-width:240px">
+            </div>
+          </div>
+        </div>
+        <div class="sub-section">
+          <p class="sub-section-title">USB tethering</p>
+          <div class="space-y-2 mt-2">
+            <label class="toggle-label">
+              <span class="toggle-wrap">
+                <input type="checkbox" id="USB_TETHERING" name="USB_TETHERING" value="1" class="toggle-input">
+                <span class="toggle-track"></span>
+                <span class="toggle-thumb"></span>
+              </span>
+              <span class="toggle-text">Enable USB tethering <span class="text-zinc-500">(Android / iPhone, device usb0)</span></span>
+            </label>
           </div>
         </div>
       </div>
-    </section>
+    </details>
 
-    <!-- 9. WireGuard Client -->
-    <section class="card router-only wg-only hidden" id="card-wg" data-section="wg">
-      <header class="card-header"><span class="dot"></span><h2>WireGuard client</h2><span class="chev">▾</span></header>
+    <!-- ── 11. Additional Packages ─────────────────────────────────── -->
+    <details class="group card" id="card-pkgs" data-section="pkgs" open>
+      <summary class="card-header">
+        <span class="dot" aria-label="Not started"></span>
+        <h2 class="flex-1 text-sm font-semibold">Additional packages</h2>
+        <span class="chev sr-only" aria-hidden="true">▾</span>
+        <svg class="w-4 h-4 text-zinc-400 transition-transform duration-200 group-open:rotate-180 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+      </summary>
       <div class="card-body">
-        <div class="row"><label>Mode</label>
-          <div class="radio-group">
-            <label><input type="radio" name="wg_mode" value="disabled" checked> Skeleton only</label>
-            <label><input type="radio" name="wg_mode" value="custom"> Custom (configure in LuCI)</label>
-            <label><input type="radio" name="wg_mode" value="warp"> Cloudflare WARP</label>
+        <div class="form-row">
+          <label for="additional_packages" class="form-label">Packages</label>
+          <div>
+            <textarea id="additional_packages" name="additional_packages" class="input-base" placeholder="space- or newline-separated, e.g. htop tcpdump" rows="3"></textarea>
+            <p class="form-help">Appended to the final list as-is. Prefix with <code class="bg-zinc-100 dark:bg-zinc-800 px-1 rounded text-xs">-</code> to remove a default package.</p>
           </div>
         </div>
-        <div class="row"><label for="WG_IFACE">Interface name</label>
-          <input type="text" id="WG_IFACE" name="WG_IFACE" placeholder="vpn">
-        </div>
-        <div class="wg-disabled-note help" style="margin-top:6px">Script will create a skeleton interface. After boot: LuCI → Network → Interfaces → vpn → Edit → Load config.</div>
-        <div class="wg-warp-note help hidden" style="margin-top:6px">A new WARP registration will be created and embedded in the firmware. Refresh token is stored in this session for reuse.</div>
       </div>
-    </section>
+    </details>
 
-    <!-- 10. Failover -->
-    <section class="card router-only collapsed" id="card-failover" data-section="failover">
-      <header class="card-header"><span class="dot"></span><h2>Failover</h2><span class="chev">▾</span></header>
+    <!-- ── 12. Performance & Misc ──────────────────────────────────── -->
+    <details class="group card" id="card-misc" data-section="misc" open>
+      <summary class="card-header">
+        <span class="dot" aria-label="Not started"></span>
+        <h2 class="flex-1 text-sm font-semibold">Performance &amp; misc</h2>
+        <span class="chev sr-only" aria-hidden="true">▾</span>
+        <svg class="w-4 h-4 text-zinc-400 transition-transform duration-200 group-open:rotate-180 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+      </summary>
       <div class="card-body">
-        <div class="row"><label>MBIM modem</label>
-          <label class="inline"><input type="checkbox" id="CELLULAR_MODEM" name="CELLULAR_MODEM" value="1"> Enable (configure path/APN in LuCI after boot)</label>
-        </div>
-        <div class="row"><label>USB tethering</label>
-          <label class="inline"><input type="checkbox" id="USB_TETHERING" name="USB_TETHERING" value="1"> Enable (Android/iPhone, device usb0)</label>
+        <div class="space-y-3">
+          <label class="toggle-label">
+            <span class="toggle-wrap">
+              <input type="checkbox" id="SOFTWARE_OFFLOAD" name="SOFTWARE_OFFLOAD" value="1" class="toggle-input" checked>
+              <span class="toggle-track"></span>
+              <span class="toggle-thumb"></span>
+            </span>
+            <div>
+              <span class="toggle-text">Software flow offload</span>
+              <p class="form-help mt-0">On by default. Improves throughput. Disable if using QoS/SQM.</p>
+            </div>
+          </label>
+          <label class="toggle-label">
+            <span class="toggle-wrap">
+              <input type="checkbox" id="HARDWARE_OFFLOAD" name="HARDWARE_OFFLOAD" value="1" class="toggle-input">
+              <span class="toggle-track"></span>
+              <span class="toggle-thumb"></span>
+            </span>
+            <div>
+              <span class="toggle-text">Hardware flow offload</span>
+              <p class="form-help mt-0">Higher throughput where supported. <strong>Do not enable if using QoS/SQM.</strong> Implies software offload.</p>
+            </div>
+          </label>
+          <label class="toggle-label">
+            <span class="toggle-wrap">
+              <input type="checkbox" id="BLOCK_DOT_DOQ" name="BLOCK_DOT_DOQ" value="1" class="toggle-input">
+              <span class="toggle-track"></span>
+              <span class="toggle-thumb"></span>
+            </span>
+            <span class="toggle-text">Block DoT/DoQ <span class="text-zinc-500">(port 853 at firewall)</span></span>
+          </label>
         </div>
       </div>
-    </section>
+    </details>
 
-    <!-- 11. Additional Packages -->
-    <section class="card" id="card-pkgs" data-section="pkgs">
-      <header class="card-header"><span class="dot"></span><h2>Additional packages</h2><span class="chev">▾</span></header>
-      <div class="card-body">
-        <div class="row"><label for="additional_packages">Packages</label>
-          <textarea id="additional_packages" placeholder="space- or newline-separated, e.g. htop tcpdump"></textarea>
-          <div class="help">Appended to the final list as-is. Prefix with <code>-</code> to remove a default package.</div>
-        </div>
+    <!-- ── Status / progress / result ─────────────────────────────── -->
+    <div id="status" class="status hidden" role="status" aria-live="polite"></div>
+    <div id="progress" class="hidden mt-4">
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress-fill" style="width:0%"></div>
       </div>
-    </section>
-
-    <!-- 12. Performance & Misc -->
-    <section class="card" id="card-misc" data-section="misc">
-      <header class="card-header"><span class="dot"></span><h2>Performance &amp; misc</h2><span class="chev">▾</span></header>
-      <div class="card-body">
-        <div class="row"><label>Block DoT/DoQ</label>
-          <label class="inline"><input type="checkbox" id="BLOCK_DOT_DOQ" name="BLOCK_DOT_DOQ" value="1"> Block DNS-over-TLS/QUIC (port 853) at firewall</label>
-        </div>
-      </div>
-    </section>
-
-    <div class="actions">
-      <button class="btn btn-primary" type="button" id="build-btn" disabled>Build firmware</button>
-      <span id="build-hint" class="help" style="color:var(--muted)">Pick a version and device to enable build.</span>
-    </div>
-
-    <div id="status" class="status hidden"></div>
-    <div id="progress" class="hidden">
-      <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
-      <div id="progress-label" class="help" style="margin-top:6px"></div>
+      <p id="progress-label" class="form-help mt-1.5"></p>
     </div>
     <div id="result" class="hidden"></div>
-    <details id="config-preview-wrap" class="hidden" style="margin-top:12px">
-      <summary style="cursor:pointer">Config preview (what the server rendered)</summary>
+    <details id="config-preview-wrap" class="hidden mt-4">
+      <summary class="text-xs text-zinc-500 dark:text-zinc-400 cursor-pointer hover:text-zinc-700 dark:hover:text-zinc-200 select-none">
+        Config preview (what the server rendered)
+      </summary>
       <pre class="config-preview" id="config-preview"></pre>
     </details>
-  </main>
 
+    <!-- ── Build actions ───────────────────────────────────────────── -->
+    <div class="build-actions">
+      <button class="btn btn-primary" type="button" id="build-btn" disabled>Build firmware</button>
+      <span id="build-hint" class="text-xs text-zinc-500 dark:text-zinc-500">Pick a version and device to enable build.</span>
+    </div>
+
+  </main><!-- /main -->
+
+  <!-- Scripts -->
   <script src="/js/bcrypt.js"></script>
+  <script src="/js/theme.js"></script>
   <script src="/js/ui.js"></script>
   <script src="/js/tzdata.js"></script>
   <script src="/js/devices.js"></script>
   <script src="/js/build.js"></script>
   <script src="/js/app.js"></script>
-</body>
 
+</body>
 </html>

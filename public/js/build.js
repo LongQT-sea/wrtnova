@@ -6,19 +6,21 @@
   const $  = ui.$, $$ = ui.$$;
   const ASU = 'https://sysupgrade.openwrt.org';
 
-  // -------------------------------------- form serialization
-  function checkboxVal(id) { return $('#' + id).checked ? '1' : ''; }
+  // -------------------------------------- form serialization helpers
+  function checkboxVal(id) { const el = $('#' + id); return el && el.checked ? '1' : ''; }
   function textVal(id)     { return ($('#' + id) || {}).value || ''; }
 
   function collectConfig() {
-    const apMode = $('input[name="AP_MODE"]:checked').value;
+    const apMode  = $('input[name="AP_MODE"]:checked').value;
     const wanType = ($('input[name="wan_type"]:checked') || {}).value || 'dhcp';
-    const wgMode  = ($('input[name="wg_mode"]:checked')  || {}).value || 'disabled';
-    const tz = ui.collectTimezone();
+    const tz      = ui.collectTimezone();
 
-    const wgEnable = $('#WG_ENABLE').checked && apMode !== '1';
+    const isRouter   = apMode !== '1';
+    const wgEnable   = isRouter && $('#WG_ENABLE').checked;
+    const meshEnable = $('#WIRELESS_MESH') && $('#WIRELESS_MESH').checked;
+    const modemEn    = isRouter && $('#CELLULAR_MODEM') && $('#CELLULAR_MODEM').checked;
 
-    // Adguard hash. Empty plaintext -> empty string (script falls back to default).
+    // AdGuard hash. Empty plaintext → empty string (script falls back to default).
     let adguard = '';
     const rootpw = textVal('ROOT_PASSWD');
     if (rootpw && window.bcrypt) {
@@ -26,65 +28,84 @@
     }
 
     return {
-      AP_MODE:        apMode,
-      AP_INDEX:       apMode === '1' ? textVal('AP_INDEX') : '',
-      HOST_NAME:      textVal('HOST_NAME'),
-      ROOT_PASSWD:    rootpw,
-      SSH_PUBLIC_KEY: textVal('SSH_PUBLIC_KEY'),
-      SSH_PASSWD_AUTH: ($('input[name="SSH_PASSWD_AUTH"]:checked') || {}).value || '',
-      ZONE_NAME: tz.ZONE_NAME,
-      TIME_ZONE: tz.TIME_ZONE,
+      // ── Device mode ──────────────────────────────────────────────────────
+      AP_MODE:  apMode,
+      AP_INDEX: isRouter ? '' : textVal('AP_INDEX'),
 
-      // WAN
+      // ── System ───────────────────────────────────────────────────────────
+      HOST_NAME:       textVal('HOST_NAME'),
+      ROOT_PASSWD:     rootpw,
+      SSH_PUBLIC_KEY:  textVal('SSH_PUBLIC_KEY'),
+      SSH_PASSWD_AUTH: ($('input[name="SSH_PASSWD_AUTH"]:checked') || {}).value || '',
+      ZONE_NAME:       tz.ZONE_NAME,
+      TIME_ZONE:       tz.TIME_ZONE,
+
+      // ── WAN (router only) ─────────────────────────────────────────────────
       PPPOE_USERNAME: wanType === 'pppoe' ? textVal('PPPOE_USERNAME') : '',
       PPPOE_PASSWD:   wanType === 'pppoe' ? textVal('PPPOE_PASSWD')   : '',
       WAN_MAC_ADDR:   textVal('WAN_MAC_ADDR'),
       WAN_IS_TAGGED:  checkboxVal('WAN_IS_TAGGED'),
-      WAN_B_ENABLE:   checkboxVal('WAN_B_ENABLE'),
+      WAN_B_ENABLE:   isRouter ? checkboxVal('WAN_B_ENABLE') : '',
 
-      // Network
+      // ── Network ───────────────────────────────────────────────────────────
       BASE_NET_PREFIX: textVal('BASE_NET_PREFIX'),
-      DEFAULT_SUBNET:     textVal('DEFAULT_SUBNET'),
-      GUEST_ENABLE:       checkboxVal('GUEST_ENABLE'),
-      IOT_ENABLE:         checkboxVal('IOT_ENABLE'),
-      IOT_INTERNET:       $('#IOT_ENABLE').checked ? checkboxVal('IOT_INTERNET') : '',
-      WG_ENABLE:          wgEnable ? '1' : '',
+      DEFAULT_SUBNET:  textVal('DEFAULT_SUBNET'),
+      GUEST_ENABLE:    checkboxVal('GUEST_ENABLE'),
+      IOT_ENABLE:      checkboxVal('IOT_ENABLE'),
+      IOT_INTERNET:    $('#IOT_ENABLE').checked ? checkboxVal('IOT_INTERNET') : '',
+      WG_ENABLE:       wgEnable ? '1' : '',
 
-      // WiFi
-      COUNTRY_CODE: textVal('COUNTRY_CODE').toUpperCase(),
-      DENSE_ENV:    checkboxVal('DENSE_ENV'),
-      LAN_WIFI_SSID: textVal('LAN_WIFI_SSID'),  LAN_WIFI_PASSWD: textVal('LAN_WIFI_PASSWD'),
-      GUEST_WIFI_SSID: $('#GUEST_ENABLE').checked ? textVal('GUEST_WIFI_SSID') : '',
-      GUEST_WIFI_PASSWD: $('#GUEST_ENABLE').checked ? textVal('GUEST_WIFI_PASSWD') : '',
-      IOT_WIFI_SSID: $('#IOT_ENABLE').checked ? textVal('IOT_WIFI_SSID') : '',
-      IOT_WIFI_PASSWD: $('#IOT_ENABLE').checked ? textVal('IOT_WIFI_PASSWD') : '',
-      LAN_WG_WIFI_SSID: wgEnable ? textVal('LAN_WG_WIFI_SSID') : '',
+      // ── WiFi ──────────────────────────────────────────────────────────────
+      COUNTRY_CODE:   textVal('COUNTRY_CODE').toUpperCase(),
+      DENSE_ENV:      checkboxVal('DENSE_ENV'),
+      WIRELESS_MESH:  checkboxVal('WIRELESS_MESH'),
+      MESH_ID:        meshEnable ? textVal('MESH_ID')     : '',
+      MESH_PASSWD:    meshEnable ? textVal('MESH_PASSWD') : '',
+
+      LAN_WIFI_SSID:      textVal('LAN_WIFI_SSID'),
+      LAN_WIFI_PASSWD:    textVal('LAN_WIFI_PASSWD'),
+      GUEST_WIFI_SSID:    $('#GUEST_ENABLE').checked ? textVal('GUEST_WIFI_SSID')   : '',
+      GUEST_WIFI_PASSWD:  $('#GUEST_ENABLE').checked ? textVal('GUEST_WIFI_PASSWD') : '',
+      IOT_WIFI_SSID:      $('#IOT_ENABLE').checked   ? textVal('IOT_WIFI_SSID')     : '',
+      IOT_WIFI_PASSWD:    $('#IOT_ENABLE').checked   ? textVal('IOT_WIFI_PASSWD')   : '',
+      LAN_WG_WIFI_SSID:   wgEnable ? textVal('LAN_WG_WIFI_SSID')   : '',
       LAN_WG_WIFI_PASSWD: wgEnable ? textVal('LAN_WG_WIFI_PASSWD') : '',
       CHANNEL_2G:   textVal('CHANNEL_2G'),
       CHANNEL_5G:   textVal('CHANNEL_5G'),
       CHANNEL_6G:   textVal('CHANNEL_6G'),
       WIFI_LOG_LVL: textVal('WIFI_LOG_LVL'),
 
-      // Port forwarding / IPv6
-      PORT_FORWARD_LIST: apMode !== '1' ? ui.serializeRows('portfwd') : '',
-      IPV6_SERVER_LIST:  apMode !== '1' ? ui.serializeRows('ipv6')    : '',
+      // ── WireGuard VPN client (always collected when WG enabled) ───────────
+      // Leave any field blank to trigger WARP auto-register on the server.
+      WG_PRIVATE_KEY: wgEnable ? textVal('WG_PRIVATE_KEY') : '',
+      PEER_PUBLIC_KEY: wgEnable ? textVal('PEER_PUBLIC_KEY') : '',
+      ENDPOINT:        wgEnable ? textVal('ENDPOINT')        : '',
+      ENDPOINT_PORT:   wgEnable ? textVal('ENDPOINT_PORT')   : '',
+      PRESHARED_KEY:   wgEnable ? textVal('PRESHARED_KEY')   : '',
+      WG_IPV4:         wgEnable ? textVal('WG_IPV4')         : '',
+      WG_IPV6:         wgEnable ? textVal('WG_IPV6')         : '',
+      ALLOWED_IPS:     wgEnable ? textVal('ALLOWED_IPS')     : '',
 
-      // DDNS
-      DDNS_ENABLE:        apMode !== '1' ? checkboxVal('DDNS_ENABLE') : '',
-      LOOKUP_HOSTNAME:    $('#DDNS_ENABLE').checked ? textVal('LOOKUP_HOSTNAME')   : '',
-      CLOUDFLARE_API_KEY: $('#DDNS_ENABLE').checked ? textVal('CLOUDFLARE_API_KEY') : '',
+      // ── Port forwarding / IPv6 exposure (router only) ─────────────────────
+      PORT_FORWARD_LIST: isRouter ? ui.serializeRows('portfwd') : '',
+      IPV6_SERVER_LIST:  isRouter ? ui.serializeRows('ipv6')    : '',
 
-      // WG client
-      WG_IFACE: wgEnable ? (textVal('WG_IFACE') || 'vpn') : '',
-      _wg_mode: wgEnable ? wgMode : 'disabled',
+      // ── DDNS (router only) ─────────────────────────────────────────────────
+      DDNS_ENABLE:        isRouter ? checkboxVal('DDNS_ENABLE') : '',
+      LOOKUP_HOSTNAME:    isRouter ? textVal('LOOKUP_HOSTNAME')    : '',
+      CLOUDFLARE_API_KEY: isRouter ? textVal('CLOUDFLARE_API_KEY') : '',
 
-      // Failover
-      CELLULAR_MODEM: apMode !== '1' ? checkboxVal('CELLULAR_MODEM') : '',
-      USB_TETHERING: apMode !== '1' ? checkboxVal('USB_TETHERING') : '',
+      // ── Failover (router only) ────────────────────────────────────────────
+      CELLULAR_MODEM: isRouter ? checkboxVal('CELLULAR_MODEM') : '',
+      MODEM_PATH:     modemEn  ? textVal('MODEM_PATH') : '',
+      MODEM_APN:      modemEn  ? textVal('MODEM_APN')  : '',
+      USB_TETHERING:  isRouter ? checkboxVal('USB_TETHERING') : '',
 
-      // Misc
-      BLOCK_DOT_DOQ:   checkboxVal('BLOCK_DOT_DOQ'),
-      ADGUARD_PASSWD:  adguard,
+      // ── Performance & misc ────────────────────────────────────────────────
+      SOFTWARE_OFFLOAD: checkboxVal('SOFTWARE_OFFLOAD'),
+      HARDWARE_OFFLOAD: checkboxVal('HARDWARE_OFFLOAD'),
+      BLOCK_DOT_DOQ:    checkboxVal('BLOCK_DOT_DOQ'),
+      ADGUARD_PASSWD:   adguard,
     };
   }
 
@@ -114,11 +135,10 @@
       version_code: target.version_code,
       default_packages: target.default_packages,
       device_packages:  target.device_packages,
-      wrtnova_config: collectConfig(),
+      wrtnova_config:      collectConfig(),
       additional_packages: parseAdditionalPackages(),
-      warp_mode: (($('input[name="wg_mode"]:checked') || {}).value === 'warp')
-                  && $('#WG_ENABLE').checked
-                  && $('input[name="AP_MODE"]:checked').value !== '1',
+      // WARP refresh token lets the server reuse an existing WARP registration.
+      // Server infers WARP auto-fill from empty WG fields — no separate flag needed.
       warp_refresh_token: localStorage.getItem('wrtnova_warp_refresh') || '',
     };
 
@@ -153,7 +173,7 @@
     }
 
     if (resp.firmware_url) {
-      // cached build, no polling
+      // cached build — no polling needed
       renderResult({ firmware_url: resp.firmware_url, images: resp.images, bin_dir: resp.bin_dir });
       ui.setProgress('Done (cached build)', 100);
       $('#build-btn').disabled = false;
@@ -170,16 +190,16 @@
   };
 
   const PROGRESS_MAP = {
-    'init': [5,  'Initializing'],
-    'queued': [10, 'Queued'],
-    'started': [12, 'Starting build'],
-    'container-setup': [15, 'Setting up container'],
-    'download-imagebuilder': [20, 'Downloading imagebuilder'],
-    'validate-manifest': [30, 'Validating manifest'],
-    'unpack-imagebuilder': [40, 'Unpacking imagebuilder'],
-    'calculate-packages-hash': [60, 'Resolving packages'],
-    'building-image': [80, 'Building image'],
-    'build-successful': [100, 'Done'],
+    'init':                    [ 5,  'Initializing'],
+    'queued':                  [10,  'Queued'],
+    'started':                 [12,  'Starting build'],
+    'container-setup':         [15,  'Setting up container'],
+    'download-imagebuilder':   [20,  'Downloading imagebuilder'],
+    'validate-manifest':       [30,  'Validating manifest'],
+    'unpack-imagebuilder':     [40,  'Unpacking imagebuilder'],
+    'calculate-packages-hash': [60,  'Resolving packages'],
+    'building-image':          [80,  'Building image'],
+    'build-successful':        [100, 'Done'],
   };
 
   function pollAsu(hash) {
@@ -228,19 +248,21 @@
       : null);
 
     const wrap = $('#result'); wrap.classList.remove('hidden');
-    let html = '<div class="status success">Firmware ready.</div>';
+    let html = '<div class="result-wrap">';
     if (main) {
-      html += '<p><a class="btn btn-primary" style="display:inline-block;text-decoration:none;color:#fff" href="'
-            + main + '">Download '+ (sys ? sys.type : 'image') +' image</a></p>';
+      html += '<a class="btn btn-primary result-btn" href="' + main + '">'
+            + 'Download ' + (sys ? sys.type : 'image') + ' image</a>';
     }
     if (images.length > 1) {
-      html += '<details><summary>Other images</summary><ul>';
+      html += '<details class="result-other"><summary>Other images</summary><ul>';
       images.forEach(im => {
         const url = ASU + '/store/' + bin_dir + '/' + im.name;
-        html += '<li><a href="' + url + '">' + im.name + '</a> <small>(' + im.type + ', sha256: ' + (im.sha256||'').slice(0,16) + '…)</small></li>';
+        html += '<li><a href="' + url + '">' + im.name + '</a>'
+             + ' <small>(' + im.type + ', sha256: ' + (im.sha256 || '').slice(0, 16) + '…)</small></li>';
       });
       html += '</ul></details>';
     }
+    html += '</div>';
     wrap.innerHTML = html;
   }
 
