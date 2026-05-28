@@ -146,7 +146,7 @@
     if (lowRam) {
       pkgs.push('dnsproxy');
     } else {
-      pkgs.push('adguardhome', '-dnsproxy', 'luci-ssl');
+      pkgs.push('adguardhome', 'luci-ssl');
     }
     pkgs.push('zram-swap', 'luci-app-commands', 'ip-bridge');
 

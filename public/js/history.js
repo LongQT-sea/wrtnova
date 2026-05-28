@@ -144,10 +144,12 @@
     set('SSH_PUBLIC_KEY',  cfg.SSH_PUBLIC_KEY);
     radio('SSH_PASSWD_AUTH', cfg.SSH_PASSWD_AUTH);
 
-    // Timezone: set input value then fire input event so tzdata.js picks it up
+    // Timezone: use setTimezone so state.zoneName/tzString are updated, not just the input text
     if (cfg.ZONE_NAME) {
-      const tzEl = document.getElementById('timezone');
-      if (tzEl) { tzEl.value = cfg.ZONE_NAME; tzEl.dispatchEvent(new Event('input')); }
+      if (!ui.setTimezone(cfg.ZONE_NAME)) {
+        const tzEl = document.getElementById('timezone');
+        if (tzEl) tzEl.value = cfg.ZONE_NAME;
+      }
     }
 
     set('BASE_NET_PREFIX', cfg.BASE_NET_PREFIX);

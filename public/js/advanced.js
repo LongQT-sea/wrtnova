@@ -268,7 +268,7 @@
       label: 'WrtNova core',
       title: 'Essential packages WrtNova always installs',
       pkgs:  ['curl', 'ip-full', 'umdns', 'zram-swap', 'luci-app-commands', 'ip-bridge',
-              'adguardhome', '-dnsproxy', 'luci-ssl', 'luci-app-ddns', 'ddns-scripts-cloudflare'],
+              'adguardhome', 'luci-ssl', 'luci-app-ddns', 'ddns-scripts-cloudflare'],
     },
     {
       label: 'Full WiFi',

@@ -71,4 +71,17 @@
   ui.collectTimezone = function () {
     return { ZONE_NAME: state.zoneName, TIME_ZONE: state.tzString };
   };
+
+  // Set timezone by zone name without opening the dropdown (used by history restore).
+  ui.setTimezone = function (zoneName) {
+    const zone = state.zones.find(z => z.zoneName === zoneName);
+    if (!zone) return false;
+    const inp  = $('#timezone');
+    const help = $('#tz-help');
+    state.zoneName = zone.zoneName;
+    state.tzString = zone.tzString;
+    if (inp)  inp.value = zone.zoneName;
+    if (help) help.textContent = 'ZONE_NAME="' + zone.zoneName + '"  TIME_ZONE="' + zone.tzString + '"';
+    return true;
+  };
 })();

@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="WrtNova Advanced Builder — direct config editor and custom ASU endpoint.">
+  <title>WrtNova Advanced Builder</title>
+  <script>
+    (function(){
+      var s=localStorage.getItem('theme');
+      if(s==='light'||(!s&&!window.matchMedia('(prefers-color-scheme: dark)').matches)){
+        document.documentElement.classList.remove('dark');
+      }
+    })();
+  </script>
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="/fonts/ibm-plex-mono-v20-latin-regular.woff2">
+  <link rel="stylesheet" href="/style.css">
+  <!-- Monaco Editor -->
+  <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/min/vs/loader.js"></script>
+</head>
+
+<body class="bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 font-mono text-sm min-h-screen pb-24 md:pb-0">
+
+  <!-- ─── Header ──────────────────────────────────────────────────── -->
+  <header class="sticky top-0 z-40 bg-zinc-50/90 dark:bg-zinc-950/90 backdrop-blur-sm border-b border-zinc-200 dark:border-zinc-800">
+    <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
+      <div>
+        <h1 class="text-base font-semibold tracking-tight leading-tight">
+          <a href="/" class="hover:underline">WrtNova</a> <span class="text-zinc-500 dark:text-zinc-400 font-normal">advanced builder</span>
+        </h1>
+        <p class="hidden sm:block text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
+          Full config editor · custom ASU endpoint · direct browser→ASU submission.
+          <a href="/builder" class="underline hover:text-zinc-700 dark:hover:text-zinc-200">← Back to standard builder</a>
+        </p>
+      </div>
+      <button id="theme-toggle" type="button"
+              class="p-2 rounded-md text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors focus:outline-none focus:ring-2 focus:ring-accent"
+              aria-label="Toggle color theme">
+        <svg class="icon-sun w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        <svg class="icon-moon w-5 h-5 hidden" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- ─── Main ────────────────────────────────────────────────────── -->
+  <main class="max-w-5xl mx-auto px-4 py-6 space-y-4">
+
+    <!-- ── Firmware target ────────────────────────────────────────── -->
+    <details class="group card" id="card-target" data-section="target" open>
+      <summary class="card-header">
+        <span class="dot" aria-label="Not started"></span>
+        <h2 class="flex-1 text-sm font-semibold">Firmware target</h2>
+        <svg class="w-4 h-4 text-zinc-400 transition-transform duration-200 group-open:rotate-180 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+      </summary>
+      <div class="card-body">
+        <div class="form-row">
+          <label for="version" class="form-label">OpenWrt version</label>
+          <select id="version" class="input-base">
+            <option value="">Loading…</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label for="device" class="form-label">Device</label>
+          <div class="combo">
+            <input type="text" id="device" class="input-base" placeholder="Type to search (e.g. Archer C7)" autocomplete="off" disabled aria-autocomplete="list" aria-controls="device-list">
+            <div class="combo-list hidden" id="device-list" role="listbox" aria-label="Device suggestions"></div>
+          </div>
+        </div>
+        <div class="form-row">
+          <span class="form-label"></span>
+          <p id="device-info" class="form-help mt-0"></p>
+        </div>
+      </div>
+    </details>
+
+    <!-- ── Config editor ─────────────────────────────────────────── -->
+    <details class="group card" id="card-config" open>
+      <summary class="card-header">
+        <h2 class="flex-1 text-sm font-semibold">Config</h2>
+        <svg class="w-4 h-4 text-zinc-400 transition-transform duration-200 group-open:rotate-180 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+      </summary>
+      <div class="card-body" style="padding:0">
+        <div id="monaco-editor" style="height:min(680px,calc(100vh - 320px));min-height:360px;width:100%"></div>
+      </div>
+      <div class="info-note" role="note">
+        Edit the config variables directly. The script body (everything after the end-config marker) is appended automatically.
+      </div>
+    </details>
+
+    <!-- ── Additional packages ───────────────────────────────────── -->
+    <details class="group card" id="card-packages" open>
+      <summary class="card-header">
+        <h2 class="flex-1 text-sm font-semibold">Additional packages</h2>
+        <svg class="w-4 h-4 text-zinc-400 transition-transform duration-200 group-open:rotate-180 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+      </summary>
+      <div class="card-body">
+        <div id="preset-buttons" class="flex flex-wrap gap-1.5 mb-3"></div>
+        <textarea id="packages" class="input-base font-mono" rows="4"
+          placeholder="space or newline separated&#10;e.g. luci-app-ttyd kmod-usb3&#10;prefix with - to remove: -dnsmasq"></textarea>
+        <p class="form-help mt-2">Applied as a diff on top of the device's default packages (<code>diff_packages: true</code>). No WrtNova auto-resolution — you own the full list.</p>
+      </div>
+    </details>
+
+    <!-- ── ASU endpoint ───────────────────────────────────────────── -->
+    <details class="group card" id="card-asu">
+      <summary class="card-header">
+        <h2 class="flex-1 text-sm font-semibold">ASU endpoint</h2>
+        <svg class="w-4 h-4 text-zinc-400 transition-transform duration-200 group-open:rotate-180 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+      </summary>
+      <div class="card-body">
+        <div class="form-row">
+          <label for="asu-url" class="form-label">Build server URL</label>
+          <div>
+            <input type="url" id="asu-url" class="input-base" placeholder="https://sysupgrade.openwrt.org" autocomplete="off">
+            <p class="form-help">Leave blank to use the official OpenWrt ASU server. Point to a private instance if you run your own.</p>
+          </div>
+        </div>
+      </div>
+    </details>
+
+    <!-- ── Status / progress / result ───────────────────────────── -->
+    <div id="status" class="status hidden" role="status" aria-live="polite"></div>
+    <div id="progress" class="hidden mt-4">
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+      </div>
+      <p id="progress-label" class="form-help mt-1.5"></p>
+    </div>
+    <div id="result" class="hidden"></div>
+
+    <!-- ── Build actions ─────────────────────────────────────────── -->
+    <div class="build-actions">
+      <button class="btn btn-primary" type="button" id="build-btn" disabled>Build firmware</button>
+      <span id="build-hint" class="text-xs text-zinc-500 dark:text-zinc-400">Pick a device to enable build.</span>
+    </div>
+
+    <!-- ── Footer ────────────────────────────────────────────────── -->
+    <footer class="site-footer">
+      <p><a href="https://github.com/LongQT-sea/wrtnova" target="_blank" rel="noopener" aria-label="Source on GitHub">GitHub</a></p>
+    </footer>
+
+  </main>
+
+  <script src="/js/theme.js"></script>
+  <script src="/js/ui.js"></script>
+  <script src="/js/advanced.js"></script>
+  <script src="/js/devices.js"></script>
+</body>
+</html>
