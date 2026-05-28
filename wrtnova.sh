@@ -7,15 +7,6 @@
 
 # Router LAN IP is derived from NET_PREFIX.VLAN.1, e.g. 192.168.1.1 or 192.168.1.2 if AP mode
 
-# REQUIRES THESE ADDITIONAL PACKAGES:
-# Essential:	 luci-app-ddns ddns-scripts-cloudflare curl ip-full adguardhome -dnsproxy 
-# Multi WAN:	 luci-app-mwan3 
-# Full WiFi:	 -wpad-basic-mbedtls wpad-mbedtls luci-app-usteer luci-proto-batman-adv 
-# WireGuard:	 luci-proto-wireguard 
-# MBIM modem:	 luci-proto-modemmanager kmod-usb-net-cdc-mbim 
-# Tethering:	 kmod-usb-net-rndis kmod-usb-net-cdc-ncm kmod-usb-net-ipheth 
-# Optional:	 zram-swap luci-ssl luci-app-commands ip-bridge umdns
-
 # === System ===
 HOST_NAME=""		# Default: WrtNova
 ROOT_PASSWD=""
@@ -426,6 +417,7 @@ mesh_iface=${BATMAN_ADV:+bat0_}mesh0
 	[ $mesh_iface = "\$DEVICENAME" ] || exit 0
 	sleep 4
 	$set_mesh_param mesh_rssi_threshold -78
+	$set_mesh_param mesh_max_peer_links 6
 	EOF
 
 	[ "$AP_MODE" != 1 ] && {
