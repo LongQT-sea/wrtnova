@@ -130,6 +130,18 @@
     refresh();
   };
 
+  // ----------------------------------------- expand sections after device pick
+  ui.expandSectionsOnDevice = function (hasWifi) {
+    ['system', 'network', 'wan'].forEach(function (id) {
+      const el = document.getElementById('card-' + id);
+      if (el) el.open = true;
+    });
+    if (hasWifi) {
+      const wifi = document.getElementById('card-wifi');
+      if (wifi) wifi.open = true;
+    }
+  };
+
   // ----------------------------------- show/hide password toggle buttons
   // Toggles input type between password/text. Does NOT alter button content
   // (SVG icons stay intact). Updates aria-label for screen reader context.

@@ -4,8 +4,13 @@
 // in browser localStorage. Designed so we can later attach KV-backed server
 // state without breaking the storage model.
 
+import { guardResponse } from './_guard.js';
+
 export async function onRequest(context) {
-  const { request } = context;
+  const { request, env } = context;
+  const block = guardResponse(request, env);
+  if (block) return block;
+
   const url = new URL(request.url);
 
   const cookies = parseCookies(request.headers.get('cookie') || '');

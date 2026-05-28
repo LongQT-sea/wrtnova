@@ -196,7 +196,9 @@
       version_code: target.version_code,
       default_packages: target.default_packages,
       device_packages:  target.device_packages,
-      low_ram:           checkboxVal('LOW_RAM'),
+      device_title:        ($('#device') || {}).value || '',
+      low_ram:             checkboxVal('LOW_RAM'),
+      save_sensitive:      ($('#save-sensitive') || {}).checked === true,
       wrtnova_config:      collectConfig(),
       additional_packages: parseAdditionalPackages(),
     };
@@ -302,6 +304,15 @@
     const main = data.firmware_url || (sys && bin_dir
       ? ASU + '/store/' + bin_dir + '/' + sys.name
       : null);
+
+    // Patch history entry with final firmware_url (handles queued builds that polled to completion)
+    if (main) {
+      fetch('/api/history', {
+        method:  'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ firmware_url: main }),
+      }).catch(function () {});
+    }
 
     const wrap = $('#result'); wrap.classList.remove('hidden');
     let html = '<div class="result-wrap">';

@@ -1,9 +1,8 @@
 #!/usr/bin/env node
-// Regenerate functions/api/_wrtnova_template.js from wrtnova.sh.
-//
-// We embed only the body (everything after the '# End config section' marker)
-// because the config-variable block is rendered dynamically per build from
-// wrtnova_config submitted by the browser.
+// Regenerate build artifacts from wrtnova.sh:
+//   functions/api/_wrtnova_template.js  — Worker import (body b64)
+//   public/config-template.sh           — advanced editor pre-fill (config section)
+//   public/wrtnova-body.b64             — advanced page client-side script assembly
 
 import { readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
@@ -35,3 +34,10 @@ const out = [
 
 writeFileSync(resolve(root, 'functions/api/_wrtnova_template.js'), out);
 console.log('Wrote functions/api/_wrtnova_template.js  (' + body.length + ' bytes body)');
+
+const configSection = sh.slice(0, idx);
+writeFileSync(resolve(root, 'public/config-template.sh'), configSection);
+console.log('Wrote public/config-template.sh           (' + configSection.length + ' bytes)');
+
+writeFileSync(resolve(root, 'public/wrtnova-body.b64'), b64);
+console.log('Wrote public/wrtnova-body.b64             (' + b64.length + ' bytes)');

@@ -501,6 +501,9 @@
       justify-content: center;
       min-height: 44px;
     }
+    /* Empty hint span still occupies a flex slot and the gap shifts the button
+       left by gap/2. Hide it so the button is truly centred in the bar. */
+    #build-hint:empty { display: none; }
   }
 
   /* ── Build result ─────────────────────────────────────────────── */

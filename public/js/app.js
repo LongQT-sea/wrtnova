@@ -41,6 +41,7 @@
       ui.status('Init failed: ' + e.message, 'error');
     }
     ui.notifyTargetChanged && ui.notifyTargetChanged();
+    ui.loadHistory && ui.loadHistory();
   }
 
   if (document.readyState === 'loading') {

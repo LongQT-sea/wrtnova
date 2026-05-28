@@ -304,7 +304,22 @@
     $('#device-info').textContent =
       prof.target + ' • ' + defs + ' default + ' + devs + ' device pkgs • ' + (data.version_code || '');
     if (ui.renderAutoPackages) ui.renderAutoPackages();
+    const allPkgs = (data.default_packages || []).concat((dev.device_packages || []));
+    const hasWifi = /\bwpad[-\w]|\bhostapd|\bmac80211/.test(allPkgs.join(' '));
+    if (ui.expandSectionsOnDevice) ui.expandSectionsOnDevice(hasWifi);
   }
+
+  // -------------------------------------- programmatic device selection (used by history restore)
+  ui.selectDevice = async function (title) {
+    const profile = state.devicesByTitle && state.devicesByTitle[title];
+    if (!profile) return false;
+    $('#device').value    = title;
+    state.selectedTitle   = title;
+    state.selectedProfile = profile;
+    await loadProfileDetails();
+    ui.notifyTargetChanged && ui.notifyTargetChanged();
+    return true;
+  };
 
   // -------------------------------------- gather final build payload
   ui.collectTarget = function () {

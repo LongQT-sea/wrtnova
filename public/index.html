@@ -81,7 +81,7 @@
             </span>
             <div>
 			  <span class="toggle-text">This device has less than 230 MB RAM</span>
-              <p class="form-help mt-0">Replaces AdGuard Home with dnsproxy to reduce memory usage.</p>
+              <p class="form-help mt-0">Replaces AdGuard Home with dnsproxy.</p>
             </div>
           </label>
         </div>
@@ -102,14 +102,14 @@
           <label for="AP_INDEX" class="form-label">AP Index</label>
           <div>
             <input type="number" id="AP_INDEX" name="AP_INDEX" class="input-base" min="2" max="99" value="2" style="max-width:120px" oninput="document.getElementById('ap-index-preview').textContent=this.value||'2'">
-            <p class="form-help">Last octet 2–19. Router LAN IP becomes 192.168.1.<span id="ap-index-preview">2</span></p>
+            <p class="form-help">Last octet 2–19. LAN IP becomes 192.168.1.<span id="ap-index-preview">2</span></p>
           </div>
         </div>
       </div>
     </details>
 
     <!-- ── 1. System ───────────────────────────────────────────────── -->
-    <details class="group card" id="card-system" data-section="system" open>
+    <details class="group card" id="card-system" data-section="system">
       <summary class="card-header">
         <span class="dot" aria-label="Not started"></span>
         <h2 class="flex-1 text-sm font-semibold">System</h2>
@@ -169,7 +169,7 @@
     </details>
 
     <!-- ── 3. Network ──────────────────────────────────────────────── -->
-    <details class="group card" id="card-network" data-section="network" open>
+    <details class="group card" id="card-network" data-section="network">
       <summary class="card-header">
         <span class="dot" aria-label="Not started"></span>
         <h2 class="flex-1 text-sm font-semibold">Network</h2>
@@ -245,7 +245,7 @@
     </details>
 
     <!-- ── 4. WireGuard VPN client ─────────────────────────────────── -->
-    <details class="group card router-only wg-only hidden" id="card-wg" data-section="wg" open>
+    <details class="group card router-only wg-only hidden" id="card-wg" data-section="wg">
       <summary class="card-header">
         <span class="dot" aria-label="Not started"></span>
         <h2 class="flex-1 text-sm font-semibold">WireGuard VPN client</h2>
@@ -319,7 +319,7 @@
     </details>
 
     <!-- ── 5. WAN ───────────────────────────────────────────────────── -->
-    <details class="group card router-only" id="card-wan" data-section="wan" open>
+    <details class="group card router-only" id="card-wan" data-section="wan">
       <summary class="card-header">
         <span class="dot" aria-label="Not started"></span>
         <h2 class="flex-1 text-sm font-semibold">WAN</h2>
@@ -388,7 +388,7 @@
     </details>
 
     <!-- ── 6. WiFi ─────────────────────────────────────────────────── -->
-    <details class="group card" id="card-wifi" data-section="wifi" open>
+    <details class="group card" id="card-wifi" data-section="wifi">
       <summary class="card-header">
         <span class="dot" aria-label="Not started"></span>
         <h2 class="flex-1 text-sm font-semibold">WiFi</h2>
@@ -508,10 +508,10 @@
     </details>
 
     <!-- ── 7. Port Forwarding (IPv4) ───────────────────────────────── -->
-    <details class="group card router-only" id="card-portfwd" data-section="portfwd" open>
+    <details class="group card router-only" id="card-portfwd" data-section="portfwd">
       <summary class="card-header">
         <span class="dot" aria-label="Not started"></span>
-        <h2 class="flex-1 text-sm font-semibold">Port forwarding <span class="font-normal text-zinc-500 dark:text-zinc-400">(IPv4)</span></h2>
+        <h2 class="flex-1 text-sm font-semibold">IPv4 port forwarding</h2>
         <span class="chev sr-only" aria-hidden="true">▾</span>
         <svg class="w-4 h-4 text-zinc-400 transition-transform duration-200 group-open:rotate-180 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
       </summary>
@@ -538,10 +538,10 @@
     </details>
 
     <!-- ── 8. IPv6 Exposure ────────────────────────────────────────── -->
-    <details class="group card router-only" id="card-ipv6" data-section="ipv6" open>
+    <details class="group card router-only" id="card-ipv6" data-section="ipv6">
       <summary class="card-header">
         <span class="dot" aria-label="Not started"></span>
-        <h2 class="flex-1 text-sm font-semibold">IPv6 exposure</h2>
+        <h2 class="flex-1 text-sm font-semibold">IPv6 server exposure</h2>
         <span class="chev sr-only" aria-hidden="true">▾</span>
         <svg class="w-4 h-4 text-zinc-400 transition-transform duration-200 group-open:rotate-180 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
       </summary>
@@ -569,7 +569,7 @@
     </details>
 
     <!-- ── 9. DDNS ─────────────────────────────────────────────────── -->
-    <details class="group card router-only" id="card-ddns" data-section="ddns" open>
+    <details class="group card router-only" id="card-ddns" data-section="ddns">
       <summary class="card-header">
         <span class="dot" aria-label="Not started"></span>
         <h2 class="flex-1 text-sm font-semibold">DDNS <span class="font-normal text-zinc-500 dark:text-zinc-400">(Cloudflare)</span></h2>
@@ -664,7 +664,7 @@
     </details>
 
     <!-- ── 11. Additional Packages ─────────────────────────────────── -->
-    <details class="group card" id="card-pkgs" data-section="pkgs" open>
+    <details class="group card" id="card-pkgs" data-section="pkgs">
       <summary class="card-header">
         <span class="dot" aria-label="Not started"></span>
         <h2 class="flex-1 text-sm font-semibold">Additional packages</h2>
@@ -687,7 +687,7 @@
     </details>
 
     <!-- ── 12. Performance & Misc ──────────────────────────────────── -->
-    <details class="group card" id="card-misc" data-section="misc" open>
+    <details class="group card" id="card-misc" data-section="misc">
       <summary class="card-header">
         <span class="dot" aria-label="Not started"></span>
         <h2 class="flex-1 text-sm font-semibold">Performance &amp; misc</h2>
@@ -755,6 +755,21 @@
       <button class="btn btn-primary" type="button" id="build-btn" disabled>Build firmware</button>
       <span id="build-hint" class="text-xs text-zinc-500 dark:text-zinc-400">Pick a device to enable build.</span>
     </div>
+    <label class="flex items-center gap-2 text-xs text-zinc-400 dark:text-zinc-500 mt-2 cursor-pointer select-none">
+      <input type="checkbox" id="save-sensitive" class="w-3.5 h-3.5 accent-orange-500" checked>
+      <span>Save passwords &amp; keys to build history</span>
+    </label>
+
+    <!-- ── Recent builds ──────────────────────────────────────────── -->
+    <details class="group card mt-4" id="card-history">
+      <summary class="card-header">
+        <h2 class="flex-1 text-sm font-semibold">Recent builds</h2>
+        <svg class="w-4 h-4 text-zinc-400 transition-transform duration-200 group-open:rotate-180 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+      </summary>
+      <div id="history-body" class="card-body">
+        <p class="form-help">No builds yet.</p>
+      </div>
+    </details>
 
   </main><!-- /main -->
 
@@ -765,6 +780,7 @@
   <script src="/js/tzdata.js"></script>
   <script src="/js/devices.js"></script>
   <script src="/js/build.js"></script>
+  <script src="/js/history.js"></script>
   <script src="/js/app.js"></script>
 
 </body>
