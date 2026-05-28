@@ -125,6 +125,7 @@
   }
   .toggle-wrap {
     position: relative;
+    display: inline-flex;
     width: 2.25rem;  /* 36px */
     height: 1.25rem; /* 20px */
     flex-shrink: 0;
@@ -585,4 +586,158 @@
   /* ── Inline checkbox (for table/misc) ────────────────────────── */
   .inline { display: flex; gap: 0.5rem; align-items: center; }
   .inline > label { cursor: pointer; }
+
+  /* ── Per-network VLAN / addressing table ────────────────────────── */
+  .net-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 0.5rem;
+  }
+  .net-table thead th {
+    text-align: left;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #71717a;
+    padding: 0.4rem 0.5rem;
+    border-bottom: 1px solid #e4e4e7;
+    white-space: nowrap;
+  }
+  .dark .net-table thead th {
+    color: #a1a1aa;
+    border-bottom-color: #27272a;
+  }
+  .net-table td {
+    padding: 0.45rem 0.5rem;
+    border-bottom: 1px solid #f4f4f5;
+    vertical-align: middle;
+  }
+  .dark .net-table td { border-bottom-color: #1f1f23; }
+  .net-table tr:last-child td { border-bottom: none; }
+  .net-table .col-pfx { width: 18%; }
+  .net-table .col-vid { width: 11%; }
+  .net-table .col-sub { width: 24%; }
+  .net-table .col-ip  { width: 22%; }
+  .net-table .input-base {
+    font-size: 0.8125rem;
+    padding: 0.35rem 0.5rem;
+  }
+  .net-name {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-weight: 500;
+    font-size: 0.8125rem;
+    white-space: nowrap;
+  }
+  .net-fixed {
+    color: #a1a1aa;
+    font-size: 0.6875rem;
+  }
+  .net-derived {
+    font-size: 0.8125rem;
+    color: #3f3f46;
+    white-space: nowrap;
+  }
+  .dark .net-derived { color: #d4d4d8; }
+  .net-derived-sfx { color: #71717a; }
+  .dark .net-derived-sfx { color: #a1a1aa; }
+  .net-dup-warn { color: #d97706; }
+  .dark .net-dup-warn { color: #fbbf24; }
+  tr.net-off td:not(.col-en) { opacity: 0.35; }
+  tr.net-off td:not(.col-en) .input-base { pointer-events: none; }
+  .net-lan-toggle {
+    cursor: not-allowed;
+    opacity: 0.7;
+  }
+  /* Suppress number spinners on compact VID inputs */
+  .net-table [type="number"]::-webkit-inner-spin-button,
+  .net-table [type="number"]::-webkit-outer-spin-button,
+  .wan-vid-inp::-webkit-inner-spin-button,
+  .wan-vid-inp::-webkit-outer-spin-button { -webkit-appearance: none; }
+  .net-table [type="number"],
+  .wan-vid-inp { -moz-appearance: textfield; }
+  /* WAN VLAN ID rows — compact, indented, matching net-table row style */
+  .wan-vid-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.35rem 0.5rem 0.35rem calc(2.25rem + 0.625rem + 0.5rem);
+    border-bottom: 1px solid #f4f4f5;
+    margin-bottom: 0.25rem;
+  }
+  .dark .wan-vid-row { border-bottom-color: #1f1f23; }
+  .wan-vid-label {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    white-space: nowrap;
+    min-width: 7rem;
+  }
+  .wan-vid-hint {
+    font-size: 0.75rem;
+    color: #71717a;
+  }
+  .dark .wan-vid-hint { color: #a1a1aa; }
+  .wan-vid-inp {
+    font-size: 0.8125rem;
+    padding: 0.35rem 0.5rem;
+    max-width: 6rem;
+    flex-shrink: 0;
+  }
+  /* Make the hidden input a full-area transparent click target in the table */
+  .net-table .toggle-input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    clip: auto;
+    overflow: visible;
+    opacity: 0;
+    cursor: pointer;
+    white-space: normal;
+    border: 0;
+  }
+  .net-table .toggle-input:disabled { cursor: not-allowed; }
+  @media (max-width: 767px) {
+    .net-table thead { display: none; }
+    .net-table,
+    .net-table tbody,
+    .net-table tr,
+    .net-table td {
+      display: block;
+      width: 100%;
+    }
+    .net-table tr {
+      border: 1px solid #e4e4e7;
+      border-radius: 0.375rem;
+      padding: 0.5rem 0.25rem;
+      margin-bottom: 0.625rem;
+    }
+    .dark .net-table tr { border-color: #27272a; }
+    .net-table td {
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0.35rem 0.5rem;
+    }
+    .net-table td::before {
+      content: attr(data-label);
+      font-size: 0.6875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #a1a1aa;
+      flex-shrink: 0;
+    }
+    .net-table td.col-en::before { content: none; }
+    .net-table .col-pfx,
+    .net-table .col-vid,
+    .net-table .col-sub,
+    .net-table .col-ip { width: auto; }
+    .net-table .input-base { max-width: 60%; }
+  }
 }

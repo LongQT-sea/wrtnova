@@ -141,7 +141,6 @@
     set('AP_INDEX', cfg.AP_INDEX);
 
     set('HOST_NAME',       cfg.HOST_NAME);
-    set('ROOT_PASSWD',     cfg.ROOT_PASSWD);
     set('SSH_PUBLIC_KEY',  cfg.SSH_PUBLIC_KEY);
     radio('SSH_PASSWD_AUTH', cfg.SSH_PASSWD_AUTH);
 
@@ -158,6 +157,20 @@
     check('IOT_INTERNET',  cfg.IOT_INTERNET);
     check('WG_ENABLE',     cfg.WG_ENABLE);
 
+    set('LAN_BASE_PREFIX',    cfg.LAN_BASE_PREFIX);
+    set('LAN_VLAN_ID',        cfg.LAN_VLAN_ID);
+    set('LAN_SUBNET',         cfg.LAN_SUBNET);
+    set('GUEST_BASE_PREFIX',  cfg.GUEST_BASE_PREFIX);
+    set('GUEST_VLAN_ID',      cfg.GUEST_VLAN_ID);
+    set('GUEST_SUBNET',       cfg.GUEST_SUBNET);
+    set('IOT_BASE_PREFIX',    cfg.IOT_BASE_PREFIX);
+    set('IOT_VLAN_ID',        cfg.IOT_VLAN_ID);
+    set('IOT_SUBNET',         cfg.IOT_SUBNET);
+    set('LAN_WG_BASE_PREFIX', cfg.LAN_WG_BASE_PREFIX);
+    set('LAN_WG_VLAN_ID',     cfg.LAN_WG_VLAN_ID);
+    set('LAN_WG_SUBNET',      cfg.LAN_WG_SUBNET);
+    set('ADDITIONAL_VLAN_LIST', cfg.ADDITIONAL_VLAN_LIST);
+
     radio('wan_type', cfg.PPPOE_USERNAME ? 'pppoe' : 'dhcp');
     set('PPPOE_USERNAME', cfg.PPPOE_USERNAME);
     set('PPPOE_PASSWD',   cfg.PPPOE_PASSWD);
@@ -165,6 +178,7 @@
     check('WAN_IS_TAGGED', cfg.WAN_IS_TAGGED);
     set('WAN_VLAN_ID',    cfg.WAN_VLAN_ID);
     check('WAN_B_ENABLE',  cfg.WAN_B_ENABLE);
+    set('WAN_B_VLAN_ID',  cfg.WAN_B_VLAN_ID);
 
     set('COUNTRY_CODE',  cfg.COUNTRY_CODE);
     check('DENSE_ENV',   cfg.DENSE_ENV);

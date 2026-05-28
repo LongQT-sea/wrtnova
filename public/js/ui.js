@@ -85,6 +85,60 @@
     return lines.length ? '\n' + lines.join('\n') + '\n' : '';
   };
 
+  // ─────────────────────────────── per-network VLAN / addressing live sync
+  ui.syncNetworkRows = function () {
+    const basePfx  = (ui.$('#BASE_NET_PREFIX') || {}).value || '';
+    const defSub   = (ui.$('#DEFAULT_SUBNET')  || {}).value || '/24';
+    const rows     = ui.$$('.net-table tbody tr');
+    const seen     = {};
+    let   hasDup   = false;
+
+    // Fold ADDITIONAL_VLAN_LIST into the taken set
+    const trunkVids = {};
+    ((ui.$('#ADDITIONAL_VLAN_LIST') || {}).value || '').trim().split(/\s+/).forEach(function (tok) {
+      const rng = tok.match(/^(\d+)-(\d+)$/);
+      if (rng) { for (let v = +rng[1]; v <= +rng[2]; v++) trunkVids[v] = true; }
+      else if (/^\d+$/.test(tok)) trunkVids[+tok] = true;
+    });
+
+    rows.forEach(function (row) {
+      const isLan = row.dataset.net === 'lan';
+      const tog   = ui.$('.toggle-input', row);
+      const on    = isLan || (tog && tog.checked);
+      const pfxEl = row.querySelector('[id$="_BASE_PREFIX"]');
+      const vidEl = row.querySelector('[id$="_VLAN_ID"]');
+      const subEl = row.querySelector('select.input-base');
+      const ipEl  = ui.$('.net-derived', row);
+      const defEl = row.querySelector('.net-sub-def');
+
+      if (pfxEl) pfxEl.placeholder = basePfx || '192.168';
+      if (defEl) defEl.textContent  = 'Default (' + (defSub || '/24') + ')';
+
+      const effPfx  = (pfxEl && pfxEl.value.trim()) || basePfx || '192.168';
+      const effVid  = (vidEl && vidEl.value.trim()) || row.dataset.defVid;
+      const effSub  = (subEl && subEl.value)        || defSub || '/24';
+      const ap      = (ui.$('input[name="AP_MODE"]:checked') || {}).value === '1';
+      // In AP mode: LAN gets the AP index as last octet; Guest/IoT/WG get proto=none (no IP)
+      const hasIp   = on && effVid && (!ap || isLan);
+      const lastOct = (ap && isLan) ? ((ui.$('#AP_INDEX') || {}).value || '2') : '1';
+
+      if (ipEl) {
+        ipEl.innerHTML = hasIp
+          ? effPfx + '.' + effVid + '.' + lastOct + '<span class="net-derived-sfx">' + effSub + '</span>'
+          : '<span class="net-derived-sfx">—</span>';
+      }
+
+      if (on && effVid) {
+        const vid = +effVid;
+        if (seen[vid] || trunkVids[vid]) hasDup = true;
+        seen[vid] = true;
+      }
+    });
+
+    const warn = ui.$('#net-dup-warn');
+    if (warn) warn.classList.toggle('hidden', !hasDup);
+  };
+
   // ---------------------------------------------- conditional visibility wires
   ui.initConditionalVisibility = function () {
     function refresh() {
@@ -109,6 +163,7 @@
       // WireGuard client card: router-only — AP trunks back, no client config needed.
       const wgRouter = wgEnabled && !ap;
       ui.$$('.wg-only').forEach(el => el.classList.toggle('hidden', !wgRouter));
+      if (wgRouter) { const wgCard = ui.$('#card-wg'); if (wgCard) wgCard.open = true; }
       // Help text: swap between router and AP explanation when WG_ENABLE is on.
       ui.$$('.wg-help-router').forEach(el => el.classList.toggle('hidden', ap && wgEnabled));
       ui.$$('.wg-help-ap').forEach(el => el.classList.toggle('hidden', !(ap && wgEnabled)));
@@ -124,6 +179,17 @@
 
       const wanTagged = ui.$('#WAN_IS_TAGGED') && ui.$('#WAN_IS_TAGGED').checked;
       ui.$$('.wan-tagged-only').forEach(el => el.classList.toggle('hidden', !wanTagged));
+
+      const wanB = ui.$('#WAN_B_ENABLE') && ui.$('#WAN_B_ENABLE').checked;
+      ui.$$('.wan-b-only').forEach(el => el.classList.toggle('hidden', !wanB));
+
+      // Per-row net-off grey-out
+      ui.$$('.net-table tbody tr').forEach(function (row) {
+        if (row.dataset.net === 'lan') return;
+        const tog = ui.$('.toggle-input', row);
+        if (tog) row.classList.toggle('net-off', !tog.checked);
+      });
+      ui.syncNetworkRows();
     }
     document.body.addEventListener('change', refresh);
     document.body.addEventListener('input', refresh);

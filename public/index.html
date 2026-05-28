@@ -159,7 +159,7 @@
           <label for="timezone" class="form-label">Timezone</label>
           <div>
             <div class="combo">
-              <input type="text" id="timezone" class="input-base" placeholder="Type to search (e.g. Ho_Chi_Minh)" autocomplete="off" aria-autocomplete="list" aria-controls="tz-list">
+              <input type="text" id="timezone" class="input-base" placeholder="Type to search (e.g. New York)" autocomplete="off" aria-autocomplete="list" aria-controls="tz-list">
               <div class="combo-list hidden" id="tz-list" role="listbox" aria-label="Timezone suggestions"></div>
             </div>
             <p class="form-help" id="tz-help"></p>
@@ -199,47 +199,134 @@
         </div>
 
         <div class="sub-section">
-          <p class="sub-section-title">Networks</p>
-          <div class="space-y-2 mt-2">
-            <label class="toggle-label">
-              <span class="toggle-wrap">
-                <input type="checkbox" id="GUEST_ENABLE" name="GUEST_ENABLE" value="1" class="toggle-input" checked>
-                <span class="toggle-track"></span>
-                <span class="toggle-thumb"></span>
-              </span>
-              <span class="toggle-text">Guest network</span>
-            </label>
-            <div>
-              <label class="toggle-label">
-                <span class="toggle-wrap">
-                  <input type="checkbox" id="IOT_ENABLE" name="IOT_ENABLE" value="1" class="toggle-input">
-                  <span class="toggle-track"></span>
-                  <span class="toggle-thumb"></span>
-                </span>
-                <span class="toggle-text">IoT network</span>
-              </label>
-              <div class="iot-only hidden ml-10 mt-1">
-                <label class="toggle-label">
-                  <span class="toggle-wrap">
-                    <input type="checkbox" id="IOT_INTERNET" name="IOT_INTERNET" value="1" class="toggle-input">
+          <p class="sub-section-title">Networks &amp; addressing</p>
+          <table class="net-table">
+            <thead>
+              <tr>
+                <th>On</th>
+                <th>Network</th>
+                <th class="col-pfx">IP prefix</th>
+                <th class="col-vid">VLAN ID</th>
+                <th class="col-sub">Subnet</th>
+                <th class="col-ip">Router IP</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- LAN: always on -->
+              <tr data-net="lan" data-def-vid="1">
+                <td class="col-en">
+                  <span class="toggle-wrap net-lan-toggle">
+                    <input type="checkbox" class="toggle-input" checked disabled aria-label="LAN is always enabled">
                     <span class="toggle-track"></span>
                     <span class="toggle-thumb"></span>
                   </span>
-                  <span class="toggle-text text-xs">Enable internet access for IoT devices</span>
-                </label>
-              </div>
-            </div>
+                </td>
+                <td data-label="Network"><span class="net-name">LAN <span class="net-fixed">(always on)</span></span></td>
+                <td class="col-pfx" data-label="Prefix"><input type="text" id="LAN_BASE_PREFIX" name="LAN_BASE_PREFIX" class="input-base" placeholder="192.168"></td>
+                <td class="col-vid" data-label="VLAN"><input type="number" id="LAN_VLAN_ID" name="LAN_VLAN_ID" class="input-base" min="1" max="255" placeholder="1"></td>
+                <td class="col-sub" data-label="Subnet">
+                  <select id="LAN_SUBNET" name="LAN_SUBNET" class="input-base">
+                    <option value="" class="net-sub-def">Default (/24)</option>
+                    <option value="/24">/24</option>
+                    <option value="/23">/23</option>
+                    <option value="/22">/22</option>
+                  </select>
+                </td>
+                <td class="col-ip" data-label="Router IP"><span class="net-derived">—</span></td>
+              </tr>
+              <!-- Guest -->
+              <tr data-net="guest" data-def-vid="5">
+                <td class="col-en">
+                  <span class="toggle-wrap">
+                    <input type="checkbox" id="GUEST_ENABLE" name="GUEST_ENABLE" value="1" class="toggle-input" checked>
+                    <span class="toggle-track"></span>
+                    <span class="toggle-thumb"></span>
+                  </span>
+                </td>
+                <td data-label="Network"><span class="net-name">Guest</span></td>
+                <td class="col-pfx" data-label="Prefix"><input type="text" id="GUEST_BASE_PREFIX" name="GUEST_BASE_PREFIX" class="input-base" placeholder="192.168"></td>
+                <td class="col-vid" data-label="VLAN"><input type="number" id="GUEST_VLAN_ID" name="GUEST_VLAN_ID" class="input-base" min="1" max="255" placeholder="5"></td>
+                <td class="col-sub" data-label="Subnet">
+                  <select id="GUEST_SUBNET" name="GUEST_SUBNET" class="input-base">
+                    <option value="" class="net-sub-def">Default (/24)</option>
+                    <option value="/24">/24</option>
+                    <option value="/23">/23</option>
+                    <option value="/22">/22</option>
+                  </select>
+                </td>
+                <td class="col-ip" data-label="Router IP"><span class="net-derived">—</span></td>
+              </tr>
+              <!-- IoT -->
+              <tr data-net="iot" data-def-vid="10">
+                <td class="col-en">
+                  <span class="toggle-wrap">
+                    <input type="checkbox" id="IOT_ENABLE" name="IOT_ENABLE" value="1" class="toggle-input">
+                    <span class="toggle-track"></span>
+                    <span class="toggle-thumb"></span>
+                  </span>
+                </td>
+                <td data-label="Network"><span class="net-name">IoT</span></td>
+                <td class="col-pfx" data-label="Prefix"><input type="text" id="IOT_BASE_PREFIX" name="IOT_BASE_PREFIX" class="input-base" placeholder="192.168"></td>
+                <td class="col-vid" data-label="VLAN"><input type="number" id="IOT_VLAN_ID" name="IOT_VLAN_ID" class="input-base" min="1" max="255" placeholder="10"></td>
+                <td class="col-sub" data-label="Subnet">
+                  <select id="IOT_SUBNET" name="IOT_SUBNET" class="input-base">
+                    <option value="" class="net-sub-def">Default (/24)</option>
+                    <option value="/24">/24</option>
+                    <option value="/23">/23</option>
+                    <option value="/22">/22</option>
+                  </select>
+                </td>
+                <td class="col-ip" data-label="Router IP"><span class="net-derived">—</span></td>
+              </tr>
+              <!-- WireGuard VPN -->
+              <tr data-net="wg" data-def-vid="15">
+                <td class="col-en">
+                  <span class="toggle-wrap">
+                    <input type="checkbox" id="WG_ENABLE" name="WG_ENABLE" value="1" class="toggle-input">
+                    <span class="toggle-track"></span>
+                    <span class="toggle-thumb"></span>
+                  </span>
+                </td>
+                <td data-label="Network"><span class="net-name">WireGuard VPN</span></td>
+                <td class="col-pfx" data-label="Prefix"><input type="text" id="LAN_WG_BASE_PREFIX" name="LAN_WG_BASE_PREFIX" class="input-base" placeholder="192.168"></td>
+                <td class="col-vid" data-label="VLAN"><input type="number" id="LAN_WG_VLAN_ID" name="LAN_WG_VLAN_ID" class="input-base" min="1" max="255" placeholder="15"></td>
+                <td class="col-sub" data-label="Subnet">
+                  <select id="LAN_WG_SUBNET" name="LAN_WG_SUBNET" class="input-base">
+                    <option value="" class="net-sub-def">Default (/24)</option>
+                    <option value="/24">/24</option>
+                    <option value="/23">/23</option>
+                    <option value="/22">/22</option>
+                  </select>
+                </td>
+                <td class="col-ip" data-label="Router IP"><span class="net-derived">—</span></td>
+              </tr>
+            </tbody>
+          </table>
+
+          <!-- IoT internet toggle: shown only when IoT is on -->
+          <div class="iot-only hidden mt-2 pl-1">
             <label class="toggle-label">
               <span class="toggle-wrap">
-                <input type="checkbox" id="WG_ENABLE" name="WG_ENABLE" value="1" class="toggle-input">
+                <input type="checkbox" id="IOT_INTERNET" name="IOT_INTERNET" value="1" class="toggle-input">
                 <span class="toggle-track"></span>
                 <span class="toggle-thumb"></span>
               </span>
-              <span class="toggle-text">WireGuard VPN network</span>
+              <span class="toggle-text text-xs">Enable internet access for IoT devices</span>
             </label>
           </div>
-          <p class="form-help mt-2 wg-help-router">WireGuard VPN network creates a VLAN, a WiFi SSID, and activates the WireGuard client section.</p>
-          <p class="form-help mt-2 wg-help-ap hidden">In AP mode, WireGuard VPN network creates the VLAN and WiFi SSID only — the AP trunks tagged traffic back to the main router. No WireGuard client config is needed here.</p>
+
+          <p class="form-help mt-1 net-dup-warn hidden" id="net-dup-warn">⚠ Two or more enabled networks share a VLAN ID — the build will auto-resolve one of them.</p>
+
+          <p class="form-help mt-2 wg-help-router">WireGuard VPN network is a dedicated network with its own WiFi SSID; all its traffic is routed through the WireGuard VPN client.</p>
+          <p class="form-help mt-2 wg-help-ap hidden">In AP mode, WireGuard VPN network creates the VLAN and WiFi SSID only — the AP trunks the tagged traffic back to the main router.</p>
+
+          <div class="form-row" style="margin-top:1.25rem">
+            <label for="ADDITIONAL_VLAN_LIST" class="form-label">Additional trunk VLANs</label>
+            <div>
+              <input type="text" id="ADDITIONAL_VLAN_LIST" name="ADDITIONAL_VLAN_LIST" class="input-base" placeholder="e.g. 25 30 40  or  30-50">
+              <p class="form-help">Extra VLAN IDs to trunk (tagged) through every port on this device. Space-separated; ranges as low-high.</p>
+            </div>
+          </div>
         </div>
       </div>
     </details>
@@ -358,30 +445,39 @@
         </div>
         <div class="sub-section">
           <p class="sub-section-title">WAN options</p>
-          <div class="space-y-2 mt-2">
-            <label class="toggle-label">
-              <span class="toggle-wrap">
-                <input type="checkbox" id="WAN_IS_TAGGED" name="WAN_IS_TAGGED" value="1" class="toggle-input">
-                <span class="toggle-track"></span>
-                <span class="toggle-thumb"></span>
-              </span>
-              <span class="toggle-text">Tagged WAN VLAN <span class="text-zinc-500 dark:text-zinc-400">(required by some ISPs)</span></span>
-            </label>
-            <div class="wan-tagged-only hidden form-row" style="margin-top:0.5rem">
-              <label for="WAN_VLAN_ID" class="form-label">WAN VLAN ID</label>
-              <div>
-                <input type="number" id="WAN_VLAN_ID" name="WAN_VLAN_ID" class="input-base" min="1" max="4094" placeholder="20" style="max-width:120px">
-                <p class="form-help">802.1Q VLAN tag for the WAN interface. Default: 20.</p>
+          <div class="mt-2 space-y-1">
+            <!-- Group 1: Tagged WAN VLAN -->
+            <div>
+              <label class="toggle-label">
+                <span class="toggle-wrap">
+                  <input type="checkbox" id="WAN_IS_TAGGED" name="WAN_IS_TAGGED" value="1" class="toggle-input">
+                  <span class="toggle-track"></span>
+                  <span class="toggle-thumb"></span>
+                </span>
+                <span class="toggle-text">Tagged WAN VLAN <span class="text-zinc-500 dark:text-zinc-400">(required by some ISPs)</span></span>
+              </label>
+              <div class="wan-vid-row wan-tagged-only hidden">
+                <span class="wan-vid-label">WAN VLAN ID</span>
+                <input type="number" id="WAN_VLAN_ID" name="WAN_VLAN_ID" class="input-base wan-vid-inp" min="1" max="4094" placeholder="20">
+                <span class="wan-vid-hint">802.1Q VLAN tag for the WAN interface. Default: 20.</span>
               </div>
             </div>
-            <label class="toggle-label">
-              <span class="toggle-wrap">
-                <input type="checkbox" id="WAN_B_ENABLE" name="WAN_B_ENABLE" value="1" class="toggle-input">
-                <span class="toggle-track"></span>
-                <span class="toggle-thumb"></span>
-              </span>
-              <span class="toggle-text">Enable secondary WAN (WAN-B)</span>
-            </label>
+            <!-- Group 2: WAN-B -->
+            <div>
+              <label class="toggle-label">
+                <span class="toggle-wrap">
+                  <input type="checkbox" id="WAN_B_ENABLE" name="WAN_B_ENABLE" value="1" class="toggle-input">
+                  <span class="toggle-track"></span>
+                  <span class="toggle-thumb"></span>
+                </span>
+                <span class="toggle-text">Enable secondary WAN (WAN-B)</span>
+              </label>
+              <div class="wan-vid-row wan-b-only hidden">
+                <span class="wan-vid-label">WAN-B VLAN ID</span>
+                <input type="number" id="WAN_B_VLAN_ID" name="WAN_B_VLAN_ID" class="input-base wan-vid-inp" min="1" max="4094" placeholder="21">
+                <span class="wan-vid-hint">802.1Q VLAN tag for WAN-B. Default: 21.</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -398,7 +494,7 @@
       <div class="card-body">
         <div class="form-row">
           <label for="COUNTRY_CODE" class="form-label">Country code</label>
-          <input type="text" id="COUNTRY_CODE" name="COUNTRY_CODE" class="input-base" maxlength="2" placeholder="VN" style="max-width:80px;text-transform:uppercase">
+          <input type="text" id="COUNTRY_CODE" name="COUNTRY_CODE" class="input-base" maxlength="2" placeholder="US" style="max-width:80px;text-transform:uppercase">
         </div>
         <div class="form-row">
           <label class="form-label">Dense environment</label>
@@ -755,11 +851,6 @@
       <button class="btn btn-primary" type="button" id="build-btn" disabled>Build firmware</button>
       <span id="build-hint" class="text-xs text-zinc-500 dark:text-zinc-400">Pick a device to enable build.</span>
     </div>
-    <label class="flex items-center gap-2 text-xs text-zinc-400 dark:text-zinc-500 mt-2 cursor-pointer select-none">
-      <input type="checkbox" id="save-sensitive" class="w-3.5 h-3.5 accent-orange-500" checked>
-      <span>Save passwords &amp; keys to build history</span>
-    </label>
-
     <!-- ── Recent builds ──────────────────────────────────────────── -->
     <details class="group card mt-4" id="card-history">
       <summary class="card-header">

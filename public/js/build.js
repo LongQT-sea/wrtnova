@@ -48,6 +48,7 @@
       WAN_IS_TAGGED:  checkboxVal('WAN_IS_TAGGED'),
       WAN_VLAN_ID:    checkboxVal('WAN_IS_TAGGED') ? textVal('WAN_VLAN_ID') : '',
       WAN_B_ENABLE:   isRouter ? checkboxVal('WAN_B_ENABLE') : '',
+      WAN_B_VLAN_ID:  (isRouter && $('#WAN_B_ENABLE').checked) ? textVal('WAN_B_VLAN_ID') : '',
 
       // ── Network ───────────────────────────────────────────────────────────
       BASE_NET_PREFIX: textVal('BASE_NET_PREFIX'),
@@ -56,6 +57,21 @@
       IOT_ENABLE:      checkboxVal('IOT_ENABLE'),
       IOT_INTERNET:    $('#IOT_ENABLE').checked ? checkboxVal('IOT_INTERNET') : '',
       WG_ENABLE:       wgEnable ? '1' : '',
+
+      // ── Per-network addressing (blank = inherit default) ──────────────────
+      LAN_BASE_PREFIX:    textVal('LAN_BASE_PREFIX'),
+      LAN_VLAN_ID:        textVal('LAN_VLAN_ID'),
+      LAN_SUBNET:         textVal('LAN_SUBNET'),
+      GUEST_BASE_PREFIX:  $('#GUEST_ENABLE').checked ? textVal('GUEST_BASE_PREFIX') : '',
+      GUEST_VLAN_ID:      $('#GUEST_ENABLE').checked ? textVal('GUEST_VLAN_ID')     : '',
+      GUEST_SUBNET:       $('#GUEST_ENABLE').checked ? textVal('GUEST_SUBNET')       : '',
+      IOT_BASE_PREFIX:    $('#IOT_ENABLE').checked   ? textVal('IOT_BASE_PREFIX')   : '',
+      IOT_VLAN_ID:        $('#IOT_ENABLE').checked   ? textVal('IOT_VLAN_ID')       : '',
+      IOT_SUBNET:         $('#IOT_ENABLE').checked   ? textVal('IOT_SUBNET')         : '',
+      LAN_WG_BASE_PREFIX: wgEnable ? textVal('LAN_WG_BASE_PREFIX') : '',
+      LAN_WG_VLAN_ID:     wgEnable ? textVal('LAN_WG_VLAN_ID')     : '',
+      LAN_WG_SUBNET:      wgEnable ? textVal('LAN_WG_SUBNET')       : '',
+      ADDITIONAL_VLAN_LIST: textVal('ADDITIONAL_VLAN_LIST'),
 
       // ── WiFi ──────────────────────────────────────────────────────────────
       COUNTRY_CODE:   textVal('COUNTRY_CODE').toUpperCase(),
@@ -198,7 +214,6 @@
       device_packages:  target.device_packages,
       device_title:        ($('#device') || {}).value || '',
       low_ram:             checkboxVal('LOW_RAM'),
-      save_sensitive:      ($('#save-sensitive') || {}).checked === true,
       wrtnova_config:      collectConfig(),
       additional_packages: parseAdditionalPackages(),
     };
@@ -234,6 +249,7 @@
       // cached build — no polling needed
       renderResult({ firmware_url: resp.firmware_url, images: resp.images, bin_dir: resp.bin_dir });
       ui.setProgress('Done (cached build)', 100);
+      ui.status('Build complete (cached).', 'success');
       $('#build-btn').disabled = false;
       return;
     }
