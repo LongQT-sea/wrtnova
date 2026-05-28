@@ -199,9 +199,6 @@
       low_ram:           checkboxVal('LOW_RAM'),
       wrtnova_config:      collectConfig(),
       additional_packages: parseAdditionalPackages(),
-      // WARP refresh token lets the server reuse an existing WARP registration.
-      // Server infers WARP auto-fill from empty WG fields — no separate flag needed.
-      warp_refresh_token: localStorage.getItem('wrtnova_warp_refresh') || '',
     };
 
     $('#build-btn').disabled = true;
@@ -226,9 +223,6 @@
       return;
     }
 
-    if (resp.warp_refresh_token) {
-      localStorage.setItem('wrtnova_warp_refresh', resp.warp_refresh_token);
-    }
     if (resp.config_preview) {
       $('#config-preview').textContent = resp.config_preview;
       $('#config-preview-wrap').classList.remove('hidden');
@@ -326,6 +320,70 @@
     }
     html += '</div>';
     wrap.innerHTML = html;
+  }
+
+  // -------------------------------------- WARP prefill button
+  function initWarpPrefill() {
+    const btn = $('#warp-prefill-btn');
+    if (!btn) return;
+    const msg = $('#warp-prefill-msg');
+    let dismissTimer;
+
+    btn.addEventListener('click', async () => {
+      btn.disabled = true;
+      const origText = btn.textContent;
+      btn.textContent = 'Fetching WARP…';
+      if (msg) { msg.textContent = ''; msg.classList.add('hidden'); }
+      clearTimeout(dismissTimer);
+
+      try {
+        const r = await fetch('/api/warp/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            warp_refresh_token: localStorage.getItem('wrtnova_warp_refresh') || '',
+          }),
+        });
+        let data;
+        try { data = await r.json(); } catch (_) { data = {}; }
+        if (!r.ok) throw new Error(data.message || data.error || ('HTTP ' + r.status));
+
+        const setField = (id, val) => { const el = $('#' + id); if (el) el.value = val || ''; };
+        setField('WG_PRIVATE_KEY',  data.WG_PRIVATE_KEY);
+        setField('PEER_PUBLIC_KEY', data.PEER_PUBLIC_KEY);
+        setField('ENDPOINT',        data.ENDPOINT);
+        setField('ENDPOINT_PORT',   data.ENDPOINT_PORT);
+        setField('WG_IPV4',         data.WG_IPV4);
+        setField('WG_IPV6',         data.WG_IPV6);
+        setField('ALLOWED_IPS',     data.ALLOWED_IPS);
+
+        if (data.warp_refresh_token) {
+          localStorage.setItem('wrtnova_warp_refresh', data.warp_refresh_token);
+        }
+
+        if (msg) {
+          msg.textContent = '✓ Filled from Cloudflare WARP';
+          msg.style.color = '#16a34a';
+          msg.classList.remove('hidden');
+          dismissTimer = setTimeout(() => msg.classList.add('hidden'), 5000);
+        }
+      } catch (e) {
+        if (msg) {
+          msg.textContent = e.message;
+          msg.style.color = '#dc2626';
+          msg.classList.remove('hidden');
+        }
+      } finally {
+        btn.textContent = origText;
+        btn.disabled = false;
+      }
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initWarpPrefill);
+  } else {
+    initWarpPrefill();
   }
 
   // -------------------------------------- expose build enable/disable signal

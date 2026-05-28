@@ -238,7 +238,7 @@
               <span class="toggle-text">WireGuard VPN network</span>
             </label>
           </div>
-          <p class="form-help mt-2 wg-help-router">WireGuard VPN network creates a VLAN, a WiFi SSID, and activates the WireGuard client section. Leave WG fields blank to auto-register Cloudflare WARP.</p>
+          <p class="form-help mt-2 wg-help-router">WireGuard VPN network creates a VLAN, a WiFi SSID, and activates the WireGuard client section.</p>
           <p class="form-help mt-2 wg-help-ap hidden">In AP mode, WireGuard VPN network creates the VLAN and WiFi SSID only — the AP trunks tagged traffic back to the main router. No WireGuard client config is needed here.</p>
         </div>
       </div>
@@ -253,11 +253,19 @@
         <svg class="w-4 h-4 text-zinc-400 transition-transform duration-200 group-open:rotate-180 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
       </summary>
       <div class="card-body">
+        <p class="form-help">Don't have a WireGuard provider? Use Cloudflare's free WARP.</p>
+        <div class="form-row" style="margin-top:0.5rem">
+          <span class="form-label"></span>
+          <div>
+            <button id="warp-prefill-btn" type="button" class="btn">Prefill with Cloudflare WARP</button>
+            <p id="warp-prefill-msg" class="form-help mt-1 hidden"></p>
+          </div>
+        </div>
         <div class="form-row">
           <label for="WG_PRIVATE_KEY" class="form-label">Private key</label>
           <div>
             <div class="relative">
-              <input type="password" id="WG_PRIVATE_KEY" name="WG_PRIVATE_KEY" class="input-base" style="padding-right:2.5rem" autocomplete="off" placeholder="leave blank for WARP auto-register">
+              <input type="password" id="WG_PRIVATE_KEY" name="WG_PRIVATE_KEY" class="input-base" style="padding-right:2.5rem" autocomplete="off" placeholder="base64-encoded private key">
               <button type="button" id="toggle-wg-privkey"
                       class="btn btn-ghost btn-icon absolute right-1.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
                       aria-label="Show private key">
@@ -268,7 +276,7 @@
         </div>
         <div class="form-row">
           <label for="PEER_PUBLIC_KEY" class="form-label">Peer public key</label>
-          <input type="text" id="PEER_PUBLIC_KEY" name="PEER_PUBLIC_KEY" class="input-base" placeholder="leave blank for WARP auto-register" autocomplete="off">
+          <input type="text" id="PEER_PUBLIC_KEY" name="PEER_PUBLIC_KEY" class="input-base" placeholder="base64-encoded public key" autocomplete="off">
         </div>
         <div class="form-row">
           <label for="ENDPOINT" class="form-label">Endpoint</label>
@@ -577,6 +585,7 @@
               <span class="toggle-track"></span>
               <span class="toggle-thumb"></span>
             </span>
+            <span class="sr-only">Enable DDNS</span>
           </label>
         </div>
         <!-- Always visible regardless of DDNS_ENABLE toggle -->
