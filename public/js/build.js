@@ -373,7 +373,12 @@
         });
         let data;
         try { data = await r.json(); } catch (_) { data = {}; }
-        if (!r.ok) throw new Error(data.message || data.error || ('HTTP ' + r.status));
+        if (!r.ok) {
+          const friendly = r.status === 429 || (data.message || '').includes('429')
+            ? 'Too many requests — wait a moment and try again'
+            : (data.message || data.error || 'WARP registration failed — try again shortly');
+          throw new Error(friendly);
+        }
 
         const setField = (id, val) => { const el = $('#' + id); if (el) el.value = val || ''; };
         setField('WG_PRIVATE_KEY',  data.WG_PRIVATE_KEY);

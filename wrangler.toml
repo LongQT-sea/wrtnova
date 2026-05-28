@@ -9,7 +9,7 @@ compatibility_flags = ["nodejs_compat"]
 #command = "npm run build:css && node scripts/embed-wrtnova.mjs"
 
 [vars]
-ALLOWED_ORIGIN = "https://wrtnova.pages.dev"
+ALLOWED_ORIGIN = "https://wrtnova.com"
 # ASU_URL = "https://sysupgrade.openwrt.org"  # uncomment to override; defaults to official ASU
 
 # ── Rate limiting (configure in CF dashboard, not here) ──────────────────────
