@@ -23,8 +23,9 @@
     // AdGuard hash. Empty plaintext → empty string (script falls back to default).
     let adguard = '';
     const rootpw = textVal('ROOT_PASSWD');
-    if (rootpw && window.bcrypt) {
-      try { adguard = window.bcrypt.hashSync(rootpw, 10); } catch (e) { /* leave empty */ }
+    const bcrypt = window.dcodeIO && window.dcodeIO.bcrypt;
+	if (rootpw && bcrypt) {
+      try { adguard = bcrypt.hashSync(rootpw, 10); } catch (e) { /* leave empty */ }
     }
 
     return {
@@ -45,6 +46,7 @@
       PPPOE_PASSWD:   wanType === 'pppoe' ? textVal('PPPOE_PASSWD')   : '',
       WAN_MAC_ADDR:   textVal('WAN_MAC_ADDR'),
       WAN_IS_TAGGED:  checkboxVal('WAN_IS_TAGGED'),
+      WAN_VLAN_ID:    checkboxVal('WAN_IS_TAGGED') ? textVal('WAN_VLAN_ID') : '',
       WAN_B_ENABLE:   isRouter ? checkboxVal('WAN_B_ENABLE') : '',
 
       // ── Network ───────────────────────────────────────────────────────────
@@ -116,6 +118,65 @@
       .filter(Boolean);
   }
 
+  // Mirror of server-side resolvePackages additions — keep in sync with functions/api/build.js.
+  function computeAutoPackages() {
+    const target  = ui.collectTarget && ui.collectTarget();
+    const cfg     = collectConfig();
+    const base    = target ? [...(target.default_packages || []), ...(target.device_packages || [])] : [];
+    const lowRam  = checkboxVal('LOW_RAM') === '1';
+    const pkgs    = [];
+
+    pkgs.push('curl', 'ip-full', 'umdns');
+    if (lowRam) {
+      pkgs.push('dnsproxy');
+    } else {
+      pkgs.push('adguardhome', '-dnsproxy', 'luci-ssl');
+    }
+    pkgs.push('zram-swap', 'luci-app-commands', 'ip-bridge');
+
+    const multiWan = cfg.WAN_B_ENABLE === '1' || cfg.WWAN_ENABLE === '1' ||
+                     cfg.CELLULAR_MODEM === '1' || cfg.USB_TETHERING === '1';
+    if (multiWan) pkgs.push('luci-app-mwan3');
+
+    const hasWifi = /\bwpad-?|\bhostapd|\bmac80211/.test(base.join(' ')) ||
+                    Object.entries(cfg).some(([k, v]) => /WIFI/.test(k) && v);
+    if (hasWifi) pkgs.push('-wpad-basic-mbedtls', 'wpad-mbedtls', 'luci-app-usteer');
+
+    pkgs.push('luci-app-ddns', 'ddns-scripts-cloudflare');
+    if (cfg.WG_ENABLE === '1' && cfg.AP_MODE !== '1') pkgs.push('luci-proto-wireguard');
+    if (cfg.CELLULAR_MODEM === '1') pkgs.push('luci-proto-modemmanager', 'kmod-usb-net-cdc-mbim');
+    if (cfg.USB_TETHERING === '1') pkgs.push('kmod-usb-net-rndis', 'kmod-usb-net-cdc-ncm', 'kmod-usb-net-ipheth');
+
+    return pkgs;
+  }
+
+  function renderAutoPackages() {
+    const el = $('#auto-packages');
+    if (!el) return;
+    const pkgs = computeAutoPackages();
+    el.innerHTML = pkgs.map(p => {
+      const isRemoval = p.startsWith('-');
+      const cls = isRemoval
+        ? 'inline-flex items-center px-2 py-0.5 rounded text-xs font-mono bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400 line-through'
+        : 'inline-flex items-center px-2 py-0.5 rounded text-xs font-mono bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300';
+      return `<span class="${cls}">${p}</span>`;
+    }).join(' ');
+  }
+
+  ui.renderAutoPackages = renderAutoPackages;
+
+  // Re-render chips whenever any input in the form changes or device is picked.
+  function initAutoPackages() {
+    document.body.addEventListener('change', renderAutoPackages);
+    document.body.addEventListener('input',  renderAutoPackages);
+    renderAutoPackages();
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initAutoPackages);
+  } else {
+    initAutoPackages();
+  }
+
   // -------------------------------------- main build flow
   let polling = null;
 
@@ -135,6 +196,7 @@
       version_code: target.version_code,
       default_packages: target.default_packages,
       device_packages:  target.device_packages,
+      low_ram:           checkboxVal('LOW_RAM'),
       wrtnova_config:      collectConfig(),
       additional_packages: parseAdditionalPackages(),
       // WARP refresh token lets the server reuse an existing WARP registration.
@@ -271,7 +333,7 @@
     const t = ui.collectTarget && ui.collectTarget();
     const ok = !!t;
     $('#build-btn').disabled = !ok;
-    $('#build-hint').textContent = ok ? '' : 'Pick a version and device to enable build.';
+    $('#build-hint').textContent = ok ? '' : 'Pick a device to enable build.';
     if (ok) ui.setDot('target', 'valid');
   };
 })();

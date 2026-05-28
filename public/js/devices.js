@@ -303,6 +303,7 @@
     const devs = (dev.device_packages || []).length;
     $('#device-info').textContent =
       prof.target + ' • ' + defs + ' default + ' + devs + ' device pkgs • ' + (data.version_code || '');
+    if (ui.renderAutoPackages) ui.renderAutoPackages();
   }
 
   // -------------------------------------- gather final build payload

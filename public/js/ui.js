@@ -121,6 +121,9 @@
 
       const modem = ui.$('#CELLULAR_MODEM') && ui.$('#CELLULAR_MODEM').checked;
       ui.$$('.modem-only').forEach(el => el.classList.toggle('hidden', !modem));
+
+      const wanTagged = ui.$('#WAN_IS_TAGGED') && ui.$('#WAN_IS_TAGGED').checked;
+      ui.$$('.wan-tagged-only').forEach(el => el.classList.toggle('hidden', !wanTagged));
     }
     document.body.addEventListener('change', refresh);
     document.body.addEventListener('input', refresh);

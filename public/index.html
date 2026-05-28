@@ -71,18 +71,20 @@
           <span class="form-label"></span>
           <p id="device-info" class="form-help mt-0"></p>
         </div>
-      </div>
-    </details>
-
-    <!-- ── 1. Device Mode ──────────────────────────────────────────── -->
-    <details class="group card" id="card-mode" data-section="mode" open>
-      <summary class="card-header">
-        <span class="dot" aria-label="Not started"></span>
-        <h2 class="flex-1 text-sm font-semibold">Device mode</h2>
-        <span class="chev sr-only" aria-hidden="true">▾</span>
-        <svg class="w-4 h-4 text-zinc-400 transition-transform duration-200 group-open:rotate-180 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
-      </summary>
-      <div class="card-body">
+        <div class="form-row">
+          <span class="form-label"></span>
+          <label class="toggle-label">
+            <span class="toggle-wrap">
+              <input type="checkbox" id="LOW_RAM" name="LOW_RAM" value="1" class="toggle-input">
+              <span class="toggle-track"></span>
+              <span class="toggle-thumb"></span>
+            </span>
+            <div>
+			  <span class="toggle-text">This device has less than 230 MB RAM</span>
+              <p class="form-help mt-0">Replaces AdGuard Home with dnsproxy to reduce memory usage.</p>
+            </div>
+          </label>
+        </div>
         <div class="form-row">
           <label class="form-label">Mode</label>
           <div class="radio-seg" role="radiogroup" aria-label="Device mode">
@@ -97,16 +99,16 @@
           </div>
         </div>
         <div class="form-row ap-only hidden">
-          <label for="AP_INDEX" class="form-label">AP management IP</label>
+          <label for="AP_INDEX" class="form-label">AP Index</label>
           <div>
-            <input type="number" id="AP_INDEX" name="AP_INDEX" class="input-base" min="2" max="99" value="2" style="max-width:120px">
-            <p class="form-help">Last octet 2–99. Router LAN IP becomes 192.168.1.&lt;this&gt;.</p>
+            <input type="number" id="AP_INDEX" name="AP_INDEX" class="input-base" min="2" max="99" value="2" style="max-width:120px" oninput="document.getElementById('ap-index-preview').textContent=this.value||'2'">
+            <p class="form-help">Last octet 2–19. Router LAN IP becomes 192.168.1.<span id="ap-index-preview">2</span></p>
           </div>
         </div>
       </div>
     </details>
 
-    <!-- ── 2. System ───────────────────────────────────────────────── -->
+    <!-- ── 1. System ───────────────────────────────────────────────── -->
     <details class="group card" id="card-system" data-section="system" open>
       <summary class="card-header">
         <span class="dot" aria-label="Not started"></span>
@@ -130,7 +132,7 @@
                 <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
               </button>
             </div>
-            <p class="form-help">Used for SSH login and AdGuard Home admin (hashed client-side).</p>
+            <p class="form-help">Used for SSH login and AdGuard Home admin.</p>
           </div>
         </div>
         <div class="form-row">
@@ -177,15 +179,22 @@
       <div class="card-body">
         <div class="form-row">
           <label for="BASE_NET_PREFIX" class="form-label">Default IP prefix</label>
-          <input type="text" id="BASE_NET_PREFIX" name="BASE_NET_PREFIX" class="input-base" placeholder="192.168" style="max-width:180px">
+          <input type="text" id="BASE_NET_PREFIX" name="BASE_NET_PREFIX" class="input-base" placeholder="192.168" style="max-width:180px" list="prefix-options">
+          <datalist id="prefix-options">
+            <option value="192.168">
+            <option value="10.0">
+            <option value="10.10">
+            <option value="172.16">
+            <option value="172.20">
+            <option value="172.31">
+          </datalist>
         </div>
         <div class="form-row">
           <label for="DEFAULT_SUBNET" class="form-label">Default subnet</label>
           <select id="DEFAULT_SUBNET" name="DEFAULT_SUBNET" class="input-base" style="max-width:180px">
             <option value="">/24 (default)</option>
-            <option value="/22">/22</option>
             <option value="/23">/23</option>
-            <option value="/24">/24</option>
+			<option value="/22">/22</option>
           </select>
         </div>
 
@@ -216,7 +225,7 @@
                     <span class="toggle-track"></span>
                     <span class="toggle-thumb"></span>
                   </span>
-                  <span class="toggle-text text-xs">Allow internet access</span>
+                  <span class="toggle-text text-xs">Enable internet access for IoT devices</span>
                 </label>
               </div>
             </div>
@@ -294,10 +303,9 @@
         </div>
 
         <div class="info-note" role="note">
-          You can switch to a different provider or paste a different WireGuard config later via
-          <strong>LuCI → Network → Interfaces → vpn → Edit</strong>.
-          When importing a config, remember to enable <em>Route Allowed IPs</em> so the tunnel
-          actually carries traffic.
+          You can switch to a different WireGuard config later via 
+		  <strong>LuCI → Network → Interfaces → vpn → Edit → Load configuration</strong>.
+          When importing a config, remember to enable <em>Route Allowed IPs</em> in Peers setting.
         </div>
       </div>
     </details>
@@ -351,6 +359,13 @@
               </span>
               <span class="toggle-text">Tagged WAN VLAN <span class="text-zinc-500 dark:text-zinc-400">(required by some ISPs)</span></span>
             </label>
+            <div class="wan-tagged-only hidden form-row" style="margin-top:0.5rem">
+              <label for="WAN_VLAN_ID" class="form-label">WAN VLAN ID</label>
+              <div>
+                <input type="number" id="WAN_VLAN_ID" name="WAN_VLAN_ID" class="input-base" min="1" max="4094" placeholder="20" style="max-width:120px">
+                <p class="form-help">802.1Q VLAN tag for the WAN interface. Default: 20.</p>
+              </div>
+            </div>
             <label class="toggle-label">
               <span class="toggle-wrap">
                 <input type="checkbox" id="WAN_B_ENABLE" name="WAN_B_ENABLE" value="1" class="toggle-input">
@@ -389,7 +404,7 @@
           </label>
         </div>
         <div class="form-row">
-          <label class="form-label">Wireless mesh backhaul</label>
+          <label class="form-label">Wireless mesh</label>
           <div>
             <label class="toggle-label">
               <span class="toggle-wrap">
@@ -397,9 +412,9 @@
                 <span class="toggle-track"></span>
                 <span class="toggle-thumb"></span>
               </span>
-              <span class="toggle-text">Enable wireless mesh</span>
+              <span class="toggle-text">Enable 802.11s mesh backhaul</span>
             </label>
-            <p class="form-help">Enable only when this device can't be wired to its parent. Wired backhaul is preferred.</p>
+            <p class="form-help">Note: Wired backhaul is always better when feasible</p>
           </div>
         </div>
 
@@ -449,6 +464,11 @@
               <input type="password" id="LAN_WG_WIFI_PASSWD" name="LAN_WG_WIFI_PASSWD" class="input-base" placeholder="password" autocomplete="new-password">
             </div>
           </div>
+		  <p class="form-help"></p>
+        </div>
+
+        <div class="info-note" role="note">
+          Default to 12345678 when Wi-Fi password is empty
         </div>
 
         <!-- Advanced channels -->
@@ -504,6 +524,9 @@
           Add row
         </button>
       </div>
+      <div class="info-note" role="note">
+		Each row create a static DHCPv4 lease and add port forwarding from WAN. Ports must be unique.
+      </div>
     </details>
 
     <!-- ── 8. IPv6 Exposure ────────────────────────────────────────── -->
@@ -531,6 +554,10 @@
           Add row
         </button>
       </div>
+      <div class="info-note" role="note">
+		Each row create a static hostid (IPv6 Token) in DHCP leases, IPv6 firewall forward rule, and Cloudflare DDNS entry. 
+		After boot, go to Network -> DHCP Leases and update the DUID for each host to match the actual client DUID.
+      </div>
     </details>
 
     <!-- ── 9. DDNS ─────────────────────────────────────────────────── -->
@@ -550,7 +577,6 @@
               <span class="toggle-track"></span>
               <span class="toggle-thumb"></span>
             </span>
-            <span class="toggle-text">Start DDNS service on boot</span>
           </label>
         </div>
         <!-- Always visible regardless of DDNS_ENABLE toggle -->
@@ -586,6 +612,19 @@
       </summary>
       <div class="card-body">
         <div class="sub-section" style="margin-top:0;padding-top:0;border-top:none">
+          <p class="sub-section-title">USB tethering</p>
+          <div class="space-y-2 mt-2">
+            <label class="toggle-label">
+              <span class="toggle-wrap">
+                <input type="checkbox" id="USB_TETHERING" name="USB_TETHERING" value="1" class="toggle-input">
+                <span class="toggle-track"></span>
+                <span class="toggle-thumb"></span>
+              </span>
+              <span class="toggle-text">Enable USB tethering <span class="text-zinc-500 dark:text-zinc-400">(Android / iPhone, device usb0)</span></span>
+            </label>
+          </div>
+        </div>
+        <div class="sub-section">
           <p class="sub-section-title">Cellular modem (MBIM)</p>
           <div class="space-y-2 mt-2">
             <label class="toggle-label">
@@ -603,26 +642,13 @@
               <label for="MODEM_PATH" class="form-label">Modem path</label>
               <div>
                 <input type="text" id="MODEM_PATH" name="MODEM_PATH" class="input-base" placeholder="/sys/devices/platform/…/usb2/2-1">
-                <p class="form-help">Hardware-specific sysfs path. Default suits most boards; override only if your device path differs.</p>
+                <p class="form-help">Hardware-specific sysfs path. This can change later in LuCI.</p>
               </div>
             </div>
             <div class="form-row">
               <label for="MODEM_APN" class="form-label">APN</label>
               <input type="text" id="MODEM_APN" name="MODEM_APN" class="input-base" placeholder="internet" style="max-width:240px">
             </div>
-          </div>
-        </div>
-        <div class="sub-section">
-          <p class="sub-section-title">USB tethering</p>
-          <div class="space-y-2 mt-2">
-            <label class="toggle-label">
-              <span class="toggle-wrap">
-                <input type="checkbox" id="USB_TETHERING" name="USB_TETHERING" value="1" class="toggle-input">
-                <span class="toggle-track"></span>
-                <span class="toggle-thumb"></span>
-              </span>
-              <span class="toggle-text">Enable USB tethering <span class="text-zinc-500 dark:text-zinc-400">(Android / iPhone, device usb0)</span></span>
-            </label>
           </div>
         </div>
       </div>
@@ -638,10 +664,14 @@
       </summary>
       <div class="card-body">
         <div class="form-row">
-          <label for="additional_packages" class="form-label">Packages</label>
+          <label class="form-label">Auto-added</label>
+          <div id="auto-packages" class="flex flex-wrap gap-1 py-1 min-h-[1.75rem]"></div>
+        </div>
+        <div class="form-row">
+          <label for="additional_packages" class="form-label">Extra packages</label>
           <div>
             <textarea id="additional_packages" name="additional_packages" class="input-base" placeholder="space- or newline-separated, e.g. htop tcpdump" rows="3"></textarea>
-            <p class="form-help">Appended to the final list as-is. Prefix with <code class="bg-zinc-100 dark:bg-zinc-800 px-1 rounded text-xs">-</code> to remove a default package.</p>
+            <p class="form-help">Appended to the final list. Prefix with <code class="bg-zinc-100 dark:bg-zinc-800 px-1 rounded text-xs">-</code> to remove an auto-added package.</p>
           </div>
         </div>
       </div>
@@ -665,7 +695,7 @@
             </span>
             <div>
               <span class="toggle-text">Software flow offload</span>
-              <p class="form-help mt-0">On by default. Improves throughput. Disable if using QoS/SQM.</p>
+              <p class="form-help mt-0">Can increases network throughput.</p>
             </div>
           </label>
           <label class="toggle-label">
@@ -676,7 +706,8 @@
             </span>
             <div>
               <span class="toggle-text">Hardware flow offload</span>
-              <p class="form-help mt-0">Higher throughput where supported. <strong>Do not enable if using QoS/SQM.</strong> Implies software offload.</p>
+              <p class="form-help mt-0">Higher network throughput and lower CPU usage where supported.
+				  <br><strong>Do not enable if using QoS/SQM.</strong></p>
             </div>
           </label>
           <label class="toggle-label">
@@ -685,7 +716,10 @@
               <span class="toggle-track"></span>
               <span class="toggle-thumb"></span>
             </span>
-            <span class="toggle-text">Block DoT/DoQ <span class="text-zinc-500 dark:text-zinc-400">(port 853 at firewall)</span></span>
+			<div>
+              <span class="toggle-text">Block DoT and DoQ</span></span>
+			  <p class="form-help mt-0">Enforce ad blocking on stubborn client devices.</strong></p>
+			</div>
           </label>
         </div>
       </div>
@@ -702,7 +736,7 @@
     <div id="result" class="hidden"></div>
     <details id="config-preview-wrap" class="hidden mt-4">
       <summary class="text-xs text-zinc-500 dark:text-zinc-400 cursor-pointer hover:text-zinc-700 dark:hover:text-zinc-200 select-none">
-        Config preview (what the server rendered)
+        Config preview
       </summary>
       <pre class="config-preview" id="config-preview"></pre>
     </details>
@@ -710,7 +744,7 @@
     <!-- ── Build actions ───────────────────────────────────────────── -->
     <div class="build-actions">
       <button class="btn btn-primary" type="button" id="build-btn" disabled>Build firmware</button>
-      <span id="build-hint" class="text-xs text-zinc-500 dark:text-zinc-400">Pick a version and device to enable build.</span>
+      <span id="build-hint" class="text-xs text-zinc-500 dark:text-zinc-400">Pick a device to enable build.</span>
     </div>
 
   </main><!-- /main -->

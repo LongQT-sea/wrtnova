@@ -6,6 +6,19 @@
   const ui = window.WrtNova = window.WrtNova || {};
   const $ = ui.$;
 
+  function syncSsidPlaceholders() {
+    const name = ($('#HOST_NAME').value || '').trim() || 'WrtNova';
+    [
+      ['LAN_WIFI_SSID',    name],
+      ['GUEST_WIFI_SSID',  name + '_Guest'],
+      ['IOT_WIFI_SSID',    name + '_IoT'],
+      ['LAN_WG_WIFI_SSID', name + '_VPN'],
+    ].forEach(function([id, ph]) {
+      const el = $('#' + id);
+      if (el) el.placeholder = ph;
+    });
+  }
+
   async function init() {
     ui.initDynamicRows();
     ui.initConditionalVisibility();
@@ -13,6 +26,9 @@
     ui.wireDotTouches();
     ui.initDeviceCombo();
     ui.initTzCombo();
+
+    $('#HOST_NAME').addEventListener('input', syncSsidPlaceholders);
+    syncSsidPlaceholders();
 
     $('#build-btn').addEventListener('click', () => ui.startBuild());
 
