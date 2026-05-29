@@ -20,7 +20,6 @@
 
 <body class="bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 font-mono text-sm min-h-screen">
 
-  <!-- ─── Header ──────────────────────────────────────────────────────── -->
   <header class="sticky top-0 z-40 bg-zinc-50/90 dark:bg-zinc-950/90 backdrop-blur-sm border-b border-zinc-200 dark:border-zinc-800">
     <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
       <span class="text-base font-semibold tracking-tight leading-tight">WrtNova</span>
@@ -32,11 +31,10 @@
 
   <main>
 
-  <!-- ─── Hero ────────────────────────────────────────────────────────── -->
   <section class="max-w-5xl mx-auto px-4 py-14 md:py-20">
     <div class="flex flex-col md:flex-row md:items-center gap-12 md:gap-12 lg:gap-20">
 
-      <!-- Copy -->
+
       <div class="flex-1 min-w-0">
         <p class="text-xs tracking-widest uppercase mb-5 text-accent font-semibold">OpenWrt · Browser-built · Zero SSH</p>
         <h1 class="text-3xl md:text-4xl font-semibold leading-tight tracking-tight mb-5">
@@ -56,16 +54,13 @@
         </div>
       </div>
 
-      <!-- Hero visual: builder UI mockup -->
       <div class="flex-shrink-0 w-full md:w-[420px] lg:w-[500px]">
         <svg viewBox="0 0 400 290" fill="none" xmlns="http://www.w3.org/2000/svg"
              role="img" aria-label="WrtNova firmware builder interface preview"
              style="width:100%;height:auto;display:block;margin:0 auto;">
 
-          <!-- Outer card -->
           <rect width="400" height="290" rx="9" fill="#18181b" stroke="#27272a"/>
 
-          <!-- Title bar -->
           <rect width="400" height="44" rx="9" fill="#18181b"/>
           <rect y="43" width="400" height="1" fill="#27272a"/>
           <circle cx="19" cy="22" r="4.5" fill="#3f3f46"/>
@@ -74,49 +69,40 @@
           <text x="66" y="26.5" font-size="9.5" font-family="'IBM Plex Mono',ui-monospace,monospace" fill="#3f3f46">WrtNova</text>
           <text x="115" y="26.5" font-size="9.5" font-family="'IBM Plex Mono',ui-monospace,monospace" fill="#52525b"> firmware builder</text>
 
-          <!-- Card: Firmware target (collapsed) -->
           <rect x="12" y="56" width="376" height="36" rx="6" fill="#111113" stroke="#27272a"/>
           <circle cx="27" cy="74" r="3.5" stroke="#71717a" stroke-width="1.5"/>
           <text x="41" y="78.5" font-size="9" font-family="'IBM Plex Mono',ui-monospace,monospace" fill="#f4f4f5" font-weight="600">Firmware target</text>
           <text x="268" y="78.5" font-size="8.5" font-family="'IBM Plex Mono',ui-monospace,monospace" fill="#52525b">Archer C7 v5  ▾</text>
 
-          <!-- Card: Network (expanded, orange dot = configured) -->
           <rect x="12" y="100" width="376" height="104" rx="6" fill="#111113" stroke="#27272a"/>
           <circle cx="27" cy="116" r="3.5" fill="#f6821f"/>
           <text x="41" y="120.5" font-size="9" font-family="'IBM Plex Mono',ui-monospace,monospace" fill="#f4f4f5" font-weight="600">Network</text>
           <line x1="12" y1="129" x2="388" y2="129" stroke="#27272a"/>
-          <!-- Column headers -->
           <text x="28" y="142" font-size="6.5" font-family="'IBM Plex Mono',ui-monospace,monospace" fill="#52525b" letter-spacing="0.07em">NETWORK</text>
           <text x="116" y="142" font-size="6.5" font-family="'IBM Plex Mono',ui-monospace,monospace" fill="#52525b" letter-spacing="0.07em">PREFIX</text>
           <text x="195" y="142" font-size="6.5" font-family="'IBM Plex Mono',ui-monospace,monospace" fill="#52525b" letter-spacing="0.07em">VLAN</text>
           <text x="256" y="142" font-size="6.5" font-family="'IBM Plex Mono',ui-monospace,monospace" fill="#52525b" letter-spacing="0.07em">SUBNET</text>
-          <!-- LAN row -->
           <text x="28" y="158" font-size="8.5" font-family="'IBM Plex Mono',ui-monospace,monospace" fill="#a1a1aa">LAN</text>
           <text x="116" y="158" font-size="8.5" font-family="'IBM Plex Mono',ui-monospace,monospace" fill="#d4d4d8">192.168</text>
           <text x="200" y="158" font-size="8.5" font-family="'IBM Plex Mono',ui-monospace,monospace" fill="#d4d4d8">1</text>
           <text x="256" y="158" font-size="8.5" font-family="'IBM Plex Mono',ui-monospace,monospace" fill="#d4d4d8">/24</text>
-          <!-- Guest row -->
           <text x="28" y="173" font-size="8.5" font-family="'IBM Plex Mono',ui-monospace,monospace" fill="#a1a1aa">Guest</text>
           <text x="116" y="173" font-size="8.5" font-family="'IBM Plex Mono',ui-monospace,monospace" fill="#d4d4d8">192.168</text>
           <text x="200" y="173" font-size="8.5" font-family="'IBM Plex Mono',ui-monospace,monospace" fill="#d4d4d8">5</text>
           <text x="256" y="173" font-size="8.5" font-family="'IBM Plex Mono',ui-monospace,monospace" fill="#d4d4d8">/24</text>
-          <!-- IoT row -->
           <text x="28" y="188" font-size="8.5" font-family="'IBM Plex Mono',ui-monospace,monospace" fill="#a1a1aa">IoT</text>
           <text x="116" y="188" font-size="8.5" font-family="'IBM Plex Mono',ui-monospace,monospace" fill="#d4d4d8">192.168</text>
           <text x="200" y="188" font-size="8.5" font-family="'IBM Plex Mono',ui-monospace,monospace" fill="#d4d4d8">10</text>
           <text x="256" y="188" font-size="8.5" font-family="'IBM Plex Mono',ui-monospace,monospace" fill="#d4d4d8">/24</text>
 
-          <!-- Card: WireGuard VPN (collapsed, orange dot = configured) -->
           <rect x="12" y="212" width="376" height="36" rx="6" fill="#111113" stroke="#27272a"/>
           <circle cx="27" cy="230" r="3.5" fill="#f6821f"/>
           <text x="41" y="234.5" font-size="9" font-family="'IBM Plex Mono',ui-monospace,monospace" fill="#f4f4f5" font-weight="600">WireGuard VPN</text>
           <text x="276" y="234.5" font-size="8.5" font-family="'IBM Plex Mono',ui-monospace,monospace" fill="#52525b">WARP  ▾</text>
 
-          <!-- Build firmware button -->
           <rect x="12" y="256" width="376" height="24" rx="5" fill="#f6821f"/>
           <text x="200" y="272" font-size="9.5" font-family="'IBM Plex Mono',ui-monospace,monospace" fill="#18181b" font-weight="600" text-anchor="middle">Build firmware</text>
 
-          <!-- Subtle download arrow on button -->
           <text x="326" y="272" font-size="9.5" font-family="'IBM Plex Mono',ui-monospace,monospace" fill="rgba(24,24,27,0.55)" font-weight="400">↓</text>
         </svg>
       </div>
@@ -124,11 +110,9 @@
     </div>
   </section>
 
-  <!-- ─── Features ────────────────────────────────────────────────────── -->
   <section class="max-w-5xl mx-auto px-4 pb-14 md:pb-20">
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
-      <!-- VLANs without learning VLANs -->
       <div class="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-lg p-5 md:p-6">
         <div class="flex items-center justify-center w-8 h-8 rounded-md bg-zinc-100 dark:bg-zinc-800 mb-4 flex-shrink-0">
           <svg class="w-4 h-4 text-zinc-500 dark:text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -144,7 +128,6 @@
         </p>
       </div>
 
-      <!-- VPN built in -->
       <div class="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-lg p-5 md:p-6">
         <div class="flex items-center justify-center w-8 h-8 rounded-md bg-zinc-100 dark:bg-zinc-800 mb-4 flex-shrink-0">
           <svg class="w-4 h-4 text-zinc-500 dark:text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -157,7 +140,6 @@
         </p>
       </div>
 
-      <!-- Private and ad-free -->
       <div class="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-lg p-5 md:p-6">
         <div class="flex items-center justify-center w-8 h-8 rounded-md bg-zinc-100 dark:bg-zinc-800 mb-4 flex-shrink-0">
           <svg class="w-4 h-4 text-zinc-500 dark:text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -171,7 +153,6 @@
         </p>
       </div>
 
-      <!-- Flash once -->
       <div class="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-lg p-5 md:p-6">
         <div class="flex items-center justify-center w-8 h-8 rounded-md bg-zinc-100 dark:bg-zinc-800 mb-4 flex-shrink-0">
           <svg class="w-4 h-4 text-zinc-500 dark:text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -186,13 +167,11 @@
 
     </div>
 
-    <!-- Secondary feature line -->
     <p class="text-center text-zinc-500 dark:text-zinc-400 text-xs mt-6 leading-relaxed">
       Plus mesh networking, multi-WAN failover, Cloudflare DDNS, IPv6, port forwarding, and more.
     </p>
   </section>
 
-  <!-- ─── Second CTA ──────────────────────────────────────────────────── -->
   <section class="border-t border-zinc-200 dark:border-zinc-800 py-14 md:py-20">
     <div class="max-w-5xl mx-auto px-4 text-center">
       <p class="text-zinc-500 dark:text-zinc-400 text-xs mb-6">Your router, your config — baked in from the first boot.</p>
@@ -204,7 +183,6 @@
 
   </main>
 
-  <!-- ─── Footer ──────────────────────────────────────────────────────── -->
   <footer class="site-footer px-4 pb-6">
     <p>
       <a href="https://github.com/LongQT-sea/wrtnova" target="_blank" rel="noopener" aria-label="Source on GitHub">GitHub</a>

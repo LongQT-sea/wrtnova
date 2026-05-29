@@ -15,13 +15,11 @@
   </script>
   <link rel="preload" as="font" type="font/woff2" crossorigin href="/fonts/ibm-plex-mono-v20-latin-regular.woff2">
   <link rel="stylesheet" href="/style.css">
-  <!-- Monaco Editor -->
   <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/min/vs/loader.js"></script>
 </head>
 
 <body class="bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 font-mono text-sm min-h-screen pb-24 md:pb-0">
 
-  <!-- ─── Header ──────────────────────────────────────────────────── -->
   <header class="sticky top-0 z-40 bg-zinc-50/90 dark:bg-zinc-950/90 backdrop-blur-sm border-b border-zinc-200 dark:border-zinc-800">
     <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
       <div>
@@ -42,10 +40,8 @@
     </div>
   </header>
 
-  <!-- ─── Main ────────────────────────────────────────────────────── -->
   <main class="max-w-5xl mx-auto px-4 py-6 space-y-4">
 
-    <!-- ── Firmware target ────────────────────────────────────────── -->
     <details class="group card" id="card-target" data-section="target" open>
       <summary class="card-header">
         <span class="dot" aria-label="Not started"></span>
@@ -73,7 +69,6 @@
       </div>
     </details>
 
-    <!-- ── Config editor ─────────────────────────────────────────── -->
     <details class="group card" id="card-config" open>
       <summary class="card-header">
         <h2 class="flex-1 text-sm font-semibold">Config</h2>
@@ -87,7 +82,6 @@
       </div>
     </details>
 
-    <!-- ── Additional packages ───────────────────────────────────── -->
     <details class="group card" id="card-packages" open>
       <summary class="card-header">
         <h2 class="flex-1 text-sm font-semibold">Additional packages</h2>
@@ -101,7 +95,6 @@
       </div>
     </details>
 
-    <!-- ── ASU endpoint ───────────────────────────────────────────── -->
     <details class="group card" id="card-asu">
       <summary class="card-header">
         <h2 class="flex-1 text-sm font-semibold">ASU endpoint</h2>
@@ -118,7 +111,6 @@
       </div>
     </details>
 
-    <!-- ── Status / progress / result ───────────────────────────── -->
     <div id="status" class="status hidden" role="status" aria-live="polite"></div>
     <div id="progress" class="hidden mt-4">
       <div class="progress-bar">
@@ -128,13 +120,11 @@
     </div>
     <div id="result" class="hidden"></div>
 
-    <!-- ── Build actions ─────────────────────────────────────────── -->
     <div class="build-actions">
       <button class="btn btn-primary" type="button" id="build-btn" disabled>Build firmware</button>
       <span id="build-hint" class="text-xs text-zinc-500 dark:text-zinc-400">Pick a device to enable build.</span>
     </div>
 
-    <!-- ── Footer ────────────────────────────────────────────────── -->
     <footer class="site-footer">
       <p><a href="https://github.com/LongQT-sea/wrtnova" target="_blank" rel="noopener" aria-label="Source on GitHub">GitHub</a></p>
     </footer>

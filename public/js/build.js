@@ -1,4 +1,3 @@
-// Collect form -> POST /api/build -> poll ASU -> render download URL.
 (function () {
   'use strict';
 
@@ -6,7 +5,6 @@
   const $  = ui.$, $$ = ui.$$;
   const ASU = 'https://sysupgrade.openwrt.org';
 
-  // -------------------------------------- form serialization helpers
   function checkboxVal(id) { const el = $('#' + id); return el && el.checked ? '1' : ''; }
   function textVal(id)     { return ($('#' + id) || {}).value || ''; }
 
@@ -29,11 +27,9 @@
     }
 
     return {
-      // ── Device mode ──────────────────────────────────────────────────────
       AP_MODE:  apMode,
       AP_INDEX: isRouter ? '' : textVal('AP_INDEX'),
 
-      // ── System ───────────────────────────────────────────────────────────
       HOST_NAME:       textVal('HOST_NAME'),
       ROOT_PASSWD:     rootpw,
       SSH_PUBLIC_KEY:  textVal('SSH_PUBLIC_KEY'),
@@ -41,7 +37,6 @@
       ZONE_NAME:       tz.ZONE_NAME,
       TIME_ZONE:       tz.TIME_ZONE,
 
-      // ── WAN (router only) ─────────────────────────────────────────────────
       PPPOE_USERNAME: wanType === 'pppoe' ? textVal('PPPOE_USERNAME') : '',
       PPPOE_PASSWD:   wanType === 'pppoe' ? textVal('PPPOE_PASSWD')   : '',
       WAN_MAC_ADDR:   textVal('WAN_MAC_ADDR'),
@@ -50,7 +45,6 @@
       WAN_B_ENABLE:   isRouter ? checkboxVal('WAN_B_ENABLE') : '',
       WAN_B_VLAN_ID:  (isRouter && $('#WAN_B_ENABLE').checked) ? textVal('WAN_B_VLAN_ID') : '',
 
-      // ── Network ───────────────────────────────────────────────────────────
       BASE_NET_PREFIX: textVal('BASE_NET_PREFIX'),
       DEFAULT_SUBNET:  textVal('DEFAULT_SUBNET'),
       GUEST_ENABLE:    checkboxVal('GUEST_ENABLE'),
@@ -73,7 +67,6 @@
       LAN_WG_SUBNET:      wgEnable ? textVal('LAN_WG_SUBNET')       : '',
       ADDITIONAL_VLAN_LIST: textVal('ADDITIONAL_VLAN_LIST'),
 
-      // ── WiFi ──────────────────────────────────────────────────────────────
       COUNTRY_CODE:   textVal('COUNTRY_CODE').toUpperCase(),
       DENSE_ENV:      checkboxVal('DENSE_ENV'),
       WIRELESS_MESH:  checkboxVal('WIRELESS_MESH'),
@@ -93,8 +86,6 @@
       CHANNEL_6G:   textVal('CHANNEL_6G'),
       WIFI_LOG_LVL: textVal('WIFI_LOG_LVL'),
 
-      // ── WireGuard VPN client (always collected when WG enabled) ───────────
-      // Leave any field blank to trigger WARP auto-register on the server.
       WG_PRIVATE_KEY: wgEnable ? textVal('WG_PRIVATE_KEY') : '',
       PEER_PUBLIC_KEY: wgEnable ? textVal('PEER_PUBLIC_KEY') : '',
       ENDPOINT:        wgEnable ? textVal('ENDPOINT')        : '',
@@ -104,25 +95,23 @@
       WG_IPV6:         wgEnable ? textVal('WG_IPV6')         : '',
       ALLOWED_IPS:     wgEnable ? textVal('ALLOWED_IPS')     : '',
 
-      // ── Port forwarding / IPv6 exposure (router only) ─────────────────────
       PORT_FORWARD_LIST: isRouter ? ui.serializeRows('portfwd') : '',
       IPV6_SERVER_LIST:  isRouter ? ui.serializeRows('ipv6')    : '',
 
-      // ── DDNS (router only) ─────────────────────────────────────────────────
       DDNS_ENABLE:        isRouter ? checkboxVal('DDNS_ENABLE') : '',
       LOOKUP_HOSTNAME:    isRouter ? textVal('LOOKUP_HOSTNAME')    : '',
       CLOUDFLARE_API_KEY: isRouter ? textVal('CLOUDFLARE_API_KEY') : '',
 
-      // ── Failover (router only) ────────────────────────────────────────────
       CELLULAR_MODEM: isRouter ? checkboxVal('CELLULAR_MODEM') : '',
       MODEM_PATH:     modemEn  ? textVal('MODEM_PATH') : '',
       MODEM_APN:      modemEn  ? textVal('MODEM_APN')  : '',
       USB_TETHERING:  isRouter ? checkboxVal('USB_TETHERING') : '',
 
-      // ── Performance & misc ────────────────────────────────────────────────
+      DNS_MODE:         ($('input[name="DNS_MODE"]:checked') || {}).value || 'adguardhome',
       SOFTWARE_OFFLOAD: checkboxVal('SOFTWARE_OFFLOAD'),
       HARDWARE_OFFLOAD: checkboxVal('HARDWARE_OFFLOAD'),
       BLOCK_DOT_DOQ:    checkboxVal('BLOCK_DOT_DOQ'),
+      NON_CT_ATH10K:    checkboxVal('NON_CT_ATH10K'),
       ADGUARD_PASSWD:   adguard,
     };
   }
@@ -134,19 +123,17 @@
       .filter(Boolean);
   }
 
-  // Mirror of server-side resolvePackages additions — keep in sync with functions/api/build.js.
   function computeAutoPackages() {
     const target  = ui.collectTarget && ui.collectTarget();
     const cfg     = collectConfig();
     const base    = target ? [...(target.default_packages || []), ...(target.device_packages || [])] : [];
-    const lowRam  = checkboxVal('LOW_RAM') === '1';
     const pkgs    = [];
 
     pkgs.push('curl', 'ip-full', 'umdns');
-    if (lowRam) {
-      pkgs.push('dnsproxy');
-    } else {
-      pkgs.push('adguardhome', 'luci-ssl');
+    if (cfg.AP_MODE !== '1') {
+      const dnsMode = cfg.DNS_MODE || 'adguardhome';
+      if (dnsMode === 'adguardhome') pkgs.push('adguardhome', 'luci-ssl');
+      else if (dnsMode === 'dnsproxy') pkgs.push('dnsproxy');
     }
     pkgs.push('zram-swap', 'luci-app-commands', 'ip-bridge');
 
@@ -157,6 +144,12 @@
     const hasWifi = /\bwpad-?|\bhostapd|\bmac80211/.test(base.join(' ')) ||
                     Object.entries(cfg).some(([k, v]) => /WIFI/.test(k) && v);
     if (hasWifi) pkgs.push('-wpad-basic-mbedtls', 'wpad-mbedtls', 'luci-app-usteer');
+
+    const isAth10kCt = p => /^ath10k-firmware-|^kmod-ath10k-ct/.test(p);
+    const ctPkgs = base.filter(isAth10kCt);
+    if (cfg.NON_CT_ATH10K === '1' && ctPkgs.length) {
+      ctPkgs.forEach(p => { pkgs.push('-' + p); pkgs.push(p.replace(/-ct.*$/, '')); });
+    }
 
     pkgs.push('luci-app-ddns', 'ddns-scripts-cloudflare');
     if (cfg.WG_ENABLE === '1' && cfg.AP_MODE !== '1') pkgs.push('luci-proto-wireguard');
@@ -181,7 +174,6 @@
 
   ui.renderAutoPackages = renderAutoPackages;
 
-  // Re-render chips whenever any input in the form changes or device is picked.
   function initAutoPackages() {
     document.body.addEventListener('change', renderAutoPackages);
     document.body.addEventListener('input',  renderAutoPackages);
@@ -193,7 +185,6 @@
     initAutoPackages();
   }
 
-  // -------------------------------------- main build flow
   let polling = null;
 
   ui.startBuild = async function () {
@@ -214,7 +205,6 @@
       default_packages: target.default_packages,
       device_packages:  target.device_packages,
       device_title:        ($('#device') || {}).value || '',
-      low_ram:             checkboxVal('LOW_RAM'),
       wrtnova_config:      collectConfig(),
       additional_packages: parseAdditionalPackages(),
     };
@@ -247,7 +237,6 @@
     }
 
     if (resp.firmware_url) {
-      // cached build — no polling needed
       renderResult({ firmware_url: resp.firmware_url, images: resp.images, bin_dir: resp.bin_dir });
       ui.setProgress('Done (cached build)', 100);
       ui.status('Build complete (cached).', 'success');
@@ -350,7 +339,6 @@
     wrap.innerHTML = html;
   }
 
-  // -------------------------------------- WARP prefill button
   function initWarpPrefill() {
     const btn = $('#warp-prefill-btn');
     if (!btn) return;
@@ -419,7 +407,6 @@
     initWarpPrefill();
   }
 
-  // -------------------------------------- expose build enable/disable signal
   ui.notifyTargetChanged = function () {
     const t = ui.collectTarget && ui.collectTarget();
     const ok = !!t;

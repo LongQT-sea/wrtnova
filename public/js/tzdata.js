@@ -1,4 +1,3 @@
-// Parse public/tzdata.lua into a searchable list + combobox.
 (function () {
   'use strict';
 

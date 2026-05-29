@@ -18,7 +18,6 @@
       .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
 
-  // ── fetch + render ─────────────────────────────────────────────────────────
   ui.loadHistory = async function () {
     const body = document.getElementById('history-body');
     if (!body) return;
@@ -75,14 +74,12 @@
     });
   }
 
-  // ── restore ────────────────────────────────────────────────────────────────
   ui.restoreFromHistory = async function (entry) {
     if (!entry) return;
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
     const dev = entry.device || {};
 
-    // 1. Set version (best match for stored branch)
     const sel = document.getElementById('version');
     const best = findBestVersion(dev.version, sel);
     if (sel && best && sel.value !== best) {
@@ -91,23 +88,16 @@
       await ui.loadOverview().catch(function () {});
     }
 
-    // 2. Select device
     if (dev.title && ui.selectDevice) {
       await ui.selectDevice(dev.title).catch(function () {});
     }
 
-    // 3. Restore config fields
     if (entry.config) restoreConfig(entry.config);
 
-    // 4. Additional packages
     const pkgEl = document.getElementById('additional_packages');
     if (pkgEl) pkgEl.value = (entry.additional_packages || []).join(' ');
 
-    // 5. LOW_RAM
-    const lowRam = document.getElementById('LOW_RAM');
-    if (lowRam) lowRam.checked = entry.low_ram === '1';
 
-    // Trigger visibility refresh
     document.body.dispatchEvent(new Event('change'));
 
     ui.status('Config restored from ' + timeAgo(entry.ts) + '.', 'info');
@@ -137,7 +127,8 @@
       if (el) el.checked = true;
     }
 
-    radio('AP_MODE', cfg.AP_MODE);
+    radio('AP_MODE',  cfg.AP_MODE);
+    radio('DNS_MODE', cfg.DNS_MODE || 'adguardhome');
     set('AP_INDEX', cfg.AP_INDEX);
 
     set('HOST_NAME',       cfg.HOST_NAME);
@@ -224,6 +215,7 @@
     check('SOFTWARE_OFFLOAD', cfg.SOFTWARE_OFFLOAD);
     check('HARDWARE_OFFLOAD', cfg.HARDWARE_OFFLOAD);
     check('BLOCK_DOT_DOQ',    cfg.BLOCK_DOT_DOQ);
+    check('NON_CT_ATH10K',    cfg.NON_CT_ATH10K);
   }
 
   function restoreTable(kind, list) {

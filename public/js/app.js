@@ -1,4 +1,3 @@
-// Entry point: wire UI, load static data, kick session.
 // Theme toggle is handled by theme.js (loaded separately).
 // Collapsible open/close is handled natively by <details>/<summary>.
 (function () {

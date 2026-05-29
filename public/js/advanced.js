@@ -9,9 +9,9 @@
   let bodyB64 = null;  // wrtnova-body.b64 contents
   let polling = null;
 
-  // ── stubs so devices.js doesn't break ──────────────────────────────────────
   ui.renderAutoPackages   = function () {};
-  ui.expandSectionsOnDevice = function () {};
+  ui.expandSectionsOnDevice  = function () {};
+  ui.updateAth10kVisibility  = function () {};
   ui.notifyTargetChanged  = function () {
     const ok  = !!(ui.collectTarget && ui.collectTarget());
     const btn = document.getElementById('build-btn');
@@ -21,7 +21,6 @@
     if (ok)   ui.setDot('target', 'valid');
   };
 
-  // ── fetch static assets ────────────────────────────────────────────────────
   async function fetchAssets() {
     const [tplRes, bodyRes] = await Promise.all([
       fetch('/config-template.sh'),
@@ -34,7 +33,6 @@
     return template;
   }
 
-  // ── Monaco init ────────────────────────────────────────────────────────────
   function initMonaco(template) {
     const isDark = () => document.documentElement.classList.contains('dark');
     require.config({ paths: { vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/min/vs' } });
@@ -60,10 +58,6 @@
     });
   }
 
-  // ── config stripping ───────────────────────────────────────────────────────
-  // Removes comment-only lines, blank lines, and empty variable assignments
-  // (VAR="", VAR='', VAR=) before submission. Handles multi-line values like
-  // PORT_FORWARD_LIST and SSH_PUBLIC_KEY correctly.
   function stripConfig(text) {
     const lines = text.split('\n');
     const out   = [];
@@ -111,7 +105,6 @@
     return out.join('\n') + '\n';
   }
 
-  // ── helpers ────────────────────────────────────────────────────────────────
   function asuBase() {
     return (document.getElementById('asu-url').value || ASU_DEFAULT).trim().replace(/\/+$/, '');
   }
@@ -123,7 +116,6 @@
       .filter(Boolean);
   }
 
-  // ── build ──────────────────────────────────────────────────────────────────
   async function startBuild() {
     if (polling) return;
     ui.clearStatus(); ui.clearProgress();
@@ -262,7 +254,6 @@
     wrap.innerHTML = html;
   }
 
-  // ── package presets ────────────────────────────────────────────────────────
   const PRESETS = [
     {
       label: 'WrtNova core',
@@ -326,7 +317,6 @@
     });
   }
 
-  // ── boot ───────────────────────────────────────────────────────────────────
   document.addEventListener('DOMContentLoaded', async function () {
     document.getElementById('build-btn').disabled = true;
     document.getElementById('build-btn').addEventListener('click', startBuild);

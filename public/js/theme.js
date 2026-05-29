@@ -1,6 +1,4 @@
-// Dark/light mode toggle.
 // The anti-FOUC snippet in <head> applies the initial class before first paint.
-// This module wires the toggle button and keeps Sun/Moon icons in sync.
 (function () {
   'use strict';
 

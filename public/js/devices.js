@@ -1,4 +1,3 @@
-// Versions / overview / profiles fetch + searchable device combobox.
 // On mobile (<768px) the combobox opens as a full-screen native <dialog>.
 (function () {
   'use strict';
@@ -19,7 +18,6 @@
     profileDetails: null,           // result of profiles.json fetch
   };
 
-  // -------------------------------------- helpers
   function pickLatestPatch(versions, branch) {
     const ofBranch = versions.filter(v => v.startsWith(branch + '.'));
     if (!ofBranch.length) return null;
@@ -45,7 +43,6 @@
     return [t.vendor, t.model, t.variant].filter(Boolean).join(' ').trim();
   }
 
-  // -------------------------------------- version list
   ui.loadVersions = async function () {
     const res = await fetch(DL + '/.versions.json', { cache: 'no-cache' });
     if (!res.ok) throw new Error('versions fetch failed: ' + res.status);
@@ -64,7 +61,6 @@
       sel.appendChild(o);
     });
 
-    // Pre-select stable if it matches one of our picks
     if (data.stable_version && picks.includes(data.stable_version)) {
       sel.value = data.stable_version;
     } else {
@@ -80,7 +76,6 @@
     await ui.loadOverview();
   };
 
-  // -------------------------------------- overview (device list)
   ui.loadOverview = async function () {
     const v = state.version;
     $('#device').disabled = true;
@@ -114,12 +109,10 @@
     ui.notifyTargetChanged && ui.notifyTargetChanged();
   };
 
-  // -------------------------------------- device combobox
   ui.initDeviceCombo = function () {
     const inp = $('#device'), list = $('#device-list');
     let active = -1;
 
-    // ---------- shared helpers
     function search(q) {
       if (!state.devicesByTitle) return [];
       const qs = q.toLowerCase().split(/\s+/).filter(Boolean);
@@ -144,7 +137,6 @@
       setTimeout(() => { suppressMobileFocus = false; }, 200);
     }
 
-    // ---------- desktop dropdown
     function close() { list.classList.add('hidden'); active = -1; }
     function render(items) {
       list.innerHTML = '';
@@ -169,7 +161,6 @@
       else if (e.key === 'Escape') { close(); }
     });
 
-    // ---------- mobile full-screen dialog
     let dlg = null, dlgInp = null, dlgList = null;
     let suppressMobileFocus = false; // guards against dialog reopening on focus-return
 
@@ -189,7 +180,6 @@
       wrap.className =
         'flex flex-col h-full bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100';
 
-      // Header bar: search input + Cancel
       const bar = document.createElement('div');
       bar.className =
         'flex items-center gap-2 px-3 py-2 border-b border-zinc-200 dark:border-zinc-800 flex-shrink-0';
@@ -206,7 +196,6 @@
       cancelBtn.className = 'btn btn-ghost text-sm flex-shrink-0';
       cancelBtn.textContent = 'Cancel';
 
-      // Results list — scrollable
       dlgList = document.createElement('div');
       dlgList.setAttribute('role', 'listbox');
       dlgList.setAttribute('aria-label', 'Device suggestions');
@@ -269,7 +258,6 @@
       });
     }
 
-    // Wire focus: desktop shows dropdown, mobile shows dialog
     inp.addEventListener('focus', () => {
       if (window.innerWidth < 768) {
         // Guard: don't reopen the dialog when focus returns to inp after a pick.
@@ -306,7 +294,9 @@
     if (ui.renderAutoPackages) ui.renderAutoPackages();
     const allPkgs = (data.default_packages || []).concat((dev.device_packages || []));
     const hasWifi = /\bwpad[-\w]|\bhostapd|\bmac80211/.test(allPkgs.join(' '));
+    const hasCt   = allPkgs.some(p => /^ath10k-firmware-|^kmod-ath10k-ct/.test(p));
     if (ui.expandSectionsOnDevice) ui.expandSectionsOnDevice(hasWifi);
+    if (ui.updateAth10kVisibility) ui.updateAth10kVisibility(hasCt);
   }
 
   // -------------------------------------- programmatic device selection (used by history restore)
@@ -321,7 +311,6 @@
     return true;
   };
 
-  // -------------------------------------- gather final build payload
   ui.collectTarget = function () {
     const prof = state.selectedProfile, det = state.profileDetails;
     if (!prof || !det) return null;

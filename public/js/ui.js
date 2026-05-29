@@ -1,15 +1,12 @@
-// DOM helpers: status bar, dynamic table rows, status dots, conditional visibility.
 // Native <details>/<summary> handles collapsible open/close — no custom logic needed.
 (function () {
   'use strict';
 
   const ui = window.WrtNova = window.WrtNova || {};
 
-  // ---------------------------------------------------------------- shorthand
   ui.$  = (sel, root) => (root || document).querySelector(sel);
   ui.$$ = (sel, root) => Array.from((root || document).querySelectorAll(sel));
 
-  // -------------------------------------------------------- section status dots
   // states: 'untouched' | 'touched' | 'valid'
   ui.setDot = function (sectionId, state) {
     const card = document.getElementById('card-' + sectionId);
@@ -21,7 +18,6 @@
     else if (state === 'valid') dot.classList.add('valid');
   };
 
-  // touch a section whenever any of its inputs changes
   ui.wireDotTouches = function () {
     ui.$$('.card').forEach(card => {
       const id = (card.dataset.section || card.id.replace(/^card-/, ''));
@@ -33,7 +29,6 @@
     });
   };
 
-  // --------------------------------------------------------- status / progress
   ui.status = function (msg, kind /* 'info' | 'error' | 'success' */) {
     const el = ui.$('#status');
     el.textContent = msg;
@@ -48,7 +43,6 @@
   };
   ui.clearProgress = function () { ui.$('#progress').classList.add('hidden'); };
 
-  // ----------------------------------------------------- dynamic table rows
   function addRow(kind) {
     const tbody = document.querySelector('#' + kind + '-table tbody');
     const tr = document.createElement('tr');
@@ -88,7 +82,6 @@
     return lines.length ? '\n' + lines.join('\n') + '\n' : '';
   };
 
-  // ─────────────────────────────── per-network VLAN / addressing live sync
   ui.syncNetworkRows = function () {
     const basePfx  = (ui.$('#BASE_NET_PREFIX') || {}).value || '';
     const defSub   = (ui.$('#DEFAULT_SUBNET')  || {}).value || '/24';
@@ -96,7 +89,6 @@
     const seen     = {};
     let   hasDup   = false;
 
-    // Fold ADDITIONAL_VLAN_LIST into the taken set
     const trunkVids = {};
     ((ui.$('#ADDITIONAL_VLAN_LIST') || {}).value || '').trim().split(/\s+/).forEach(function (tok) {
       const rng = tok.match(/^(\d+)-(\d+)$/);
@@ -157,7 +149,6 @@
     if (warn) warn.classList.toggle('hidden', !hasDup);
   };
 
-  // ---------------------------------------------- conditional visibility wires
   ui.initConditionalVisibility = function () {
     function refresh() {
       const ap = ui.$('input[name="AP_MODE"]:checked').value === '1';
@@ -222,6 +213,14 @@
     if (hasWifi) {
       const wifi = document.getElementById('card-wifi');
       if (wifi) wifi.open = true;
+    }
+  };
+
+  ui.updateAth10kVisibility = function (hasCt) {
+    ui.$$('.ath10k-ct-row').forEach(el => el.classList.toggle('hidden', !hasCt));
+    if (!hasCt) {
+      const cb = ui.$('#NON_CT_ATH10K');
+      if (cb) cb.checked = false;
     }
   };
 
