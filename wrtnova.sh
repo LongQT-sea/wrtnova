@@ -661,10 +661,7 @@ wg_subnet=${LAN_WG_SUBNET:-$def_subnet}
 [ "$IOT_ENABLE" = 1 ] && \
 	_uci network interface iot proto=static +ipaddr="${iot_net_pfx}.1${iot_subnet}"
 
-has_pkg modemmanager || CELLULAR_MODEM=
-
-_uci network interface lan -netmask -ipaddr \
-	+ipaddr="${lan_net_pfx}.1${lan_subnet}" +ip6class=wan_6 ${CELLULAR_MODEM:++ip6class=cellular_6}
+_uci network interface lan -netmask -ipaddr +ipaddr="${lan_net_pfx}.1${lan_subnet}"
 
 uci -q get network.wan || {
 	_uci network interface wan proto=dhcp
@@ -683,6 +680,7 @@ _uci network interface wan6 device=@wan ~wan_6
 	_uci network interface wanb_6 proto=dhcpv6 device=@wanb ${no_mwan3:+metric=2}
 }
 
+has_pkg modemmanager || CELLULAR_MODEM=
 [ "$CELLULAR_MODEM" = 1 ] && \
 	_uci network interface cellular proto=modemmanager \
 		iptype=ipv4v6 device="$MODEM_PATH" apn="${MODEM_APN:-internet}" ${no_mwan3:+metric=3}
@@ -1004,11 +1002,11 @@ mwan3-iface-add wan_6 ipv6
 [ "$CELLULAR_MODEM" = 1 ] && mwan3-iface-add cellular "" 2 2
 [ "$USB_TETHERING" = 1 ] && mwan3-iface-add usb0 "" 2 2
 
+ula_prefix="$(uci -q get network.globals.ula_prefix)"
+
 [ "$WG_ENABLE" = 1 ] && [ -z "$no_mwan3" ] && [ "$AP_MODE" != 1 ] && {
 	mwan3-iface-add "${wg_iface}" "" 1 1 0
 	mwan3-iface-add "${wg_iface}_6" ipv6 1 1 0
-
-	ula_prefix="$(uci -q get network.globals.ula_prefix)"
 
 	_uci mwan3 rule "lan_${wg_iface:0:5}_ipv4" \
 		src_ip="${wg_net_pfx}.0${wg_subnet}" use_policy="${wg_iface}_only" @2
@@ -1054,7 +1052,7 @@ uci -q get "network.${IFACE}" > /dev/null || {
 
 BITS=$(uci -q get "network.${IFACE}.ipaddr" | grep -o '/[0-9]*$' | tr -d '/')
 LIMIT=${7:-$(( (1 << (32 - ${BITS:-24})) - 156 ))}
-DEV=$(ifstatus "$IFACE" | jsonfilter -e '@.device' 2>/dev/null || echo eth0)
+DEV=$(ifstatus "$IFACE" | jsonfilter -e '@.device' 2>/dev/null)
 
 _uci dhcp dnsmasq "${IFACE}_dns" \
 	domainneeded=1 localise_queries=1 \
@@ -1074,7 +1072,7 @@ _uci dhcp "" "$IFACE" \
 [ "$IPV6" = 1 ] && _uci dhcp "" "$IFACE" \
 	ra=server dhcpv6=server ra_default=1 \
 	ra_flags="managed-config other-config" \
-	-dns +dns="$(ip -6 a s dev "$DEV" | grep -o 'fe80[^/]*')"
+	-dns "${DEV:++dns=$(ip -6 a s dev "$DEV" | grep -o 'fe80[^/]*')}"
 EOF
 chmod +x /sbin/dhcp-instance-add
 
@@ -1088,7 +1086,6 @@ setup_dnsmasq_upstream() {
 
 while uci -q del dhcp.@dnsmasq[0]; do :; done
 while uci -q del dhcp.@dhcp[0]; do :; done
-IPV6_LINK_LOCAL=$(ip l s eth0 up && ip -6 a s dev eth0 | grep -o 'fe80[^/]*')
 
 [ "$GUEST_ENABLE" = 1 ] && dhcp-instance-add guest 1h "" "" 0 "$GUEST_DHCP_START"
 
@@ -1100,6 +1097,7 @@ IPV6_LINK_LOCAL=$(ip l s eth0 up && ip -6 a s dev eth0 | grep -o 'fe80[^/]*')
 }
 
 dhcp-instance-add lan 24h lan lan 1 "$LAN_DHCP_START"
+_uci dhcp "" lan -ra_default
 uci del dhcp.lan_dns.notinterface
 
 [ "$WG_ENABLE" = 1 ] && \
@@ -1110,7 +1108,7 @@ _uci system timeserver ntp -server \
 
 cat >> /etc/hosts << EOF
 
-$IPV6_LINK_LOCAL	${HOST_NAME}${AP_MODE:+-$AP_INDEX}
+${ula_prefix%%/*}1	${HOST_NAME}${AP_MODE:+-$AP_INDEX}
 
 216.239.35.0		time1.google.com
 216.239.35.4		time2.google.com
