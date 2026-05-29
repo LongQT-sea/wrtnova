@@ -4,14 +4,27 @@
 //   public/config-template.sh           — advanced editor pre-fill (config section)
 //   public/wrtnova-body.b64             — advanced page client-side script assembly
 
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = resolve(here, '..');
 
-const sh = readFileSync(resolve(root, 'wrtnova.sh'), 'utf8');
+const REMOTE_URL = 'https://raw.githubusercontent.com/LongQT-sea/wrtnova/main/wrtnova.sh';
+const localPath  = resolve(root, 'wrtnova.sh');
+
+let sh;
+if (existsSync(localPath)) {
+  sh = readFileSync(localPath, 'utf8');
+  console.log('Using local wrtnova.sh');
+} else {
+  console.log('Fetching wrtnova.sh from ' + REMOTE_URL + ' ...');
+  const res = await fetch(REMOTE_URL);
+  if (!res.ok) { console.error('Fetch failed: ' + res.status); process.exit(1); }
+  sh = await res.text();
+  console.log('Fetched ' + sh.length + ' bytes');
+}
 const marker = '# ===================\n# End config section\n# ===================\n';
 const idx = sh.indexOf(marker);
 if (idx < 0) {

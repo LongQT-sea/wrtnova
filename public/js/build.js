@@ -18,12 +18,20 @@
     const meshEnable = $('#WIRELESS_MESH') && $('#WIRELESS_MESH').checked;
 
 
-    // AdGuard hash. Empty plaintext → empty string (script falls back to default).
+    // AdGuard hash. Reuse cached hash when ROOT_PASSWD unchanged so ASU cache hits.
     let adguard = '';
     const rootpw = textVal('ROOT_PASSWD');
     const bcrypt = window.dcodeIO && window.dcodeIO.bcrypt;
-	if (rootpw && bcrypt) {
-      try { adguard = bcrypt.hashSync(rootpw, 10); } catch (e) { /* leave empty */ }
+    if (rootpw && bcrypt) {
+      try {
+        const cached = JSON.parse(localStorage.getItem('wrtnova_adguard') || 'null');
+        if (cached && cached.pw === rootpw) {
+          adguard = cached.hash;
+        } else {
+          adguard = bcrypt.hashSync(rootpw, 10);
+          localStorage.setItem('wrtnova_adguard', JSON.stringify({ pw: rootpw, hash: adguard }));
+        }
+      } catch (e) { /* leave empty */ }
     }
 
     return {
@@ -127,10 +135,10 @@ USB_TETHERING:  isRouter ? checkboxVal('USB_TETHERING') : '',
     const base    = target ? [...(target.default_packages || []), ...(target.device_packages || [])] : [];
     const pkgs    = [];
 
-    pkgs.push('curl', 'ip-full', 'umdns');
+    pkgs.push('curl', 'ip-full', 'umdns', 'luci');
     if (cfg.AP_MODE !== '1') {
       const dnsMode = cfg.DNS_MODE || 'adguardhome';
-      if (dnsMode === 'adguardhome') pkgs.push('adguardhome', 'luci-ssl');
+      if (dnsMode === 'adguardhome') pkgs.push('adguardhome');
       else if (dnsMode === 'dnsproxy') pkgs.push('dnsproxy');
     }
     pkgs.push('zram-swap', 'luci-app-commands', 'ip-bridge');
@@ -181,6 +189,54 @@ USB_TETHERING:  isRouter ? checkboxVal('USB_TETHERING') : '',
     document.addEventListener('DOMContentLoaded', initAutoPackages);
   } else {
     initAutoPackages();
+  }
+
+  const HISTORY_KEY = 'wrtnova_history';
+  const HISTORY_MAX = 5;
+  const HISTORY_SENSITIVE = new Set();
+
+  function saveHistoryLocal(payload, result) {
+    const cfg = {};
+    for (const [k, v] of Object.entries(payload.wrtnova_config || {})) {
+      if (HISTORY_SENSITIVE.has(k)) continue;
+      cfg[k] = v;
+    }
+    const entry = {
+      ts: Date.now(),
+      device: {
+        title:   payload.device_title || '',
+        profile: payload.profile,
+        target:  payload.target,
+        version: payload.version,
+      },
+      config:              cfg,
+      additional_packages: payload.additional_packages || [],
+      result,
+    };
+    try {
+      const existing = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+      const top = existing[0];
+      const cfgKey = c => JSON.stringify(c);
+      const isDup = top &&
+        top.device.profile === entry.device.profile &&
+        top.device.version === entry.device.version &&
+        cfgKey(top.config) === cfgKey(entry.config);
+      const updated = isDup ? [entry, ...existing.slice(1)] : [entry, ...existing];
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(updated.slice(0, HISTORY_MAX)));
+    } catch (_) {}
+    ui.loadHistory && ui.loadHistory();
+  }
+
+  function updateHistoryFirmwareUrl(firmware_url) {
+    try {
+      const existing = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+      if (existing.length && existing[0].result) {
+        existing[0].result.firmware_url = firmware_url;
+        existing[0].result.status = 'success';
+        localStorage.setItem(HISTORY_KEY, JSON.stringify(existing));
+      }
+    } catch (_) {}
+    ui.loadHistory && ui.loadHistory();
   }
 
   let polling = null;
@@ -235,6 +291,7 @@ USB_TETHERING:  isRouter ? checkboxVal('USB_TETHERING') : '',
     }
 
     if (resp.firmware_url) {
+      saveHistoryLocal(payload, { status: 'success', firmware_url: resp.firmware_url });
       renderResult({ firmware_url: resp.firmware_url, images: resp.images, bin_dir: resp.bin_dir });
       ui.setProgress('Done (cached build)', 100);
       ui.status('Build complete.', 'success');
@@ -248,6 +305,7 @@ USB_TETHERING:  isRouter ? checkboxVal('USB_TETHERING') : '',
       return;
     }
 
+    saveHistoryLocal(payload, { status: 'queued', firmware_url: null });
     pollAsu(resp.request_hash);
   };
 
@@ -309,14 +367,7 @@ USB_TETHERING:  isRouter ? checkboxVal('USB_TETHERING') : '',
       ? ASU + '/store/' + bin_dir + '/' + sys.name
       : null);
 
-    // Patch history entry with final firmware_url (handles queued builds that polled to completion)
-    if (main) {
-      fetch('/api/history', {
-        method:  'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ firmware_url: main }),
-      }).catch(function () {});
-    }
+    if (main) updateHistoryFirmwareUrl(main);
 
     const wrap = $('#result'); wrap.classList.remove('hidden');
     let html = '<div class="result-wrap">'

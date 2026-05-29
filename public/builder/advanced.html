@@ -13,7 +13,9 @@
       }
     })();
   </script>
+  <link rel="preconnect" href="https://downloads.openwrt.org">
   <link rel="preload" as="font" type="font/woff2" crossorigin href="/fonts/ibm-plex-mono-v20-latin-regular.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="/fonts/ibm-plex-mono-v20-latin-600.woff2">
   <link rel="stylesheet" href="/style.css">
   <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/min/vs/loader.js"></script>
 </head>
@@ -46,6 +48,7 @@
       <summary class="card-header">
         <span class="dot" aria-label="Not started"></span>
         <h2 class="flex-1 text-sm font-semibold">Firmware target</h2>
+        <span class="chev sr-only" aria-hidden="true">▾</span>
         <svg class="w-4 h-4 text-zinc-400 transition-transform duration-200 group-open:rotate-180 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
       </summary>
       <div class="card-body">
@@ -72,6 +75,7 @@
     <details class="group card" id="card-config" open>
       <summary class="card-header">
         <h2 class="flex-1 text-sm font-semibold">Config</h2>
+        <span class="chev sr-only" aria-hidden="true">▾</span>
         <svg class="w-4 h-4 text-zinc-400 transition-transform duration-200 group-open:rotate-180 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
       </summary>
       <div class="card-body" style="padding:0">
@@ -85,6 +89,7 @@
     <details class="group card" id="card-packages" open>
       <summary class="card-header">
         <h2 class="flex-1 text-sm font-semibold">Additional packages</h2>
+        <span class="chev sr-only" aria-hidden="true">▾</span>
         <svg class="w-4 h-4 text-zinc-400 transition-transform duration-200 group-open:rotate-180 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
       </summary>
       <div class="card-body">
@@ -98,6 +103,7 @@
     <details class="group card" id="card-asu">
       <summary class="card-header">
         <h2 class="flex-1 text-sm font-semibold">ASU endpoint</h2>
+        <span class="chev sr-only" aria-hidden="true">▾</span>
         <svg class="w-4 h-4 text-zinc-400 transition-transform duration-200 group-open:rotate-180 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
       </summary>
       <div class="card-body">
@@ -126,7 +132,9 @@
     </div>
 
     <footer class="site-footer">
-      <p><a href="https://github.com/LongQT-sea/wrtnova" target="_blank" rel="noopener" aria-label="Source on GitHub">GitHub</a></p>
+      <p><a href="https://github.com/LongQT-sea/wrtnova" target="_blank" rel="noopener" aria-label="Source on GitHub">GitHub</a> · <a href="https://www.cloudflare.com/terms/" target="_blank" rel="noopener">Cloudflare TOS</a></p>
+      <p class="site-footer-disclaimer">Not affiliated with or endorsed by Cloudflare, Inc.</p>
+      <p class="site-footer-disclaimer">Cloudflare and WARP are registered trademarks of their respective owners.</p>
     </footer>
 
   </main>

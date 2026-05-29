@@ -18,13 +18,11 @@
       .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
 
-  ui.loadHistory = async function () {
+  ui.loadHistory = function () {
     const body = document.getElementById('history-body');
     if (!body) return;
     try {
-      const r = await fetch('/api/history');
-      if (!r.ok) return;
-      const entries = await r.json();
+      const entries = JSON.parse(localStorage.getItem('wrtnova_history') || '[]');
       renderHistory(entries);
     } catch (_) { /* non-critical */ }
   };
@@ -132,6 +130,7 @@
     set('AP_INDEX', cfg.AP_INDEX);
 
     set('HOST_NAME',       cfg.HOST_NAME);
+    set('ROOT_PASSWD',     cfg.ROOT_PASSWD);
     set('SSH_PUBLIC_KEY',  cfg.SSH_PUBLIC_KEY);
     radio('SSH_PASSWD_AUTH', cfg.SSH_PASSWD_AUTH);
 

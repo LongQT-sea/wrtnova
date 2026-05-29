@@ -97,7 +97,7 @@
     });
 
     $('#device').disabled = false;
-    $('#device-info').textContent = (data.profiles || []).length + ' devices available';
+    $('#device-info').textContent = 'Supports devices with ≥16MB flash and ≥128MB RAM.';
     state.selectedTitle = ''; state.selectedProfile = null; state.profileDetails = null;
     ui.notifyTargetChanged && ui.notifyTargetChanged();
   }
@@ -115,27 +115,12 @@
         .catch(() => {});
       await ui.loadOverview();
     } else {
-      // Speculative parallel fetch: start overview for the pre-seeded version
-      // simultaneously with versions, avoiding a sequential round-trip chain.
-      const seedVersion = $('#version').value;
-      const [versionsRes, overviewRes] = await Promise.all([
-        fetch(DL + '/.versions.json', { cache: 'no-cache' }),
-        fetch(versionToUrl(seedVersion) + '/.overview.json', { cache: 'no-cache' }),
-      ]);
-
-      if (!versionsRes.ok) throw new Error('versions fetch failed: ' + versionsRes.status);
-      const versionsData = await versionsRes.json();
-      cacheSet(VERSIONS_KEY, versionsData);
-      applyVersionsData(versionsData);
-
-      // If stable version matched our guess, reuse the in-flight response.
-      if (state.version === seedVersion && overviewRes.ok) {
-        const overviewData = await overviewRes.json();
-        cacheSet('wrtnova_overview_' + seedVersion, overviewData);
-        applyOverviewData(overviewData);
-      } else {
-        await ui.loadOverview();
-      }
+      const res = await fetch(DL + '/.versions.json', { cache: 'no-cache' });
+      if (!res.ok) throw new Error('versions fetch failed: ' + res.status);
+      const data = await res.json();
+      cacheSet(VERSIONS_KEY, data);
+      applyVersionsData(data);
+      await ui.loadOverview();
     }
 
     $('#version').addEventListener('change', () => {
