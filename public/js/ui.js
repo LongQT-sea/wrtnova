@@ -64,7 +64,10 @@
   ui.addRow = addRow;
   ui.initDynamicRows = function () {
     addRow('portfwd');
-    addRow('ipv6');
+    const ipv6Row = addRow('ipv6');
+    ipv6Row.querySelector('[data-col="host"]').value  = 'docker-host';
+    ipv6Row.querySelector('[data-col="octet"]').value = '20';
+    ipv6Row.querySelector('[data-col="ports"]').value = '80 443';
     document.body.addEventListener('click', e => {
       const btn = e.target.closest('[data-add]');
       if (btn) addRow(btn.dataset.add);
@@ -101,6 +104,21 @@
       else if (/^\d+$/.test(tok)) trunkVids[+tok] = true;
     });
 
+    const ap = (ui.$('input[name="AP_MODE"]:checked') || {}).value === '1';
+
+    // In router mode, WAN and WAN_B VLANs are always part of resolve_vlans pool.
+    if (!ap) {
+      const wanVid = +(ui.$('#WAN_VLAN_ID') || {}).value || 20;
+      if (trunkVids[wanVid]) hasDup = true;
+      seen[wanVid] = true;
+      const wanBEl = ui.$('#WAN_B_ENABLE');
+      if (wanBEl && wanBEl.checked) {
+        const wanBVid = +(ui.$('#WAN_B_VLAN_ID') || {}).value || 21;
+        if (seen[wanBVid] || trunkVids[wanBVid]) hasDup = true;
+        seen[wanBVid] = true;
+      }
+    }
+
     rows.forEach(function (row) {
       const isLan = row.dataset.net === 'lan';
       const tog   = ui.$('.toggle-input', row);
@@ -117,7 +135,6 @@
       const effPfx  = (pfxEl && pfxEl.value.trim()) || basePfx || '192.168';
       const effVid  = (vidEl && vidEl.value.trim()) || row.dataset.defVid;
       const effSub  = (subEl && subEl.value)        || defSub || '/24';
-      const ap      = (ui.$('input[name="AP_MODE"]:checked') || {}).value === '1';
       // In AP mode: LAN gets the AP index as last octet; Guest/IoT/WG get proto=none (no IP)
       const hasIp   = on && effVid && (!ap || isLan);
       const lastOct = (ap && isLan) ? ((ui.$('#AP_INDEX') || {}).value || '2') : '1';
@@ -135,6 +152,7 @@
       }
     });
 
+    ui.hasVlanConflict = hasDup;
     const warn = ui.$('#net-dup-warn');
     if (warn) warn.classList.toggle('hidden', !hasDup);
   };

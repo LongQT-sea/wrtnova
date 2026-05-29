@@ -324,7 +324,7 @@
             </label>
           </div>
 
-          <p class="form-help mt-1 net-dup-warn hidden" id="net-dup-warn">⚠ Two or more enabled networks share a VLAN ID — the build will auto-resolve one of them.</p>
+          <p class="form-help mt-1 net-dup-warn hidden" id="net-dup-warn">⚠ Two or more enabled networks share a VLAN ID — fix the conflict before building.</p>
 
           <p class="form-help mt-2 wg-help-router">WireGuard VPN network is a dedicated network with its own WiFi SSID; all its traffic is routed through the WireGuard VPN client.</p>
           <p class="form-help mt-2 ap-only hidden">In AP mode, only L2 networks are created (VLAN and WiFi SSID) for Guest, IoT, and WireGuard VPN — L3 traffic is routed back to the main router.</p>
@@ -786,7 +786,7 @@
     </details>
 
     <!-- ── 12. Performance & Misc ──────────────────────────────────── -->
-    <details class="group card" id="card-misc" data-section="misc">
+    <details class="group card router-only" id="card-misc" data-section="misc">
       <summary class="card-header">
         <span class="dot" aria-label="Not started"></span>
         <h2 class="flex-1 text-sm font-semibold">Performance &amp; misc</h2>

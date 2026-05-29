@@ -16,7 +16,7 @@
     const tz      = ui.collectTimezone();
 
     const isRouter   = apMode !== '1';
-    const wgEnable   = isRouter && $('#WG_ENABLE').checked;
+    const wgEnable   = $('#WG_ENABLE').checked;
     const meshEnable = $('#WIRELESS_MESH') && $('#WIRELESS_MESH').checked;
     const modemEn    = isRouter && $('#CELLULAR_MODEM') && $('#CELLULAR_MODEM').checked;
 
@@ -204,6 +204,7 @@
 
     const target = ui.collectTarget();
     if (!target) { ui.status('Pick a device first.', 'error'); return; }
+    if (ui.hasVlanConflict) { ui.status('Fix duplicate VLAN IDs before building.', 'error'); return; }
 
     const payload = {
       profile:      target.profile,
