@@ -14,7 +14,9 @@
       }
     })();
   </script>
+  <link rel="preconnect" href="https://downloads.openwrt.org">
   <link rel="preload" as="font" type="font/woff2" crossorigin href="/fonts/ibm-plex-mono-v20-latin-regular.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="/fonts/ibm-plex-mono-v20-latin-600.woff2">
   <link rel="stylesheet" href="/style.css">
 </head>
 
@@ -60,7 +62,7 @@
         <div class="form-row">
           <label for="version" class="form-label">OpenWrt version</label>
           <select id="version" class="input-base">
-            <option value="">Loading…</option>
+            <option value="25.12.4">25.12.4</option>
           </select>
         </div>
         <div class="form-row">
@@ -380,9 +382,9 @@
         </div>
 
         <div class="info-note" role="note">
-          You can switch to a different WireGuard config later via 
-		  <strong>LuCI → Network → Interfaces → vpn → Edit → Load configuration</strong>.
-          When importing a config, remember to enable <em>Route Allowed IPs</em> in Peers setting.
+          You can change to a different WireGuard config later via 
+		      <strong>LuCI → Network → Interfaces → vpn → Edit → Load configuration</strong>.
+          After importing a config, remember to enable <em>Route Allowed IPs</em> in the Peers settings.
         </div>
       </div>
     </details>
@@ -509,9 +511,9 @@
                 <span class="toggle-track"></span>
                 <span class="toggle-thumb"></span>
               </span>
-              <span class="toggle-text">Use non-CT ath10k firmware</span>
+              <span class="toggle-text">Use non-CT ath10k firmware & driver</span>
             </label>
-            <p class="form-help">Replaces CT (Candela Technologies) firmware and driver with standard upstream Qualcomm variants. CT adds features (IBSS, .11r, HTT path) but some hardware works better with the upstream firmware.</p>
+            <p class="form-help">Replaces Candela Technologies firmware and driver with standard upstream Qualcomm variants.</p>
           </div>
         </div>
 
@@ -559,7 +561,7 @@
 		  <p class="form-help"></p>
         </div>
 
-        <div class="info-note" role="note"> Default to 12345678 when password is empty</div>
+        <div class="info-note" role="note">Default to 12345678 when password is empty.<br>SSID and password must match between nodes for seamless roaming to work.</div>
 
         <details class="mt-4">
           <summary class="text-xs text-zinc-500 dark:text-zinc-400 cursor-pointer hover:text-zinc-700 dark:hover:text-zinc-200 select-none flex items-center gap-1">
@@ -718,22 +720,8 @@
                 <span class="toggle-track"></span>
                 <span class="toggle-thumb"></span>
               </span>
-              <span class="toggle-text">Enable modem failover</span>
+              <span class="toggle-text">Enable MBIM modem failover</span>
             </label>
-          </div>
-          <!-- Modem fields: shown when CELLULAR_MODEM=1 (JS wires this next prompt) -->
-          <div class="modem-only hidden">
-            <div class="form-row">
-              <label for="MODEM_PATH" class="form-label">Modem path</label>
-              <div>
-                <input type="text" id="MODEM_PATH" name="MODEM_PATH" class="input-base" placeholder="/sys/devices/platform/…/usb2/2-1">
-                <p class="form-help">Hardware-specific sysfs path. This can change later in LuCI.</p>
-              </div>
-            </div>
-            <div class="form-row">
-              <label for="MODEM_APN" class="form-label">APN</label>
-              <input type="text" id="MODEM_APN" name="MODEM_APN" class="input-base" placeholder="internet" style="max-width:240px">
-            </div>
           </div>
         </div>
       </div>

@@ -43,11 +43,20 @@
     return [t.vendor, t.model, t.variant].filter(Boolean).join(' ').trim();
   }
 
-  ui.loadVersions = async function () {
-    const res = await fetch(DL + '/.versions.json', { cache: 'no-cache' });
-    if (!res.ok) throw new Error('versions fetch failed: ' + res.status);
-    const data = await res.json();
+  const CACHE_TTL = 6 * 60 * 60 * 1000; // 6 hours
 
+  function cacheGet(key) {
+    try {
+      const item = JSON.parse(localStorage.getItem(key) || 'null');
+      return item && (Date.now() - item.ts < CACHE_TTL) ? item.data : null;
+    } catch (e) { return null; }
+  }
+
+  function cacheSet(key, data) {
+    try { localStorage.setItem(key, JSON.stringify({ data, ts: Date.now() })); } catch (e) {}
+  }
+
+  function applyVersionsData(data) {
     const picks = SUPPORTED_BRANCHES
       .map(b => pickLatestPatch(data.versions_list || [], b))
       .filter(Boolean);
@@ -67,27 +76,11 @@
       sel.value = picks[0];
     }
     state.version = sel.value;
+  }
 
-    sel.addEventListener('change', () => {
-      state.version = sel.value;
-      ui.loadOverview().catch(err => ui.status('Failed to load device list: ' + err.message, 'error'));
-    });
-
-    await ui.loadOverview();
-  };
-
-  ui.loadOverview = async function () {
-    const v = state.version;
-    $('#device').disabled = true;
-    $('#device').value = '';
-    $('#device-info').textContent = 'Loading devices…';
-
-    const res = await fetch(versionToUrl(v) + '/.overview.json', { cache: 'no-cache' });
-    if (!res.ok) throw new Error('overview fetch failed: ' + res.status);
-    const data = await res.json();
+  function applyOverviewData(data) {
     state.overview = data;
 
-    // build title map, disambiguate dup titles via (target)
     const titles = {};
     const dups = new Set();
     (data.profiles || []).forEach(p => {
@@ -107,6 +100,72 @@
     $('#device-info').textContent = (data.profiles || []).length + ' devices available';
     state.selectedTitle = ''; state.selectedProfile = null; state.profileDetails = null;
     ui.notifyTargetChanged && ui.notifyTargetChanged();
+  }
+
+  ui.loadVersions = async function () {
+    const VERSIONS_KEY = 'wrtnova_versions';
+    const cachedVersions = cacheGet(VERSIONS_KEY);
+
+    if (cachedVersions) {
+      applyVersionsData(cachedVersions);
+      // Background refresh so cache stays current
+      fetch(DL + '/.versions.json', { cache: 'no-cache' })
+        .then(r => r.ok ? r.json() : Promise.reject())
+        .then(d => cacheSet(VERSIONS_KEY, d))
+        .catch(() => {});
+      await ui.loadOverview();
+    } else {
+      // Speculative parallel fetch: start overview for the pre-seeded version
+      // simultaneously with versions, avoiding a sequential round-trip chain.
+      const seedVersion = $('#version').value;
+      const [versionsRes, overviewRes] = await Promise.all([
+        fetch(DL + '/.versions.json', { cache: 'no-cache' }),
+        fetch(versionToUrl(seedVersion) + '/.overview.json', { cache: 'no-cache' }),
+      ]);
+
+      if (!versionsRes.ok) throw new Error('versions fetch failed: ' + versionsRes.status);
+      const versionsData = await versionsRes.json();
+      cacheSet(VERSIONS_KEY, versionsData);
+      applyVersionsData(versionsData);
+
+      // If stable version matched our guess, reuse the in-flight response.
+      if (state.version === seedVersion && overviewRes.ok) {
+        const overviewData = await overviewRes.json();
+        cacheSet('wrtnova_overview_' + seedVersion, overviewData);
+        applyOverviewData(overviewData);
+      } else {
+        await ui.loadOverview();
+      }
+    }
+
+    $('#version').addEventListener('change', () => {
+      state.version = $('#version').value;
+      ui.loadOverview().catch(err => ui.status('Failed to load device list: ' + err.message, 'error'));
+    });
+  };
+
+  ui.loadOverview = async function () {
+    const v = state.version;
+    const OVERVIEW_KEY = 'wrtnova_overview_' + v;
+    $('#device').disabled = true;
+    $('#device').value = '';
+
+    const cached = cacheGet(OVERVIEW_KEY);
+    if (cached) {
+      applyOverviewData(cached);
+      // Background refresh
+      fetch(versionToUrl(v) + '/.overview.json', { cache: 'no-cache' })
+        .then(r => r.ok ? r.json() : Promise.reject())
+        .then(d => cacheSet(OVERVIEW_KEY, d))
+        .catch(() => {});
+    } else {
+      $('#device-info').textContent = 'Loading devices…';
+      const res = await fetch(versionToUrl(v) + '/.overview.json', { cache: 'no-cache' });
+      if (!res.ok) throw new Error('overview fetch failed: ' + res.status);
+      const data = await res.json();
+      cacheSet(OVERVIEW_KEY, data);
+      applyOverviewData(data);
+    }
   };
 
   ui.initDeviceCombo = function () {

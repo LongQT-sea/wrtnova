@@ -182,10 +182,7 @@
       const mesh = ui.$('#WIRELESS_MESH') && ui.$('#WIRELESS_MESH').checked;
       ui.$$('.mesh-only').forEach(el => el.classList.toggle('hidden', !mesh));
 
-      const modem = ui.$('#CELLULAR_MODEM') && ui.$('#CELLULAR_MODEM').checked;
-      ui.$$('.modem-only').forEach(el => el.classList.toggle('hidden', !modem));
-
-      const wanTagged = ui.$('#WAN_IS_TAGGED') && ui.$('#WAN_IS_TAGGED').checked;
+const wanTagged = ui.$('#WAN_IS_TAGGED') && ui.$('#WAN_IS_TAGGED').checked;
       ui.$$('.wan-tagged-only').forEach(el => el.classList.toggle('hidden', !wanTagged));
 
       const wanB = ui.$('#WAN_B_ENABLE') && ui.$('#WAN_B_ENABLE').checked;

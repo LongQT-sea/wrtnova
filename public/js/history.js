@@ -53,9 +53,9 @@
         (i < entries.length - 1 ? ' border-b border-zinc-100 dark:border-zinc-800' : '') + '">' +
         '<div class="min-w-0 flex-1">' +
           '<div class="text-xs font-medium truncate">' + esc(dev.title) +
-            ' <span class="font-normal text-zinc-400 dark:text-zinc-500">' + esc(dev.version) + '</span>' +
+            ' <span class="font-normal text-zinc-500 dark:text-zinc-400">' + esc(dev.version) + '</span>' +
           '</div>' +
-          '<div class="text-xs text-zinc-400 dark:text-zinc-500 mt-0.5">' + esc(details) + '</div>' +
+          '<div class="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">' + esc(details) + '</div>' +
         '</div>' +
         '<div class="flex gap-1.5 flex-shrink-0">' +
           (result.firmware_url
@@ -208,8 +208,6 @@
     set('CLOUDFLARE_API_KEY', cfg.CLOUDFLARE_API_KEY);
 
     check('CELLULAR_MODEM', cfg.CELLULAR_MODEM);
-    set('MODEM_PATH',       cfg.MODEM_PATH);
-    set('MODEM_APN',        cfg.MODEM_APN);
     check('USB_TETHERING',  cfg.USB_TETHERING);
 
     check('SOFTWARE_OFFLOAD', cfg.SOFTWARE_OFFLOAD);

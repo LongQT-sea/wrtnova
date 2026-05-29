@@ -16,7 +16,7 @@
     const isRouter   = apMode !== '1';
     const wgEnable   = $('#WG_ENABLE').checked;
     const meshEnable = $('#WIRELESS_MESH') && $('#WIRELESS_MESH').checked;
-    const modemEn    = isRouter && $('#CELLULAR_MODEM') && $('#CELLULAR_MODEM').checked;
+
 
     // AdGuard hash. Empty plaintext → empty string (script falls back to default).
     let adguard = '';
@@ -103,9 +103,7 @@
       CLOUDFLARE_API_KEY: isRouter ? textVal('CLOUDFLARE_API_KEY') : '',
 
       CELLULAR_MODEM: isRouter ? checkboxVal('CELLULAR_MODEM') : '',
-      MODEM_PATH:     modemEn  ? textVal('MODEM_PATH') : '',
-      MODEM_APN:      modemEn  ? textVal('MODEM_APN')  : '',
-      USB_TETHERING:  isRouter ? checkboxVal('USB_TETHERING') : '',
+USB_TETHERING:  isRouter ? checkboxVal('USB_TETHERING') : '',
 
       DNS_MODE:         ($('input[name="DNS_MODE"]:checked') || {}).value || 'adguardhome',
       SOFTWARE_OFFLOAD: checkboxVal('SOFTWARE_OFFLOAD'),
@@ -239,7 +237,7 @@
     if (resp.firmware_url) {
       renderResult({ firmware_url: resp.firmware_url, images: resp.images, bin_dir: resp.bin_dir });
       ui.setProgress('Done (cached build)', 100);
-      ui.status('Build complete (cached).', 'success');
+      ui.status('Build complete.', 'success');
       $('#build-btn').disabled = false;
       return;
     }
@@ -321,21 +319,18 @@
     }
 
     const wrap = $('#result'); wrap.classList.remove('hidden');
-    let html = '<div class="result-wrap">';
-    if (main) {
-      html += '<a class="btn btn-primary result-btn" href="' + main + '">'
-            + 'Download ' + (sys ? sys.type : 'image') + ' image</a>';
-    }
-    if (images.length > 1) {
-      html += '<details class="result-other"><summary>Other images</summary><ul>';
-      images.forEach(im => {
-        const url = ASU + '/store/' + bin_dir + '/' + im.name;
-        html += '<li><a href="' + url + '">' + im.name + '</a>'
-             + ' <small>(' + im.type + ', sha256: ' + (im.sha256 || '').slice(0, 16) + '…)</small></li>';
-      });
-      html += '</ul></details>';
-    }
-    html += '</div>';
+    let html = '<div class="result-wrap">'
+             + '<p class="result-note">Flash the "<strong>sysupgrade.bin</strong>" via "System → Backup / Flash firmware → Flash image". '
+             + 'Make sure to <strong>disable "Keep settings and retain the current configuration"</strong>.</p>'
+             + '<ul class="result-images">';
+    images.slice().sort((a, b) => (b.type === 'sysupgrade') - (a.type === 'sysupgrade')).forEach(im => {
+      const url = bin_dir ? ASU + '/store/' + bin_dir + '/' + im.name : (im === sys ? main : null);
+      html += '<li>'
+            + (url ? '<a href="' + url + '">' + im.name + '</a>' : im.name)
+            + (im.sha256 ? '<br><span class="result-hash">sha256: ' + im.sha256 + '</span>' : '')
+            + '</li>';
+    });
+    html += '</ul></div>';
     wrap.innerHTML = html;
   }
 
