@@ -3,10 +3,8 @@
 
   const ui = window.WrtNova = window.WrtNova || {};
   const ASU_DEFAULT = 'https://sysupgrade.openwrt.org';
-  const END_MARKER  = '# ===================\n# End config section\n# ===================\n';
 
   let editor  = null;  // Monaco instance
-  let bodyB64 = null;  // wrtnova-body.b64 contents
   let polling = null;
 
   ui.renderAutoPackages   = function () {};
@@ -22,21 +20,16 @@
   };
 
   async function fetchAssets() {
-    const [tplRes, bodyRes] = await Promise.all([
-      fetch('/config-template.sh'),
-      fetch('/wrtnova-body.b64'),
-    ]);
-    if (!tplRes.ok)  throw new Error('Failed to load config-template.sh (' + tplRes.status + ')');
-    if (!bodyRes.ok) throw new Error('Failed to load wrtnova-body.b64 ('  + bodyRes.status + ')');
-    const template = await tplRes.text();
-    bodyB64 = (await bodyRes.text()).trim();
-    return template;
+    const res = await fetch('/wrtnova.sh');
+    if (!res.ok) throw new Error('Failed to load wrtnova.sh (' + res.status + ')');
+    return res.text();
   }
 
   function initMonaco(template) {
     const isDark = () => document.documentElement.classList.contains('dark');
-    require.config({ paths: { vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/min/vs' } });
+    require.config({ paths: { vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@0.55.1/min/vs' } });
     require(['vs/editor/editor.main'], function () {
+      document.getElementById('monaco-loading').remove();
       editor = monaco.editor.create(document.getElementById('monaco-editor'), {
         value:                template,
         language:             'shell',
@@ -58,53 +51,6 @@
     });
   }
 
-  function stripConfig(text) {
-    const lines = text.split('\n');
-    const out   = [];
-    let i = 0;
-
-    while (i < lines.length) {
-      const raw = lines[i];
-      const t   = raw.trim();
-
-      // blank or comment-only (includes shebang and section headers)
-      if (!t || t.startsWith('#')) { i++; continue; }
-
-      // variable assignment: NAME=...
-      const eq = t.indexOf('=');
-      if (eq > 0 && /^[A-Z_][A-Z0-9_]*$/.test(t.slice(0, eq))) {
-        const rest  = t.slice(eq + 1);
-        const openQ = rest.match(/^(['"])/);
-
-        if (openQ && !new RegExp('^' + openQ[1] + '.*' + openQ[1] + '$').test(rest)) {
-          // multi-line value: collect until the line that is just the closing quote
-          const q     = openQ[1];
-          const block = [raw];
-          i++;
-          while (i < lines.length) {
-            block.push(lines[i]);
-            if (lines[i].trim() === q) { i++; break; }
-            i++;
-          }
-          // keep only if content between first and last line is non-whitespace
-          if (block.slice(1, -1).join('\n').trim()) out.push(block.join('\n'));
-          continue;
-        }
-
-        // single-line: strip trailing inline comment, then test for emptiness
-        const val = rest.replace(/\s+#.*$/, '').trim();
-        if (val === '' || val === '""' || val === "''" || /^(['"])\s*\1$/.test(val)) {
-          i++; continue;
-        }
-      }
-
-      out.push(raw);
-      i++;
-    }
-
-    return out.join('\n') + '\n';
-  }
-
   function asuBase() {
     return (document.getElementById('asu-url').value || ASU_DEFAULT).trim().replace(/\/+$/, '');
   }
@@ -124,11 +70,8 @@
     const target = ui.collectTarget && ui.collectTarget();
     if (!target) { ui.status('Pick a device first.', 'error'); return; }
     if (!editor)  { ui.status('Editor not ready yet.', 'error'); return; }
-    if (!bodyB64) { ui.status('Script body not loaded.', 'error'); return; }
 
-    const script = stripConfig(editor.getValue()) +
-      END_MARKER +
-      atob(bodyB64);
+    const script = editor.getValue();
 
     const asu     = asuBase();
     const payload = {
@@ -317,9 +260,27 @@
     });
   }
 
+  function toggleFullscreen() {
+    const wrap = document.getElementById('monaco-wrap');
+    const btn  = document.getElementById('monaco-fs-btn');
+    const open = wrap.classList.toggle('is-fullscreen');
+    document.body.classList.toggle('monaco-fs-open', open);
+    btn.querySelector('.icon-expand').classList.toggle('hidden', open);
+    btn.querySelector('.icon-collapse').classList.toggle('hidden', !open);
+    btn.setAttribute('aria-label', open ? 'Exit full screen' : 'Expand editor to full screen');
+  }
+
+  // ESC exits fullscreen (capture phase so it fires before Monaco's own ESC handlers)
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && document.getElementById('monaco-wrap').classList.contains('is-fullscreen')) {
+      toggleFullscreen();
+    }
+  }, true);
+
   document.addEventListener('DOMContentLoaded', async function () {
     document.getElementById('build-btn').disabled = true;
     document.getElementById('build-btn').addEventListener('click', startBuild);
+    document.getElementById('monaco-fs-btn').addEventListener('click', toggleFullscreen);
 
     initPresets();
     ui.initDeviceCombo();

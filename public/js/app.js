@@ -34,6 +34,8 @@
     // session cookie ping (best-effort; not required to proceed)
     fetch('/api/session').catch(() => {});
 
+    ui.loadAsuServers && ui.loadAsuServers();
+
     try {
       await Promise.all([ui.loadVersions(), ui.loadTzdata()]);
     } catch (e) {

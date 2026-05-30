@@ -1,8 +1,7 @@
 #!/usr/bin/env node
 // Regenerate build artifacts from wrtnova.sh:
 //   functions/api/_wrtnova_template.js  — Worker import (body b64)
-//   public/config-template.sh           — advanced editor pre-fill (config section)
-//   public/wrtnova-body.b64             — advanced page client-side script assembly
+//   public/wrtnova.sh                   — full script served to the advanced editor
 
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
@@ -48,9 +47,5 @@ const out = [
 writeFileSync(resolve(root, 'functions/api/_wrtnova_template.js'), out);
 console.log('Wrote functions/api/_wrtnova_template.js  (' + body.length + ' bytes body)');
 
-const configSection = sh.slice(0, idx);
-writeFileSync(resolve(root, 'public/config-template.sh'), configSection);
-console.log('Wrote public/config-template.sh           (' + configSection.length + ' bytes)');
-
-writeFileSync(resolve(root, 'public/wrtnova-body.b64'), b64);
-console.log('Wrote public/wrtnova-body.b64             (' + b64.length + ' bytes)');
+writeFileSync(resolve(root, 'public/wrtnova.sh'), sh);
+console.log('Wrote public/wrtnova.sh                   (' + sh.length + ' bytes)');

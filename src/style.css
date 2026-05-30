@@ -51,6 +51,9 @@
       row-gap: 0;
       align-items: start;
     }
+    .form-row:has(> .form-label:empty) {
+      grid-template-columns: 1fr;
+    }
   }
 
   .form-label {
@@ -445,6 +448,10 @@
     vertical-align: middle;
   }
   .responsive-table td input { font-size: 0.875rem; }
+  @media (min-width: 768px) {
+    .responsive-table th:first-child,
+    .responsive-table td:first-child { width: 30%; }
+  }
   @media (max-width: 767px) {
     .responsive-table thead { display: none; }
     .responsive-table tbody { display: block; }
@@ -752,4 +759,55 @@
     .net-table .col-ip { width: auto; }
     .net-table .input-base { max-width: 60%; }
   }
+}
+
+/* ── Monaco fullscreen ───────────────────────────────────────────── */
+#monaco-wrap {
+  position: relative;
+}
+
+#monaco-loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8125rem;
+  color: #71717a;
+  pointer-events: none;
+}
+
+#monaco-fs-btn {
+  position: absolute;
+  top: 0.3rem;
+  right: 0.9rem;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 0.25rem;
+  border: none;
+  background: transparent;
+  color: #71717a;
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s;
+}
+#monaco-fs-btn:hover {
+  color: #e4e4e7;
+  background: rgba(63, 63, 70, 0.5);
+}
+
+#monaco-wrap.is-fullscreen {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+}
+#monaco-wrap.is-fullscreen #monaco-editor {
+  height: 100vh !important;
+  min-height: 0 !important;
+}
+body.monaco-fs-open {
+  overflow: hidden;
 }

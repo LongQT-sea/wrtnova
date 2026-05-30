@@ -3,7 +3,32 @@
 
   const ui = window.WrtNova = window.WrtNova || {};
   const $  = ui.$, $$ = ui.$$;
-  const ASU = 'https://sysupgrade.openwrt.org';
+  const ASU_DEFAULT = 'https://sysupgrade.openwrt.org';
+  let activeAsu = ASU_DEFAULT;
+
+  ui.loadAsuServers = async function () {
+    let data;
+    try {
+      const r = await fetch('/api/asu-servers');
+      if (!r.ok) return;
+      data = await r.json();
+    } catch { return; }
+    const servers = data.servers || [];
+    if (servers.length < 2) return;
+
+    const sel = $('#asu-server');
+    if (!sel) return;
+    servers.forEach(s => {
+      const opt = document.createElement('option');
+      opt.value = s.url;
+      opt.textContent = s.label;
+      sel.appendChild(opt);
+    });
+    sel.value = servers[0].url;
+    activeAsu = servers[0].url;
+    sel.addEventListener('change', () => { activeAsu = sel.value; });
+    $('#asu-server-row').classList.remove('hidden');
+  };
 
   function checkboxVal(id) { const el = $('#' + id); return el && el.checked ? '1' : ''; }
   function textVal(id)     { return ($('#' + id) || {}).value || ''; }
@@ -251,6 +276,23 @@ USB_TETHERING:  isRouter ? checkboxVal('USB_TETHERING') : '',
     if (!target) { ui.status('Pick a device first.', 'error'); return; }
     if (ui.hasVlanConflict) { ui.status('Fix duplicate VLAN IDs before building.', 'error'); return; }
 
+    const wifiPassFields = [
+      { id: 'LAN_WIFI_PASSWD',   active: true },
+      { id: 'GUEST_WIFI_PASSWD', active: $('#GUEST_ENABLE').checked },
+      { id: 'IOT_WIFI_PASSWD',   active: $('#IOT_ENABLE').checked },
+      { id: 'LAN_WG_WIFI_PASSWD',active: $('#WG_ENABLE').checked },
+      { id: 'MESH_PASSWD',       active: true },
+    ];
+    for (const { id, active } of wifiPassFields) {
+      if (!active) continue;
+      const val = $('#' + id).value;
+      if (val && val.length < 8) {
+        ui.status('WiFi password must be at least 8 characters (' + id.replace(/_PASSWD|_WIFI/, '') + ').', 'error');
+        $('#' + id).focus();
+        return;
+      }
+    }
+
     const payload = {
       profile:      target.profile,
       target:       target.target,
@@ -261,6 +303,7 @@ USB_TETHERING:  isRouter ? checkboxVal('USB_TETHERING') : '',
       device_title:        ($('#device') || {}).value || '',
       wrtnova_config:      collectConfig(),
       additional_packages: parseAdditionalPackages(),
+      asu_url: activeAsu,
     };
 
     $('#build-btn').disabled = true;
@@ -292,7 +335,7 @@ USB_TETHERING:  isRouter ? checkboxVal('USB_TETHERING') : '',
 
     if (resp.firmware_url) {
       saveHistoryLocal(payload, { status: 'success', firmware_url: resp.firmware_url });
-      renderResult({ firmware_url: resp.firmware_url, images: resp.images, bin_dir: resp.bin_dir });
+      renderResult({ firmware_url: resp.firmware_url, images: resp.images, bin_dir: resp.bin_dir }, activeAsu);
       ui.setProgress('Done (cached build)', 100);
       ui.status('Build complete.', 'success');
       $('#build-btn').disabled = false;
@@ -306,7 +349,7 @@ USB_TETHERING:  isRouter ? checkboxVal('USB_TETHERING') : '',
     }
 
     saveHistoryLocal(payload, { status: 'queued', firmware_url: null });
-    pollAsu(resp.request_hash);
+    pollAsu(resp.request_hash, resp.asu_url || activeAsu);
   };
 
   const PROGRESS_MAP = {
@@ -322,12 +365,13 @@ USB_TETHERING:  isRouter ? checkboxVal('USB_TETHERING') : '',
     'build-successful':        [100, 'Done'],
   };
 
-  function pollAsu(hash) {
+  function pollAsu(hash, asuBase) {
+    const base = (asuBase || ASU_DEFAULT).replace(/\/+$/, '');
     let tries = 0;
     polling = setInterval(async () => {
       tries++;
       try {
-        const r = await fetch(ASU + '/api/v1/build/' + hash, { cache: 'no-cache' });
+        const r = await fetch(base + '/api/v1/build/' + hash, { cache: 'no-cache' });
         const data = await r.json();
         if (r.status === 202) {
           const m = PROGRESS_MAP[data.detail] || [50, data.detail || 'Building…'];
@@ -339,7 +383,7 @@ USB_TETHERING:  isRouter ? checkboxVal('USB_TETHERING') : '',
         if (r.status === 200) {
           ui.setProgress('Done', 100);
           ui.status('Build complete.', 'success');
-          renderResult(data);
+          renderResult(data, base);
         } else {
           ui.status('Build failed: ' + (data.detail || ('HTTP ' + r.status)), 'error');
           if (data.stderr) {
@@ -357,14 +401,15 @@ USB_TETHERING:  isRouter ? checkboxVal('USB_TETHERING') : '',
     }, 5000);
   }
 
-  function renderResult(data) {
+  function renderResult(data, asuBase) {
+    const base   = (asuBase || activeAsu || ASU_DEFAULT).replace(/\/+$/, '');
     const bin_dir = data.bin_dir;
     const images  = data.images || [];
     const sys = images.find(i => i.type === 'sysupgrade') ||
                 images.find(i => i.type === 'factory') ||
                 images[0];
     const main = data.firmware_url || (sys && bin_dir
-      ? ASU + '/store/' + bin_dir + '/' + sys.name
+      ? base + '/store/' + bin_dir + '/' + sys.name
       : null);
 
     if (main) updateHistoryFirmwareUrl(main);
@@ -375,7 +420,7 @@ USB_TETHERING:  isRouter ? checkboxVal('USB_TETHERING') : '',
              + 'Make sure to <strong>disable "Keep settings and retain the current configuration"</strong>.</p>'
              + '<ul class="result-images">';
     images.slice().sort((a, b) => (b.type === 'sysupgrade') - (a.type === 'sysupgrade')).forEach(im => {
-      const url = bin_dir ? ASU + '/store/' + bin_dir + '/' + im.name : (im === sys ? main : null);
+      const url = bin_dir ? base + '/store/' + bin_dir + '/' + im.name : (im === sys ? main : null);
       html += '<li>'
             + (url ? '<a href="' + url + '">' + im.name + '</a>' : im.name)
             + (im.sha256 ? '<br><span class="result-hash">sha256: ' + im.sha256 + '</span>' : '')

@@ -10,7 +10,9 @@ compatibility_flags = ["nodejs_compat"]
 
 [vars]
 ALLOWED_ORIGIN = "https://wrtnova.com"
-# ASU_URL = "https://sysupgrade.openwrt.org"  # uncomment to override; defaults to official ASU
+# ASU_URL   = "https://sysupgrade.openwrt.org"  # primary ASU; defaults to official if unset
+# ASU_URL_2 = "https://asu.example.com"          # additional ASU shown in endpoint dropdown
+# ASU_URL_3 = "https://asu2.example.com"         # add more as needed
 
 # ── Rate limiting (configure in CF dashboard, not here) ──────────────────────
 # Security → WAF → Rate Limiting Rules:
