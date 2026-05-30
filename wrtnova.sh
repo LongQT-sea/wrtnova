@@ -785,7 +785,7 @@ if [ "$use_bridge_vlan" = 1 ]; then
 		fi
 	}
 
-	_uci network device @device[0] name=br-vlan -ports ${WIRELESS_MESH:+stp=1}
+	_uci network device @device[0] name=br-vlan -ports
 	for p in $lan_ports ${bridge_wan_port:+$wan_port}; do
 		_uci network device @device[0] +ports="$p"
 	done
