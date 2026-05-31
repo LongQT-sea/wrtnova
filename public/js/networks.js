@@ -222,15 +222,15 @@
       const cached = JSON.parse(localStorage.getItem('wrtnova_adguard') || 'null');
       if (cached && cached.pw === pw) return Promise.resolve(cached.hash);
     } catch (_) {}
-    const bcrypt = window.dcodeIO && window.dcodeIO.bcrypt;
-    if (!bcrypt) return Promise.resolve('');
-    return new Promise(resolve => {
+    return ui.loadScript('/js/bcrypt.js').then(() => {
+      const bcrypt = window.dcodeIO && window.dcodeIO.bcrypt;
+      if (!bcrypt) return '';
       try {
         const hash = bcrypt.hashSync(pw, 10);
         try { localStorage.setItem('wrtnova_adguard', JSON.stringify({ pw, hash })); } catch (_) {}
-        resolve(hash);
-      } catch (_) { resolve(''); }
-    });
+        return hash;
+      } catch (_) { return ''; }
+    }).catch(() => '');
   }
 
   function panelActEl(nodeId) {

@@ -43,28 +43,12 @@
     const meshEnable = $('#WIRELESS_MESH') && $('#WIRELESS_MESH').checked;
 
 
-    // AdGuard hash. Reuse cached hash when ROOT_PASSWD unchanged so ASU cache hits.
-    let adguard = '';
-    const rootpw = textVal('ROOT_PASSWD');
-    const bcrypt = window.dcodeIO && window.dcodeIO.bcrypt;
-    if (rootpw && bcrypt) {
-      try {
-        const cached = JSON.parse(localStorage.getItem('wrtnova_adguard') || 'null');
-        if (cached && cached.pw === rootpw) {
-          adguard = cached.hash;
-        } else {
-          adguard = bcrypt.hashSync(rootpw, 10);
-          localStorage.setItem('wrtnova_adguard', JSON.stringify({ pw: rootpw, hash: adguard }));
-        }
-      } catch (e) { /* leave empty */ }
-    }
-
     return {
       AP_MODE:  apMode,
       AP_INDEX: isRouter ? '' : textVal('AP_INDEX'),
 
       HOST_NAME:       textVal('HOST_NAME'),
-      ROOT_PASSWD:     rootpw,
+      ROOT_PASSWD:     textVal('ROOT_PASSWD'),
       SSH_PUBLIC_KEY:  textVal('SSH_PUBLIC_KEY'),
       SSH_PASSWD_AUTH: ($('input[name="SSH_PASSWD_AUTH"]:checked') || {}).value || '',
       ZONE_NAME:       tz.ZONE_NAME,
@@ -143,7 +127,6 @@ USB_TETHERING:  isRouter ? checkboxVal('USB_TETHERING') : '',
       HARDWARE_OFFLOAD: checkboxVal('HARDWARE_OFFLOAD'),
       BLOCK_DOT_DOQ:    checkboxVal('BLOCK_DOT_DOQ'),
       NON_CT_ATH10K:    checkboxVal('NON_CT_ATH10K'),
-      ADGUARD_PASSWD:   adguard,
     };
   }
 
@@ -293,6 +276,26 @@ USB_TETHERING:  isRouter ? checkboxVal('USB_TETHERING') : '',
       }
     }
 
+    await Promise.all([
+      ui.loadScript('/js/bcrypt.js'),
+      ui.loadScript('/js/history.js'),
+    ]);
+
+    const cfg = collectConfig();
+    const rootpw = cfg.ROOT_PASSWD;
+    const bcrypt = window.dcodeIO && window.dcodeIO.bcrypt;
+    if (rootpw && bcrypt) {
+      try {
+        const cached = JSON.parse(localStorage.getItem('wrtnova_adguard') || 'null');
+        if (cached && cached.pw === rootpw) {
+          cfg.ADGUARD_PASSWD = cached.hash;
+        } else {
+          cfg.ADGUARD_PASSWD = bcrypt.hashSync(rootpw, 10);
+          localStorage.setItem('wrtnova_adguard', JSON.stringify({ pw: rootpw, hash: cfg.ADGUARD_PASSWD }));
+        }
+      } catch (_) {}
+    }
+
     const payload = {
       profile:      target.profile,
       target:       target.target,
@@ -301,7 +304,7 @@ USB_TETHERING:  isRouter ? checkboxVal('USB_TETHERING') : '',
       default_packages: target.default_packages,
       device_packages:  target.device_packages,
       device_title:        ($('#device') || {}).value || '',
-      wrtnova_config:      collectConfig(),
+      wrtnova_config:      cfg,
       additional_packages: parseAdditionalPackages(),
       asu_url: activeAsu,
     };

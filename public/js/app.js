@@ -42,7 +42,13 @@
       ui.status('Init failed: ' + e.message, 'error');
     }
     ui.notifyTargetChanged && ui.notifyTargetChanged();
-    ui.loadHistory && ui.loadHistory();
+
+    const historyCard = document.getElementById('card-history');
+    if (historyCard) {
+      historyCard.addEventListener('toggle', () => {
+        ui.loadScript('/js/history.js').then(() => ui.loadHistory && ui.loadHistory());
+      }, { once: true });
+    }
   }
 
   if (document.readyState === 'loading') {

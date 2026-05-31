@@ -7,6 +7,16 @@
   ui.$  = (sel, root) => (root || document).querySelector(sel);
   ui.$$ = (sel, root) => Array.from((root || document).querySelectorAll(sel));
 
+  ui.loadScript = function (src) {
+    if (document.querySelector('script[src="' + src + '"]')) return Promise.resolve();
+    return new Promise((resolve, reject) => {
+      const s = document.createElement('script');
+      s.src = src; s.onload = resolve;
+      s.onerror = () => reject(new Error('Failed to load ' + src));
+      document.head.appendChild(s);
+    });
+  };
+
   // states: 'untouched' | 'touched' | 'valid'
   ui.setDot = function (sectionId, state) {
     const card = document.getElementById('card-' + sectionId);

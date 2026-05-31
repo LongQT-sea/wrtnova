@@ -15,9 +15,9 @@
   </script>
   <link rel="preconnect" href="https://downloads.openwrt.org">
   <link rel="preload" as="font" type="font/woff2" crossorigin href="/fonts/ibm-plex-mono-v20-latin-regular.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="/fonts/ibm-plex-mono-v20-latin-500.woff2">
   <link rel="preload" as="font" type="font/woff2" crossorigin href="/fonts/ibm-plex-mono-v20-latin-600.woff2">
   <link rel="stylesheet" href="/style.css">
-  <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.55.1/min/vs/loader.js"></script>
 </head>
 
 <body class="bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 font-mono text-sm min-h-screen pb-24 md:pb-0">
@@ -79,13 +79,13 @@
         <svg class="w-4 h-4 text-zinc-400 transition-transform duration-200 group-open:rotate-180 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
       </summary>
       <div class="card-body" style="padding:0">
-        <div id="monaco-wrap">
-          <button id="monaco-fs-btn" type="button" aria-label="Expand editor to full screen">
+        <div id="editor-wrap">
+          <button id="editor-fs-btn" type="button" aria-label="Expand editor to full screen">
             <svg class="icon-expand w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
             <svg class="icon-collapse w-4 h-4 hidden" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="10" y1="14" x2="3" y2="21"/><line x1="21" y1="3" x2="14" y2="10"/></svg>
           </button>
-          <div id="monaco-loading" aria-hidden="true">Loading editor…</div>
-          <div id="monaco-editor" style="height:min(680px,calc(100vh - 320px));min-height:360px;width:100%"></div>
+          <div id="editor-loading" aria-hidden="true">Loading editor…</div>
+          <div id="editor-container" style="height:min(680px,calc(100vh - 320px));min-height:360px;width:100%"></div>
         </div>
       </div>
       <div class="info-note" role="note">
@@ -146,9 +146,10 @@
 
   </main>
 
-  <script src="/js/theme.js"></script>
-  <script src="/js/ui.js"></script>
-  <script src="/js/advanced.js"></script>
-  <script src="/js/devices.js"></script>
+  <script defer src="/js/cm.bundle.js"></script>
+  <script defer src="/js/theme.js"></script>
+  <script defer src="/js/ui.js"></script>
+  <script defer src="/js/advanced.js"></script>
+  <script defer src="/js/devices.js"></script>
 </body>
 </html>

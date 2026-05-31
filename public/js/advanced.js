@@ -4,13 +4,13 @@
   const ui = window.WrtNova = window.WrtNova || {};
   const ASU_DEFAULT = 'https://sysupgrade.openwrt.org';
 
-  let editor  = null;  // Monaco instance
+  let editor  = null;  // CodeMirror EditorView instance
   let polling = null;
 
-  ui.renderAutoPackages   = function () {};
+  ui.renderAutoPackages      = function () {};
   ui.expandSectionsOnDevice  = function () {};
   ui.updateAth10kVisibility  = function () {};
-  ui.notifyTargetChanged  = function () {
+  ui.notifyTargetChanged     = function () {
     const ok  = !!(ui.collectTarget && ui.collectTarget());
     const btn = document.getElementById('build-btn');
     const hint = document.getElementById('build-hint');
@@ -25,30 +25,62 @@
     return res.text();
   }
 
-  function initMonaco(template) {
+  function initCmEditor(template) {
+    const {
+      EditorView, Compartment, Prec,
+      lineNumbers, highlightActiveLine, drawSelection, highlightSpecialChars, keymap,
+      history, historyKeymap, defaultKeymap,
+      searchKeymap,
+      StreamLanguage, syntaxHighlighting, HighlightStyle, defaultHighlightStyle, indentOnInput,
+      shell, oneDark, tags,
+    } = window.CM6;
     const isDark = () => document.documentElement.classList.contains('dark');
-    require.config({ paths: { vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@0.55.1/min/vs' } });
-    require(['vs/editor/editor.main'], function () {
-      document.getElementById('monaco-loading').remove();
-      editor = monaco.editor.create(document.getElementById('monaco-editor'), {
-        value:                template,
-        language:             'shell',
-        theme:                isDark() ? 'vs-dark' : 'vs',
-        automaticLayout:      true,
-        minimap:              { enabled: false },
-        fontSize:             13,
-        fontFamily:           '"IBM Plex Mono", "Courier New", monospace',
-        scrollBeyondLastLine: false,
-        lineNumbers:          'on',
-        renderLineHighlight:  'line',
-        tabSize:              4,
-        wordWrap:             'off',
-      });
+    const themeConf = new Compartment();
 
-      new MutationObserver(function () {
-        monaco.editor.setTheme(isDark() ? 'vs-dark' : 'vs');
-      }).observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+    // oneDark comments/meta use #5c6370 (~2.1:1 contrast) — override to #9da5b4 (~5.18:1)
+    const commentContrast = Prec.highest(syntaxHighlighting(HighlightStyle.define([
+      { tag: [tags.comment, tags.meta], color: '#9da5b4', fontStyle: 'italic' },
+      { tag: tags.link,                 color: '#9da5b4', textDecoration: 'underline' },
+    ])));
+
+    const darkTheme = [
+      oneDark,
+      commentContrast,
+      EditorView.theme({ '.cm-gutterElement': { color: '#9da5b4' } }),
+    ];
+
+    editor = new EditorView({
+      doc: template,
+      extensions: [
+        lineNumbers(),
+        highlightSpecialChars(),
+        history(),
+        drawSelection(),
+        syntaxHighlighting(defaultHighlightStyle, { fallback: true }),
+        highlightActiveLine(),
+        indentOnInput(),
+        keymap.of([...defaultKeymap, ...historyKeymap, ...searchKeymap]),
+        StreamLanguage.define(shell),
+        themeConf.of(isDark() ? darkTheme : []),
+        EditorView.contentAttributes.of({ 'aria-label': 'Config script editor' }),
+        EditorView.theme({
+          '&':            { fontFamily: '"IBM Plex Mono", "Courier New", monospace', fontSize: '13px', height: '100%' },
+          '.cm-scroller': { fontFamily: 'inherit', overflow: 'auto' },
+        }),
+      ],
+      parent: document.getElementById('editor-container'),
     });
+
+    const loading = document.getElementById('editor-loading');
+    if (loading) loading.remove();
+
+    new MutationObserver(function () {
+      editor.dispatch({ effects: themeConf.reconfigure(isDark() ? darkTheme : []) });
+    }).observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+  }
+
+  function editorValue() {
+    return editor ? editor.state.doc.toString() : '';
   }
 
   function asuBase() {
@@ -56,10 +88,14 @@
   }
 
   function parsePackages() {
-    return (document.getElementById('packages').value || '')
+    const user = (document.getElementById('packages').value || '')
       .split(/[\s,\n]+/)
       .map(function (s) { return s.trim(); })
       .filter(Boolean);
+    // Always include luci unless the user explicitly removes it with -luci
+    if (!user.includes('luci') && !user.includes('-luci'))
+      user.unshift('luci');
+    return user;
   }
 
   async function startBuild() {
@@ -71,7 +107,7 @@
     if (!target) { ui.status('Pick a device first.', 'error'); return; }
     if (!editor)  { ui.status('Editor not ready yet.', 'error'); return; }
 
-    const script = editor.getValue();
+    const script = editorValue();
 
     const asu     = asuBase();
     const payload = {
@@ -202,7 +238,7 @@
       label: 'WrtNova core',
       title: 'Essential packages WrtNova always installs',
       pkgs:  ['curl', 'ip-full', 'umdns', 'zram-swap', 'luci-app-commands', 'ip-bridge',
-              'adguardhome', 'luci-ssl', 'luci-app-ddns', 'ddns-scripts-cloudflare'],
+              'adguardhome', 'luci-app-ddns', 'ddns-scripts-cloudflare'],
     },
     {
       label: 'Full WiFi',
@@ -232,7 +268,7 @@
     {
       label: 'Low RAM',
       title: 'Swap AdGuard Home for dnsproxy (devices with <230 MB RAM)',
-      pkgs:  ['dnsproxy', '-adguardhome', '-luci-ssl'],
+      pkgs:  ['dnsproxy', '-adguardhome'],
     },
   ];
 
@@ -251,28 +287,28 @@
     if (!container) return;
     PRESETS.forEach(function (preset) {
       const btn = document.createElement('button');
-      btn.type      = 'button';
+      btn.type        = 'button';
       btn.textContent = '+ ' + preset.label;
-      btn.title     = preset.title;
-      btn.className = 'btn btn-ghost text-xs py-0.5 px-2';
+      btn.title       = preset.title;
+      btn.className   = 'btn btn-ghost text-xs py-0.5 px-2';
       btn.addEventListener('click', function () { addPreset(preset.pkgs); });
       container.appendChild(btn);
     });
   }
 
   function toggleFullscreen() {
-    const wrap = document.getElementById('monaco-wrap');
-    const btn  = document.getElementById('monaco-fs-btn');
+    const wrap = document.getElementById('editor-wrap');
+    const btn  = document.getElementById('editor-fs-btn');
     const open = wrap.classList.toggle('is-fullscreen');
-    document.body.classList.toggle('monaco-fs-open', open);
+    document.body.classList.toggle('editor-fs-open', open);
     btn.querySelector('.icon-expand').classList.toggle('hidden', open);
     btn.querySelector('.icon-collapse').classList.toggle('hidden', !open);
     btn.setAttribute('aria-label', open ? 'Exit full screen' : 'Expand editor to full screen');
+    if (editor) editor.requestMeasure();
   }
 
-  // ESC exits fullscreen (capture phase so it fires before Monaco's own ESC handlers)
   document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape' && document.getElementById('monaco-wrap').classList.contains('is-fullscreen')) {
+    if (e.key === 'Escape' && document.getElementById('editor-wrap').classList.contains('is-fullscreen')) {
       toggleFullscreen();
     }
   }, true);
@@ -280,7 +316,7 @@
   document.addEventListener('DOMContentLoaded', async function () {
     document.getElementById('build-btn').disabled = true;
     document.getElementById('build-btn').addEventListener('click', startBuild);
-    document.getElementById('monaco-fs-btn').addEventListener('click', toggleFullscreen);
+    document.getElementById('editor-fs-btn').addEventListener('click', toggleFullscreen);
 
     initPresets();
     ui.initDeviceCombo();
@@ -293,7 +329,7 @@
     ]);
 
     if (templateResult.status === 'fulfilled') {
-      initMonaco(templateResult.value);
+      initCmEditor(templateResult.value);
     } else {
       ui.status('Failed to load editor assets: ' + templateResult.reason.message, 'error');
     }

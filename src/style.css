@@ -861,12 +861,16 @@
   }
 }
 
-/* ── Monaco fullscreen ───────────────────────────────────────────── */
-#monaco-wrap {
+/* ── Editor (CodeMirror) ─────────────────────────────────────────── */
+#editor-wrap {
   position: relative;
 }
 
-#monaco-loading {
+#editor-container .cm-editor {
+  height: 100%;
+}
+
+#editor-loading {
   position: absolute;
   inset: 0;
   display: flex;
@@ -877,7 +881,7 @@
   pointer-events: none;
 }
 
-#monaco-fs-btn {
+#editor-fs-btn {
   position: absolute;
   top: 0.3rem;
   right: 0.9rem;
@@ -894,21 +898,29 @@
   cursor: pointer;
   transition: color 0.15s, background 0.15s;
 }
-#monaco-fs-btn:hover {
+#editor-fs-btn:hover {
+  color: #3f3f46;
+  background: rgba(63, 63, 70, 0.1);
+}
+.dark #editor-fs-btn:hover {
   color: #e4e4e7;
   background: rgba(63, 63, 70, 0.5);
 }
 
-#monaco-wrap.is-fullscreen {
+#editor-wrap.is-fullscreen {
   position: fixed;
   inset: 0;
   z-index: 9999;
+  background-color: #ffffff;
 }
-#monaco-wrap.is-fullscreen #monaco-editor {
+.dark #editor-wrap.is-fullscreen {
+  background-color: #282c34; /* matches oneDark editor background */
+}
+#editor-wrap.is-fullscreen #editor-container {
   height: 100vh !important;
   min-height: 0 !important;
 }
-body.monaco-fs-open {
+body.editor-fs-open {
   overflow: hidden;
 }
 
