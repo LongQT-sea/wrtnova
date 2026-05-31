@@ -51,7 +51,7 @@
       row-gap: 0;
       align-items: start;
     }
-    .form-row:has(> .form-label:empty) {
+    .form-row--full {
       grid-template-columns: 1fr;
     }
   }
@@ -759,6 +759,106 @@
     .net-table .col-ip { width: auto; }
     .net-table .input-base { max-width: 60%; }
   }
+
+  /* ── Networks fleet builder ─────────────────────────────────────── */
+  .net-card-link { cursor: pointer; transition: border-color 0.15s; }
+  .net-card-link:hover { border-color: #f6821f; }
+
+  .node-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.625rem 1rem;
+    border-bottom: 1px solid #e4e4e7;
+    cursor: pointer;
+    transition: background-color 0.12s;
+    user-select: none;
+  }
+  .dark .node-row { border-bottom-color: #27272a; }
+  .node-row:hover { background-color: #f9f9f9; }
+  .dark .node-row:hover { background-color: rgba(39,39,42,0.5); }
+  .node-row.active {
+    background-color: #fafafa;
+    box-shadow: inset 2px 0 0 #f6821f;
+    padding-left: calc(1rem - 2px);
+  }
+  .dark .node-row.active { background-color: rgba(39,39,42,0.6); }
+
+  .node-panel {
+    overflow: hidden;
+    transition: max-height 0.25s ease, opacity 0.2s ease;
+    max-height: 0;
+    opacity: 0;
+  }
+  .node-panel.open { max-height: 2400px; opacity: 1; }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.6875rem;
+    line-height: 1;
+    padding: 0.15rem 0.4rem;
+    border-radius: 0.25rem;
+    background-color: #f4f4f5;
+    color: #71717a;
+    border: 1px solid #e4e4e7;
+    white-space: nowrap;
+  }
+  .dark .chip {
+    background-color: #27272a;
+    color: #a1a1aa;
+    border-color: #3f3f46;
+  }
+
+  .inherited-badge {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.6875rem;
+    line-height: 1;
+    padding: 0.15rem 0.4rem;
+    border-radius: 0.25rem;
+    background-color: #f4f4f5;
+    color: #52525b;
+    border: 1px solid #e4e4e7;
+    white-space: nowrap;
+  }
+  .dark .inherited-badge {
+    background-color: #27272a;
+    color: #71717a;
+    border-color: #3f3f46;
+  }
+
+  .inherited-wrap { display: flex; flex-wrap: wrap; gap: 0.375rem; }
+
+  .config-actions {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e4e4e7;
+  }
+  .dark .config-actions { border-top-color: #27272a; }
+  @media (max-width: 767px) {
+    .config-actions {
+      position: sticky;
+      bottom: 0;
+      margin: 0 -1rem;
+      padding: 0.75rem 1rem;
+      padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
+      background-color: rgba(250,250,250,0.95);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border-top: 1px solid #e4e4e7;
+      border-radius: 0;
+      z-index: 30;
+    }
+    .dark .config-actions {
+      background-color: rgba(9,9,11,0.95);
+      border-top-color: #27272a;
+    }
+    .config-actions .btn-primary { flex: 1; justify-content: center; min-height: 44px; }
+  }
 }
 
 /* ── Monaco fullscreen ───────────────────────────────────────────── */
@@ -810,4 +910,37 @@
 }
 body.monaco-fs-open {
   overflow: hidden;
+}
+
+/* ── /networks device picker ─────────────────────────────────────── */
+#modal-device-picker {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  margin: 0;
+  border: none;
+  padding: 0;
+  background: transparent;
+  border-radius: 0;
+}
+@media (min-width: 768px) {
+  #modal-device-picker {
+    inset: unset;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 560px;
+    height: 70vh;
+    max-width: calc(100vw - 2rem);
+    max-height: calc(100vh - 4rem);
+    border-radius: 0.5rem;
+    overflow: hidden;
+    border: 1px solid #3f3f46; /* zinc-700 */
+  }
+  #modal-device-picker::backdrop {
+    background: rgba(9, 9, 11, 0.6);
+  }
 }

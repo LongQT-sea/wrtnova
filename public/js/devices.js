@@ -18,19 +18,18 @@
     profileDetails: null,           // result of profiles.json fetch
   };
 
-  function pickLatestPatch(versions, branch) {
-    const ofBranch = versions.filter(v => v.startsWith(branch + '.'));
-    if (!ofBranch.length) return null;
-    // semver-ish sort: numeric per component, descending.
-    ofBranch.sort((a, b) => {
-      const pa = a.split('.').map(Number), pb = b.split('.').map(Number);
-      for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
-        const d = (pb[i] || 0) - (pa[i] || 0);
-        if (d) return d;
-      }
-      return 0;
-    });
-    return ofBranch[0];
+  function pickLatestNPatches(versions, branch, n) {
+    return versions.filter(v => v.startsWith(branch + '.'))
+      .sort((a, b) => {
+        const pa = a.split('.').map(Number), pb = b.split('.').map(Number);
+        for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
+          const d = (pb[i] || 0) - (pa[i] || 0);
+          if (d) return d;
+        }
+        return 0;
+      })
+      .slice(0, n)
+      .reverse();
   }
 
   function versionToUrl(v) {
@@ -57,9 +56,8 @@
   }
 
   function applyVersionsData(data) {
-    const picks = SUPPORTED_BRANCHES
-      .map(b => pickLatestPatch(data.versions_list || [], b))
-      .filter(Boolean);
+    const picks = [];
+    SUPPORTED_BRANCHES.forEach(b => picks.push(...pickLatestNPatches(data.versions_list || [], b, 2)));
     picks.push('SNAPSHOT');
 
     const sel = $('#version');
@@ -73,7 +71,7 @@
     if (data.stable_version && picks.includes(data.stable_version)) {
       sel.value = data.stable_version;
     } else {
-      sel.value = picks[0];
+      sel.value = picks.filter(v => v !== 'SNAPSHOT').pop() || picks[0];
     }
     state.version = sel.value;
   }

@@ -150,7 +150,7 @@
   };
 
   ui.initConditionalVisibility = function () {
-    function refresh() {
+    function refresh(e) {
       const ap = ui.$('input[name="AP_MODE"]:checked').value === '1';
       ui.$$('.router-only').forEach(el => el.classList.toggle('hidden', ap));
       ui.$$('.ap-only').forEach(el => el.classList.toggle('hidden', !ap));
@@ -171,8 +171,9 @@
       ui.$$('.wifi-wg').forEach(el => el.classList.toggle('hidden', !wgEnabled));
       // WireGuard client card: router-only — AP trunks back, no client config needed.
       const wgRouter = wgEnabled && !ap;
+      const wgCard = ui.$('#card-wg');
       ui.$$('.wg-only').forEach(el => el.classList.toggle('hidden', !wgRouter));
-      if (wgRouter) { const wgCard = ui.$('#card-wg'); if (wgCard) wgCard.open = true; }
+      if (wgRouter && e?.target?.id === 'WG_ENABLE') wgCard.open = true;
       // Help text: swap between router and AP explanation when WG_ENABLE is on.
       ui.$$('.wg-help-router').forEach(el => el.classList.toggle('hidden', ap));
 
