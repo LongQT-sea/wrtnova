@@ -1,5 +1,4 @@
 // Theme toggle is handled by theme.js (loaded separately).
-// Collapsible open/close is handled natively by <details>/<summary>.
 (function () {
   'use strict';
   const ui = window.WrtNova = window.WrtNova || {};
@@ -19,6 +18,7 @@
   }
 
   async function init() {
+    ui.initCardToggles();
     ui.initDynamicRows();
     ui.initConditionalVisibility();
     ui.initPasswordToggles();

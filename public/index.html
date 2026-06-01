@@ -21,38 +21,37 @@
 <body class="page-home bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 font-mono text-sm min-h-screen">
 
   <header class="sticky top-0 z-40 bg-zinc-50/90 dark:bg-zinc-950/90 backdrop-blur-sm border-b border-zinc-200 dark:border-zinc-800">
-    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
-      <span class="text-base font-semibold tracking-tight leading-tight">WrtNova</span>
-      <div class="flex items-center gap-2">
+    <div class="max-w-[68rem] mx-auto px-4 py-3 flex items-center justify-between gap-4">
+      <a href="/" class="text-base font-semibold tracking-tight leading-tight hover:underline">WrtNova</a>
+      <div class="flex items-center gap-1">
         <a href="/networks" class="btn btn-ghost text-xs py-1 px-2 hidden sm:inline-flex">Fleet builder →</a>
-        <a href="/builder" class="btn btn-primary" style="padding:0.375rem 0.875rem;min-height:32px;font-size:0.8125rem;">
-          Open builder →
-        </a>
+        <button id="theme-toggle" type="button"
+                class="p-2 rounded-md text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors focus:outline-none focus:ring-2 focus:ring-accent"
+                aria-label="Toggle color theme">
+          <svg class="icon-sun w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          <svg class="icon-moon w-5 h-5 hidden" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
       </div>
     </div>
   </header>
 
   <main>
 
-  <section class="w-full md:w-4/5 xl:w-3/4 mx-auto px-4 md:px-0 py-14 md:py-20">
+  <section class="w-full xl:w-[64%] mx-auto px-4 py-14 md:py-20">
     <div class="flex flex-col md:flex-row md:items-center gap-12 md:gap-12 lg:gap-20">
 
 
       <div class="flex-1 min-w-0">
-        <p class="text-xs tracking-widest uppercase mb-5 text-accent font-semibold">OpenWrt · Browser-built · Zero SSH</p>
+        <p class="text-xs tracking-wide uppercase mb-5 text-accent font-semibold whitespace-nowrap">OpenWrt · Browser-built · Zero SSH</p>
         <h1 class="text-3xl md:text-4xl font-semibold leading-tight tracking-tight mb-5">
           Flash once.<br>Everything's<br>already set up.
         </h1>
         <p class="text-zinc-500 dark:text-zinc-400 leading-relaxed mb-8 max-w-xs">
           Build a fully-configured OpenWrt image — VLANs, WiFi, VPN, ad-blocking — in your browser.
         </p>
-        <div class="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
-          <a href="/builder" class="btn btn-primary" style="min-height:44px;padding:0.625rem 1.25rem;font-size:0.9375rem;">
-            Open the builder →
-          </a>
-          <a href="/networks" class="btn btn-ghost" style="min-height:44px;padding:0.625rem 1.25rem;font-size:0.9375rem;">
-            Multi-node fleet builder →
-          </a>
+        <div class="flex flex-col gap-3 items-start">
+          <a href="/builder" class="btn btn-primary btn-lg">Single-node builder →</a>
+          <a href="/networks" class="btn btn-outline btn-lg">Multi-node fleet builder →</a>
         </div>
         <div class="mt-3">
           <a href="https://github.com/LongQT-sea/wrtnova" target="_blank" rel="noopener"
@@ -118,7 +117,7 @@
     </div>
   </section>
 
-  <section class="w-full md:w-4/5 xl:w-3/4 mx-auto px-4 md:px-0 pb-14 md:pb-20">
+  <section class="w-full xl:w-[64%] mx-auto px-4 pb-14 md:pb-20">
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
 <div class="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-lg p-5 md:p-6">
@@ -181,15 +180,11 @@
   </section>
 
   <section class="border-t border-zinc-200 dark:border-zinc-800 py-14 md:py-20">
-    <div class="w-full md:w-4/5 xl:w-3/4 mx-auto px-4 md:px-0 text-center">
+    <div class="w-full xl:w-[64%] mx-auto px-4 text-center">
       <p class="text-zinc-500 dark:text-zinc-400 text-xs mb-6">Your router, your config — baked in from the first boot.</p>
-      <div class="flex flex-col sm:flex-row gap-3 justify-center items-center">
-        <a href="/builder" class="btn btn-primary" style="min-height:44px;padding:0.625rem 1.5rem;font-size:0.9375rem;">
-          Open the builder →
-        </a>
-        <a href="/networks" class="btn btn-ghost" style="min-height:44px;padding:0.625rem 1.5rem;font-size:0.9375rem;">
-          Multi-node fleet builder →
-        </a>
+      <div class="flex flex-col gap-3 items-center">
+        <a href="/builder" class="btn btn-primary btn-lg">Single-node builder →</a>
+        <a href="/networks" class="btn btn-outline btn-lg">Multi-node fleet builder →</a>
       </div>
     </div>
   </section>
@@ -205,5 +200,6 @@
     <p class="site-footer-disclaimer">Cloudflare and WARP are registered trademarks of their respective owners.</p>
   </footer>
 
+  <script defer src="/js/theme.js"></script>
 </body>
 </html>

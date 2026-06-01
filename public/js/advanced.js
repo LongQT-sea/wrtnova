@@ -4,7 +4,7 @@
   const ui = window.WrtNova = window.WrtNova || {};
   const ASU_DEFAULT = 'https://sysupgrade.openwrt.org';
 
-  let editor  = null;  // CodeMirror EditorView instance
+  let editor  = null;  // Monaco IStandaloneCodeEditor instance
   let polling = null;
 
   ui.renderAutoPackages      = function () {};
@@ -25,62 +25,35 @@
     return res.text();
   }
 
-  function initCmEditor(template) {
-    const {
-      EditorView, Compartment, Prec,
-      lineNumbers, highlightActiveLine, drawSelection, highlightSpecialChars, keymap,
-      history, historyKeymap, defaultKeymap,
-      searchKeymap,
-      StreamLanguage, syntaxHighlighting, HighlightStyle, defaultHighlightStyle, indentOnInput,
-      shell, oneDark, tags,
-    } = window.CM6;
-    const isDark = () => document.documentElement.classList.contains('dark');
-    const themeConf = new Compartment();
+  function initMonacoEditor(template) {
+    require(['vs/editor/editor.main'], function () {
+      var isDark = document.documentElement.classList.contains('dark');
+      editor = monaco.editor.create(document.getElementById('editor-container'), {
+        value: template,
+        language: 'shell',
+        theme: isDark ? 'vs-dark' : 'vs',
+        fontSize: 13,
+        fontFamily: '"IBM Plex Mono", "Courier New", monospace',
+        minimap: { enabled: false },
+        scrollBeyondLastLine: false,
+        automaticLayout: true,
+        lineNumbers: 'on',
+        wordWrap: 'off',
+        'semanticHighlighting.enabled': false,
+        ariaLabel: 'Config script editor',
+      });
 
-    // oneDark comments/meta use #5c6370 (~2.1:1 contrast) — override to #9da5b4 (~5.18:1)
-    const commentContrast = Prec.highest(syntaxHighlighting(HighlightStyle.define([
-      { tag: [tags.comment, tags.meta], color: '#9da5b4', fontStyle: 'italic' },
-      { tag: tags.link,                 color: '#9da5b4', textDecoration: 'underline' },
-    ])));
+      var loading = document.getElementById('editor-loading');
+      if (loading) loading.remove();
 
-    const darkTheme = [
-      oneDark,
-      commentContrast,
-      EditorView.theme({ '.cm-gutterElement': { color: '#9da5b4' } }),
-    ];
-
-    editor = new EditorView({
-      doc: template,
-      extensions: [
-        lineNumbers(),
-        highlightSpecialChars(),
-        history(),
-        drawSelection(),
-        syntaxHighlighting(defaultHighlightStyle, { fallback: true }),
-        highlightActiveLine(),
-        indentOnInput(),
-        keymap.of([...defaultKeymap, ...historyKeymap, ...searchKeymap]),
-        StreamLanguage.define(shell),
-        themeConf.of(isDark() ? darkTheme : []),
-        EditorView.contentAttributes.of({ 'aria-label': 'Config script editor' }),
-        EditorView.theme({
-          '&':            { fontFamily: '"IBM Plex Mono", "Courier New", monospace', fontSize: '13px', height: '100%' },
-          '.cm-scroller': { fontFamily: 'inherit', overflow: 'auto' },
-        }),
-      ],
-      parent: document.getElementById('editor-container'),
+      new MutationObserver(function () {
+        monaco.editor.setTheme(document.documentElement.classList.contains('dark') ? 'vs-dark' : 'vs');
+      }).observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
     });
-
-    const loading = document.getElementById('editor-loading');
-    if (loading) loading.remove();
-
-    new MutationObserver(function () {
-      editor.dispatch({ effects: themeConf.reconfigure(isDark() ? darkTheme : []) });
-    }).observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
   }
 
   function editorValue() {
-    return editor ? editor.state.doc.toString() : '';
+    return editor ? editor.getValue() : '';
   }
 
   function asuBase() {
@@ -158,21 +131,9 @@
     ui.status('Build failed: ' + (data.detail || data.error || 'HTTP ' + r.status), 'error');
   }
 
-  const PROGRESS_MAP = {
-    'init':                    [  5, 'Initializing'],
-    'queued':                  [ 10, 'Queued'],
-    'started':                 [ 12, 'Starting build'],
-    'container-setup':         [ 15, 'Setting up container'],
-    'download-imagebuilder':   [ 20, 'Downloading imagebuilder'],
-    'validate-manifest':       [ 30, 'Validating manifest'],
-    'unpack-imagebuilder':     [ 40, 'Unpacking imagebuilder'],
-    'calculate-packages-hash': [ 60, 'Resolving packages'],
-    'building-image':          [ 80, 'Building image'],
-    'build-successful':        [100, 'Done'],
-  };
-
   function pollAsu(asu, hash) {
     let tries = 0;
+    let pct = 15;
     const btn = document.getElementById('build-btn');
     polling = setInterval(async function () {
       tries++;
@@ -180,9 +141,12 @@
         const r    = await fetch(asu + '/api/v1/build/' + hash, { cache: 'no-cache' });
         const data = await r.json();
         if (r.status === 202) {
-          const m = PROGRESS_MAP[data.detail] || [50, data.detail || 'Building…'];
-          const q = data.queue_position != null ? ' (#' + data.queue_position + ' in queue)' : '';
-          ui.setProgress(m[1] + q, m[0]);
+          if (data.queue_position != null && data.queue_position > 0) {
+            ui.setProgress('In build queue (#' + data.queue_position + ')', 8);
+          } else {
+            pct = Math.min(94, pct + (pct < 85 ? 8 : 2));
+            ui.setProgress('Building…', pct);
+          }
           return;
         }
         clearInterval(polling); polling = null;
@@ -210,26 +174,18 @@
     const sys = images.find(function (i) { return i.type === 'sysupgrade'; }) ||
                 images.find(function (i) { return i.type === 'factory'; }) ||
                 images[0];
-    const main = data.firmware_url ||
-      (sys && bin_dir ? asu + '/store/' + bin_dir + '/' + sys.name : null);
 
     const wrap = document.getElementById('result');
     wrap.classList.remove('hidden');
-    let html = '<div class="result-wrap">';
-    if (main) {
-      html += '<a class="btn btn-primary result-btn" href="' + main + '">'
-            + 'Download ' + (sys ? sys.type : 'image') + ' image</a>';
-    }
-    if (images.length > 1) {
-      html += '<details class="result-other"><summary>Other images</summary><ul>';
-      images.forEach(function (im) {
-        const url = asu + '/store/' + bin_dir + '/' + im.name;
-        html += '<li><a href="' + url + '">' + im.name + '</a>'
-              + ' <small>(' + im.type + ', sha256: ' + (im.sha256 || '').slice(0, 16) + '…)</small></li>';
-      });
-      html += '</ul></details>';
-    }
-    html += '</div>';
+    let html = '<div class="result-wrap"><ul class="result-images">';
+    images.slice().sort(function (a, b) { return (b.type === 'sysupgrade') - (a.type === 'sysupgrade'); }).forEach(function (im) {
+      const url = bin_dir ? asu + '/store/' + bin_dir + '/' + im.name : (im === sys ? data.firmware_url : null);
+      html += '<li>'
+            + (url ? '<a href="' + url + '">' + im.name + '</a>' : im.name)
+            + (im.sha256 ? '<br><span class="result-hash">sha256: ' + im.sha256 + '</span>' : '')
+            + '</li>';
+    });
+    html += '</ul></div>';
     wrap.innerHTML = html;
   }
 
@@ -304,7 +260,7 @@
     btn.querySelector('.icon-expand').classList.toggle('hidden', open);
     btn.querySelector('.icon-collapse').classList.toggle('hidden', !open);
     btn.setAttribute('aria-label', open ? 'Exit full screen' : 'Expand editor to full screen');
-    if (editor) editor.requestMeasure();
+    if (editor) editor.layout();
   }
 
   document.addEventListener('keydown', function (e) {
@@ -329,7 +285,7 @@
     ]);
 
     if (templateResult.status === 'fulfilled') {
-      initCmEditor(templateResult.value);
+      initMonacoEditor(templateResult.value);
     } else {
       ui.status('Failed to load editor assets: ' + templateResult.reason.message, 'error');
     }

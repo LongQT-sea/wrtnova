@@ -263,7 +263,7 @@
     if (!images || !images.length) return '';
     const base = (asuBase || activeAsu).replace(/\/+$/, '');
     const sorted = images.slice().sort((a, b) => (b.type === 'sysupgrade') - (a.type === 'sysupgrade'));
-    let list = '<ul class="result-images mt-1.5">';
+    let list = '<ul class="result-images mt-0.5">';
     sorted.forEach(im => {
       const url = bin_dir ? base + '/store/' + bin_dir + '/' + im.name : null;
       list += '<li>' + (url ? '<a href="' + esc(url) + '" target="_blank">' + esc(im.name) + '</a>' : esc(im.name))
@@ -276,7 +276,7 @@
 
   function flashNoteHtml(images) {
     return (images || []).some(i => i.type === 'sysupgrade')
-      ? '<p class="result-note w-full mt-2">Flash the "<strong>sysupgrade</strong>" image via "System → Backup / Flash firmware → Flash image". Make sure to <strong>disable "Keep settings and retain the current configuration"</strong>.</p>'
+      ? '<p class="result-note w-full mt-1">Flash the "<strong>sysupgrade</strong>" image via "System → Backup / Flash firmware → Flash image". Make sure to <strong>disable "Keep settings and retain the current configuration"</strong>.</p>'
       : '';
   }
 
@@ -554,8 +554,7 @@
     return (
       '<div class="px-4 py-4 bg-zinc-50 dark:bg-zinc-900/50 border-t border-zinc-200 dark:border-zinc-800">' +
       '<p class="text-xs text-zinc-500 dark:text-zinc-400 mb-4">' +
-      (isAp ? 'AP node — only per-node fields shown. Everything else is inherited from network config.'
-             : 'Router node — device-specific overrides. All other settings come from network config.') +
+      'These are device-specific settings. All other settings come from network config.' +
       '</p>' + fields +
       '<div class="flex gap-2 mt-4 flex-wrap node-actions">' +
       '<button type="button" class="btn btn-primary text-xs" data-savenode="' + id + '"' +
@@ -1552,10 +1551,25 @@
     btn.textContent = origText;
   }
 
+  function initCardToggles() {
+    ui.$$('#config-form .card-anim').forEach(function (card) {
+      var hdr = card.querySelector('.card-header');
+      if (!hdr) return;
+      hdr.setAttribute('role', 'button');
+      hdr.setAttribute('tabindex', '0');
+      hdr.addEventListener('click', function () { card.classList.toggle('open'); });
+      hdr.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); card.classList.toggle('open'); }
+      });
+    });
+  }
+
   // ── Init ──────────────────────────────────────────────────────────
   function init() {
     fetch('/api/session').catch(() => {});
     loadAsuServer();
+
+    initCardToggles();
 
     // Wire up ui.js helpers for the config form (they attach to document.body
     // so they work regardless of which view is visible)

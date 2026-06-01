@@ -355,30 +355,22 @@ USB_TETHERING:  isRouter ? checkboxVal('USB_TETHERING') : '',
     pollAsu(resp.request_hash, resp.asu_url || activeAsu);
   };
 
-  const PROGRESS_MAP = {
-    'init':                    [ 5,  'Initializing'],
-    'queued':                  [10,  'Queued'],
-    'started':                 [12,  'Starting build'],
-    'container-setup':         [15,  'Setting up container'],
-    'download-imagebuilder':   [20,  'Downloading imagebuilder'],
-    'validate-manifest':       [30,  'Validating manifest'],
-    'unpack-imagebuilder':     [40,  'Unpacking imagebuilder'],
-    'calculate-packages-hash': [60,  'Resolving packages'],
-    'building-image':          [80,  'Building image'],
-    'build-successful':        [100, 'Done'],
-  };
-
   function pollAsu(hash, asuBase) {
     const base = (asuBase || ASU_DEFAULT).replace(/\/+$/, '');
     let tries = 0;
+    let pct = 15;
     polling = setInterval(async () => {
       tries++;
       try {
         const r = await fetch(base + '/api/v1/build/' + hash, { cache: 'no-cache' });
         const data = await r.json();
         if (r.status === 202) {
-          const m = PROGRESS_MAP[data.detail] || [50, data.detail || 'Building…'];
-          ui.setProgress(m[1] + (data.queue_position != null ? ' (#' + data.queue_position + ' in queue)' : ''), m[0]);
+          if (data.queue_position != null && data.queue_position > 0) {
+            ui.setProgress('In build queue (#' + data.queue_position + ')', 8);
+          } else {
+            pct = Math.min(94, pct + (pct < 85 ? 8 : 2));
+            ui.setProgress('Building…', pct);
+          }
           return;
         }
         clearInterval(polling); polling = null;

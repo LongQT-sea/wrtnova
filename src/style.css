@@ -215,18 +215,56 @@
   .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
 
   /* Landing page — white/zinc CTAs so they don't mimic the orange mock "Build firmware" button */
+  /* blue-600 (#2563eb) on white = 4.79:1 — passes WCAG AA */
   .page-home .btn-primary,
   .dark .page-home .btn-primary {
-    background-color: #3b82f6;
-    border-color: #3b82f6;
+    background-color: #2563eb;
+    border-color: #2563eb;
     color: #ffffff;
+    transition: background-color 0.15s, border-color 0.15s, box-shadow 0.15s, transform 0.15s;
   }
   .page-home .btn-primary:hover,
   .dark .page-home .btn-primary:hover {
-    background-color: #2563eb;
-    border-color: #2563eb;
+    background-color: #1d4ed8;
+    border-color: #1d4ed8;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(29, 78, 216, 0.4);
   }
-  .page-home .text-accent { color: #3b82f6; }
+  /* blue-700 on #fafafa = 5.86:1; blue-500 on #09090b = 5.74:1 — both pass WCAG AA */
+  .page-home .text-accent { color: #1d4ed8; }
+  .dark .page-home .text-accent { color: #3b82f6; }
+  /* Ghost button: transparent bg/border in light mode makes it invisible as a button —
+     restore a visible border so it reads as interactive */
+  .page-home .btn-ghost { border-color: #d4d4d8; }
+  .dark .page-home .btn-ghost { border-color: #3f3f46; }
+
+  /* Large CTA buttons (landing page hero/CTA sections) */
+  .btn-lg {
+    min-height: 44px;
+    padding: 0.625rem 1.5rem;
+    font-size: 0.9375rem;
+  }
+
+  /* Outline CTA variant for landing page secondary action */
+  .page-home .btn-outline {
+    background-color: transparent;
+    border-color: #2563eb;
+    color: #2563eb;
+    transition: background-color 0.15s, border-color 0.15s, box-shadow 0.15s, transform 0.15s;
+  }
+  .dark .page-home .btn-outline {
+    border-color: #3b82f6;
+    color: #3b82f6;
+    background-color: transparent;
+  }
+  .page-home .btn-outline:hover {
+    background-color: rgba(37,99,235,0.08);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(37,99,235,0.15);
+  }
+  .dark .page-home .btn-outline:hover {
+    background-color: rgba(59,130,246,0.08);
+  }
 
   .btn-icon {
     padding: 0.375rem;
@@ -239,7 +277,7 @@
     background-color: transparent;
   }
   .btn-ghost:hover { background-color: #f4f4f5; }
-  .dark .btn-ghost:hover { background-color: #27272a; }
+  .dark .btn-ghost:hover { background-color: #3f3f46; } /* was #27272a = same as base, invisible */
 
   /* ── Section cards ────────────────────────────────────────────── */
   .card {
@@ -267,8 +305,9 @@
     /* Full rounding when the card is collapsed (no body visible) */
     border-radius: 0.5rem;
   }
-  /* When the details is open, only round the top two corners */
-  .card[open] > .card-header {
+  /* When the card is open, only round the top two corners */
+  .card[open] > .card-header,
+  .card-anim.open > .card-header {
     border-radius: 0.5rem 0.5rem 0 0;
   }
   .card-header:hover { background-color: #f9f9f9; }
@@ -534,7 +573,7 @@
   .result-note {
     font-size: 0.75rem;
     color: #71717a;
-    margin-bottom: 0.75rem;
+    margin-bottom: 0.25rem;
   }
   .dark .result-note { color: #a1a1aa; }
   .result-images {
@@ -588,7 +627,7 @@
 
   /* ── Site footer ─────────────────────────────────────────────── */
   .site-footer {
-    margin-top: 2rem;
+    margin-top: 1rem;
     padding-top: 1.25rem;
     border-top: 1px solid #e4e4e7;
     text-align: center;
@@ -807,6 +846,21 @@
   .node-panel.open { max-height: 2400px; opacity: 1; border-bottom: 1px solid #e4e4e7; }
   .dark .node-panel.open { border-bottom-color: #27272a; }
 
+  /* ── Animated config cards ───────────────────────────────────────── */
+  .card-anim .card-body-wrap {
+    overflow: hidden;
+    max-height: 0;
+    opacity: 0;
+    transition: max-height 0.25s ease, opacity 0.2s ease;
+  }
+  .card-anim.open .card-body-wrap {
+    max-height: 4000px;
+    opacity: 1;
+  }
+  .card-anim.open .card-chev {
+    transform: rotate(180deg);
+  }
+
   .chip {
     display: inline-flex;
     align-items: center;
@@ -849,11 +903,11 @@
     display: flex;
     gap: 0.75rem;
     align-items: center;
-    margin-top: 1.5rem;
-    padding-top: 1rem;
-    border-top: 1px solid #e4e4e7;
+    margin-top: 1rem;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
   }
-  .dark .config-actions { border-top-color: #27272a; }
+  .config-actions .btn-primary { font-size: 1.0rem; }
   @media (max-width: 767px) {
     .config-actions {
       position: sticky;
@@ -876,13 +930,9 @@
   }
 }
 
-/* ── Editor (CodeMirror) ─────────────────────────────────────────── */
+/* ── Editor (Monaco) ─────────────────────────────────────────────── */
 #editor-wrap {
   position: relative;
-}
-
-#editor-container .cm-editor {
-  height: 100%;
 }
 
 #editor-loading {
@@ -929,7 +979,7 @@
   background-color: #ffffff;
 }
 .dark #editor-wrap.is-fullscreen {
-  background-color: #282c34; /* matches oneDark editor background */
+  background-color: #1e1e1e; /* matches Monaco vs-dark background */
 }
 #editor-wrap.is-fullscreen #editor-container {
   height: 100vh !important;

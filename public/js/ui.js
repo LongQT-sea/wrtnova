@@ -1,4 +1,4 @@
-// Native <details>/<summary> handles collapsible open/close — no custom logic needed.
+// Card toggle animation for .card-anim elements; <details> used only for card-history.
 (function () {
   'use strict';
 
@@ -6,6 +6,20 @@
 
   ui.$  = (sel, root) => (root || document).querySelector(sel);
   ui.$$ = (sel, root) => Array.from((root || document).querySelectorAll(sel));
+
+  ui.initCardToggles = function (scope) {
+    var root = scope ? (typeof scope === 'string' ? document.querySelector(scope) : scope) : document;
+    ui.$$('.card-anim', root).forEach(function (card) {
+      var hdr = card.querySelector('.card-header');
+      if (!hdr) return;
+      hdr.setAttribute('role', 'button');
+      hdr.setAttribute('tabindex', '0');
+      hdr.addEventListener('click', function () { card.classList.toggle('open'); });
+      hdr.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); card.classList.toggle('open'); }
+      });
+    });
+  };
 
   ui.loadScript = function (src) {
     if (document.querySelector('script[src="' + src + '"]')) return Promise.resolve();
@@ -183,7 +197,10 @@
       const wgRouter = wgEnabled && !ap;
       const wgCard = ui.$('#card-wg');
       ui.$$('.wg-only').forEach(el => el.classList.toggle('hidden', !wgRouter));
-      if (wgRouter && e?.target?.id === 'WG_ENABLE') wgCard.open = true;
+      if (wgRouter && e?.target?.id === 'WG_ENABLE') {
+        if (wgCard.tagName === 'DETAILS') wgCard.open = true;
+        else wgCard.classList.add('open');
+      }
       // Help text: swap between router and AP explanation when WG_ENABLE is on.
       ui.$$('.wg-help-router').forEach(el => el.classList.toggle('hidden', ap || !wgEnabled));
 
@@ -216,11 +233,11 @@ const wanTagged = ui.$('#WAN_IS_TAGGED') && ui.$('#WAN_IS_TAGGED').checked;
   ui.expandSectionsOnDevice = function (hasWifi) {
     ['system', 'network', 'wan'].forEach(function (id) {
       const el = document.getElementById('card-' + id);
-      if (el) el.open = true;
+      if (el) el.classList.add('open');
     });
     if (hasWifi) {
       const wifi = document.getElementById('card-wifi');
-      if (wifi) wifi.open = true;
+      if (wifi) wifi.classList.add('open');
     }
   };
 
