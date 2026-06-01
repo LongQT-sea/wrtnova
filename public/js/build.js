@@ -419,7 +419,7 @@ USB_TETHERING:  isRouter ? checkboxVal('USB_TETHERING') : '',
 
     const wrap = $('#result'); wrap.classList.remove('hidden');
     let html = '<div class="result-wrap">'
-             + '<p class="result-note">Flash the "<strong>sysupgrade.bin</strong>" via "System → Backup / Flash firmware → Flash image". '
+             + '<p class="result-note">Flash the "<strong>sysupgrade</strong>" image via "System → Backup / Flash firmware → Flash image". '
              + 'Make sure to <strong>disable "Keep settings and retain the current configuration"</strong>.</p>'
              + '<ul class="result-images">';
     images.slice().sort((a, b) => (b.type === 'sysupgrade') - (a.type === 'sysupgrade')).forEach(im => {

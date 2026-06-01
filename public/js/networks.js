@@ -9,18 +9,6 @@
   const ASU_DEFAULT = 'https://sysupgrade.openwrt.org';
   let activeAsu = ASU_DEFAULT;
 
-  const PROGRESS_MAP = {
-    'init':                    [ 5, 'Initializing'],
-    'queued':                  [10, 'Queued'],
-    'started':                 [12, 'Starting build'],
-    'container-setup':         [15, 'Setting up container'],
-    'download-imagebuilder':   [20, 'Downloading imagebuilder'],
-    'validate-manifest':       [30, 'Validating manifest'],
-    'unpack-imagebuilder':     [40, 'Unpacking imagebuilder'],
-    'calculate-packages-hash': [60, 'Resolving packages'],
-    'building-image':          [80, 'Building image'],
-    'build-successful':        [100, 'Done'],
-  };
 
   const nodeBuilds = new Map();
 
@@ -245,34 +233,60 @@
 
   function showPanelProgress(actEl, pct, label) {
     if (!actEl) return;
+    const done = pct >= 100;
     actEl.innerHTML =
       '<div class="w-full">' +
       '<div class="h-1.5 bg-zinc-200 dark:bg-zinc-700 rounded overflow-hidden mb-1.5">' +
-      '<div class="h-full bg-blue-500 transition-all duration-500" style="width:' + pct + '%"></div></div>' +
-      '<p class="text-xs text-zinc-500 dark:text-zinc-400">' + esc(label || '…') + '</p>' +
+      '<div class="h-full transition-all duration-500 ' + (done ? 'bg-green-500' : 'bg-blue-500') + '" style="width:' + pct + '%"></div></div>' +
+      '<p class="text-xs ' + (done ? 'text-green-600 dark:text-green-400' : 'text-zinc-500 dark:text-zinc-400') + '">' + esc(label || '…') + '</p>' +
       '</div>';
   }
 
   function showPanelError(actEl, msg, onRetry) {
     if (!actEl) return;
     const id = 'retry-' + uid();
+    const isStorageFull = /exceed.*storage|storage.*exceed/i.test(msg);
     actEl.innerHTML =
-      '<p class="text-xs text-red-500 dark:text-red-400 mr-2">' + esc(msg) + '</p>' +
-      '<button type="button" class="btn text-xs" id="' + id + '">Retry</button>';
+      '<div class="w-full">' +
+      '<div class="flex items-start gap-2">' +
+      '<p class="text-xs text-red-500 dark:text-red-400 flex-1">' + esc(msg) + '</p>' +
+      '<button type="button" class="btn text-xs flex-shrink-0" id="' + id + '">Retry</button>' +
+      '</div>' +
+      (isStorageFull
+        ? '<p class="text-xs text-zinc-500 dark:text-zinc-400 mt-1.5">Try switching <strong>DNS &amp; adblock</strong> from AdGuard Home to dnsproxy in network config.</p>'
+        : '') +
+      '</div>';
     actEl.querySelector('#' + id)?.addEventListener('click', onRetry);
   }
 
-  function showPanelDone(actEl, firmwareUrl, onDone) {
+  function imageFilesHtml(images, bin_dir, asuBase) {
+    if (!images || !images.length) return '';
+    const base = (asuBase || activeAsu).replace(/\/+$/, '');
+    const sorted = images.slice().sort((a, b) => (b.type === 'sysupgrade') - (a.type === 'sysupgrade'));
+    let list = '<ul class="result-images mt-1.5">';
+    sorted.forEach(im => {
+      const url = bin_dir ? base + '/store/' + bin_dir + '/' + im.name : null;
+      list += '<li>' + (url ? '<a href="' + esc(url) + '" target="_blank">' + esc(im.name) + '</a>' : esc(im.name))
+            + (im.sha256 ? '<br><span class="result-hash">sha256: ' + esc(im.sha256) + '</span>' : '')
+            + '</li>';
+    });
+    list += '</ul>';
+    return '<div class="w-full mt-1">' + list + '</div>';
+  }
+
+  function flashNoteHtml(images) {
+    return (images || []).some(i => i.type === 'sysupgrade')
+      ? '<p class="result-note w-full mt-2">Flash the "<strong>sysupgrade</strong>" image via "System → Backup / Flash firmware → Flash image". Make sure to <strong>disable "Keep settings and retain the current configuration"</strong>.</p>'
+      : '';
+  }
+
+  function showPanelDone(actEl, firmwareUrl, images, bin_dir, asuBase, onDone) {
     if (!actEl) return;
-    const id = 'done-' + uid();
+    const id = 'buildbtn-' + uid();
     actEl.innerHTML =
-      '<div class="w-full mb-2">' +
-      '<div class="h-1.5 bg-zinc-200 dark:bg-zinc-700 rounded overflow-hidden mb-1.5">' +
-      '<div class="h-full bg-green-500" style="width:100%"></div></div>' +
-      '<p class="text-xs text-green-600 dark:text-green-400">Build complete!</p>' +
-      '</div>' +
-      (firmwareUrl ? '<a href="' + esc(firmwareUrl) + '" target="_blank" class="btn btn-primary text-xs">Download firmware</a>' : '') +
-      '<button type="button" class="btn text-xs" id="' + id + '">Done</button>';
+      '<button type="button" class="btn btn-primary text-xs" id="' + id + '">Build firmware</button>' +
+      flashNoteHtml(images) +
+      imageFilesHtml(images, bin_dir, asuBase);
     actEl.querySelector('#' + id)?.addEventListener('click', onDone);
   }
 
@@ -470,6 +484,7 @@
       '</select></div>';
   }
 
+
   function panelHTML(net, node) {
     const isAp = node.overrides.AP_MODE === '1';
     const cfg = net.shared_config;
@@ -500,7 +515,9 @@
       '<div><div class="flex gap-2 items-center">' +
       '<input class="input-base" id="np-device-' + id + '" value="' + devTitle + '" placeholder="No device selected" readonly style="cursor:pointer;max-width:280px">' +
       '<button type="button" class="btn text-xs flex-shrink-0" data-pickdevice="' + id + '">Change</button>' +
-      '</div></div></div>';
+      '</div>' +
+      '<p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1">Required: ≥16MB flash, ≥128MB RAM</p>' +
+      '</div></div>';
 
     if (!isAp) {
       fields = deviceRow +
@@ -544,7 +561,10 @@
       '<button type="button" class="btn btn-primary text-xs" data-savenode="' + id + '"' +
       (hasDevice ? '' : ' disabled style="opacity:0.4;cursor:not-allowed"') + '>' +
       (hasDevice ? 'Build firmware' : 'Select a device first') + '</button>' +
-      (hasDevice && node.last_build ? '<button type="button" class="btn text-xs" data-viewbuild="' + id + '">View last build</button>' : '') +
+      (hasDevice && node.last_build?.images?.length
+        ? flashNoteHtml(node.last_build.images) +
+          imageFilesHtml(node.last_build.images, node.last_build.bin_dir, node.last_build.asu_base)
+        : '') +
       '</div></div>'
     );
   }
@@ -569,10 +589,6 @@
       buildNode(net, node);
     });
 
-    const vb = panel.querySelector('[data-viewbuild]');
-    if (vb && node.last_build?.firmware_url) {
-      vb.addEventListener('click', () => window.open(node.last_build.firmware_url, '_blank'));
-    }
   }
 
   function saveNodePanel(net, node) {
@@ -978,14 +994,35 @@
     const t = node.device_target;
     const extraPkgs = (net.shared_config.additional_packages || '').split(/[\s,]+/).filter(Boolean);
     const rootPasswd = node.overrides.ROOT_PASSWD || net.shared_config.ROOT_PASSWD || '';
+    const effectiveVersion = node.overrides.version || t.version || net.shared_config.shared_version;
 
-    bcryptHash(rootPasswd).then(adguardHash => {
+    const getVersionedTarget = async () => {
+      if (!node.overrides.version || node.overrides.version === t.version)
+        return { version_code: t.version_code, default_packages: t.default_packages, device_packages: t.device_packages };
+      const cacheKey = 'wrtnova_profiles_' + effectiveVersion + '_' + t.target;
+      let data = dpCacheGet(cacheKey);
+      if (!data) {
+        const res = await fetch(dpUrl(effectiveVersion) + '/targets/' + t.target + '/profiles.json', { cache: 'no-cache' });
+        if (!res.ok) throw new Error('Failed to fetch profiles for ' + effectiveVersion);
+        data = await res.json();
+        dpCacheSet(cacheKey, data);
+      }
+      const dev = (data.profiles || {})[t.profile] || {};
+      return {
+        version_code: data.version_code || '',
+        default_packages: data.default_packages || t.default_packages,
+        device_packages: dev.device_packages || t.device_packages,
+      };
+    };
+
+    Promise.all([bcryptHash(rootPasswd), getVersionedTarget()])
+      .then(([adguardHash, vt]) => {
       const payload = {
         profile: t.profile, target: t.target,
-        version: node.overrides.version || t.version || net.shared_config.shared_version,
-        version_code: t.version_code,
-        default_packages: t.default_packages,
-        device_packages: t.device_packages,
+        version: effectiveVersion,
+        version_code: vt.version_code,
+        default_packages: vt.default_packages,
+        device_packages: vt.device_packages,
         device_title: t.title,
         shared_config: net.shared_config,
         node_overrides: node.overrides,
@@ -1009,28 +1046,38 @@
       })
       .catch(err => showPanelError(panelActEl(node.id) || actEl,
         'Build failed: ' + err.message, () => buildNode(net, node)));
-    });
+    })
+    .catch(err => showPanelError(panelActEl(node.id) || actEl,
+      'Build failed: ' + err.message, () => buildNode(net, node)));
   }
 
   function pollNodeBuild(net, node, actEl, hash, asuBase) {
     const base = (asuBase || activeAsu).replace(/\/+$/, '');
     let tries = 0;
+    let pct = 15;
     const interval = setInterval(async () => {
       tries++;
       try {
         const r = await fetch(base + '/api/v1/build/' + hash, { cache: 'no-cache' });
         const data = await r.json();
         if (r.status === 202) {
-          const m = PROGRESS_MAP[data.detail] || [50, data.detail || 'Building…'];
-          const label = m[1] + (data.queue_position != null ? ' (queue #' + data.queue_position + ')' : '');
-          showPanelProgress(panelActEl(node.id) || actEl, m[0], label);
+          if (data.queue_position != null && data.queue_position > 0) {
+            showPanelProgress(panelActEl(node.id) || actEl, 8, 'In build queue (#' + data.queue_position + ')');
+          } else {
+            pct = Math.min(94, pct + (pct < 85 ? 8 : 2));
+            showPanelProgress(panelActEl(node.id) || actEl, pct, 'Building…');
+          }
           return;
         }
         clearInterval(interval);
         nodeBuilds.delete(node.id);
         const el = panelActEl(node.id) || actEl;
-        if (r.status === 200) finishNodeBuild(net, node, el, data, base);
-        else showPanelError(el, 'Build failed: ' + (data.detail || 'HTTP ' + r.status), () => buildNode(net, node));
+        if (r.status === 200) {
+          showPanelProgress(el, 100, 'Build complete!');
+          setTimeout(() => finishNodeBuild(net, node, panelActEl(node.id) || el, data, base), 1500);
+        } else {
+          showPanelError(el, 'Build failed: ' + (data.detail || 'HTTP ' + r.status), () => buildNode(net, node));
+        }
       } catch (e) {
         if (tries > 200) {
           clearInterval(interval);
@@ -1049,7 +1096,7 @@
     const firmwareUrl = data.firmware_url || (sys && data.bin_dir
       ? base + '/store/' + data.bin_dir + '/' + sys.name : null);
 
-    node.last_build = { firmware_url: firmwareUrl, timestamp: Date.now() };
+    node.last_build = { firmware_url: firmwareUrl, images, bin_dir: data.bin_dir || '', asu_base: base, timestamp: Date.now() };
     net.updated_at = Date.now();
     saveNetworks();
 
@@ -1067,7 +1114,7 @@
           ' · built ' + timeAgo(node.last_build.timestamp);
       }
     }
-    showPanelDone(actEl, firmwareUrl, () => closePanel(node.id));
+    showPanelDone(actEl, firmwareUrl, images, data.bin_dir || '', base, () => buildNode(net, node));
     updateBuildAllRow(node.id, firmwareUrl, null);
   }
 
@@ -1089,11 +1136,10 @@
         '<div id="ba-row-' + esc(n.id) + '" class="flex items-center gap-3">' +
         '<span class="text-xs font-medium w-28 truncate flex-shrink-0">' + esc(n.name) + '</span>' +
         '<div class="flex-1 min-w-0">' +
-        '<div class="h-1.5 bg-zinc-200 dark:bg-zinc-700 rounded overflow-hidden mb-0.5">' +
+        '<div class="h-1.5 bg-zinc-200 dark:bg-zinc-700 rounded overflow-hidden">' +
         '<div class="ba-bar h-full bg-blue-500 transition-all duration-500" style="width:2%"></div></div>' +
-        '<p class="ba-label text-xs text-zinc-500 dark:text-zinc-400">Starting…</p>' +
         '</div>' +
-        '<div class="ba-link flex-shrink-0 w-24 text-right"></div>' +
+        '<div class="ba-link flex-shrink-0 w-20 text-right"></div>' +
         '</div>'
       ).join('') +
       '</div></div>';
@@ -1118,23 +1164,19 @@
     const link = row.querySelector('.ba-link');
     if (errMsg) {
       if (bar) { bar.style.width = '100%'; bar.style.background = '#ef4444'; }
-      if (label) label.textContent = 'Failed';
       if (link) link.innerHTML = '<span class="text-xs text-red-500 dark:text-red-400" title="' + esc(errMsg) + '">Error</span>';
     } else {
       if (bar) { bar.style.width = '100%'; bar.style.background = '#22c55e'; }
-      if (label) label.textContent = 'Done';
       if (link && firmwareUrl)
         link.innerHTML = '<a href="' + esc(firmwareUrl) + '" target="_blank" class="text-xs text-blue-500 hover:underline">Download</a>';
     }
   }
 
-  function updateBuildAllProgress(nodeId, pct, label) {
+  function updateBuildAllProgress(nodeId, pct) {
     const row = document.getElementById('ba-row-' + nodeId);
     if (!row) return;
     const bar = row.querySelector('.ba-bar');
-    const lbl = row.querySelector('.ba-label');
     if (bar) bar.style.width = pct + '%';
-    if (lbl) lbl.textContent = label || '…';
   }
 
   async function startBuildAllNode(net, node, onComplete) {
@@ -1143,12 +1185,36 @@
     const rootPasswd = node.overrides.ROOT_PASSWD || net.shared_config.ROOT_PASSWD || '';
     const adguardHash = await bcryptHash(rootPasswd);
 
+    const effectiveVersion = node.overrides.version || t.version || net.shared_config.shared_version;
+    let version_code = t.version_code;
+    let default_packages = t.default_packages;
+    let device_packages = t.device_packages;
+    if (node.overrides.version && node.overrides.version !== t.version) {
+      try {
+        const cacheKey = 'wrtnova_profiles_' + effectiveVersion + '_' + t.target;
+        let data = dpCacheGet(cacheKey);
+        if (!data) {
+          const res = await fetch(dpUrl(effectiveVersion) + '/targets/' + t.target + '/profiles.json', { cache: 'no-cache' });
+          if (!res.ok) throw new Error('Failed to fetch profiles for ' + effectiveVersion);
+          data = await res.json();
+          dpCacheSet(cacheKey, data);
+        }
+        version_code = data.version_code || '';
+        default_packages = data.default_packages || t.default_packages;
+        device_packages = (data.profiles?.[t.profile]?.device_packages) || t.device_packages;
+      } catch (e) {
+        updateBuildAllRow(node.id, null, e.message);
+        onComplete();
+        return;
+      }
+    }
+
     const payload = {
       profile: t.profile, target: t.target,
-      version: node.overrides.version || t.version || net.shared_config.shared_version,
-      version_code: t.version_code,
-      default_packages: t.default_packages,
-      device_packages: t.device_packages,
+      version: effectiveVersion,
+      version_code,
+      default_packages,
+      device_packages,
       device_title: t.title,
       shared_config: net.shared_config,
       node_overrides: node.overrides,
@@ -1189,20 +1255,29 @@
   function pollBuildAllNode(net, node, hash, asuBase, onComplete) {
     const base = (asuBase || activeAsu).replace(/\/+$/, '');
     let tries = 0;
+    let pct = 15;
     const interval = setInterval(async () => {
       tries++;
       try {
         const r = await fetch(base + '/api/v1/build/' + hash, { cache: 'no-cache' });
         const data = await r.json();
         if (r.status === 202) {
-          const m = PROGRESS_MAP[data.detail] || [50, data.detail || 'Building…'];
-          updateBuildAllProgress(node.id, m[0], m[1] + (data.queue_position != null ? ' (#' + data.queue_position + ')' : ''));
+          if (data.queue_position != null && data.queue_position > 0) {
+            updateBuildAllProgress(node.id, 8, 'Queue #' + data.queue_position);
+          } else {
+            pct = Math.min(94, pct + (pct < 85 ? 8 : 2));
+            updateBuildAllProgress(node.id, pct, 'Building…');
+          }
           return;
         }
         clearInterval(interval);
         nodeBuilds.delete(node.id);
-        if (r.status === 200) finishBuildAllNode(net, node, data, base);
-        else updateBuildAllRow(node.id, null, data.detail || 'HTTP ' + r.status);
+        if (r.status === 200) {
+          updateBuildAllProgress(node.id, 100, 'Done');
+          finishBuildAllNode(net, node, data, base);
+        } else {
+          updateBuildAllRow(node.id, null, data.detail || 'HTTP ' + r.status);
+        }
         onComplete();
       } catch (e) {
         if (tries > 200) {
@@ -1222,7 +1297,7 @@
     const sys = images.find(i => i.type === 'sysupgrade') || images.find(i => i.type === 'factory') || images[0];
     const firmwareUrl = data.firmware_url || (sys && data.bin_dir
       ? base + '/store/' + data.bin_dir + '/' + sys.name : null);
-    node.last_build = { firmware_url: firmwareUrl, timestamp: Date.now() };
+    node.last_build = { firmware_url: firmwareUrl, images, bin_dir: data.bin_dir || '', asu_base: base, timestamp: Date.now() };
     net.updated_at = Date.now();
     saveNetworks();
     updateBuildAllRow(node.id, firmwareUrl, null);

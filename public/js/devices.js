@@ -95,7 +95,7 @@
     });
 
     $('#device').disabled = false;
-    $('#device-info').textContent = 'Supports devices with ≥16MB flash and ≥128MB RAM.';
+    $('#device-info').textContent = 'Required: ≥16MB flash, ≥128MB RAM';
     state.selectedTitle = ''; state.selectedProfile = null; state.profileDetails = null;
     ui.notifyTargetChanged && ui.notifyTargetChanged();
   }
