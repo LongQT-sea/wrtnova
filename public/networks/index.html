@@ -26,7 +26,6 @@
           <a href="/" class="hover:underline">WrtNova</a>
           <span id="header-sub" class="text-zinc-500 dark:text-zinc-400 font-normal"></span>
         </h1>
-        <p class="hidden sm:block text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">Multi-node fleet builder — build firmware for your entire network at once.</p>
       </div>
       <div class="flex items-center gap-1">
         <a href="/builder" class="btn btn-ghost text-xs py-1 px-2 hidden sm:inline-flex">← Single builder</a>
@@ -57,7 +56,7 @@
       </div>
 
       <div id="networks-list" class="space-y-3"></div>
-      <p class="text-xs text-zinc-600 dark:text-zinc-600 mt-6 text-center">Networks are saved locally in your browser.</p>
+      <p class="text-xs text-zinc-600 dark:text-zinc-600 mt-6 text-center">Multi-node fleet builder — build firmware for your entire network at once.</p>
 
     </div>
 
@@ -86,7 +85,7 @@
         <div class="flex items-center gap-2 flex-shrink-0">
           <button class="btn text-xs" id="btn-edit-config">
             <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-            Edit config
+            Network config
           </button>
           <button class="btn btn-ghost btn-icon" id="btn-delete-network" title="Delete network" aria-label="Delete network">
             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
@@ -132,7 +131,7 @@
           </div>
           <div id="config-name-chips" class="flex gap-1.5 mt-2 flex-wrap"></div>
         </div>
-        <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">Shared across all nodes. Changes apply on next build.</p>
+        <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">Shared config across all nodes. Changes apply on next build.</p>
       </div>
 
       <!-- The config form reuses the builder's sections verbatim.
@@ -156,7 +155,7 @@
                 <select id="shared-version" class="input-base" style="max-width:220px">
                   <option value="">Loading…</option>
                 </select>
-                <p class="form-help">Shared version for all nodes. Device is selected per-node.</p>
+                <p class="form-help">Default version for all nodes.</p>
               </div>
             </div>
           </div>
@@ -252,7 +251,7 @@
 
             <div class="sub-section">
               <p class="sub-section-title">Networks &amp; addressing</p>
-              <p class="form-help mb-2">VLAN IDs must be identical across every node for trunking to work correctly.</p>
+              <p class="form-help mb-2">VLAN IDs are identical across all nodes in this network.</p>
               <table class="net-table">
                 <thead>
                   <tr>
@@ -385,7 +384,6 @@
             <svg class="w-4 h-4 text-zinc-400 transition-transform duration-200 group-open:rotate-180 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
           </summary>
           <div class="card-body">
-            <p class="form-help">Keys are shared — router terminates the tunnel, AP nodes bridge the VPN VLAN and broadcast the VPN SSID automatically.</p>
             <div class="mt-1.5">
               <button id="warp-prefill-btn" type="button" class="btn" style="font-size:0.8125rem;padding:0.3rem 0.625rem;min-height:unset">Prefill with Cloudflare WARP</button>
               <p id="warp-prefill-msg" class="form-help mt-1 hidden"></p>
@@ -438,6 +436,7 @@
               <label for="ALLOWED_IPS" class="form-label">Allowed IPs</label>
               <input type="text" id="ALLOWED_IPS" name="ALLOWED_IPS" class="input-base" placeholder="0.0.0.0/0, ::/0">
             </div>
+            <div class="info-note mt-2" role="note">Router terminates the tunnel, AP nodes bridge the VPN VLAN and broadcast the VPN SSID automatically.</div>
           </div>
         </details>
 
@@ -476,7 +475,6 @@
               <label for="WAN_MAC_ADDR" class="form-label">WAN MAC address</label>
               <div>
                 <input type="text" id="WAN_MAC_ADDR" name="WAN_MAC_ADDR" class="input-base" placeholder="aa:bb:cc:dd:ee:ff (optional)">
-                <p class="form-help">Default for all router nodes — override per-node in the node panel.</p>
               </div>
             </div>
             <div class="sub-section">
@@ -551,7 +549,7 @@
                   </span>
                   <span class="toggle-text">Enable 802.11s mesh backhaul (default — overridable per node)</span>
                 </label>
-                <p class="form-help">Wired backhaul is always better when feasible.</p>
+                <p class="form-help">Note: Wired backhaul is always better when feasible.</p>
               </div>
             </div>
 
@@ -599,7 +597,7 @@
               <p class="form-help"></p>
             </div>
 
-            <div class="info-note" role="note">SSID and password must match across all nodes for seamless roaming. Leave password blank to use the default: <code class="bg-zinc-100 dark:bg-zinc-800 px-1 rounded text-xs">12345678</code></div>
+            <div class="info-note" role="note">Leave password blank to use the default: <code class="bg-zinc-100 dark:bg-zinc-800 px-1 rounded text-xs">12345678</code></div>
 
             <details class="mt-4">
               <summary class="text-xs text-zinc-500 dark:text-zinc-400 cursor-pointer hover:text-zinc-700 dark:hover:text-zinc-200 select-none flex items-center gap-1">
@@ -609,19 +607,19 @@
               <div class="mt-2 pl-4 border-l-2 border-zinc-200 dark:border-zinc-700">
                 <div class="form-row">
                   <label for="CHANNEL_2G" class="form-label">2.4 GHz channel</label>
-                  <input type="text" id="CHANNEL_2G" name="CHANNEL_2G" class="input-base" placeholder="auto" style="max-width:120px">
+                  <input type="text" id="CHANNEL_2G" name="CHANNEL_2G" class="input-base" placeholder="default" style="max-width:120px">
                 </div>
                 <div class="form-row">
                   <label for="CHANNEL_5G" class="form-label">5 GHz channel</label>
-                  <input type="text" id="CHANNEL_5G" name="CHANNEL_5G" class="input-base" placeholder="auto" style="max-width:120px">
+                  <input type="text" id="CHANNEL_5G" name="CHANNEL_5G" class="input-base" placeholder="default" style="max-width:120px">
                 </div>
                 <div class="form-row">
                   <label for="CHANNEL_6G" class="form-label">6 GHz channel</label>
-                  <input type="text" id="CHANNEL_6G" name="CHANNEL_6G" class="input-base" placeholder="auto" style="max-width:120px">
+                  <input type="text" id="CHANNEL_6G" name="CHANNEL_6G" class="input-base" placeholder="default" style="max-width:120px">
                 </div>
                 <div class="form-row">
                   <label for="WIFI_LOG_LVL" class="form-label">WiFi log level</label>
-                  <input type="text" id="WIFI_LOG_LVL" name="WIFI_LOG_LVL" class="input-base" placeholder="driver default" style="max-width:160px">
+                  <input type="text" id="WIFI_LOG_LVL" name="WIFI_LOG_LVL" class="input-base" placeholder="default" style="max-width:120px">
                 </div>
               </div>
             </details>
@@ -716,7 +714,7 @@
                     <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
                   </button>
                 </div>
-                <p class="form-help">DDNS entries for IPv6-exposed hosts are derived from the IPv6 Exposure table.</p>
+                <p class="form-help">DDNS entries for IPv6-exposed hosts are derived from the IPv6 server exposure table.</p>
               </div>
             </div>
           </div>
@@ -867,6 +865,13 @@
 
     </div><!-- /view-config -->
 
+    <footer class="site-footer">
+      <p><a href="https://github.com/LongQT-sea/wrtnova" target="_blank" rel="noopener" aria-label="Source on GitHub">GitHub</a> · <a href="https://www.cloudflare.com/terms/" target="_blank" rel="noopener">Cloudflare TOS</a></p>
+      <p class="site-footer-disclaimer">Supports devices with ≥16MB flash and ≥128MB RAM.</p>
+      <p class="site-footer-disclaimer">Not affiliated with or endorsed by Cloudflare, Inc.</p>
+      <p class="site-footer-disclaimer">Cloudflare and WARP are registered trademarks of their respective owners.</p>
+    </footer>
+
   </main>
 
 
@@ -888,7 +893,6 @@
   <dialog id="modal-device-picker">
     <div class="flex flex-col h-full bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 font-mono text-sm">
       <div class="flex items-center gap-2 px-3 py-2 border-b border-zinc-200 dark:border-zinc-800 flex-shrink-0">
-        <select id="dp-version" class="input-base flex-shrink-0" style="max-width:160px;font-size:0.8125rem;padding:0.375rem 0.5rem"></select>
         <input type="text" id="dp-search" class="input-base flex-1 min-w-0" placeholder="Type to search (e.g. Archer C7)" autocomplete="off">
         <button type="button" id="dp-cancel" class="btn btn-ghost text-sm flex-shrink-0">Cancel</button>
       </div>

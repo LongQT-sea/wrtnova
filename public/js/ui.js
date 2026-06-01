@@ -185,7 +185,7 @@
       ui.$$('.wg-only').forEach(el => el.classList.toggle('hidden', !wgRouter));
       if (wgRouter && e?.target?.id === 'WG_ENABLE') wgCard.open = true;
       // Help text: swap between router and AP explanation when WG_ENABLE is on.
-      ui.$$('.wg-help-router').forEach(el => el.classList.toggle('hidden', ap));
+      ui.$$('.wg-help-router').forEach(el => el.classList.toggle('hidden', ap || !wgEnabled));
 
       const hasKeys = ui.$('#SSH_PUBLIC_KEY').value.trim().length > 0;
       ui.$$('.ssh-pw-row').forEach(el => el.classList.toggle('hidden', !hasKeys));

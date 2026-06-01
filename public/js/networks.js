@@ -183,6 +183,12 @@
     return p.join(' · ') || 'Not yet configured';
   }
 
+  function nodeLanIp(net, node) {
+    const prefix = net.shared_config.BASE_NET_PREFIX || '192.168';
+    const last = node.overrides.AP_MODE === '1' ? (node.overrides.AP_INDEX || '2') : '1';
+    return prefix + '.1.' + last;
+  }
+
   function nodeDotClass(node) {
     if (node.last_build) return 'dot valid';
     if (node.device_target.profile) return 'dot touched';
@@ -374,7 +380,7 @@
     card.innerHTML = net.nodes.map(node => {
       const isAp = node.overrides.AP_MODE === '1';
       const devLabel = node.device_target.title || 'No device selected';
-      const status = node.last_build ? 'built ' + timeAgo(node.last_build.timestamp) : 'not yet built';
+      const status = nodeLanIp(net, node) + (node.last_build ? ' · built ' + timeAgo(node.last_build.timestamp) : '');
       const buildBtnCls = node.device_target.profile ? 'btn text-xs py-0.5 px-2' : 'btn btn-primary text-xs py-0.5 px-2';
       return (
         '<div class="node-row" data-nodeid="' + esc(node.id) + '">' +
@@ -443,15 +449,14 @@
   }
 
   function versionOpts(currentOverride, sharedVersion) {
-    const sel = document.getElementById('dp-version');
-    const versions = sel && sel.options.length > 1
-      ? Array.from(sel.options).map(o => o.value)
+    const sharedSel = document.getElementById('shared-version');
+    const versions = sharedSel && sharedSel.options.length > 1
+      ? Array.from(sharedSel.options).map(o => o.value)
       : BRANCHES.slice().reverse().concat(['SNAPSHOT']);
     const effectiveShared = sharedVersion
-      || document.getElementById('shared-version')?.value
-      || document.getElementById('dp-version')?.value
+      || sharedSel?.value
       || '';
-    const sharedLabel = 'Shared (' + (effectiveShared || '…') + ')';
+    const sharedLabel = 'Default (' + (effectiveShared || '…') + ')';
     return '<option value="">' + esc(sharedLabel) + '</option>' +
       versions.map(v =>
         '<option value="' + esc(v) + '"' + (currentOverride === v ? ' selected' : '') + '>' + esc(v) + '</option>'
@@ -478,13 +483,14 @@
     const devVer = esc(effectiveVer);
     const hasDevice = !!node.device_target.profile;
     const allPkgs = [...(node.device_target.default_packages || []), ...(node.device_target.device_packages || [])];
+    const hasWifi = /\bwpad-?|\bhostapd|\bmac80211/.test(allPkgs.join(' '));
     const hasCt = allPkgs.some(p => /^ath10k-firmware-|^kmod-ath10k-ct/.test(p));
     const nonCtRow = hasCt
       ? '<div class="form-row"><span class="form-label">Non-CT ath10k</span>' +
         '<label class="toggle-label"><span class="toggle-wrap">' +
         '<input type="checkbox" class="toggle-input" id="np-nonct-' + id + '"' + (node.overrides.NON_CT_ATH10K === '1' ? ' checked' : '') + '>' +
         '<span class="toggle-track"></span><span class="toggle-thumb"></span></span>' +
-        '<span class="toggle-text text-xs">Use non-CT ath10k firmware (QCA98xx)</span></label></div>'
+        '<span class="toggle-text text-xs">Use non-CT ath10k firmware & driver</span></label></div>'
       : '';
 
     let fields;
@@ -494,7 +500,7 @@
       '<div><div class="flex gap-2 items-center">' +
       '<input class="input-base" id="np-device-' + id + '" value="' + devTitle + '" placeholder="No device selected" readonly style="cursor:pointer;max-width:280px">' +
       '<button type="button" class="btn text-xs flex-shrink-0" data-pickdevice="' + id + '">Change</button>' +
-      '</div><p class="form-help" id="np-devinfo-' + id + '">' + (devVer ? 'OpenWrt ' + devVer : '') + '</p></div></div>';
+      '</div></div></div>';
 
     if (!isAp) {
       fields = deviceRow +
@@ -503,11 +509,11 @@
         '<div class="form-row"><label class="form-label" for="np-name-' + id + '">Node name</label>' +
         '<input class="input-base" id="np-name-' + id + '" value="' + esc(node.name) + '" style="max-width:220px"></div>' +
 
-        '<div class="form-row"><span class="form-label">Wireless mesh</span>' +
+        (hasWifi ? '<div class="form-row"><span class="form-label">Wireless mesh</span>' +
         '<label class="toggle-label"><span class="toggle-wrap">' +
         '<input type="checkbox" class="toggle-input" id="np-mesh-' + id + '"' + (meshChecked ? ' checked' : '') + '>' +
         '<span class="toggle-track"></span><span class="toggle-thumb"></span></span>' +
-        '<span class="toggle-text text-xs">Enable 802.11s mesh backhaul</span></label></div>' +
+        '<span class="toggle-text text-xs">Enable 802.11s mesh backhaul</span></label></div>' : '') +
         nonCtRow;
     } else {
       fields = deviceRow +
@@ -518,18 +524,15 @@
 
         '<div class="form-row"><label class="form-label" for="np-apidx-' + id + '">AP index</label>' +
         '<div><input type="number" class="input-base" id="np-apidx-' + id + '" min="2" max="19" value="' + esc(node.overrides.AP_INDEX || '2') + '" style="max-width:90px">' +
-        '<p class="form-help">LAN IP: ' + esc(cfg.BASE_NET_PREFIX || '192.168') + '.1.<span id="np-apidx-prev-' + id + '">' + esc(node.overrides.AP_INDEX || '2') + '</span></p></div></div>' +
+        '</div></div>' +
 
-        '<div class="form-row"><span class="form-label">Wireless mesh</span>' +
+        (hasWifi ? '<div class="form-row"><span class="form-label">Wireless mesh</span>' +
         '<label class="toggle-label"><span class="toggle-wrap">' +
         '<input type="checkbox" class="toggle-input" id="np-mesh-' + id + '"' + (meshChecked ? ' checked' : '') + '>' +
         '<span class="toggle-track"></span><span class="toggle-thumb"></span></span>' +
-        '<span class="toggle-text text-xs">Enable 802.11s mesh backhaul</span></label></div>' +
+        '<span class="toggle-text text-xs">Enable 802.11s mesh backhaul</span></label></div>' : '') +
         nonCtRow;
     }
-
-    const chipsHtml = inheritedChips(net, node)
-      .map(c => '<span class="inherited-badge">' + esc(c) + '</span>').join('');
 
     return (
       '<div class="px-4 py-4 bg-zinc-50 dark:bg-zinc-900/50 border-t border-zinc-200 dark:border-zinc-800">' +
@@ -537,9 +540,6 @@
       (isAp ? 'AP node — only per-node fields shown. Everything else is inherited from network config.'
              : 'Router node — device-specific overrides. All other settings come from network config.') +
       '</p>' + fields +
-      '<div class="mt-4 pt-3 border-t border-zinc-200 dark:border-zinc-800">' +
-      '<p class="text-xs text-zinc-500 dark:text-zinc-400 mb-2">Inherited from network config:</p>' +
-      '<div class="inherited-wrap">' + chipsHtml + '</div></div>' +
       '<div class="flex gap-2 mt-4 flex-wrap node-actions">' +
       '<button type="button" class="btn btn-primary text-xs" data-savenode="' + id + '"' +
       (hasDevice ? '' : ' disabled style="opacity:0.4;cursor:not-allowed"') + '>' +
@@ -559,11 +559,6 @@
       panel.querySelector('#np-device-' + node.id)
         ?.addEventListener('click', () => openDevicePicker(net.id, node.id));
     }
-
-    panel.querySelector('#np-apidx-' + node.id)?.addEventListener('input', e => {
-      const prev = panel.querySelector('#np-apidx-prev-' + node.id);
-      if (prev) prev.textContent = e.target.value || '2';
-    });
 
     // Auto-save on any change or blur inside the panel
     panel.addEventListener('change', () => saveNodePanel(net, node));
@@ -1268,7 +1263,6 @@
 
   async function dpEnsureVersions() {
     const sharedSel = document.getElementById('shared-version');
-    const dpSel = document.getElementById('dp-version');
     if (sharedSel && sharedSel.options.length > 1) return; // already populated
 
     let data = dpCacheGet('wrtnova_versions');
@@ -1284,22 +1278,20 @@
     BRANCHES.forEach(b => picks.push(...pickLatestN(data.versions_list || [], b, 2)));
     picks.push('SNAPSHOT');
 
-    [sharedSel, dpSel].forEach(sel => {
-      if (!sel) return;
-      sel.innerHTML = '';
+    if (sharedSel) {
+      sharedSel.innerHTML = '';
       picks.forEach(v => {
         const o = document.createElement('option');
         o.value = v; o.textContent = v;
-        sel.appendChild(o);
+        sharedSel.appendChild(o);
       });
-    });
+    }
 
     const desired = sharedSel?.dataset.desired;
     const best = (desired && picks.includes(desired)) ? desired
                  : (data.stable_version && picks.includes(data.stable_version)) ? data.stable_version
                  : picks.filter(v => v !== 'SNAPSHOT').pop() || picks[0] || '';
     if (sharedSel) sharedSel.value = best;
-    if (dpSel) dpSel.value = best;
     DP.currentVersion = best;
   }
 
@@ -1359,7 +1351,6 @@
     const modal = document.getElementById('modal-device-picker');
     const status = document.getElementById('dp-status');
     const search = document.getElementById('dp-search');
-    const dpSel = document.getElementById('dp-version');
 
     search.value = '';
     document.getElementById('dp-list').innerHTML = '';
@@ -1379,19 +1370,7 @@
 
     try {
       await dpEnsureVersions();
-      if (dpSel && DP.currentVersion) dpSel.value = DP.currentVersion;
-      DP.currentVersion = dpSel?.value || DP.currentVersion;
-
-      dpSel.onchange = async () => {
-        DP.currentVersion = dpSel.value;
-        DP.devicesByTitle = null;
-        status.textContent = 'Loading devices…';
-        status.classList.remove('hidden');
-        document.getElementById('dp-list').innerHTML = '';
-        try { await dpLoadOverview(DP.currentVersion); status.classList.add('hidden'); dpRenderList(search.value); }
-        catch(e) { status.textContent = 'Error: ' + e.message; }
-      };
-
+      if (!DP.currentVersion) DP.currentVersion = document.getElementById('shared-version')?.value || '';
       await dpLoadOverview(DP.currentVersion);
       status.classList.add('hidden');
       dpRenderList('');
@@ -1437,8 +1416,6 @@
         // Update panel
         document.getElementById('np-device-' + node.id)?.let?.(el => el.value = title)
           || (document.getElementById('np-device-' + node.id) && (document.getElementById('np-device-' + node.id).value = title));
-        const devInfo = document.getElementById('np-devinfo-' + node.id);
-        if (devInfo) devInfo.textContent = 'OpenWrt ' + DP.currentVersion + ' · ' + profile.target;
 
         const panel = document.getElementById('panel-' + node.id);
         if (panel?.classList.contains('open')) { panel.innerHTML = panelHTML(net, node); wirePanelEvents(net, node); }
@@ -1450,7 +1427,7 @@
           const sub = row.querySelector('.text-xs.text-zinc-500');
           if (sub) {
             const isAp = node.overrides.AP_MODE === '1';
-            sub.textContent = title + ' · ' + (isAp ? 'AP #' + (node.overrides.AP_INDEX || '2') : 'Router') + ' · not yet built';
+            sub.textContent = title + ' · ' + (isAp ? 'AP #' + (node.overrides.AP_INDEX || '2') : 'Router') + ' · ' + nodeLanIp(net, node) + (node.last_build ? ' · built ' + timeAgo(node.last_build.timestamp) : '');
           }
         }
       }
