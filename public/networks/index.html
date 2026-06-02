@@ -693,7 +693,10 @@
               Add row
             </button>
           </div>
-          <div class="info-note" role="note">Each row creates a static hostid, IPv6 firewall forward rule, and Cloudflare DDNS entry.</div>
+                <div class="info-note" role="note">
+                  Each row create a static hostid (IPv6 Token) in DHCP leases, IPv6 firewall forward rule, and Cloudflare DDNS entry.
+                  After boot, go to Network -> DHCP Leases and update the DUID for each host to match the actual client DUID.
+                </div>
           </div>
         </div>
 
@@ -735,7 +738,7 @@
               </div>
             </div>
           </div>
-          <div class="info-note" role="note">DDNS entries for IPv6-exposed hosts are derived from the IPv6 server exposure table — no extra config needed.</div>
+          <div class="info-note" role="note">DDNS entries for IPv6-exposed hosts are derived from the IPv6 server exposure table</div>
           </div>
         </div>
 

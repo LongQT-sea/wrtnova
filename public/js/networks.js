@@ -619,7 +619,7 @@
       '<p class="text-xs text-zinc-500 dark:text-zinc-400 mb-4">' +
       'These are device-specific settings. All other settings come from network config.' +
       '</p>' + fields +
-      '<div class="flex gap-2 mt-4 flex-wrap node-actions">' +
+      '<div class="flex gap-2 mt-4 flex-wrap items-center node-actions">' +
       '<button type="button" class="btn btn-primary text-xs" data-savenode="' + id + '"' +
       (hasDevice ? '' : ' disabled style="opacity:0.4;cursor:not-allowed"') + '>' +
       (hasDevice ? 'Build firmware' : 'Select a device first') + '</button>' +
@@ -627,6 +627,7 @@
         ? flashNoteHtml(node.last_build.images) +
           imageFilesHtml(node.last_build.images, node.last_build.bin_dir, node.last_build.asu_base)
         : '') +
+      (isAp ? '<button type="button" class="btn text-xs ml-auto text-red-500 hover:text-red-400 border-red-800/40 hover:border-red-600/60" data-deletenode="' + id + '">Delete node</button>' : '') +
       '</div></div>'
     );
   }
@@ -649,6 +650,14 @@
     panel.querySelector('[data-savenode]')?.addEventListener('click', () => {
       saveNodePanel(net, node);
       buildNode(net, node);
+    });
+
+    panel.querySelector('[data-deletenode]')?.addEventListener('click', () => {
+      if (!confirm('Delete "' + node.name + '"? This cannot be undone.')) return;
+      net.nodes = net.nodes.filter(n => n.id !== node.id);
+      net.updated_at = Date.now();
+      saveNetworks();
+      renderNodeList(net);
     });
 
   }
@@ -681,11 +690,18 @@
     if (row) {
       const nameEl = row.querySelector('.font-medium.text-sm');
       if (nameEl) nameEl.textContent = node.name;
+      const subEl = row.querySelector('.text-xs.text-zinc-500');
+      if (subEl) {
+        const devLabel = node.device_target.title || 'No device selected';
+        const isAp = node.overrides.AP_MODE === '1';
+        const status = nodeLanIp(net, node) + (node.last_build ? ' · built ' + timeAgo(node.last_build.timestamp) : '');
+        subEl.textContent = devLabel + ' · ' + (isAp ? 'AP #' + (node.overrides.AP_INDEX || '2') : 'Router') + ' · ' + status;
+      }
     }
   }
 
   // ── Config form view ──────────────────────────────────────────────
-  function showConfig(networkId, autoRename) {
+  function showConfig(networkId, autoRename, isNew) {
     const net = getNet(networkId);
     if (!net) return;
     st.networkId = networkId;
@@ -706,6 +722,7 @@
     document.getElementById('config-name-edit')?.classList.add('hidden');
 
     loadConfig(net.shared_config);
+    if (isNew) document.getElementById('card-target')?.classList.add('open');
 
     // Auto-save: teardown previous listeners, then attach fresh ones
     if (st.configSaveAbort) st.configSaveAbort.abort();
@@ -940,7 +957,7 @@
     };
     st.networks.push(net);
     saveNetworks();
-    showConfig(net.id, autoRename);
+    showConfig(net.id, autoRename, true);
   }
 
   // ── Rename (inline in config view) ───────────────────────────────
@@ -1718,16 +1735,7 @@
   }
 
   function initCardToggles() {
-    ui.$$('#config-form .card-anim').forEach(function (card) {
-      var hdr = card.querySelector('.card-header');
-      if (!hdr) return;
-      hdr.setAttribute('role', 'button');
-      hdr.setAttribute('tabindex', '0');
-      hdr.addEventListener('click', function () { card.classList.toggle('open'); });
-      hdr.addEventListener('keydown', function (e) {
-        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); card.classList.toggle('open'); }
-      });
-    });
+    ui.initCardToggles('#config-form');
   }
 
   // ── Init ──────────────────────────────────────────────────────────

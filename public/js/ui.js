@@ -18,6 +18,15 @@
       hdr.addEventListener('keydown', function (e) {
         if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); card.classList.toggle('open'); }
       });
+      var wrap = card.querySelector('.card-body-wrap');
+      if (!wrap) return;
+      var footer = document.createElement('button');
+      footer.type = 'button';
+      footer.className = 'card-collapse-footer';
+      footer.setAttribute('aria-label', 'Collapse section');
+      footer.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="18 15 12 9 6 15"/></svg>';
+      footer.addEventListener('click', function () { card.classList.remove('open'); });
+      wrap.appendChild(footer);
     });
   };
 
