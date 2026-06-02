@@ -9,7 +9,7 @@ compatibility_flags = ["nodejs_compat"]
 #command = "npm run build:css && node scripts/embed-wrtnova.mjs"
 
 [vars]
-ALLOWED_ORIGIN = "https://wrtnova.com"
+ALLOWED_ORIGIN = "https://wrtnova.com,https://wrtnova.pages.dev,https://*.wrtnova.pages.dev"
 # ASU_URL   = "https://sysupgrade.openwrt.org"  # primary ASU; defaults to official if unset
 # ASU_URL_2 = "https://asu.example.com"          # additional ASU shown in endpoint dropdown
 # ASU_URL_3 = "https://asu2.example.com"         # add more as needed

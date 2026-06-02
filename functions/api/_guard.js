@@ -26,7 +26,13 @@ export function originAllowed(request, env) {
   if (!allowed) return true;
   const origin = request.headers.get('Origin');
   if (!origin) return true; // same-origin request — browser omits Origin header
-  return origin === allowed;
+  const list = allowed.split(',').map(s => s.trim()).filter(Boolean);
+  return list.some(pat => {
+    if (!pat.includes('*')) return pat === origin;
+    // * matches one subdomain label (no dots)
+    const re = new RegExp('^' + pat.replace(/[.+^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '[^.]+') + '$');
+    return re.test(origin);
+  });
 }
 
 export function getSid(request) {

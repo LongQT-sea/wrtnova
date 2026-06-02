@@ -304,7 +304,7 @@ USB_TETHERING:  isRouter ? checkboxVal('USB_TETHERING') : '',
       default_packages: target.default_packages,
       device_packages:  target.device_packages,
       device_title:        ($('#device') || {}).value || '',
-      wrtnova_config:      cfg,
+      wrtnova_config:      ui.stripSensitive(cfg),
       additional_packages: parseAdditionalPackages(),
       asu_url: activeAsu,
     };
@@ -336,23 +336,76 @@ USB_TETHERING:  isRouter ? checkboxVal('USB_TETHERING') : '',
       $('#config-preview-wrap').classList.remove('hidden');
     }
 
-    if (resp.firmware_url) {
-      saveHistoryLocal(payload, { status: 'success', firmware_url: resp.firmware_url });
-      renderResult({ firmware_url: resp.firmware_url, images: resp.images, bin_dir: resp.bin_dir }, activeAsu);
+    if (!resp.packages || !resp.asu_url) {
+      ui.status('Unexpected response from /api/build', 'error');
+      $('#build-btn').disabled = false;
+      return;
+    }
+
+    ui.status('Preparing build…', 'info');
+    ui.setProgress('Preparing build…', 5);
+
+    let wrtnovaBody;
+    try {
+      wrtnovaBody = await ui.fetchWrtnovaBody();
+    } catch (e) {
+      $('#build-btn').disabled = false;
+      ui.clearProgress();
+      ui.status('Failed to load build template: ' + e.message, 'error');
+      return;
+    }
+
+    const asuBody = {
+      profile:      target.profile,
+      target:       target.target,
+      version:      target.version,
+      version_code: target.version_code,
+      packages:     resp.packages,
+      defaults:     ui.assembleScript(cfg, wrtnovaBody),
+      diff_packages: true,
+      client:       'wrtnova/1.0',
+    };
+
+    ui.status('Submitting to build server…', 'info');
+    ui.setProgress('Submitting to build server…', 8);
+
+    let asuR, asuData;
+    try {
+      asuR = await fetch(resp.asu_url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(asuBody),
+      });
+      asuData = await asuR.json();
+      if (asuR.status !== 200 && asuR.status !== 202) throw new Error(
+        asuData.detail || ('ASU HTTP ' + asuR.status)
+      );
+    } catch (e) {
+      $('#build-btn').disabled = false;
+      ui.clearProgress();
+      ui.status('Build request failed: ' + e.message, 'error');
+      return;
+    }
+
+    const asuBase = resp.asu_url.replace('/api/v1/build', '');
+
+    if (asuR.status === 200) {
+      saveHistoryLocal(payload, { status: 'success', firmware_url: null });
+      renderResult(asuData, asuBase);
       ui.setProgress('Done (cached build)', 100);
       ui.status('Build complete.', 'success');
       $('#build-btn').disabled = false;
       return;
     }
 
-    if (!resp.request_hash) {
-      ui.status('Unexpected response from /api/build', 'error');
+    if (!asuData.request_hash) {
+      ui.status('Unexpected response from build server', 'error');
       $('#build-btn').disabled = false;
       return;
     }
 
     saveHistoryLocal(payload, { status: 'queued', firmware_url: null });
-    pollAsu(resp.request_hash, resp.asu_url || activeAsu);
+    pollAsu(asuData.request_hash, asuBase);
   };
 
   function pollAsu(hash, asuBase) {

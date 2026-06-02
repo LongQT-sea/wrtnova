@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- dark zinc-900 background with rounded corners -->
+  <rect width="32" height="32" rx="6" fill="#18181b"/>
+
+  <!-- WiFi signal — represents Wrt / OpenWrt -->
+  <circle cx="16" cy="23" r="2.2" fill="#f97316"/>
+  <path d="M 12.7 18 A 6 6 0 0 1 19.3 18"
+        stroke="#f97316" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+  <path d="M 8 15 A 11.31 11.31 0 0 1 24 15"
+        stroke="#f97316" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.5"/>
+
+  <!-- 4-point star — represents Nova -->
+  <path d="M 25 5.5 L 25.78 7.22 L 27.5 8 L 25.78 8.78
+           L 25 10.5 L 24.22 8.78 L 22.5 8 L 24.22 7.22 Z"
+        fill="#fb923c"/>
+</svg>

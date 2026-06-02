@@ -851,11 +851,16 @@
     overflow: hidden;
     max-height: 0;
     opacity: 0;
+    /* overflow snaps back to hidden immediately when closing */
     transition: max-height 0.25s ease, opacity 0.2s ease;
   }
   .card-anim.open .card-body-wrap {
     max-height: 4000px;
     opacity: 1;
+    /* switch to visible only after the open animation completes (0.25s delay)
+       so max-height clipping still works during the slide-in */
+    overflow: visible;
+    transition: max-height 0.25s ease, opacity 0.2s ease, overflow 0s 0.25s;
   }
   .card-anim.open .card-chev {
     transform: rotate(180deg);
