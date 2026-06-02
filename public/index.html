@@ -25,7 +25,7 @@
     <div class="max-w-[68rem] mx-auto px-4 py-3 flex items-center justify-between gap-4">
       <a href="/" class="text-base font-semibold tracking-tight leading-tight hover:underline">WrtNova</a>
       <div class="flex items-center gap-1">
-        <a href="/networks" class="btn btn-ghost text-xs py-1 px-2 hidden sm:inline-flex">Fleet builder →</a>
+        <a href="/networks" class="btn btn-ghost text-xs py-1 px-2 hidden sm:inline-flex" data-i18n="fleetBuilderLink">Fleet builder →</a>
         <button id="theme-toggle" type="button"
                 class="p-2 rounded-md text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors focus:outline-none focus:ring-2 focus:ring-accent"
                 aria-label="Toggle color theme">
@@ -43,20 +43,22 @@
 
 
       <div class="flex-1 min-w-0">
-        <p class="text-xs tracking-wide uppercase mb-5 text-accent font-semibold whitespace-nowrap">OpenWrt · Browser-built · Zero SSH</p>
+        <p class="text-xs tracking-wide uppercase mb-5 text-accent font-semibold whitespace-nowrap" data-i18n="heroTagline">OpenWrt · Browser-built · Zero SSH</p>
+        <!-- NOTE: h1 contains <br> for layout; data-i18n not applicable (textContent would strip tags) -->
         <h1 class="text-3xl md:text-4xl font-semibold leading-tight tracking-tight mb-5">
           Flash once.<br>Everything's<br>already set up.
         </h1>
-        <p class="text-zinc-500 dark:text-zinc-400 leading-relaxed mb-8 max-w-xs">
+        <p class="text-zinc-500 dark:text-zinc-400 leading-relaxed mb-8 max-w-xs" data-i18n="heroSubtitle">
           Build a fully-configured OpenWrt image — VLANs, WiFi, VPN, ad-blocking — in your browser.
         </p>
         <div class="flex flex-col gap-3 items-start">
-          <a href="/builder" class="btn btn-primary btn-lg">Single-node builder →</a>
-          <a href="/networks" class="btn btn-outline btn-lg">Multi-node fleet builder →</a>
+          <a href="/builder" class="btn btn-primary btn-lg" data-i18n="singleNodeBuilder">Single-node builder →</a>
+          <a href="/networks" class="btn btn-outline btn-lg" data-i18n="multiNodeFleetBuilder">Multi-node fleet builder →</a>
         </div>
         <div class="mt-3">
           <a href="https://github.com/LongQT-sea/wrtnova" target="_blank" rel="noopener"
-             class="text-xs text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:underline transition-colors">
+             class="text-xs text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:underline transition-colors"
+             data-i18n="viewSourceGithub">
             View source on GitHub ↗
           </a>
         </div>
@@ -130,8 +132,8 @@
             <line x1="5" y1="12" x2="12" y2="16"/><line x1="19" y1="12" x2="12" y2="16"/>
           </svg>
         </div>
-        <h2 class="font-semibold text-sm mb-2 leading-snug">VLANs without learning VLANs</h2>
-        <p class="text-zinc-500 dark:text-zinc-400 text-xs leading-relaxed">
+        <h2 class="font-semibold text-sm mb-2 leading-snug" data-i18n="featureVlansTitle">VLANs without learning VLANs</h2>
+        <p class="text-zinc-500 dark:text-zinc-400 text-xs leading-relaxed" data-i18n="featureVlansDesc">
           Segment into LAN, Guest, and IoT zones. WrtNova detects your switch hardware and wires the tagging correctly — no DSA-vs-swconfig rabbit hole.
         </p>
       </div>
@@ -142,8 +144,8 @@
             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
           </svg>
         </div>
-        <h2 class="font-semibold text-sm mb-2 leading-snug">VPN built in — or one click to WARP</h2>
-        <p class="text-zinc-500 dark:text-zinc-400 text-xs leading-relaxed">
+        <h2 class="font-semibold text-sm mb-2 leading-snug" data-i18n="featureVpnTitle">VPN built in — or one click to WARP</h2>
+        <p class="text-zinc-500 dark:text-zinc-400 text-xs leading-relaxed" data-i18n="featureVpnDesc">
           Route through your own WireGuard provider, or prefill a free Cloudflare WARP config in one click. It gets its own network and SSID automatically.
         </p>
       </div>
@@ -155,8 +157,8 @@
             <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
           </svg>
         </div>
-        <h2 class="font-semibold text-sm mb-2 leading-snug">Private and ad-free out of the box</h2>
-        <p class="text-zinc-500 dark:text-zinc-400 text-xs leading-relaxed">
+        <h2 class="font-semibold text-sm mb-2 leading-snug" data-i18n="featurePrivacyTitle">Private and ad-free out of the box</h2>
+        <p class="text-zinc-500 dark:text-zinc-400 text-xs leading-relaxed" data-i18n="featurePrivacyDesc">
           Network-wide ad blocking and encrypted DNS. AdGuard Home on capable hardware, a lightweight fallback on smaller routers — chosen automatically.
         </p>
       </div>
@@ -167,25 +169,25 @@
             <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
           </svg>
         </div>
-        <h2 class="font-semibold text-sm mb-2 leading-snug">Flash once, fully configured</h2>
-        <p class="text-zinc-500 dark:text-zinc-400 text-xs leading-relaxed">
+        <h2 class="font-semibold text-sm mb-2 leading-snug" data-i18n="featureFlashTitle">Flash once, fully configured</h2>
+        <p class="text-zinc-500 dark:text-zinc-400 text-xs leading-relaxed" data-i18n="featureFlashDesc">
           No LuCI menus, no SSH. WrtNova bakes your whole setup into a first-boot script. Flash the image and the router configures itself.
         </p>
       </div>
 
     </div>
 
-    <p class="text-center text-zinc-500 dark:text-zinc-400 text-xs mt-6 leading-relaxed">
+    <p class="text-center text-zinc-500 dark:text-zinc-400 text-xs mt-6 leading-relaxed" data-i18n="featureMoreText">
       Plus mesh networking, multi-WAN failover, Cloudflare DDNS, IPv6, port forwarding, and more.
     </p>
   </section>
 
   <section class="border-t border-zinc-200 dark:border-zinc-800 py-14 md:py-20">
     <div class="w-full xl:w-[64%] mx-auto px-4 text-center">
-      <p class="text-zinc-500 dark:text-zinc-400 text-xs mb-6">Your router, your config — baked in from the first boot.</p>
+      <p class="text-zinc-500 dark:text-zinc-400 text-xs mb-6" data-i18n="ctaTagline">Your router, your config — baked in from the first boot.</p>
       <div class="flex flex-col gap-3 items-center">
-        <a href="/builder" class="btn btn-primary btn-lg">Single-node builder →</a>
-        <a href="/networks" class="btn btn-outline btn-lg">Multi-node fleet builder →</a>
+        <a href="/builder" class="btn btn-primary btn-lg" data-i18n="singleNodeBuilder">Single-node builder →</a>
+        <a href="/networks" class="btn btn-outline btn-lg" data-i18n="multiNodeFleetBuilder">Multi-node fleet builder →</a>
       </div>
     </div>
   </section>
@@ -197,10 +199,11 @@
       <a href="https://github.com/LongQT-sea/wrtnova" target="_blank" rel="noopener" aria-label="Source on GitHub">GitHub</a>
       · <a href="https://www.cloudflare.com/terms/" target="_blank" rel="noopener">Cloudflare TOS</a>
     </p>
-    <p class="site-footer-disclaimer">Not affiliated with or endorsed by Cloudflare, Inc.</p>
-    <p class="site-footer-disclaimer">Cloudflare and WARP are registered trademarks of their respective owners.</p>
+    <p class="site-footer-disclaimer" data-i18n="footerNotAffiliated">Not affiliated with or endorsed by Cloudflare, Inc.</p>
+    <p class="site-footer-disclaimer" data-i18n="footerTrademark">Cloudflare and WARP are registered trademarks of their respective owners.</p>
   </footer>
 
   <script defer src="/js/theme.js"></script>
+  <script defer src="/js/i18n.js"></script>
 </body>
 </html>

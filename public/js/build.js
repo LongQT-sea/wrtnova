@@ -3,6 +3,7 @@
 
   const ui = window.WrtNova = window.WrtNova || {};
   const $  = ui.$, $$ = ui.$$;
+  const S = ui.S, t = ui.t;
   const ASU_DEFAULT = 'https://sysupgrade.openwrt.org';
   let activeAsu = ASU_DEFAULT;
 
@@ -256,8 +257,8 @@ USB_TETHERING:  isRouter ? checkboxVal('USB_TETHERING') : '',
     $('#config-preview-wrap').classList.add('hidden');
 
     const target = ui.collectTarget();
-    if (!target) { ui.status('Pick a device first.', 'error'); return; }
-    if (ui.hasVlanConflict) { ui.status('Fix duplicate VLAN IDs before building.', 'error'); return; }
+    if (!target) { ui.status(S.pickDeviceFirst, 'error'); return; }
+    if (ui.hasVlanConflict) { ui.status(S.fixVlanConflict, 'error'); return; }
 
     const wifiPassFields = [
       { id: 'LAN_WIFI_PASSWD',   active: true },
@@ -270,7 +271,7 @@ USB_TETHERING:  isRouter ? checkboxVal('USB_TETHERING') : '',
       if (!active) continue;
       const val = $('#' + id).value;
       if (val && val.length < 8) {
-        ui.status('WiFi password must be at least 8 characters (' + id.replace(/_PASSWD|_WIFI/, '') + ').', 'error');
+        ui.status(t('wifiPassTooShort', { field: id.replace(/_PASSWD|_WIFI/, '') }), 'error');
         $('#' + id).focus();
         return;
       }
@@ -310,8 +311,8 @@ USB_TETHERING:  isRouter ? checkboxVal('USB_TETHERING') : '',
     };
 
     $('#build-btn').disabled = true;
-    ui.status('Submitting build…', 'info');
-    ui.setProgress('Submitting build…', 2);
+    ui.status(S.submittingBuild, 'info');
+    ui.setProgress(S.submittingBuild, 2);
 
     let resp;
     try {
@@ -327,7 +328,7 @@ USB_TETHERING:  isRouter ? checkboxVal('USB_TETHERING') : '',
     } catch (e) {
       $('#build-btn').disabled = false;
       ui.clearProgress();
-      ui.status('Build submit failed: ' + e.message, 'error');
+      ui.status(t('buildSubmitFailed', { msg: e.message }), 'error');
       return;
     }
 
@@ -337,13 +338,13 @@ USB_TETHERING:  isRouter ? checkboxVal('USB_TETHERING') : '',
     }
 
     if (!resp.packages || !resp.asu_url) {
-      ui.status('Unexpected response from /api/build', 'error');
+      ui.status(S.unexpectedApiBuild, 'error');
       $('#build-btn').disabled = false;
       return;
     }
 
-    ui.status('Preparing build…', 'info');
-    ui.setProgress('Preparing build…', 5);
+    ui.status(S.preparingBuild, 'info');
+    ui.setProgress(S.preparingBuild, 5);
 
     let wrtnovaBody;
     try {
@@ -351,7 +352,7 @@ USB_TETHERING:  isRouter ? checkboxVal('USB_TETHERING') : '',
     } catch (e) {
       $('#build-btn').disabled = false;
       ui.clearProgress();
-      ui.status('Failed to load build template: ' + e.message, 'error');
+      ui.status(t('failedLoadTemplate', { msg: e.message }), 'error');
       return;
     }
 
@@ -366,8 +367,8 @@ USB_TETHERING:  isRouter ? checkboxVal('USB_TETHERING') : '',
       client:       'wrtnova/1.0',
     };
 
-    ui.status('Submitting to build server…', 'info');
-    ui.setProgress('Submitting to build server…', 8);
+    ui.status(S.submittingToServer, 'info');
+    ui.setProgress(S.submittingToServer, 8);
 
     let asuR, asuData;
     try {
@@ -383,7 +384,7 @@ USB_TETHERING:  isRouter ? checkboxVal('USB_TETHERING') : '',
     } catch (e) {
       $('#build-btn').disabled = false;
       ui.clearProgress();
-      ui.status('Build request failed: ' + e.message, 'error');
+      ui.status(t('buildRequestFailed', { msg: e.message }), 'error');
       return;
     }
 
@@ -392,14 +393,14 @@ USB_TETHERING:  isRouter ? checkboxVal('USB_TETHERING') : '',
     if (asuR.status === 200) {
       saveHistoryLocal(payload, { status: 'success', firmware_url: null });
       renderResult(asuData, asuBase);
-      ui.setProgress('Done (cached build)', 100);
-      ui.status('Build complete.', 'success');
+      ui.setProgress(S.doneCachedBuild, 100);
+      ui.status(S.buildComplete, 'success');
       $('#build-btn').disabled = false;
       return;
     }
 
     if (!asuData.request_hash) {
-      ui.status('Unexpected response from build server', 'error');
+      ui.status(S.unexpectedBuildServer, 'error');
       $('#build-btn').disabled = false;
       return;
     }
@@ -419,21 +420,21 @@ USB_TETHERING:  isRouter ? checkboxVal('USB_TETHERING') : '',
         const data = await r.json();
         if (r.status === 202) {
           if (data.queue_position != null && data.queue_position > 0) {
-            ui.setProgress('In build queue (#' + data.queue_position + ')', 8);
+            ui.setProgress(t('inBuildQueue', { n: data.queue_position }), 8);
           } else {
             pct = Math.min(94, pct + (pct < 85 ? 8 : 2));
-            ui.setProgress('Building…', pct);
+            ui.setProgress(S.building, pct);
           }
           return;
         }
         clearInterval(polling); polling = null;
         $('#build-btn').disabled = false;
         if (r.status === 200) {
-          ui.setProgress('Done', 100);
-          ui.status('Build complete.', 'success');
+          ui.setProgress(S.done, 100);
+          ui.status(S.buildComplete, 'success');
           renderResult(data, base);
         } else {
-          ui.status('Build failed: ' + (data.detail || ('HTTP ' + r.status)), 'error');
+          ui.status(t('buildFailed', { msg: data.detail || ('HTTP ' + r.status) }), 'error');
           if (data.stderr) {
             $('#config-preview').textContent = data.stderr;
             $('#config-preview-wrap').classList.remove('hidden');
@@ -443,7 +444,7 @@ USB_TETHERING:  isRouter ? checkboxVal('USB_TETHERING') : '',
         if (tries > 200) {
           clearInterval(polling); polling = null;
           $('#build-btn').disabled = false;
-          ui.status('Polling failed: ' + e.message, 'error');
+          ui.status(t('pollingFailed', { msg: e.message }), 'error');
         }
       }
     }, 5000);
@@ -464,8 +465,7 @@ USB_TETHERING:  isRouter ? checkboxVal('USB_TETHERING') : '',
 
     const wrap = $('#result'); wrap.classList.remove('hidden');
     let html = '<div class="result-wrap">'
-             + '<p class="result-note">Flash the "<strong>sysupgrade</strong>" image via "System → Backup / Flash firmware → Flash image". '
-             + 'Make sure to <strong>disable "Keep settings and retain the current configuration"</strong>.</p>'
+             + '<p class="result-note">' + S.flashNote + '</p>'
              + '<ul class="result-images">';
     images.slice().sort((a, b) => (b.type === 'sysupgrade') - (a.type === 'sysupgrade')).forEach(im => {
       const url = bin_dir ? base + '/store/' + bin_dir + '/' + im.name : (im === sys ? main : null);
@@ -487,7 +487,7 @@ USB_TETHERING:  isRouter ? checkboxVal('USB_TETHERING') : '',
     btn.addEventListener('click', async () => {
       btn.disabled = true;
       const origText = btn.textContent;
-      btn.textContent = 'Fetching WARP…';
+      btn.textContent = S.fetchingWarp;
       if (msg) { msg.textContent = ''; msg.classList.add('hidden'); }
       clearTimeout(dismissTimer);
 
@@ -503,8 +503,8 @@ USB_TETHERING:  isRouter ? checkboxVal('USB_TETHERING') : '',
         try { data = await r.json(); } catch (_) { data = {}; }
         if (!r.ok) {
           const friendly = r.status === 429 || (data.message || '').includes('429')
-            ? 'Too many requests — wait a moment and try again'
-            : (data.message || data.error || 'WARP registration failed — try again shortly');
+            ? S.warpTooMany
+            : (data.message || data.error || S.warpFailed);
           throw new Error(friendly);
         }
 
@@ -522,7 +522,7 @@ USB_TETHERING:  isRouter ? checkboxVal('USB_TETHERING') : '',
         }
 
         if (msg) {
-          msg.textContent = '✓ Filled from Cloudflare WARP';
+          msg.textContent = S.warpSuccess;
           msg.style.color = '#16a34a';
           msg.classList.remove('hidden');
           dismissTimer = setTimeout(() => msg.classList.add('hidden'), 5000);
@@ -550,7 +550,7 @@ USB_TETHERING:  isRouter ? checkboxVal('USB_TETHERING') : '',
     const t = ui.collectTarget && ui.collectTarget();
     const ok = !!t;
     $('#build-btn').disabled = !ok;
-    $('#build-hint').textContent = ok ? '' : 'Pick a device to enable build.';
+    $('#build-hint').textContent = ok ? '' : S.pickDeviceHint;
     if (ok) ui.setDot('target', 'valid');
   };
 })();

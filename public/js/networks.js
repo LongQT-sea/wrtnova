@@ -14,6 +14,7 @@
 
   // ui.js helpers (loaded before us)
   const ui = window.WrtNova = window.WrtNova || {};
+  const S = ui.S, t = ui.t;
 
   // ── Node config merge (mirrors Worker's mergeNodeConfig in functions/api/build.js) ──
   function mergeNodeConfig(sharedConfig, nodeOverrides) {
@@ -170,11 +171,11 @@
   }
 
   function timeAgo(ts) {
-    if (!ts) return 'never';
+    if (!ts) return S.never;
     const d = Math.floor((Date.now() - ts) / 86400000);
-    if (d === 0) return 'today';
-    if (d === 1) return 'yesterday';
-    if (d < 7) return d + ' days ago';
+    if (d === 0) return S.today;
+    if (d === 1) return S.yesterday;
+    if (d < 7) return t('daysAgo', { n: d });
     return new Date(ts).toLocaleDateString();
   }
 
@@ -197,22 +198,22 @@
       chips.push('AP_MODE=1');
       if (c.LAN_WIFI_SSID || c.HOST_NAME)
         chips.push('SSID: ' + (c.LAN_WIFI_SSID || c.HOST_NAME || 'WrtNova'));
-      if (c.GUEST_ENABLE === '1') chips.push('Guest network');
-      if (c.IOT_ENABLE === '1') chips.push('IoT network');
-      if (c.WG_ENABLE === '1') chips.push('VPN SSID');
-      if (c.ROOT_PASSWD) chips.push('Root password');
-      if (c.SSH_PUBLIC_KEY) chips.push('SSH key');
+      if (c.GUEST_ENABLE === '1') chips.push(S.guestNetwork);
+      if (c.IOT_ENABLE === '1') chips.push(S.iotNetwork);
+      if (c.WG_ENABLE === '1') chips.push(S.vpnSsid);
+      if (c.ROOT_PASSWD) chips.push(S.rootPassword);
+      if (c.SSH_PUBLIC_KEY) chips.push(S.sshKey);
       if (c.COUNTRY_CODE) chips.push('Country: ' + c.COUNTRY_CODE);
-      chips.push('VLANs trunked');
-      if (c.WAN_B_ENABLE === '1') chips.push('WAN-B VLAN');
+      chips.push(S.vlansTrunked);
+      if (c.WAN_B_ENABLE === '1') chips.push(S.wanBVlan);
     } else {
       if (c.LAN_WIFI_SSID || c.HOST_NAME)
         chips.push('SSID: ' + (c.LAN_WIFI_SSID || c.HOST_NAME || 'WrtNova'));
-      if (c.WG_ENABLE === '1') chips.push('WireGuard VPN');
-      if (c.GUEST_ENABLE === '1') chips.push('Guest network');
-      if (c.IOT_ENABLE === '1') chips.push('IoT network');
+      if (c.WG_ENABLE === '1') chips.push(S.wireGuardVpn);
+      if (c.GUEST_ENABLE === '1') chips.push(S.guestNetwork);
+      if (c.IOT_ENABLE === '1') chips.push(S.iotNetwork);
       if (c.DNS_MODE && c.DNS_MODE !== 'none')
-        chips.push(c.DNS_MODE === 'adguardhome' ? 'AdGuard Home' : 'dnsproxy');
+        chips.push(c.DNS_MODE === 'adguardhome' ? S.adguardHome : S.dnsproxy);
       if (c.DDNS_ENABLE === '1' && c.LOOKUP_HOSTNAME)
         chips.push('DDNS: ' + c.LOOKUP_HOSTNAME);
       if (c.COUNTRY_CODE) chips.push('Country: ' + c.COUNTRY_CODE);
@@ -227,9 +228,9 @@
     if (c.shared_version) p.push('OpenWrt ' + c.shared_version);
     if (c.BASE_NET_PREFIX) p.push(c.BASE_NET_PREFIX + '.x.0/24');
     if (c.DNS_MODE && c.DNS_MODE !== 'none')
-      p.push(c.DNS_MODE === 'adguardhome' ? 'AdGuard Home' : 'dnsproxy');
-    if (c.WG_ENABLE === '1') p.push('WireGuard VPN');
-    return p.join(' · ') || 'Not yet configured';
+      p.push(c.DNS_MODE === 'adguardhome' ? S.adguardHome : S.dnsproxy);
+    if (c.WG_ENABLE === '1') p.push(S.wireGuardVpn);
+    return p.join(' · ') || S.notYetConfigured;
   }
 
   function nodeLanIp(net, node) {
@@ -313,10 +314,10 @@
       '<div class="w-full">' +
       '<div class="flex items-start gap-2">' +
       '<p class="text-xs text-red-500 dark:text-red-400 flex-1">' + esc(msg) + '</p>' +
-      '<button type="button" class="btn text-xs flex-shrink-0" id="' + id + '">Retry</button>' +
+      '<button type="button" class="btn text-xs flex-shrink-0" id="' + id + '">' + S.retry + '</button>' +
       '</div>' +
       (isStorageFull
-        ? '<p class="text-xs text-zinc-500 dark:text-zinc-400 mt-1.5">Try switching <strong>DNS &amp; adblock</strong> from AdGuard Home to dnsproxy in network config.</p>'
+        ? '<p class="text-xs text-zinc-500 dark:text-zinc-400 mt-1.5">' + S.storageTip + '</p>'
         : '') +
       '</div>';
     actEl.querySelector('#' + id)?.addEventListener('click', onRetry);
@@ -339,7 +340,7 @@
 
   function flashNoteHtml(images) {
     return (images || []).some(i => i.type === 'sysupgrade')
-      ? '<p class="result-note w-full mt-1">Flash the "<strong>sysupgrade</strong>" image via "System → Backup / Flash firmware → Flash image". Make sure to <strong>disable "Keep settings and retain the current configuration"</strong>.</p>'
+      ? '<p class="result-note w-full mt-1">' + S.flashNote + '</p>'
       : '';
   }
 
@@ -347,7 +348,7 @@
     if (!actEl) return;
     const id = 'buildbtn-' + uid();
     actEl.innerHTML =
-      '<button type="button" class="btn btn-primary text-xs" id="' + id + '">Build firmware</button>' +
+      '<button type="button" class="btn btn-primary text-xs" id="' + id + '">' + S.buildFirmware + '</button>' +
       flashNoteHtml(images) +
       imageFilesHtml(images, bin_dir, asuBase);
     actEl.querySelector('#' + id)?.addEventListener('click', onDone);
@@ -378,17 +379,17 @@
 
   // ── List view ─────────────────────────────────────────────────────
   function renderList() {
-    setHeaderSub(BC_SEP + 'Networks');
+    setHeaderSub(BC_SEP + S.networks);
     const container = document.getElementById('networks-list');
 
     if (!st.networks.length) {
       container.innerHTML =
         '<div class="card p-8 text-center">' +
-        '<p class="text-zinc-500 dark:text-zinc-400 text-sm mb-4">No networks yet. Create one to get started.</p>' +
+        '<p class="text-zinc-500 dark:text-zinc-400 text-sm mb-4">' + S.noNetworksYet + '</p>' +
         '<button class="btn btn-primary" id="btn-empty-new">' +
         '<svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">' +
         '<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>' +
-        'New network</button></div>';
+        S.newNetwork + '</button></div>';
       document.getElementById('btn-empty-new')?.addEventListener('click', showNewNetwork);
       return;
     }
@@ -405,7 +406,7 @@
         '<div class="flex items-center gap-2 mb-1">' +
         '<span class="' + dotCls + '" aria-hidden="true"></span>' +
         '<span class="font-semibold">' + esc(net.name) + '</span>' +
-        '<span class="chip">' + net.nodes.length + ' node' + (net.nodes.length !== 1 ? 's' : '') + '</span>' +
+        '<span class="chip">' + t(net.nodes.length !== 1 ? 'nodesCount' : 'nodeCount', { n: net.nodes.length }) + '</span>' +
         '</div>' +
         '<p class="text-xs text-zinc-500 dark:text-zinc-400 truncate">' + names + '</p>' +
         '<p class="text-xs text-zinc-600 dark:text-zinc-500 mt-1">' + esc(netSummary(net)) + '</p>' +
@@ -413,8 +414,8 @@
         '<div class="flex flex-col items-end gap-2 flex-shrink-0">' +
         '<svg class="w-4 h-4 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>' +
         '<div class="flex gap-1">' +
-        (built ? '<span class="chip">' + built + ' built</span>' : '') +
-        (pending ? '<span class="chip text-zinc-500">' + pending + ' pending</span>' : '') +
+        (built ? '<span class="chip">' + t('builtCount', { n: built }) + '</span>' : '') +
+        (pending ? '<span class="chip text-zinc-500">' + t('pendingCount', { n: pending }) + '</span>' : '') +
         '</div></div></div></div>'
       );
     }).join('');
@@ -431,7 +432,7 @@
     const net = getNet(networkId);
     if (!net) return;
 
-    setHeaderSub(BC_SEP + bcBtn('Networks', () => { renderList(); showView('list'); }) + BC_SEP + esc(net.name));
+    setHeaderSub(BC_SEP + bcBtn(S.networks, () => { renderList(); showView('list'); }) + BC_SEP + esc(net.name));
     document.getElementById('detail-title-text').textContent = net.name;
     document.getElementById('detail-summary').textContent = netSummary(net);
     document.getElementById('detail-name-display')?.classList.remove('hidden');
@@ -456,8 +457,8 @@
     const card = document.getElementById('node-list-card');
     card.innerHTML = net.nodes.map(node => {
       const isAp = node.overrides.AP_MODE === '1';
-      const devLabel = node.device_target.title || 'No device selected';
-      const status = nodeLanIp(net, node) + (node.last_build ? ' · built ' + timeAgo(node.last_build.timestamp) : '');
+      const devLabel = node.device_target.title || S.noDeviceSelected;
+      const status = nodeLanIp(net, node) + (node.last_build ? ' · ' + t('builtAgo', { ago: timeAgo(node.last_build.timestamp) }) : '');
       const buildBtnCls = node.device_target.profile ? 'btn text-xs py-0.5 px-2' : 'btn btn-primary text-xs py-0.5 px-2';
       return (
         '<div class="node-row" data-nodeid="' + esc(node.id) + '">' +
@@ -465,11 +466,11 @@
         '<div class="flex-1 min-w-0">' +
         '<div class="font-medium text-sm">' + esc(node.name) + '</div>' +
         '<div class="text-xs text-zinc-500 dark:text-zinc-400 truncate">' + esc(devLabel) + ' · ' +
-        (isAp ? 'AP #' + esc(node.overrides.AP_INDEX || '2') : 'Router') + ' · ' + status + '</div>' +
+        (isAp ? t('apNum', { n: esc(node.overrides.AP_INDEX || '2') }) : S.router) + ' · ' + status + '</div>' +
         '</div>' +
         '<div class="flex items-center gap-2 flex-shrink-0">' +
         '<button class="' + buildBtnCls + '" data-buildbtn="' + esc(node.id) + '">' +
-        (node.device_target.profile ? 'Build' : 'Setup') + '</button>' +
+        (node.device_target.profile ? S.build : S.setup) + '</button>' +
         '<svg class="node-chev w-3.5 h-3.5 text-zinc-400 transition-transform duration-200 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>' +
         '</div></div>' +
         '<div class="node-panel" id="panel-' + esc(node.id) + '"></div>'
@@ -533,7 +534,7 @@
     const effectiveShared = sharedVersion
       || sharedSel?.value
       || '';
-    const sharedLabel = 'Default (' + (effectiveShared || '…') + ')';
+    const sharedLabel = t('defaultVersion', { v: effectiveShared || '…' });
     return '<option value="">' + esc(sharedLabel) + '</option>' +
       versions.map(v =>
         '<option value="' + esc(v) + '"' + (currentOverride === v ? ' selected' : '') + '>' + esc(v) + '</option>'
@@ -541,7 +542,7 @@
   }
 
   function versionRow(id, currentOverride, sharedVersion) {
-    return '<div class="form-row"><label class="form-label" for="np-ver-' + id + '">OpenWrt version</label>' +
+    return '<div class="form-row"><label class="form-label" for="np-ver-' + id + '">' + S.openWrtVersion + '</label>' +
       '<select class="input-base" id="np-ver-' + id + '" style="max-width:200px">' +
       versionOpts(currentOverride, sharedVersion) +
       '</select></div>';
@@ -564,70 +565,70 @@
     const hasWifi = /\bwpad-?|\bhostapd|\bmac80211/.test(allPkgs.join(' '));
     const hasCt = allPkgs.some(p => /^ath10k-firmware-|^kmod-ath10k-ct/.test(p));
     const nonCtRow = hasCt
-      ? '<div class="form-row"><span class="form-label">Non-CT ath10k</span>' +
+      ? '<div class="form-row"><span class="form-label">' + S.nonCtAth10k + '</span>' +
         '<label class="toggle-label"><span class="toggle-wrap">' +
         '<input type="checkbox" class="toggle-input" id="np-nonct-' + id + '"' + (node.overrides.NON_CT_ATH10K === '1' ? ' checked' : '') + '>' +
         '<span class="toggle-track"></span><span class="toggle-thumb"></span></span>' +
-        '<span class="toggle-text text-xs">Use non-CT ath10k firmware & driver</span></label></div>'
+        '<span class="toggle-text text-xs">' + S.useNonCtAth10k + '</span></label></div>'
       : '';
 
     let fields;
     const deviceRow =
       '<div class="form-row" style="margin-top:0">' +
-      '<label class="form-label">Device</label>' +
+      '<label class="form-label">' + S.device + '</label>' +
       '<div><div class="flex gap-2 items-center">' +
-      '<input class="input-base" id="np-device-' + id + '" value="' + devTitle + '" placeholder="No device selected" readonly style="cursor:pointer;max-width:280px">' +
-      '<button type="button" class="btn text-xs flex-shrink-0" data-pickdevice="' + id + '">Change</button>' +
+      '<input class="input-base" id="np-device-' + id + '" value="' + devTitle + '" placeholder="' + S.noDeviceSelected + '" readonly style="cursor:pointer;max-width:280px">' +
+      '<button type="button" class="btn text-xs flex-shrink-0" data-pickdevice="' + id + '">' + S.change + '</button>' +
       '</div>' +
-      '<p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1">Required: ≥16MB flash, ≥128MB RAM</p>' +
+      '<p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1">' + S.deviceRequirement + '</p>' +
       '</div></div>';
 
     if (!isAp) {
       fields = deviceRow +
         versionRow(id, verOverride, cfg.shared_version) +
 
-        '<div class="form-row"><label class="form-label" for="np-name-' + id + '">Node name</label>' +
+        '<div class="form-row"><label class="form-label" for="np-name-' + id + '">' + S.nodeName + '</label>' +
         '<input class="input-base" id="np-name-' + id + '" value="' + esc(node.name) + '" style="max-width:220px"></div>' +
 
-        (hasWifi ? '<div class="form-row"><span class="form-label">Wireless mesh</span>' +
+        (hasWifi ? '<div class="form-row"><span class="form-label">' + S.wirelessMesh + '</span>' +
         '<label class="toggle-label"><span class="toggle-wrap">' +
         '<input type="checkbox" class="toggle-input" id="np-mesh-' + id + '"' + (meshChecked ? ' checked' : '') + '>' +
         '<span class="toggle-track"></span><span class="toggle-thumb"></span></span>' +
-        '<span class="toggle-text text-xs">Enable 802.11s mesh backhaul</span></label></div>' : '') +
+        '<span class="toggle-text text-xs">' + S.enableMeshBackhaul + '</span></label></div>' : '') +
         nonCtRow;
     } else {
       fields = deviceRow +
         versionRow(id, verOverride, cfg.shared_version) +
 
-        '<div class="form-row"><label class="form-label" for="np-name-' + id + '">Node name</label>' +
+        '<div class="form-row"><label class="form-label" for="np-name-' + id + '">' + S.nodeName + '</label>' +
         '<input class="input-base" id="np-name-' + id + '" value="' + esc(node.name) + '" style="max-width:220px"></div>' +
 
-        '<div class="form-row"><label class="form-label" for="np-apidx-' + id + '">AP index</label>' +
+        '<div class="form-row"><label class="form-label" for="np-apidx-' + id + '">' + S.apIndex + '</label>' +
         '<div><input type="number" class="input-base" id="np-apidx-' + id + '" min="2" max="19" value="' + esc(node.overrides.AP_INDEX || '2') + '" style="max-width:90px">' +
         '</div></div>' +
 
-        (hasWifi ? '<div class="form-row"><span class="form-label">Wireless mesh</span>' +
+        (hasWifi ? '<div class="form-row"><span class="form-label">' + S.wirelessMesh + '</span>' +
         '<label class="toggle-label"><span class="toggle-wrap">' +
         '<input type="checkbox" class="toggle-input" id="np-mesh-' + id + '"' + (meshChecked ? ' checked' : '') + '>' +
         '<span class="toggle-track"></span><span class="toggle-thumb"></span></span>' +
-        '<span class="toggle-text text-xs">Enable 802.11s mesh backhaul</span></label></div>' : '') +
+        '<span class="toggle-text text-xs">' + S.enableMeshBackhaul + '</span></label></div>' : '') +
         nonCtRow;
     }
 
     return (
       '<div class="px-4 py-4 bg-zinc-50 dark:bg-zinc-900/50 border-t border-zinc-200 dark:border-zinc-800">' +
       '<p class="text-xs text-zinc-500 dark:text-zinc-400 mb-4">' +
-      'These are device-specific settings. All other settings come from network config.' +
+      S.deviceSpecificNote +
       '</p>' + fields +
       '<div class="flex gap-2 mt-4 flex-wrap items-center node-actions">' +
       '<button type="button" class="btn btn-primary text-xs" data-savenode="' + id + '"' +
       (hasDevice ? '' : ' disabled style="opacity:0.4;cursor:not-allowed"') + '>' +
-      (hasDevice ? 'Build firmware' : 'Select a device first') + '</button>' +
+      (hasDevice ? S.buildFirmware : S.selectDeviceFirst) + '</button>' +
       (hasDevice && node.last_build?.images?.length
         ? flashNoteHtml(node.last_build.images) +
           imageFilesHtml(node.last_build.images, node.last_build.bin_dir, node.last_build.asu_base)
         : '') +
-      (isAp ? '<button type="button" class="btn text-xs ml-auto text-red-500 hover:text-red-400 border-red-800/40 hover:border-red-600/60" data-deletenode="' + id + '">Delete node</button>' : '') +
+      (isAp ? '<button type="button" class="btn text-xs ml-auto text-red-500 hover:text-red-400 border-red-800/40 hover:border-red-600/60" data-deletenode="' + id + '">' + S.deleteNode + '</button>' : '') +
       '</div></div>'
     );
   }
@@ -653,7 +654,7 @@
     });
 
     panel.querySelector('[data-deletenode]')?.addEventListener('click', () => {
-      if (!confirm('Delete "' + node.name + '"? This cannot be undone.')) return;
+      if (!confirm(t('confirmDeleteNode', { name: node.name }))) return;
       net.nodes = net.nodes.filter(n => n.id !== node.id);
       net.updated_at = Date.now();
       saveNetworks();
@@ -692,10 +693,10 @@
       if (nameEl) nameEl.textContent = node.name;
       const subEl = row.querySelector('.text-xs.text-zinc-500');
       if (subEl) {
-        const devLabel = node.device_target.title || 'No device selected';
+        const devLabel = node.device_target.title || S.noDeviceSelected;
         const isAp = node.overrides.AP_MODE === '1';
-        const status = nodeLanIp(net, node) + (node.last_build ? ' · built ' + timeAgo(node.last_build.timestamp) : '');
-        subEl.textContent = devLabel + ' · ' + (isAp ? 'AP #' + (node.overrides.AP_INDEX || '2') : 'Router') + ' · ' + status;
+        const status = nodeLanIp(net, node) + (node.last_build ? ' · ' + t('builtAgo', { ago: timeAgo(node.last_build.timestamp) }) : '');
+        subEl.textContent = devLabel + ' · ' + (isAp ? t('apNum', { n: node.overrides.AP_INDEX || '2' }) : S.router) + ' · ' + status;
       }
     }
   }
@@ -707,9 +708,9 @@
     st.networkId = networkId;
 
     setHeaderSub(
-      BC_SEP + bcBtn('Networks', () => { renderList(); showView('list'); }) +
+      BC_SEP + bcBtn(S.networks, () => { renderList(); showView('list'); }) +
       BC_SEP + bcBtn(net.name, () => showDetail(networkId)) +
-      BC_SEP + 'Config'
+      BC_SEP + S.config
     );
     document.getElementById('config-title').textContent = net.name;
     const allBuilt = net.nodes.every(n => n.last_build);
@@ -996,9 +997,9 @@
       saveNetworks();
       document.getElementById('config-title').textContent = newName;
       setHeaderSub(
-        BC_SEP + bcBtn('Networks', () => { renderList(); showView('list'); }) +
+        BC_SEP + bcBtn(S.networks, () => { renderList(); showView('list'); }) +
         BC_SEP + bcBtn(newName, () => showDetail(net.id)) +
-        BC_SEP + 'Config'
+        BC_SEP + S.config
       );
     }
     edit.classList.add('hidden');
@@ -1027,7 +1028,7 @@
       net.updated_at = Date.now();
       saveNetworks();
       document.getElementById('detail-title-text').textContent = newName;
-      setHeaderSub(BC_SEP + bcBtn('Networks', () => { renderList(); showView('list'); }) + BC_SEP + esc(newName));
+      setHeaderSub(BC_SEP + bcBtn(S.networks, () => { renderList(); showView('list'); }) + BC_SEP + esc(newName));
     }
     edit.classList.add('hidden');
     display.classList.remove('hidden');
@@ -1073,46 +1074,46 @@
 
     const actEl = panel.querySelector('.node-actions');
     if (!actEl) return;
-    showPanelProgress(actEl, 2, 'Preparing…');
+    showPanelProgress(actEl, 2, S.preparing);
 
-    const t = node.device_target;
+    const tgt = node.device_target;
     const extraPkgs = (net.shared_config.additional_packages || '').split(/[\s,]+/).filter(Boolean);
     const rootPasswd = node.overrides.ROOT_PASSWD || net.shared_config.ROOT_PASSWD || '';
-    const effectiveVersion = node.overrides.version || t.version || net.shared_config.shared_version;
+    const effectiveVersion = node.overrides.version || tgt.version || net.shared_config.shared_version;
 
     const getVersionedTarget = async () => {
-      if (!node.overrides.version || node.overrides.version === t.version)
-        return { version_code: t.version_code, default_packages: t.default_packages, device_packages: t.device_packages };
-      const cacheKey = 'wrtnova_profiles_' + effectiveVersion + '_' + t.target;
+      if (!node.overrides.version || node.overrides.version === tgt.version)
+        return { version_code: tgt.version_code, default_packages: tgt.default_packages, device_packages: tgt.device_packages };
+      const cacheKey = 'wrtnova_profiles_' + effectiveVersion + '_' + tgt.target;
       let data = dpCacheGet(cacheKey);
       if (!data) {
-        const res = await fetch(dpUrl(effectiveVersion) + '/targets/' + t.target + '/profiles.json', { cache: 'no-cache' });
+        const res = await fetch(dpUrl(effectiveVersion) + '/targets/' + tgt.target + '/profiles.json', { cache: 'no-cache' });
         if (!res.ok) throw new Error('Failed to fetch profiles for ' + effectiveVersion);
         data = await res.json();
         dpCacheSet(cacheKey, data);
       }
-      const dev = (data.profiles || {})[t.profile] || {};
+      const dev = (data.profiles || {})[tgt.profile] || {};
       return {
         version_code: data.version_code || '',
-        default_packages: data.default_packages || t.default_packages,
-        device_packages: dev.device_packages || t.device_packages,
+        default_packages: data.default_packages || tgt.default_packages,
+        device_packages: dev.device_packages || tgt.device_packages,
       };
     };
 
     Promise.all([bcryptHash(rootPasswd), getVersionedTarget()])
       .then(async ([adguardHash, vt]) => {
       const payload = {
-        profile: t.profile, target: t.target,
+        profile: tgt.profile, target: tgt.target,
         version: effectiveVersion,
         version_code: vt.version_code,
         default_packages: vt.default_packages,
         device_packages: vt.device_packages,
-        device_title: t.title,
+        device_title: tgt.title,
         shared_config: ui.stripSensitive(net.shared_config),
         node_overrides: ui.stripSensitive(node.overrides),
         additional_packages: extraPkgs,
       };
-      showPanelProgress(actEl, 2, 'Submitting build…');
+      showPanelProgress(actEl, 2, S.submittingBuild);
       let resp;
       try {
         const r = await fetch('/api/build', {
@@ -1125,12 +1126,12 @@
           [resp.error, resp.detail, resp.message].filter(Boolean).join(' — ') || 'HTTP ' + r.status
         );
       } catch (e) {
-        showPanelError(panelActEl(node.id) || actEl, 'Build failed: ' + e.message, () => buildNode(net, node));
+        showPanelError(panelActEl(node.id) || actEl, t('buildFailed', { msg: e.message }), () => buildNode(net, node));
         return;
       }
 
       if (!resp.packages || !resp.asu_url) {
-        showPanelError(panelActEl(node.id) || actEl, 'Unexpected response from /api/build', () => buildNode(net, node));
+        showPanelError(panelActEl(node.id) || actEl, S.unexpectedApiBuild, () => buildNode(net, node));
         return;
       }
 
@@ -1138,21 +1139,21 @@
       try {
         wrtnovaBody = await ui.fetchWrtnovaBody();
       } catch (e) {
-        showPanelError(panelActEl(node.id) || actEl, 'Build failed: ' + e.message, () => buildNode(net, node));
+        showPanelError(panelActEl(node.id) || actEl, t('buildFailed', { msg: e.message }), () => buildNode(net, node));
         return;
       }
 
       const fullCfg = mergeNodeConfig(net.shared_config, node.overrides);
       if (adguardHash) fullCfg.ADGUARD_PASSWD = adguardHash;
       const asuBody = {
-        profile: t.profile, target: t.target,
+        profile: tgt.profile, target: tgt.target,
         version: effectiveVersion, version_code: vt.version_code,
         packages: resp.packages,
         defaults: ui.assembleScript(fullCfg, wrtnovaBody),
         diff_packages: true, client: 'wrtnova/1.0',
       };
 
-      showPanelProgress(panelActEl(node.id) || actEl, 8, 'Submitting to build server…');
+      showPanelProgress(panelActEl(node.id) || actEl, 8, S.submittingToServer);
       let asuR, asuData;
       try {
         asuR = await fetch(resp.asu_url, {
@@ -1165,7 +1166,7 @@
           asuData.detail || ('ASU HTTP ' + asuR.status)
         );
       } catch (e) {
-        showPanelError(panelActEl(node.id) || actEl, 'Build failed: ' + e.message, () => buildNode(net, node));
+        showPanelError(panelActEl(node.id) || actEl, t('buildFailed', { msg: e.message }), () => buildNode(net, node));
         return;
       }
 
@@ -1177,13 +1178,13 @@
       }
 
       if (!asuData.request_hash) {
-        showPanelError(panelActEl(node.id) || actEl, 'Unexpected response from build server', () => buildNode(net, node));
+        showPanelError(panelActEl(node.id) || actEl, S.unexpectedBuildServer, () => buildNode(net, node));
         return;
       }
       pollNodeBuild(net, node, panelActEl(node.id) || actEl, asuData.request_hash, asuBase);
     })
     .catch(err => showPanelError(panelActEl(node.id) || actEl,
-      'Build failed: ' + err.message, () => buildNode(net, node)));
+      t('buildFailed', { msg: err.message }), () => buildNode(net, node)));
   }
 
   function pollNodeBuild(net, node, actEl, hash, asuBase) {
@@ -1197,10 +1198,10 @@
         const data = await r.json();
         if (r.status === 202) {
           if (data.queue_position != null && data.queue_position > 0) {
-            showPanelProgress(panelActEl(node.id) || actEl, 8, 'In build queue (#' + data.queue_position + ')');
+            showPanelProgress(panelActEl(node.id) || actEl, 8, t('inBuildQueue', { n: data.queue_position }));
           } else {
             pct = Math.min(94, pct + (pct < 85 ? 8 : 2));
-            showPanelProgress(panelActEl(node.id) || actEl, pct, 'Building…');
+            showPanelProgress(panelActEl(node.id) || actEl, pct, S.building);
           }
           return;
         }
@@ -1208,16 +1209,16 @@
         nodeBuilds.delete(node.id);
         const el = panelActEl(node.id) || actEl;
         if (r.status === 200) {
-          showPanelProgress(el, 100, 'Build complete!');
+          showPanelProgress(el, 100, S.buildCompleteExcl);
           setTimeout(() => finishNodeBuild(net, node, panelActEl(node.id) || el, data, base), 1500);
         } else {
-          showPanelError(el, 'Build failed: ' + (data.detail || 'HTTP ' + r.status), () => buildNode(net, node));
+          showPanelError(el, t('buildFailed', { msg: data.detail || 'HTTP ' + r.status }), () => buildNode(net, node));
         }
       } catch (e) {
         if (tries > 200) {
           clearInterval(interval);
           nodeBuilds.delete(node.id);
-          showPanelError(panelActEl(node.id) || actEl, 'Polling failed: ' + e.message, () => buildNode(net, node));
+          showPanelError(panelActEl(node.id) || actEl, t('pollingFailed', { msg: e.message }), () => buildNode(net, node));
         }
       }
     }, 5000);
@@ -1240,13 +1241,13 @@
       const dot = row.querySelector('.dot');
       if (dot) dot.className = nodeDotClass(node) + ' flex-shrink-0';
       const bb = row.querySelector('[data-buildbtn]');
-      if (bb) { bb.className = 'btn text-xs py-0.5 px-2'; bb.textContent = 'Build'; }
+      if (bb) { bb.className = 'btn text-xs py-0.5 px-2'; bb.textContent = S.build; }
       const sub = row.querySelector('.text-xs.text-zinc-500');
       if (sub) {
         const isAp = node.overrides.AP_MODE === '1';
         sub.textContent = (node.device_target.title || '') + ' · ' +
-          (isAp ? 'AP #' + (node.overrides.AP_INDEX || '2') : 'Router') +
-          ' · built ' + timeAgo(node.last_build.timestamp);
+          (isAp ? t('apNum', { n: node.overrides.AP_INDEX || '2' }) : S.router) +
+          ' · ' + t('builtAgo', { ago: timeAgo(node.last_build.timestamp) });
       }
     }
     showPanelDone(actEl, firmwareUrl, images, data.bin_dir || '', base, () => buildNode(net, node));
@@ -1255,7 +1256,7 @@
 
   function buildAll(net) {
     const ready = net.nodes.filter(n => n.device_target.profile);
-    if (!ready.length) { alert('No nodes have a device selected yet.'); return; }
+    if (!ready.length) { alert(S.noDevicesSelected); return; }
 
     const progressEl = document.getElementById('build-all-progress');
     if (!progressEl) return;
@@ -1264,8 +1265,8 @@
     let done = 0;
     progressEl.innerHTML =
       '<div class="card p-4 mt-4">' +
-      '<p class="ba-title text-xs font-semibold mb-3 text-zinc-500 dark:text-zinc-400">Building ' +
-        ready.length + ' node' + (ready.length > 1 ? 's' : '') + '…</p>' +
+      '<p class="ba-title text-xs font-semibold mb-3 text-zinc-500 dark:text-zinc-400">' +
+        t(ready.length > 1 ? 'buildingNodesPlural' : 'buildingNodes', { n: ready.length }) + '</p>' +
       '<div class="space-y-3">' +
       ready.map(n =>
         '<div id="ba-row-' + esc(n.id) + '" class="flex items-center gap-3">' +
@@ -1288,7 +1289,7 @@
         done++;
         if (done === ready.length) {
           const title = progressEl.querySelector('.ba-title');
-          if (title) title.textContent = 'All ' + ready.length + ' nodes built';
+          if (title) title.textContent = t('allNodesBuilt', { n: ready.length });
         }
       });
     });
@@ -1302,11 +1303,11 @@
     const link = row.querySelector('.ba-link');
     if (errMsg) {
       if (bar) { bar.style.width = '100%'; bar.style.background = '#ef4444'; }
-      if (link) link.innerHTML = '<span class="text-xs text-red-500 dark:text-red-400" title="' + esc(errMsg) + '">Error</span>';
+      if (link) link.innerHTML = '<span class="text-xs text-red-500 dark:text-red-400" title="' + esc(errMsg) + '">' + S.error + '</span>';
     } else {
       if (bar) { bar.style.width = '100%'; bar.style.background = '#22c55e'; }
       if (link && firmwareUrl)
-        link.innerHTML = '<a href="' + esc(firmwareUrl) + '" target="_blank" class="text-xs text-blue-500 hover:underline">Download</a>';
+        link.innerHTML = '<a href="' + esc(firmwareUrl) + '" target="_blank" class="text-xs text-blue-500 hover:underline">' + S.download + '</a>';
     }
   }
 
@@ -1318,28 +1319,28 @@
   }
 
   async function startBuildAllNode(net, node, onComplete) {
-    const t = node.device_target;
+    const tgt = node.device_target;
     const extraPkgs = (net.shared_config.additional_packages || '').split(/[\s,]+/).filter(Boolean);
     const rootPasswd = node.overrides.ROOT_PASSWD || net.shared_config.ROOT_PASSWD || '';
     const adguardHash = await bcryptHash(rootPasswd);
 
-    const effectiveVersion = node.overrides.version || t.version || net.shared_config.shared_version;
-    let version_code = t.version_code;
-    let default_packages = t.default_packages;
-    let device_packages = t.device_packages;
-    if (node.overrides.version && node.overrides.version !== t.version) {
+    const effectiveVersion = node.overrides.version || tgt.version || net.shared_config.shared_version;
+    let version_code = tgt.version_code;
+    let default_packages = tgt.default_packages;
+    let device_packages = tgt.device_packages;
+    if (node.overrides.version && node.overrides.version !== tgt.version) {
       try {
-        const cacheKey = 'wrtnova_profiles_' + effectiveVersion + '_' + t.target;
+        const cacheKey = 'wrtnova_profiles_' + effectiveVersion + '_' + tgt.target;
         let data = dpCacheGet(cacheKey);
         if (!data) {
-          const res = await fetch(dpUrl(effectiveVersion) + '/targets/' + t.target + '/profiles.json', { cache: 'no-cache' });
+          const res = await fetch(dpUrl(effectiveVersion) + '/targets/' + tgt.target + '/profiles.json', { cache: 'no-cache' });
           if (!res.ok) throw new Error('Failed to fetch profiles for ' + effectiveVersion);
           data = await res.json();
           dpCacheSet(cacheKey, data);
         }
         version_code = data.version_code || '';
-        default_packages = data.default_packages || t.default_packages;
-        device_packages = (data.profiles?.[t.profile]?.device_packages) || t.device_packages;
+        default_packages = data.default_packages || tgt.default_packages;
+        device_packages = (data.profiles?.[tgt.profile]?.device_packages) || tgt.device_packages;
       } catch (e) {
         updateBuildAllRow(node.id, null, e.message);
         onComplete();
@@ -1348,12 +1349,12 @@
     }
 
     const payload = {
-      profile: t.profile, target: t.target,
+      profile: tgt.profile, target: tgt.target,
       version: effectiveVersion,
       version_code,
       default_packages,
       device_packages,
-      device_title: t.title,
+      device_title: tgt.title,
       shared_config: ui.stripSensitive(net.shared_config),
       node_overrides: ui.stripSensitive(node.overrides),
       additional_packages: extraPkgs,
@@ -1377,7 +1378,7 @@
     }
 
     if (!resp.packages || !resp.asu_url) {
-      updateBuildAllRow(node.id, null, 'Unexpected response from /api/build');
+      updateBuildAllRow(node.id, null, S.unexpectedApiBuild);
       onComplete();
       return;
     }
@@ -1386,7 +1387,7 @@
     try {
       wrtnovaBody = await ui.fetchWrtnovaBody();
     } catch (e) {
-      updateBuildAllRow(node.id, null, 'Build failed: ' + e.message);
+      updateBuildAllRow(node.id, null, t('buildFailed', { msg: e.message }));
       onComplete();
       return;
     }
@@ -1394,7 +1395,7 @@
     const fullCfg = mergeNodeConfig(net.shared_config, node.overrides);
     if (adguardHash) fullCfg.ADGUARD_PASSWD = adguardHash;
     const asuBody = {
-      profile: t.profile, target: t.target,
+      profile: tgt.profile, target: tgt.target,
       version: effectiveVersion, version_code,
       packages: resp.packages,
       defaults: ui.assembleScript(fullCfg, wrtnovaBody),
@@ -1413,7 +1414,7 @@
         asuData.detail || ('ASU HTTP ' + asuR.status)
       );
     } catch (e) {
-      updateBuildAllRow(node.id, null, 'Build failed: ' + e.message);
+      updateBuildAllRow(node.id, null, t('buildFailed', { msg: e.message }));
       onComplete();
       return;
     }
@@ -1427,7 +1428,7 @@
     }
 
     if (!asuData.request_hash) {
-      updateBuildAllRow(node.id, null, 'Unexpected response from build server');
+      updateBuildAllRow(node.id, null, S.unexpectedBuildServer);
       onComplete();
       return;
     }
@@ -1445,17 +1446,17 @@
         const data = await r.json();
         if (r.status === 202) {
           if (data.queue_position != null && data.queue_position > 0) {
-            updateBuildAllProgress(node.id, 8, 'Queue #' + data.queue_position);
+            updateBuildAllProgress(node.id, 8, t('queueNum', { n: data.queue_position }));
           } else {
             pct = Math.min(94, pct + (pct < 85 ? 8 : 2));
-            updateBuildAllProgress(node.id, pct, 'Building…');
+            updateBuildAllProgress(node.id, pct, S.building);
           }
           return;
         }
         clearInterval(interval);
         nodeBuilds.delete(node.id);
         if (r.status === 200) {
-          updateBuildAllProgress(node.id, 100, 'Done');
+          updateBuildAllProgress(node.id, 100, S.done);
           finishBuildAllNode(net, node, data, base);
         } else {
           updateBuildAllRow(node.id, null, data.detail || 'HTTP ' + r.status);
@@ -1465,7 +1466,7 @@
         if (tries > 200) {
           clearInterval(interval);
           nodeBuilds.delete(node.id);
-          updateBuildAllRow(node.id, null, 'Polling failed');
+          updateBuildAllRow(node.id, null, S.pollingFailedSimple);
           onComplete();
         }
       }
@@ -1588,7 +1589,7 @@
     if (!items.length) {
       const empty = document.createElement('div');
       empty.className = 'px-4 py-8 text-center text-zinc-400 text-sm';
-      empty.textContent = q ? 'No devices found.' : (DP.devicesByTitle ? 'No devices loaded.' : 'Loading…');
+      empty.textContent = q ? S.noDevicesFound : (DP.devicesByTitle ? S.noDevicesLoaded : S.loading);
       list.appendChild(empty);
       return;
     }
@@ -1611,7 +1612,7 @@
 
     search.value = '';
     document.getElementById('dp-list').innerHTML = '';
-    status.textContent = 'Loading…';
+    status.textContent = S.loading;
     status.classList.remove('hidden');
     modal.showModal();
     setTimeout(() => search?.focus(), 60);
@@ -1632,7 +1633,7 @@
       status.classList.add('hidden');
       dpRenderList('');
     } catch(e) {
-      status.textContent = 'Error loading devices: ' + e.message;
+      status.textContent = t('errorLoadingDevices', { msg: e.message });
     }
   }
 
@@ -1640,7 +1641,7 @@
     const profile = DP.devicesByTitle?.[title];
     if (!profile) return;
     const status = document.getElementById('dp-status');
-    status.textContent = 'Loading device details…';
+    status.textContent = S.loadingDeviceDetails;
     status.classList.remove('hidden');
     try {
       const cacheKey = 'wrtnova_profiles_' + DP.currentVersion + '_' + profile.target;
@@ -1680,17 +1681,17 @@
         const row = document.querySelector('[data-nodeid="' + node.id + '"]');
         if (row) {
           const dot = row.querySelector('.dot'); if (dot) dot.className = 'dot touched flex-shrink-0';
-          const bb = row.querySelector('[data-buildbtn]'); if (bb) { bb.className = 'btn text-xs py-0.5 px-2'; bb.textContent = 'Build'; }
+          const bb = row.querySelector('[data-buildbtn]'); if (bb) { bb.className = 'btn text-xs py-0.5 px-2'; bb.textContent = S.build; }
           const sub = row.querySelector('.text-xs.text-zinc-500');
           if (sub) {
             const isAp = node.overrides.AP_MODE === '1';
-            sub.textContent = title + ' · ' + (isAp ? 'AP #' + (node.overrides.AP_INDEX || '2') : 'Router') + ' · ' + nodeLanIp(net, node) + (node.last_build ? ' · built ' + timeAgo(node.last_build.timestamp) : '');
+            sub.textContent = title + ' · ' + (isAp ? t('apNum', { n: node.overrides.AP_INDEX || '2' }) : S.router) + ' · ' + nodeLanIp(net, node) + (node.last_build ? ' · ' + t('builtAgo', { ago: timeAgo(node.last_build.timestamp) }) : '');
           }
         }
       }
       document.getElementById('modal-device-picker').close();
     } catch(e) {
-      status.textContent = 'Error: ' + e.message;
+      status.textContent = t('error') + ': ' + e.message;
     }
   }
 
@@ -1701,7 +1702,7 @@
     if (!btn) return;
     btn.disabled = true;
     const origText = btn.textContent;
-    btn.textContent = 'Fetching WARP…';
+    btn.textContent = S.fetchingWarp;
     if (msg) { msg.textContent = ''; msg.classList.add('hidden'); }
     try {
       const r = await fetch('/api/warp/register', {
@@ -1712,8 +1713,8 @@
       try { data = await r.json(); } catch (_) { data = {}; }
       if (!r.ok) {
         const friendly = r.status === 429 || (data.message || '').includes('429')
-          ? 'Too many requests — wait a moment and try again'
-          : (data.message || data.error || 'WARP registration failed — try again shortly');
+          ? S.warpTooMany
+          : (data.message || data.error || S.warpFailed);
         throw new Error(friendly);
       }
       const f = (id, v) => { const el = document.getElementById(id); if (el) el.value = v || ''; };
@@ -1726,7 +1727,7 @@
       f('ALLOWED_IPS',     data.ALLOWED_IPS);
       if (data.warp_refresh_token) localStorage.setItem('wrtnova_warp_refresh', data.warp_refresh_token);
       document.getElementById('config-form')?.dispatchEvent(new Event('change', { bubbles: true }));
-      if (msg) { msg.textContent = '✓ Filled from Cloudflare WARP'; msg.style.color = '#16a34a'; msg.classList.remove('hidden'); }
+      if (msg) { msg.textContent = S.warpSuccess; msg.style.color = '#16a34a'; msg.classList.remove('hidden'); }
     } catch(e) {
       if (msg) { msg.textContent = e.message; msg.style.color = '#dc2626'; msg.classList.remove('hidden'); }
     }
