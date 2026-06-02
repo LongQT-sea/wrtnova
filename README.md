@@ -1,74 +1,67 @@
 # WrtNova
 
-Zero-touch provisioning and orchestration framework for OpenWrt.
+WrtNova is an OpenWrt provisioning script (`wrtnova.sh`) that runs as a UCI-defaults script on first boot. It configures your router completely — VLANs, WiFi, WireGuard VPN, ad-blocking, DDNS, port forwarding, and more — from a single generated config block.
 
-`wrtnova.sh` is a single POSIX shell script that runs once on a router's first
-boot and configures the whole device — VLAN segmentation, WiFi, WireGuard VPN,
-multi-WAN failover, network-wide ad blocking and encrypted DNS, Cloudflare DDNS,
-mesh, IPv6, and more — based on a small block of settings at the top of the file.
+## The easiest way: [wrtnova.com](https://wrtnova.com)
 
-It detects your hardware (DSA vs swconfig switches, radios) and
-picks the right configuration automatically, so you don't have to know the
-internals to get a sensibly-configured router.
+**[wrtnova.com](https://wrtnova.com)** is a browser-based builder that generates a custom-built OpenWrt firmware image with WrtNova pre-installed. Pick your device, fill in your config, download the image, flash it.
 
-## Just want a configured router?
+- **Single-node builder** — one device, one image.
+- **Fleet builder** — router + AP nodes sharing one config, built in parallel.
 
-**Use the builder → [wrtnova.com/builder](https://wrtnova.com/builder)**
+The builder runs entirely in your browser and submits to the official [OpenWrt ASU](https://sysupgrade.openwrt.org) service. No account required.
 
-The web builder fills in the settings for you, adds the required packages, and
-produces a ready-to-flash firmware image — no shell editing, no mistakes. This
-is the recommended path for almost everyone.
+## What the script configures
 
-## What this repo is for
+| Area | Details |
+|---|---|
+| **System** | Hostname, root password (bcrypt-hashed for AdGuard Home), SSH public keys, SSH password auth, timezone |
+| **VLANs** | LAN / Guest / IoT / WireGuard VPN networks — IDs, IP prefixes, subnets. Supports both DSA and legacy swconfig hardware. |
+| **WiFi** | SSIDs and passwords per network, country code, roaming thresholds, 802.11s mesh backhaul, channel overrides |
+| **WireGuard VPN** | Full client config — private key, peer public key, endpoint, allowed IPs, preshared key, client IPv4/IPv6. VPN gets its own network and SSID automatically. |
+| **DNS & ad-blocking** | AdGuard Home (≥32 MB flash / ≥230 MB RAM), dnsproxy (smaller devices), or plain dnsmasq. Optional DoT/DoQ blocking. |
+| **WAN** | DHCP, PPPoE, static. Tagged WAN VLAN (802.1Q), secondary WAN (WAN-B), MAC address spoofing. |
+| **Failover** | USB tethering (Android/iPhone, usb0), MBIM cellular modem |
+| **Port forwarding** | Static DHCPv4 leases + NAT port forwards |
+| **IPv6 exposure** | Static host IDs (IPv6 tokens), firewall forward rules, Cloudflare DDNS entries |
+| **DDNS** | Cloudflare API — entries for IPv6-exposed hosts derived from the exposure table |
+| **Packages** | Resolved and merged at build time; additional packages appended or removed with `-` prefix |
+| **AP mode** | Disables DHCP; device acts as managed switch + wireless AP forwarding all traffic to the main router |
 
-This repository publishes the configuration script itself, so you can:
+## How it works
 
-- **Read exactly what will run on your device** before you flash it.
-- **Report bugs** via [Issues](https://github.com/LongQT-sea/wrtnova/issues).
-- Build on it directly if you're an advanced user (see below).
+`wrtnova.sh` is structured in two parts:
 
-## Advanced / manual use
+1. **Config block** — a shell variable block generated per build (hostname, passwords, VLAN IDs, WiFi credentials, WireGuard keys, etc.).
+2. **Script body** — the provisioning logic that reads the config block and applies it via UCI commands, package installation, and file writes.
 
-If you know your way around OpenWrt, you can use the script without the [builder](https://wrtnova.com/builder):
+When embedded into a firmware image as a UCI-defaults script, OpenWrt executes it on the very first boot and configures the entire system.
 
-1. Edit the configuration variables at the top of `wrtnova.sh` (hostname,
-   passwords, VLANs, WiFi, etc.).
-2. Paste it into the **firmware selector** as a custom uci-defaults / first-boot
-   script, add the [required packages](#required-packages), build, and flash.
-3. On first boot the script applies everything and removes itself.
+## Using wrtnova.sh directly
 
-The router LAN IP is derived as `NET_PREFIX.VLAN.1` (e.g. `192.168.1.1`, or
-`.2` in AP mode).
+If you want to generate the config block yourself instead of using wrtnova.com, the config section is clearly delimited at the top of `wrtnova.sh`:
 
-> [!WARNING]
-> The defaults ship with a default WiFi password (`12345678`) and a default
-> AdGuard Home admin password. **Change these — along with the root password —
-> on first login.** Do not run a router on the shipped defaults.
+```sh
+# ===================
+# End config section
+# ===================
+```
 
-## Required packages
+Everything above that marker is the config block — edit those variables for your deployment. Everything below is the script body and should not be modified unless you are extending WrtNova itself.
 
-The script expects these to be present in the image:
+To embed the script into a firmware image manually, use the ASU API's `defaults` field or place the script in `/etc/uci-defaults/` of a custom image.
 
-| Purpose      | Packages |
-|--------------|----------|
-| Essential    | `luci-app-ddns ddns-scripts-cloudflare curl ip-full adguardhome -dnsproxy` |
-| Multi-WAN    | `luci-app-mwan3` |
-| Full WiFi    | `-wpad-basic-mbedtls wpad-mbedtls luci-app-usteer luci-proto-batman-adv` |
-| WireGuard    | `luci-proto-wireguard` |
-| MBIM modem   | `luci-proto-modemmanager kmod-usb-net-cdc-mbim` |
-| Tethering    | `kmod-usb-net-rndis kmod-usb-net-cdc-ncm kmod-usb-net-ipheth` |
-| Optional     | `zram-swap luci-ssl luci-app-commands ip-bridge umdns` |
+## Flash instructions
 
-The [builder](https://wrtnova.com/builder) selects these automatically.
-
-## Contributing
-
-Bug reports and feature suggestions are welcome — please open an
-[Issue](https://github.com/LongQT-sea/wrtnova/issues). When reporting a bug,
-include your router model, OpenWrt version, and the relevant part of your
-configuration.
+1. Build your firmware image (via [wrtnova.com](https://wrtnova.com) or manually with firmware-selector).
+2. Download the **sysupgrade** image.
+3. In OpenWrt: **System → Backup / Flash firmware → Flash image**.
+4. **Uncheck "Keep settings and retain the current configuration".**
+5. Flash and wait. The router configures itself on first boot.
 
 ## License
+
+MIT — Copyright 2024–2026 Tieu Long. See [LICENSE](LICENSE).
 
 [MIT](LICENSE) © 2024–2026 Tieu Long
 
