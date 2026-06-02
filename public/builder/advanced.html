@@ -5,10 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="WrtNova Advanced Builder — direct config editor and custom ASU endpoint.">
   <title>WrtNova Advanced Builder</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <script>
     (function(){
       var s=localStorage.getItem('theme');
-      if(s==='light'||(!s&&!window.matchMedia('(prefers-color-scheme: dark)').matches)){
+      if(s==='light'){
         document.documentElement.classList.remove('dark');
       }
     })();
@@ -146,8 +147,6 @@
 
   </main>
 
-  <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.55.1/min/vs/loader.js"></script>
-  <script>require.config({ paths: { vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@0.55.1/min/vs' } });</script>
   <script defer src="/js/theme.js"></script>
   <script defer src="/js/ui.js"></script>
   <script defer src="/js/advanced.js"></script>

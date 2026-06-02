@@ -9,7 +9,7 @@
   <script>
     (function(){
       var s=localStorage.getItem('theme');
-      if(s==='light'||(!s&&!window.matchMedia('(prefers-color-scheme: dark)').matches)){
+      if(s==='light'){
         document.documentElement.classList.remove('dark');
       }
     })();
@@ -782,7 +782,7 @@
         <div class="group card card-anim" id="card-dns" data-section="dns">
           <div class="card-header">
             <span class="dot" aria-label="Not started"></span>
-            <h2 class="flex-1 text-sm font-semibold">DNS &amp; adblock</h2>
+            <h2 class="flex-1 text-sm font-semibold">Encrypted DNS &amp; ad blocking <span class="chip ml-1">router node only</span></h2>
             <svg class="w-4 h-4 text-zinc-400 card-chev transition-transform duration-200 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
           </div>
           <div class="card-body-wrap">

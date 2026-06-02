@@ -25,7 +25,24 @@
     return res.text();
   }
 
-  function initMonacoEditor(template) {
+  const MONACO_CDN = 'https://cdn.jsdelivr.net/npm/monaco-editor@0.55.1/min/vs';
+
+  function loadMonaco() {
+    if (window.require) return Promise.resolve();
+    return new Promise(function (resolve, reject) {
+      var s = document.createElement('script');
+      s.src = MONACO_CDN + '/loader.js';
+      s.onload = function () {
+        require.config({ paths: { vs: MONACO_CDN } });
+        resolve();
+      };
+      s.onerror = reject;
+      document.head.appendChild(s);
+    });
+  }
+
+  async function initMonacoEditor(template) {
+    await loadMonaco();
     require(['vs/editor/editor.main'], function () {
       var isDark = document.documentElement.classList.contains('dark');
       editor = monaco.editor.create(document.getElementById('editor-container'), {

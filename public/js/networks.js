@@ -145,9 +145,11 @@
     };
   }
 
+  const AP_ROOM_NAMES = ['Living Room', 'Kitchen', 'Bedroom', 'Office', 'Garage', 'Dining Room'];
+
   function defaultApNode(idx) {
     return {
-      id: uid(), name: 'AP-' + idx,
+      id: uid(), name: AP_ROOM_NAMES[idx - 2] ?? 'AP-' + idx,
       device_target: emptyTarget(),
       overrides: { AP_MODE: '1', AP_INDEX: String(idx), WIRELESS_MESH: '' },
       last_build: null,
@@ -231,9 +233,11 @@
   }
 
   function nodeLanIp(net, node) {
-    const prefix = net.shared_config.BASE_NET_PREFIX || '192.168';
-    const last = node.overrides.AP_MODE === '1' ? (node.overrides.AP_INDEX || '2') : '1';
-    return prefix + '.1.' + last;
+    const cfg    = net.shared_config;
+    const prefix = cfg.LAN_BASE_PREFIX || cfg.BASE_NET_PREFIX || '192.168';
+    const vlan   = cfg.LAN_VLAN_ID || '1';
+    const last   = node.overrides.AP_MODE === '1' ? (node.overrides.AP_INDEX || '2') : '1';
+    return prefix + '.' + vlan + '.' + last;
   }
 
   function nodeDotClass(node) {
@@ -721,9 +725,12 @@
     form.addEventListener('blur', autoSave, { capture: true, signal });
 
     document.getElementById('btn-save-config').onclick = () => {
+      clearTimeout(saveTimer);
+      net.shared_config = readConfig();
+      net.updated_at = Date.now();
+      saveNetworks();
       showDetail(networkId);
-      const net = getNet(networkId);
-      const router = net && net.nodes.find(n => n.overrides.AP_MODE !== '1');
+      const router = net.nodes.find(n => n.overrides.AP_MODE !== '1');
       if (router) setTimeout(() => togglePanel(net, router.id, true), 80);
     };
 
@@ -751,9 +758,11 @@
     sv('ROOT_PASSWD', cfg.ROOT_PASSWD);
     sv('SSH_PUBLIC_KEY', cfg.SSH_PUBLIC_KEY);
     sr('SSH_PASSWD_AUTH', cfg.SSH_PASSWD_AUTH || '');
-    // Timezone — use the combo if tzdata loaded, otherwise set directly
-    const tzInp = document.getElementById('timezone');
-    if (tzInp) tzInp.value = cfg.ZONE_NAME || '';
+    // Timezone — mirrors history.js restore: update state + input via setTimezone
+    if (cfg.ZONE_NAME && ui.setTimezone && !ui.setTimezone(cfg.ZONE_NAME)) {
+      const tzInp = document.getElementById('timezone');
+      if (tzInp) tzInp.value = cfg.ZONE_NAME;
+    }
     sv('BASE_NET_PREFIX', cfg.BASE_NET_PREFIX);
     sv('DEFAULT_SUBNET', cfg.DEFAULT_SUBNET);
     sv('LAN_BASE_PREFIX', cfg.LAN_BASE_PREFIX); sv('LAN_VLAN_ID', cfg.LAN_VLAN_ID); sv('LAN_SUBNET', cfg.LAN_SUBNET);
@@ -816,7 +825,7 @@
       shared_version: gv('shared-version'),
       HOST_NAME: gv('HOST_NAME'), ROOT_PASSWD: gv('ROOT_PASSWD'),
       SSH_PUBLIC_KEY: gv('SSH_PUBLIC_KEY'), SSH_PASSWD_AUTH: gr('SSH_PASSWD_AUTH'),
-      ZONE_NAME: tzInp ? tzInp.value : '', TIME_ZONE: document.getElementById('tz-help')?.dataset.tz || '',
+      ...(ui.collectTimezone ? ui.collectTimezone() : { ZONE_NAME: tzInp ? tzInp.value : '', TIME_ZONE: '' }),
       BASE_NET_PREFIX: gv('BASE_NET_PREFIX'), DEFAULT_SUBNET: gv('DEFAULT_SUBNET'),
       LAN_BASE_PREFIX: gv('LAN_BASE_PREFIX'), LAN_VLAN_ID: gv('LAN_VLAN_ID'), LAN_SUBNET: gv('LAN_SUBNET'),
       GUEST_ENABLE: gv('GUEST_ENABLE'),
@@ -1252,6 +1261,9 @@
         '</div>'
       ).join('') +
       '</div></div>';
+
+    // Pre-warm the wrtnova.sh cache so all nodes share one fetch instead of N.
+    ui.fetchWrtnovaBody().catch(() => {});
 
     ready.forEach(node => {
       if (nodeBuilds.has(node.id)) return;

@@ -290,6 +290,7 @@ const wanTagged = ui.$('#WAN_IS_TAGGED') && ui.$('#WAN_IS_TAGGED').checked;
   const _BUILD_ONLY_KEYS = new Set(['DNS_MODE', 'NON_CT_ATH10K']);
   const _SCRIPT_MARKER = '# ===================\n# End config section\n# ===================\n';
   let _wrtnovaBodyCache = null;
+  let _wrtnovaBodyPromise = null;  // deduplicate concurrent first fetches
 
   function _shQuote(s) {
     if (!s.includes("'")) return "'" + s + "'";
@@ -309,15 +310,23 @@ const wanTagged = ui.$('#WAN_IS_TAGGED') && ui.$('#WAN_IS_TAGGED').checked;
     return lines.join('\n') + '\n';
   };
 
-  ui.fetchWrtnovaBody = async function () {
-    if (_wrtnovaBodyCache !== null) return _wrtnovaBodyCache;
-    const r = await fetch('/wrtnova.sh', { cache: 'force-cache' });
-    if (!r.ok) throw new Error('Failed to fetch /wrtnova.sh');
-    const text = await r.text();
-    const idx = text.indexOf(_SCRIPT_MARKER);
-    if (idx < 0) throw new Error('wrtnova.sh marker not found');
-    _wrtnovaBodyCache = text.slice(idx + _SCRIPT_MARKER.length);
-    return _wrtnovaBodyCache;
+  ui.fetchWrtnovaBody = function () {
+    if (_wrtnovaBodyCache !== null) return Promise.resolve(_wrtnovaBodyCache);
+    if (!_wrtnovaBodyPromise) {
+      _wrtnovaBodyPromise = fetch('/wrtnova.sh', { cache: 'force-cache' })
+        .then(r => {
+          if (!r.ok) throw new Error('Failed to fetch /wrtnova.sh');
+          return r.text();
+        })
+        .then(text => {
+          const idx = text.indexOf(_SCRIPT_MARKER);
+          if (idx < 0) throw new Error('wrtnova.sh marker not found');
+          _wrtnovaBodyCache = text.slice(idx + _SCRIPT_MARKER.length);
+          return _wrtnovaBodyCache;
+        })
+        .catch(err => { _wrtnovaBodyPromise = null; throw err; });
+    }
+    return _wrtnovaBodyPromise;
   };
 
   ui.assembleScript = function (cfg, wrtnovaBody) {
