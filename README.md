@@ -53,7 +53,7 @@ To embed the script into a firmware image manually, use the ASU API's `defaults`
 
 ## Flash instructions
 
-1. Build your firmware image (via [wrtnova.com](https://wrtnova.com) or manually with firmware-selector).
+1. Build your firmware image (via [wrtnova.com](https://wrtnova.com) or manually with [firmware-selector](https://firmware-selector.openwrt.org/)).
 2. Download the **sysupgrade** image.
 3. In OpenWrt: **System → Backup / Flash firmware → Flash image**.
 4. **Uncheck "Keep settings and retain the current configuration".**
