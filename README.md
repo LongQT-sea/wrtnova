@@ -61,7 +61,5 @@ To embed the script into a firmware image manually, use the ASU API's `defaults`
 
 ## License
 
-MIT — Copyright 2024–2026 Tieu Long. See [LICENSE](LICENSE).
-
 [MIT](LICENSE) © 2024–2026 Tieu Long
 
