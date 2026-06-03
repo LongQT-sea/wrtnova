@@ -200,9 +200,9 @@
 
       const wgEnabled = ui.$('#WG_ENABLE').checked;
       // WiFi WG SSID row: visible whenever WG_ENABLE is on, regardless of mode.
-      // (AP mode still needs the SSID — it trunks WG-tagged traffic to the router.)
+      // (AP mode still needs the SSID - it trunks WG-tagged traffic to the router.)
       ui.$$('.wifi-wg').forEach(el => el.classList.toggle('hidden', !wgEnabled));
-      // WireGuard client card: router-only — AP trunks back, no client config needed.
+      // WireGuard client card: router-only - AP trunks back, no client config needed.
       const wgRouter = wgEnabled && !ap;
       const wgCard = ui.$('#card-wg');
       ui.$$('.wg-only').forEach(el => el.classList.toggle('hidden', !wgRouter));
@@ -268,10 +268,10 @@ const wanTagged = ui.$('#WAN_IS_TAGGED') && ui.$('#WAN_IS_TAGGED').checked;
     });
   };
 
-  // ── Script assembly (shared between /builder and /networks) ──────────────────
+  // -- Script assembly (shared between /builder and /networks) ------------------
 
   // Fields the browser strips before sending config to /api/build.
-  // The Worker only needs feature flags for package resolution — never passwords.
+  // The Worker only needs feature flags for package resolution - never passwords.
   ui.SENSITIVE_FIELDS = new Set([
     'ROOT_PASSWD', 'PPPOE_PASSWD',
     'LAN_WIFI_PASSWD', 'GUEST_WIFI_PASSWD', 'IOT_WIFI_PASSWD', 'LAN_WG_WIFI_PASSWD',

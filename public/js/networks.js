@@ -1,7 +1,7 @@
 (function () {
   'use strict';
 
-  // ── Constants ────────────────────────────────────────────────────
+  // -- Constants ----------------------------------------------------
   const STORE_KEY = 'wrtnova_networks';
   const DL = 'https://downloads.openwrt.org';
   const CACHE_TTL = 6 * 60 * 60 * 1000;
@@ -16,7 +16,7 @@
   const ui = window.WrtNova = window.WrtNova || {};
   const S = ui.S, t = ui.t;
 
-  // ── Node config merge (mirrors Worker's mergeNodeConfig in functions/api/build.js) ──
+  // -- Node config merge (mirrors Worker's mergeNodeConfig in functions/api/build.js) --
   function mergeNodeConfig(sharedConfig, nodeOverrides) {
     const c = Object.assign({}, sharedConfig, nodeOverrides);
     const isAp    = c.AP_MODE       === '1';
@@ -75,7 +75,7 @@
     };
   }
 
-  // ── Storage ──────────────────────────────────────────────────────
+  // -- Storage ------------------------------------------------------
   function loadNetworks() {
     try { return JSON.parse(localStorage.getItem(STORE_KEY) || '[]'); }
     catch (e) { return []; }
@@ -95,14 +95,14 @@
     } catch (_) {}
   }
 
-  // ── App state ────────────────────────────────────────────────────
+  // -- App state ----------------------------------------------------
   const st = {
     networks: loadNetworks(),
     activeNodeId: null,
     networkId: null,
   };
 
-  // ── Data defaults — field names match the builder's form exactly ─
+  // -- Data defaults - field names match the builder's form exactly -
   function defaultConfig() {
     return {
       shared_version: '',
@@ -162,7 +162,7 @@
              default_packages: [], device_packages: [] };
   }
 
-  // ── Utilities ────────────────────────────────────────────────────
+  // -- Utilities ----------------------------------------------------
   function uid() { return Math.random().toString(36).slice(2, 10); }
 
   function esc(s) {
@@ -354,7 +354,7 @@
     actEl.querySelector('#' + id)?.addEventListener('click', onDone);
   }
 
-  // ── View routing ─────────────────────────────────────────────────
+  // -- View routing -------------------------------------------------
   function showView(name) {
     document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
     const el = document.getElementById('view-' + name);
@@ -362,7 +362,7 @@
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  // ── Breadcrumb helpers ────────────────────────────────────────────
+  // -- Breadcrumb helpers --------------------------------------------
   const BC_SEP = '<span class="mx-1 opacity-50">/</span>';
   function bcBtn(label, onClick) {
     const id = 'bc-' + uid();
@@ -377,7 +377,7 @@
     if (el) el.innerHTML = ' ' + html;
   }
 
-  // ── List view ─────────────────────────────────────────────────────
+  // -- List view -----------------------------------------------------
   function renderList() {
     setHeaderSub(BC_SEP + S.networks);
     const container = document.getElementById('networks-list');
@@ -425,7 +425,7 @@
     });
   }
 
-  // ── Detail view ──────────────────────────────────────────────────
+  // -- Detail view --------------------------------------------------
   function showDetail(networkId) {
     st.networkId = networkId;
     st.activeNodeId = null;
@@ -653,12 +653,30 @@
       buildNode(net, node);
     });
 
+    if (node.overrides.AP_MODE === '1') {
+      const idxInp = panel.querySelector('#np-apidx-' + node.id);
+      if (idxInp) {
+        idxInp.addEventListener('change', () => {
+          let val = Math.max(2, parseInt(idxInp.value) || 2);
+          const used = net.nodes
+            .filter(n => n.id !== node.id && n.overrides.AP_MODE === '1')
+            .map(n => parseInt(n.overrides.AP_INDEX) || 2);
+          while (used.includes(val)) val++;
+          idxInp.value = String(val);
+        });
+      }
+    }
+
     panel.querySelector('[data-deletenode]')?.addEventListener('click', () => {
-      if (!confirm(t('confirmDeleteNode', { name: node.name }))) return;
-      net.nodes = net.nodes.filter(n => n.id !== node.id);
-      net.updated_at = Date.now();
-      saveNetworks();
-      renderNodeList(net);
+      document.getElementById('modal-delete-node-name').textContent = node.name;
+      document.getElementById('btn-confirm-delete-node').onclick = () => {
+        net.nodes = net.nodes.filter(n => n.id !== node.id);
+        net.updated_at = Date.now();
+        saveNetworks();
+        document.getElementById('modal-delete-node').close();
+        renderNodeList(net);
+      };
+      document.getElementById('modal-delete-node').showModal();
     });
 
   }
@@ -701,7 +719,7 @@
     }
   }
 
-  // ── Config form view ──────────────────────────────────────────────
+  // -- Config form view ----------------------------------------------
   function showConfig(networkId, autoRename, isNew) {
     const net = getNet(networkId);
     if (!net) return;
@@ -776,7 +794,7 @@
     sv('ROOT_PASSWD', cfg.ROOT_PASSWD);
     sv('SSH_PUBLIC_KEY', cfg.SSH_PUBLIC_KEY);
     sr('SSH_PASSWD_AUTH', cfg.SSH_PASSWD_AUTH || '');
-    // Timezone — mirrors history.js restore: update state + input via setTimezone
+    // Timezone - mirrors history.js restore: update state + input via setTimezone
     if (cfg.ZONE_NAME && ui.setTimezone && !ui.setTimezone(cfg.ZONE_NAME)) {
       const tzInp = document.getElementById('timezone');
       if (tzInp) tzInp.value = cfg.ZONE_NAME;
@@ -824,7 +842,7 @@
 
     // Let ui.js refresh conditional visibility
     document.body.dispatchEvent(new Event('change', { bubbles: true }));
-    // Sync hostname → SSID placeholders
+    // Sync hostname -> SSID placeholders
     if (ui.$ && ui.$('#HOST_NAME')) syncSsidPlaceholders();
   }
 
@@ -895,7 +913,7 @@
     });
   }
 
-  // ── Dynamic tables (load with initial values; save via ui.serializeRows) ─
+  // -- Dynamic tables (load with initial values; save via ui.serializeRows) -
   function loadTable(tableId, listStr) {
     const tbody = document.querySelector('#' + tableId + ' tbody');
     if (!tbody) return;
@@ -936,7 +954,7 @@
     return lines.length ? '\n' + lines.join('\n') + '\n' : '';
   }
 
-  // ── New network ───────────────────────────────────────────────────
+  // -- New network ---------------------------------------------------
   const NAME_SUGGESTIONS = ["Office Network", "Friend's House", "Lab Network", "Cabin", "Parent's Home", "Vacation House"];
 
   function showNewNetwork() {
@@ -961,7 +979,7 @@
     showConfig(net.id, autoRename, true);
   }
 
-  // ── Rename (inline in config view) ───────────────────────────────
+  // -- Rename (inline in config view) -------------------------------
   function enterRenameMode(net) {
     const display = document.getElementById('config-name-display');
     const edit = document.getElementById('config-name-edit');
@@ -1060,7 +1078,7 @@
     document.getElementById('modal-delete').showModal();
   }
 
-  // ── Build ─────────────────────────────────────────────────────────
+  // -- Build ---------------------------------------------------------
   function buildNode(net, node) {
     if (!node.device_target.profile) return;
     if (nodeBuilds.has(node.id)) return;
@@ -1256,7 +1274,19 @@
 
   function buildAll(net) {
     const ready = net.nodes.filter(n => n.device_target.profile);
-    if (!ready.length) { alert(S.noDevicesSelected); return; }
+    if (!ready.length) {
+      const progressEl = document.getElementById('build-all-progress');
+      if (progressEl) {
+        progressEl.classList.remove('hidden');
+        progressEl.innerHTML =
+          '<div class="card p-3 mt-4 flex items-center gap-2 text-sm text-amber-600 dark:text-amber-400 border-amber-300/40 dark:border-amber-700/40">' +
+          '<svg class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>' +
+          '<span>' + S.noDevicesSelected + '</span>' +
+          '</div>';
+        setTimeout(() => { progressEl.classList.add('hidden'); progressEl.innerHTML = ''; }, 3000);
+      }
+      return;
+    }
 
     const progressEl = document.getElementById('build-all-progress');
     if (!progressEl) return;
@@ -1270,12 +1300,12 @@
       '<div class="space-y-3">' +
       ready.map(n =>
         '<div id="ba-row-' + esc(n.id) + '" class="flex items-center gap-3">' +
-        '<span class="text-xs font-medium w-28 truncate flex-shrink-0">' + esc(n.name) + '</span>' +
-        '<div class="flex-1 min-w-0">' +
-        '<div class="h-1.5 bg-zinc-200 dark:bg-zinc-700 rounded overflow-hidden">' +
+        '<span class="text-xs font-medium w-28 truncate flex-shrink-0 leading-none">' + esc(n.name) + '</span>' +
+        '<div class="flex-1 min-w-0 flex items-center">' +
+        '<div class="w-full h-1.5 bg-zinc-200 dark:bg-zinc-700 rounded overflow-hidden">' +
         '<div class="ba-bar h-full bg-blue-500 transition-all duration-500" style="width:2%"></div></div>' +
         '</div>' +
-        '<div class="ba-link flex-shrink-0 w-20 text-right"></div>' +
+        '<div class="ba-link flex-shrink-0 w-20 text-right leading-none"></div>' +
         '</div>'
       ).join('') +
       '</div></div>';
@@ -1491,7 +1521,7 @@
     }
   }
 
-  // ── Device picker ─────────────────────────────────────────────────
+  // -- Device picker -------------------------------------------------
   const DP = {
     devicesByTitle: null,
     currentVersion: '',
@@ -1695,7 +1725,7 @@
     }
   }
 
-  // ── WARP prefill ─────────────────────────────────────────────────
+  // -- WARP prefill -------------------------------------------------
   async function prefillWarp() {
     const btn = document.getElementById('warp-prefill-btn');
     const msg = document.getElementById('warp-prefill-msg');
@@ -1726,7 +1756,7 @@
       f('WG_IPV6',         data.WG_IPV6);
       f('ALLOWED_IPS',     data.ALLOWED_IPS);
       if (data.warp_refresh_token) localStorage.setItem('wrtnova_warp_refresh', data.warp_refresh_token);
-      document.getElementById('config-form')?.dispatchEvent(new Event('change', { bubbles: true }));
+      if (ui.setDot) ui.setDot('wg', 'touched');
       if (msg) { msg.textContent = S.warpSuccess; msg.style.color = '#16a34a'; msg.classList.remove('hidden'); }
     } catch(e) {
       if (msg) { msg.textContent = e.message; msg.style.color = '#dc2626'; msg.classList.remove('hidden'); }
@@ -1739,7 +1769,7 @@
     ui.initCardToggles('#config-form');
   }
 
-  // ── Init ──────────────────────────────────────────────────────────
+  // -- Init ----------------------------------------------------------
   function init() {
     fetch('/api/session').catch(() => {});
     loadAsuServer();
@@ -1752,7 +1782,7 @@
     if (ui.initPasswordToggles) ui.initPasswordToggles();
     if (ui.wireDotTouches) ui.wireDotTouches();
 
-    // Hostname → SSID placeholder sync
+    // Hostname -> SSID placeholder sync
     document.getElementById('HOST_NAME')?.addEventListener('input', syncSsidPlaceholders);
 
     // Timezone combo (tzdata.js exposes ui.initTzCombo + ui.loadTzdata)
@@ -1772,7 +1802,7 @@
     // WARP prefill
     document.getElementById('warp-prefill-btn')?.addEventListener('click', prefillWarp);
 
-    // Modals — backdrop close
+    // Modals - backdrop close
     document.querySelectorAll('dialog').forEach(dlg => {
       dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); });
     });
@@ -1821,6 +1851,7 @@
 
     // Delete cancel
     document.getElementById('btn-cancel-delete')?.addEventListener('click', () => document.getElementById('modal-delete').close());
+    document.getElementById('btn-cancel-delete-node')?.addEventListener('click', () => document.getElementById('modal-delete-node').close());
 
     // Device picker search + cancel
     document.getElementById('dp-search')?.addEventListener('input', e => dpRenderList(e.target.value));

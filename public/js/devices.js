@@ -6,7 +6,7 @@
   const $   = ui.$, $$ = ui.$$;
   const DL  = 'https://downloads.openwrt.org';
 
-  // PLAN: only latest patch of each major.minor branch — plus SNAPSHOT.
+  // PLAN: only latest patch of each major.minor branch - plus SNAPSHOT.
   const SUPPORTED_BRANCHES = ['23.05', '24.10', '25.12'];
 
   const state = ui.devicesState = {
@@ -170,7 +170,7 @@
     async function pick(title) {
       // Suppress the inp focus handler while we programmatically set the value.
       // When <dialog>.close() returns focus to inp, the focus event re-fires and
-      // would immediately reopen the dialog with an empty list — this flag stops that.
+      // would immediately reopen the dialog with an empty list - this flag stops that.
       suppressMobileFocus = true;
       inp.value = title;
       close();
@@ -178,7 +178,7 @@
       state.selectedProfile = state.devicesByTitle[title];
       await loadProfileDetails();
       ui.notifyTargetChanged && ui.notifyTargetChanged();
-      // Release after a tick — any focus events triggered by the pick are now done.
+      // Release after a tick - any focus events triggered by the pick are now done.
       setTimeout(() => { suppressMobileFocus = false; }, 200);
     }
 
@@ -215,7 +215,7 @@
       dlg = document.createElement('dialog');
       dlg.id = 'device-dialog';
       dlg.setAttribute('aria-label', 'Select device');
-      // Full-screen override — browsers may limit dialog max-width/height
+      // Full-screen override - browsers may limit dialog max-width/height
       dlg.style.cssText =
         'position:fixed;inset:0;width:100%;height:100%;' +
         'max-width:100%;max-height:100%;margin:0;border:none;padding:0;' +
@@ -252,7 +252,7 @@
       document.body.appendChild(dlg);
 
       cancelBtn.addEventListener('click', () => {
-        // Set flag BEFORE dlg.close() — focus returns to inp synchronously,
+        // Set flag BEFORE dlg.close() - focus returns to inp synchronously,
         // before the 'close' event fires, so the guard must already be up.
         suppressMobileFocus = true;
         setTimeout(() => { suppressMobileFocus = false; }, 200);
@@ -260,7 +260,7 @@
       });
 
       // Escape key also closes the dialog via the native 'cancel' event,
-      // which fires synchronously before 'close' — set the guard here too.
+      // which fires synchronously before 'close' - set the guard here too.
       dlg.addEventListener('cancel', () => {
         suppressMobileFocus = true;
         setTimeout(() => { suppressMobileFocus = false; }, 200);
@@ -292,7 +292,7 @@
           'border-b border-zinc-100 dark:border-zinc-800';
         d.textContent = title;
         d.addEventListener('click', () => {
-          // Guard must be set BEFORE dlg.close() — focus returns to inp
+          // Guard must be set BEFORE dlg.close() - focus returns to inp
           // synchronously (before the async 'close' event task), so pick()'s
           // later assignment would arrive too late.
           suppressMobileFocus = true;

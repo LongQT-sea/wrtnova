@@ -833,7 +833,6 @@
   .node-row.active {
     background-color: #fafafa;
     box-shadow: inset 2px 0 0 #f6821f;
-    padding-left: calc(1rem - 2px);
   }
   .dark .node-row.active { background-color: rgba(39,39,42,0.6); }
 

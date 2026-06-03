@@ -81,7 +81,7 @@
       IOT_INTERNET:    $('#IOT_ENABLE').checked ? checkboxVal('IOT_INTERNET') : '',
       WG_ENABLE:       wgEnable ? '1' : '',
 
-      // ── Per-network addressing (blank = inherit default) ──────────────────
+      // -- Per-network addressing (blank = inherit default) ------------------
       LAN_BASE_PREFIX:    textVal('LAN_BASE_PREFIX'),
       LAN_VLAN_ID:        textVal('LAN_VLAN_ID'),
       LAN_SUBNET:         textVal('LAN_SUBNET'),
@@ -531,6 +531,8 @@ USB_TETHERING:  isRouter ? checkboxVal('USB_TETHERING') : '',
         if (data.warp_refresh_token) {
           localStorage.setItem('wrtnova_warp_refresh', data.warp_refresh_token);
         }
+
+        ui.setDot('wg', 'touched');
 
         if (msg) {
           msg.textContent = S.warpSuccess;

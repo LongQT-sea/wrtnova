@@ -5,13 +5,13 @@
 
   const locales = {
     en: {
-      // ── Time ──────────────────────────────────────────────────────────
+      // -- Time ----------------------------------------------------------
       never:     'never',
       today:     'today',
       yesterday: 'yesterday',
       daysAgo:   '{n} days ago',
 
-      // ── Feature / chip labels ─────────────────────────────────────────
+      // -- Feature / chip labels -----------------------------------------
       notYetConfigured: 'Not yet configured',
       adguardHome:      'AdGuard Home',
       dnsproxy:         'dnsproxy',
@@ -24,11 +24,11 @@
       vlansTrunked:     'VLANs trunked',
       wanBVlan:         'WAN-B VLAN',
 
-      // ── Navigation / breadcrumbs ──────────────────────────────────────
+      // -- Navigation / breadcrumbs --------------------------------------
       networks:  'Networks',
       config:    'Config',
 
-      // ── List view ─────────────────────────────────────────────────────
+      // -- List view -----------------------------------------------------
       noNetworksYet: 'No networks yet. Create one to get started.',
       newNetwork:    'New network',
       nodeCount:     '{n} node',
@@ -36,7 +36,7 @@
       builtCount:    '{n} built',
       pendingCount:  '{n} pending',
 
-      // ── Node row ──────────────────────────────────────────────────────
+      // -- Node row ------------------------------------------------------
       noDeviceSelected: 'No device selected',
       apNum:            'AP #{n}',
       router:           'Router',
@@ -44,11 +44,11 @@
       setup:            'Setup',
       builtAgo:         'built {ago}',
 
-      // ── Version selector ──────────────────────────────────────────────
+      // -- Version selector ----------------------------------------------
       defaultVersion: 'Default ({v})',
       openWrtVersion: 'OpenWrt version',
 
-      // ── Node panel fields ─────────────────────────────────────────────
+      // -- Node panel fields ---------------------------------------------
       deviceSpecificNote: 'These are device-specific settings. All other settings come from network config.',
       device:             'Device',
       change:             'Change',
@@ -64,7 +64,7 @@
       selectDeviceFirst:  'Select a device first',
       deleteNode:         'Delete node',
 
-      // ── Build progress ────────────────────────────────────────────────
+      // -- Build progress ------------------------------------------------
       preparing:          'Preparing…',
       submittingBuild:    'Submitting build…',
       submittingToServer: 'Submitting to build server…',
@@ -76,7 +76,7 @@
       inBuildQueue:       'In build queue (#{n})',
       queueNum:           'Queue #{n}',
 
-      // ── Build errors ──────────────────────────────────────────────────
+      // -- Build errors --------------------------------------------------
       retry:                'Retry',
       storageTip:           'Try switching <strong>DNS &amp; adblock</strong> to dnsproxy (instead of AdGuard Home) in network config.',
       buildFailed:          'Build failed: {msg}',
@@ -88,13 +88,13 @@
       unexpectedApiBuild:   'Unexpected response from /api/build',
       unexpectedBuildServer:'Unexpected response from build server',
 
-      // ── Flash note (HTML content) ─────────────────────────────────────
+      // -- Flash note (HTML content) -------------------------------------
       flashNote: 'Flash the "<strong>sysupgrade</strong>" image via "System → Backup / Flash firmware → Flash image". Make sure to <strong>disable "Keep settings and retain the current configuration"</strong>.',
 
-      // ── Confirm dialogs ───────────────────────────────────────────────
+      // -- Confirm dialogs -----------------------------------------------
       confirmDeleteNode: 'Delete "{name}"? This cannot be undone.',
 
-      // ── Build all ─────────────────────────────────────────────────────
+      // -- Build all -----------------------------------------------------
       noDevicesSelected:   'No nodes have a device selected yet.',
       buildingNodes:       'Building {n} node…',
       buildingNodesPlural: 'Building {n} nodes…',
@@ -102,7 +102,7 @@
       download:            'Download',
       error:               'Error',
 
-      // ── Device picker ─────────────────────────────────────────────────
+      // -- Device picker -------------------------------------------------
       loading:              'Loading…',
       tzSearchPlaceholder:     'Type to search (e.g. New York)',
       deviceSearchPlaceholder: 'Type to search (e.g. Archer C7)',
@@ -111,26 +111,27 @@
       errorLoadingDevices:  'Error loading devices: {msg}',
       loadingDeviceDetails: 'Loading device details…',
 
-      // ── Generic UI ────────────────────────────────────────────────────
+      // -- Generic UI ----------------------------------------------------
       save:               'Save',
       cancel:             'Cancel',
       delete:             'Delete',
       deleteNetworkTitle: 'Delete network?',
+      deleteNodeTitle:    'Delete node?',
 
-      // ── WARP ──────────────────────────────────────────────────────────
+      // -- WARP ----------------------------------------------------------
       fetchingWarp: 'Fetching WARP…',
       warpTooMany:  'Too many requests — wait a moment and try again',
       warpFailed:   'WARP registration failed — try again shortly',
       warpSuccess:  '✓ Filled from Cloudflare WARP',
 
-      // ── builder/index.html (build.js) ────────────────────────────────
+      // -- builder/index.html (build.js) --------------------------------
       pickDeviceFirst:  'Pick a device first.',
       fixVlanConflict:  'Fix duplicate VLAN IDs before building.',
       wifiPassTooShort: 'WiFi password must be at least 8 characters ({field}).',
       preparingBuild:   'Preparing build…',
       pickDeviceHint:   'Pick a device to enable build.',
 
-      // ── Homepage (index.html) ─────────────────────────────────────────
+      // -- Homepage (index.html) -----------------------------------------
       heroTagline:        'OpenWrt · Browser-built · Zero SSH',
       heroSubtitle:       'Build a fully-configured OpenWrt image — VLANs, WiFi, VPN, ad-blocking — in your browser.',
       singleNodeBuilder:  'Single-node builder →',
@@ -150,7 +151,7 @@
       footerNotAffiliated: 'Not affiliated with or endorsed by Cloudflare, Inc.',
       footerTrademark:    'Cloudflare and WARP are registered trademarks of their respective owners.',
 
-      // ── Shared form sections (builder + networks config) ──────────────
+      // -- Shared form sections (builder + networks config) --------------
       firmwareTarget:     'Firmware target',
       system:             'System',
       firmwareBuilderSubtitle: 'firmware builder',
@@ -265,7 +266,7 @@
       noBuildsYet:        'No builds yet.',
       configPreview:      'Config preview',
 
-      // ── networks/index.html only ──────────────────────────────────────
+      // -- networks/index.html only --------------------------------------
       eachNetworkHolds:   'Each network holds a router + AP nodes sharing the same config.',
       fleetBuilderTagline: 'Multi-node fleet builder — build firmware for your entire network at once.',
       singleBuilderLink:  '← Single builder',
@@ -292,13 +293,13 @@
     },
 
     zh: {
-      // ── Time ──────────────────────────────────────────────────────────
+      // -- Time ----------------------------------------------------------
       never:     '从未',
       today:     '今天',
       yesterday: '昨天',
       daysAgo:   '{n} 天前',
 
-      // ── Feature / chip labels ─────────────────────────────────────────
+      // -- Feature / chip labels -----------------------------------------
       notYetConfigured: '尚未配置',
       adguardHome:      'AdGuard Home',
       dnsproxy:         'dnsproxy',
@@ -311,11 +312,11 @@
       vlansTrunked:     'VLAN 干道',
       wanBVlan:         'WAN-B VLAN',
 
-      // ── Navigation / breadcrumbs ──────────────────────────────────────
+      // -- Navigation / breadcrumbs --------------------------------------
       networks:  '网络',
       config:    '配置',
 
-      // ── List view ─────────────────────────────────────────────────────
+      // -- List view -----------------------------------------------------
       noNetworksYet: '暂无网络，创建一个开始吧。',
       newNetwork:    '新建网络',
       nodeCount:     '{n} 个节点',
@@ -323,7 +324,7 @@
       builtCount:    '{n} 个已构建',
       pendingCount:  '{n} 个待构建',
 
-      // ── Node row ──────────────────────────────────────────────────────
+      // -- Node row ------------------------------------------------------
       noDeviceSelected: '未选择设备',
       apNum:            'AP #{n}',
       router:           '路由器',
@@ -331,11 +332,11 @@
       setup:            '设置',
       builtAgo:         '{ago} 前构建',
 
-      // ── Version selector ──────────────────────────────────────────────
+      // -- Version selector ----------------------------------------------
       defaultVersion: '默认 ({v})',
       openWrtVersion: 'OpenWrt 版本',
 
-      // ── Node panel fields ─────────────────────────────────────────────
+      // -- Node panel fields ---------------------------------------------
       deviceSpecificNote: '这些是设备特定设置，其他所有设置来自网络配置。',
       device:             '设备',
       change:             '更改',
@@ -351,7 +352,7 @@
       selectDeviceFirst:  '请先选择设备',
       deleteNode:         '删除节点',
 
-      // ── Build progress ────────────────────────────────────────────────
+      // -- Build progress ------------------------------------------------
       preparing:          '准备中…',
       submittingBuild:    '提交构建…',
       submittingToServer: '提交到构建服务器…',
@@ -363,7 +364,7 @@
       inBuildQueue:       '在构建队列中 (#{n})',
       queueNum:           '队列 #{n}',
 
-      // ── Build errors ──────────────────────────────────────────────────
+      // -- Build errors --------------------------------------------------
       retry:                '重试',
       storageTip:           '尝试在网络配置中将 <strong>DNS 和广告拦截</strong> 切换为 dnsproxy（而非 AdGuard Home）。',
       buildFailed:          '构建失败：{msg}',
@@ -375,13 +376,13 @@
       unexpectedApiBuild:   '/api/build 返回意外响应',
       unexpectedBuildServer:'构建服务器返回意外响应',
 
-      // ── Flash note (HTML content) ─────────────────────────────────────
+      // -- Flash note (HTML content) -------------------------------------
       flashNote: '通过"系统 → 备份/刷写固件 → 刷写镜像"刷写 "<strong>sysupgrade</strong>" 镜像。确保<strong>取消勾选"保留设置和当前配置"</strong>。',
 
-      // ── Confirm dialogs ───────────────────────────────────────────────
+      // -- Confirm dialogs -----------------------------------------------
       confirmDeleteNode: '删除"{name}"？此操作无法撤销。',
 
-      // ── Build all ─────────────────────────────────────────────────────
+      // -- Build all -----------------------------------------------------
       noDevicesSelected:   '还没有节点选择设备。',
       buildingNodes:       '正在构建 {n} 个节点…',
       buildingNodesPlural: '正在构建 {n} 个节点…',
@@ -389,7 +390,7 @@
       download:            '下载',
       error:               '错误',
 
-      // ── Device picker ─────────────────────────────────────────────────
+      // -- Device picker -------------------------------------------------
       loading:              '加载中…',
       tzSearchPlaceholder:     '输入搜索（例如 New York）',
       deviceSearchPlaceholder: '输入搜索（例如 Archer C7）',
@@ -398,26 +399,27 @@
       errorLoadingDevices:  '加载设备出错：{msg}',
       loadingDeviceDetails: '正在加载设备详情…',
 
-      // ── Generic UI ────────────────────────────────────────────────────
+      // -- Generic UI ----------------------------------------------------
       save:               '保存',
       cancel:             '取消',
       delete:             '删除',
       deleteNetworkTitle: '删除网络？',
+      deleteNodeTitle:    '删除节点？',
 
-      // ── WARP ──────────────────────────────────────────────────────────
+      // -- WARP ----------------------------------------------------------
       fetchingWarp: '正在获取 WARP…',
       warpTooMany:  '请求过多——请稍候再试',
       warpFailed:   'WARP 注册失败——请稍后再试',
       warpSuccess:  '✓ 已从 Cloudflare WARP 填充',
 
-      // ── builder/index.html (build.js) ────────────────────────────────
+      // -- builder/index.html (build.js) --------------------------------
       pickDeviceFirst:  '请先选择设备。',
       fixVlanConflict:  '构建前请修复重复的 VLAN ID。',
       wifiPassTooShort: 'WiFi 密码至少需要 8 个字符（{field}）。',
       preparingBuild:   '准备构建…',
       pickDeviceHint:   '选择设备以启用构建。',
 
-      // ── Homepage ──────────────────────────────────────────────────────
+      // -- Homepage ------------------------------------------------------
       heroTagline:        'OpenWrt · 浏览器构建 · 无需 SSH',
       heroSubtitle:       '在浏览器中构建完整配置的 OpenWrt 镜像——VLAN、WiFi、VPN、广告拦截，一次搞定。',
       singleNodeBuilder:  '单节点构建器 →',
@@ -437,7 +439,7 @@
       footerNotAffiliated: '与 Cloudflare, Inc. 无关联，亦未获其背书。',
       footerTrademark:    'Cloudflare 和 WARP 是其各自所有者的注册商标。',
 
-      // ── Shared form sections ──────────────────────────────────────────
+      // -- Shared form sections ------------------------------------------
       firmwareTarget:     '固件目标',
       system:             '系统',
       firmwareBuilderSubtitle: '固件构建器',
@@ -552,7 +554,7 @@
       noBuildsYet:        '暂无构建记录。',
       configPreview:      '配置预览',
 
-      // ── networks/index.html only ──────────────────────────────────────
+      // -- networks/index.html only --------------------------------------
       eachNetworkHolds:   '每个网络包含一个路由器和多个共享相同配置的 AP 节点。',
       fleetBuilderTagline: '多节点舰队构建器——一次为整个网络构建固件。',
       singleBuilderLink:  '← 单节点构建器',
@@ -579,13 +581,13 @@
     },
 
     de: {
-      // ── Time ──────────────────────────────────────────────────────────
+      // -- Time ----------------------------------------------------------
       never:     'nie',
       today:     'heute',
       yesterday: 'gestern',
       daysAgo:   'vor {n} Tagen',
 
-      // ── Feature / chip labels ─────────────────────────────────────────
+      // -- Feature / chip labels -----------------------------------------
       notYetConfigured: 'Noch nicht konfiguriert',
       adguardHome:      'AdGuard Home',
       dnsproxy:         'dnsproxy',
@@ -598,11 +600,11 @@
       vlansTrunked:     'VLANs getrunkt',
       wanBVlan:         'WAN-B VLAN',
 
-      // ── Navigation / breadcrumbs ──────────────────────────────────────
+      // -- Navigation / breadcrumbs --------------------------------------
       networks:  'Netzwerke',
       config:    'Konfiguration',
 
-      // ── List view ─────────────────────────────────────────────────────
+      // -- List view -----------------------------------------------------
       noNetworksYet: 'Noch keine Netzwerke. Erstellen Sie eines, um zu beginnen.',
       newNetwork:    'Neues Netzwerk',
       nodeCount:     '{n} Knoten',
@@ -610,7 +612,7 @@
       builtCount:    '{n} erstellt',
       pendingCount:  '{n} ausstehend',
 
-      // ── Node row ──────────────────────────────────────────────────────
+      // -- Node row ------------------------------------------------------
       noDeviceSelected: 'Kein Gerät ausgewählt',
       apNum:            'AP #{n}',
       router:           'Router',
@@ -618,11 +620,11 @@
       setup:            'Einrichten',
       builtAgo:         'erstellt {ago}',
 
-      // ── Version selector ──────────────────────────────────────────────
+      // -- Version selector ----------------------------------------------
       defaultVersion: 'Standard ({v})',
       openWrtVersion: 'OpenWrt-Version',
 
-      // ── Node panel fields ─────────────────────────────────────────────
+      // -- Node panel fields ---------------------------------------------
       deviceSpecificNote: 'Dies sind gerätespezifische Einstellungen. Alle anderen Einstellungen stammen aus der Netzwerkkonfiguration.',
       device:             'Gerät',
       change:             'Ändern',
@@ -638,7 +640,7 @@
       selectDeviceFirst:  'Zuerst ein Gerät auswählen',
       deleteNode:         'Knoten löschen',
 
-      // ── Build progress ────────────────────────────────────────────────
+      // -- Build progress ------------------------------------------------
       preparing:          'Vorbereiten…',
       submittingBuild:    'Build wird übermittelt…',
       submittingToServer: 'Wird an den Build-Server übermittelt…',
@@ -650,7 +652,7 @@
       inBuildQueue:       'In der Build-Warteschlange (#{n})',
       queueNum:           'Warteschlange #{n}',
 
-      // ── Build errors ──────────────────────────────────────────────────
+      // -- Build errors --------------------------------------------------
       retry:                'Erneut versuchen',
       storageTip:           'Versuchen Sie, <strong>DNS &amp; Adblock</strong> auf dnsproxy (statt AdGuard Home) in der Netzwerkkonfiguration umzustellen.',
       buildFailed:          'Build fehlgeschlagen: {msg}',
@@ -662,13 +664,13 @@
       unexpectedApiBuild:   'Unerwartete Antwort von /api/build',
       unexpectedBuildServer:'Unerwartete Antwort vom Build-Server',
 
-      // ── Flash note (HTML content) ─────────────────────────────────────
+      // -- Flash note (HTML content) -------------------------------------
       flashNote: 'Flashen Sie das "<strong>sysupgrade</strong>"-Image über "System → Sicherung / Firmware flashen → Image flashen". Stellen Sie sicher, dass Sie <strong>"Einstellungen beibehalten und aktuelle Konfiguration erhalten" deaktivieren</strong>.',
 
-      // ── Confirm dialogs ───────────────────────────────────────────────
+      // -- Confirm dialogs -----------------------------------------------
       confirmDeleteNode: '"{name}" löschen? Dies kann nicht rückgängig gemacht werden.',
 
-      // ── Build all ─────────────────────────────────────────────────────
+      // -- Build all -----------------------------------------------------
       noDevicesSelected:   'Für keinen Knoten ist ein Gerät ausgewählt.',
       buildingNodes:       '{n} Knoten wird erstellt…',
       buildingNodesPlural: '{n} Knoten werden erstellt…',
@@ -676,7 +678,7 @@
       download:            'Herunterladen',
       error:               'Fehler',
 
-      // ── Device picker ─────────────────────────────────────────────────
+      // -- Device picker -------------------------------------------------
       loading:              'Wird geladen…',
       tzSearchPlaceholder:     'Zum Suchen tippen (z. B. New York)',
       deviceSearchPlaceholder: 'Zum Suchen tippen (z. B. Archer C7)',
@@ -685,26 +687,27 @@
       errorLoadingDevices:  'Fehler beim Laden der Geräte: {msg}',
       loadingDeviceDetails: 'Gerätedetails werden geladen…',
 
-      // ── Generic UI ────────────────────────────────────────────────────
+      // -- Generic UI ----------------------------------------------------
       save:               'Speichern',
       cancel:             'Abbrechen',
       delete:             'Löschen',
       deleteNetworkTitle: 'Netzwerk löschen?',
+      deleteNodeTitle:    'Knoten löschen?',
 
-      // ── WARP ──────────────────────────────────────────────────────────
+      // -- WARP ----------------------------------------------------------
       fetchingWarp: 'WARP wird abgerufen…',
       warpTooMany:  'Zu viele Anfragen — warten Sie einen Moment und versuchen Sie es erneut',
       warpFailed:   'WARP-Registrierung fehlgeschlagen — versuchen Sie es in Kürze erneut',
       warpSuccess:  '✓ Aus Cloudflare WARP ausgefüllt',
 
-      // ── builder/index.html (build.js) ────────────────────────────────
+      // -- builder/index.html (build.js) --------------------------------
       pickDeviceFirst:  'Zuerst ein Gerät auswählen.',
       fixVlanConflict:  'Doppelte VLAN-IDs beheben, bevor Sie erstellen.',
       wifiPassTooShort: 'WLAN-Passwort muss mindestens 8 Zeichen haben ({field}).',
       preparingBuild:   'Build wird vorbereitet…',
       pickDeviceHint:   'Gerät auswählen, um Build zu aktivieren.',
 
-      // ── Homepage ──────────────────────────────────────────────────────
+      // -- Homepage ------------------------------------------------------
       heroTagline:        'OpenWrt · Browser-gebaut · Kein SSH',
       heroSubtitle:       'Erstellen Sie ein vollständig konfiguriertes OpenWrt-Image — VLANs, WiFi, VPN, Werbeblocker — direkt im Browser.',
       singleNodeBuilder:  'Einzelknoten-Builder →',
@@ -724,7 +727,7 @@
       footerNotAffiliated: 'Nicht mit Cloudflare, Inc. verbunden oder von ihr unterstützt.',
       footerTrademark:    'Cloudflare und WARP sind eingetragene Marken ihrer jeweiligen Eigentümer.',
 
-      // ── Shared form sections ──────────────────────────────────────────
+      // -- Shared form sections ------------------------------------------
       firmwareTarget:     'Firmware-Ziel',
       system:             'System',
       firmwareBuilderSubtitle: 'Firmware-Builder',
@@ -839,7 +842,7 @@
       noBuildsYet:        'Noch keine Builds.',
       configPreview:      'Konfigurationsvorschau',
 
-      // ── networks/index.html only ──────────────────────────────────────
+      // -- networks/index.html only --------------------------------------
       eachNetworkHolds:   'Jedes Netzwerk enthält einen Router + AP-Knoten, die dieselbe Konfiguration teilen.',
       fleetBuilderTagline: 'Multi-Knoten-Fleet-Builder — erstellen Sie Firmware für Ihr gesamtes Netzwerk auf einmal.',
       singleBuilderLink:  '← Einzelknoten-Builder',
@@ -866,13 +869,13 @@
     },
 
     ru: {
-      // ── Time ──────────────────────────────────────────────────────────
+      // -- Time ----------------------------------------------------------
       never:     'никогда',
       today:     'сегодня',
       yesterday: 'вчера',
       daysAgo:   '{n} дн. назад',
 
-      // ── Feature / chip labels ─────────────────────────────────────────
+      // -- Feature / chip labels -----------------------------------------
       notYetConfigured: 'Не настроено',
       adguardHome:      'AdGuard Home',
       dnsproxy:         'dnsproxy',
@@ -885,11 +888,11 @@
       vlansTrunked:     'VLAN транки',
       wanBVlan:         'WAN-B VLAN',
 
-      // ── Navigation / breadcrumbs ──────────────────────────────────────
+      // -- Navigation / breadcrumbs --------------------------------------
       networks:  'Сети',
       config:    'Конфигурация',
 
-      // ── List view ─────────────────────────────────────────────────────
+      // -- List view -----------------------------------------------------
       noNetworksYet: 'Нет сетей. Создайте одну, чтобы начать.',
       newNetwork:    'Новая сеть',
       nodeCount:     '{n} узел',
@@ -897,7 +900,7 @@
       builtCount:    '{n} собрано',
       pendingCount:  '{n} ожидает',
 
-      // ── Node row ──────────────────────────────────────────────────────
+      // -- Node row ------------------------------------------------------
       noDeviceSelected: 'Устройство не выбрано',
       apNum:            'AP #{n}',
       router:           'Маршрутизатор',
@@ -905,11 +908,11 @@
       setup:            'Настройка',
       builtAgo:         'собрано {ago}',
 
-      // ── Version selector ──────────────────────────────────────────────
+      // -- Version selector ----------------------------------------------
       defaultVersion: 'По умолчанию ({v})',
       openWrtVersion: 'Версия OpenWrt',
 
-      // ── Node panel fields ─────────────────────────────────────────────
+      // -- Node panel fields ---------------------------------------------
       deviceSpecificNote: 'Это параметры конкретного устройства. Все остальные параметры берутся из конфигурации сети.',
       device:             'Устройство',
       change:             'Изменить',
@@ -925,7 +928,7 @@
       selectDeviceFirst:  'Сначала выберите устройство',
       deleteNode:         'Удалить узел',
 
-      // ── Build progress ────────────────────────────────────────────────
+      // -- Build progress ------------------------------------------------
       preparing:          'Подготовка…',
       submittingBuild:    'Отправка сборки…',
       submittingToServer: 'Отправка на сервер сборки…',
@@ -937,7 +940,7 @@
       inBuildQueue:       'В очереди сборки (#{n})',
       queueNum:           'Очередь #{n}',
 
-      // ── Build errors ──────────────────────────────────────────────────
+      // -- Build errors --------------------------------------------------
       retry:                'Повторить',
       storageTip:           'Попробуйте переключить <strong>DNS и блокировку рекламы</strong> на dnsproxy (вместо AdGuard Home) в конфигурации сети.',
       buildFailed:          'Сборка не удалась: {msg}',
@@ -949,13 +952,13 @@
       unexpectedApiBuild:   'Неожиданный ответ от /api/build',
       unexpectedBuildServer:'Неожиданный ответ от сервера сборки',
 
-      // ── Flash note (HTML content) ─────────────────────────────────────
+      // -- Flash note (HTML content) -------------------------------------
       flashNote: 'Прошейте образ "<strong>sysupgrade</strong>" через "System → Backup / Flash firmware → Flash image". Убедитесь, что <strong>снята галочка "Keep settings and retain the current configuration"</strong>.',
 
-      // ── Confirm dialogs ───────────────────────────────────────────────
+      // -- Confirm dialogs -----------------------------------------------
       confirmDeleteNode: 'Удалить "{name}"? Это действие нельзя отменить.',
 
-      // ── Build all ─────────────────────────────────────────────────────
+      // -- Build all -----------------------------------------------------
       noDevicesSelected:   'Ни для одного узла не выбрано устройство.',
       buildingNodes:       'Сборка {n} узла…',
       buildingNodesPlural: 'Сборка {n} узлов…',
@@ -963,7 +966,7 @@
       download:            'Скачать',
       error:               'Ошибка',
 
-      // ── Device picker ─────────────────────────────────────────────────
+      // -- Device picker -------------------------------------------------
       loading:              'Загрузка…',
       tzSearchPlaceholder:     'Введите для поиска (например, New York)',
       deviceSearchPlaceholder: 'Введите для поиска (например, Archer C7)',
@@ -972,26 +975,27 @@
       errorLoadingDevices:  'Ошибка загрузки устройств: {msg}',
       loadingDeviceDetails: 'Загрузка сведений об устройстве…',
 
-      // ── Generic UI ────────────────────────────────────────────────────
+      // -- Generic UI ----------------------------------------------------
       save:               'Сохранить',
       cancel:             'Отмена',
       delete:             'Удалить',
       deleteNetworkTitle: 'Удалить сеть?',
+      deleteNodeTitle:    'Удалить узел?',
 
-      // ── WARP ──────────────────────────────────────────────────────────
+      // -- WARP ----------------------------------------------------------
       fetchingWarp: 'Получение WARP…',
       warpTooMany:  'Слишком много запросов — подождите и повторите попытку',
       warpFailed:   'Регистрация WARP не удалась — повторите попытку позже',
       warpSuccess:  '✓ Заполнено из Cloudflare WARP',
 
-      // ── builder/index.html (build.js) ────────────────────────────────
+      // -- builder/index.html (build.js) --------------------------------
       pickDeviceFirst:  'Сначала выберите устройство.',
       fixVlanConflict:  'Исправьте дублирующиеся VLAN ID перед сборкой.',
       wifiPassTooShort: 'Пароль WiFi должен содержать не менее 8 символов ({field}).',
       preparingBuild:   'Подготовка сборки…',
       pickDeviceHint:   'Выберите устройство, чтобы включить сборку.',
 
-      // ── Homepage ──────────────────────────────────────────────────────
+      // -- Homepage ------------------------------------------------------
       heroTagline:        'OpenWrt · Собирается в браузере · Без SSH',
       heroSubtitle:       'Создайте полностью настроенный образ OpenWrt — VLAN, WiFi, VPN, блокировка рекламы — прямо в браузере.',
       singleNodeBuilder:  'Одиночный узел →',
@@ -1011,7 +1015,7 @@
       footerNotAffiliated: 'Не связан с Cloudflare, Inc. и не одобрен ею.',
       footerTrademark:    'Cloudflare и WARP являются зарегистрированными товарными знаками соответствующих владельцев.',
 
-      // ── Shared form sections ──────────────────────────────────────────
+      // -- Shared form sections ------------------------------------------
       firmwareTarget:     'Цель прошивки',
       system:             'Система',
       firmwareBuilderSubtitle: 'сборщик прошивки',
@@ -1126,7 +1130,7 @@
       noBuildsYet:        'Сборок пока нет.',
       configPreview:      'Предпросмотр конфигурации',
 
-      // ── networks/index.html only ──────────────────────────────────────
+      // -- networks/index.html only --------------------------------------
       eachNetworkHolds:   'Каждая сеть содержит роутер + узлы AP, использующие одинаковую конфигурацию.',
       fleetBuilderTagline: 'Мульти-узловой сборщик — собирайте прошивку для всей сети за один раз.',
       singleBuilderLink:  '← Одиночный сборщик',
@@ -1153,13 +1157,13 @@
     },
 
     pl: {
-      // ── Time ──────────────────────────────────────────────────────────
+      // -- Time ----------------------------------------------------------
       never:     'nigdy',
       today:     'dziś',
       yesterday: 'wczoraj',
       daysAgo:   '{n} dni temu',
 
-      // ── Feature / chip labels ─────────────────────────────────────────
+      // -- Feature / chip labels -----------------------------------------
       notYetConfigured: 'Jeszcze nie skonfigurowano',
       adguardHome:      'AdGuard Home',
       dnsproxy:         'dnsproxy',
@@ -1172,11 +1176,11 @@
       vlansTrunked:     'Trunk VLAN',
       wanBVlan:         'WAN-B VLAN',
 
-      // ── Navigation / breadcrumbs ──────────────────────────────────────
+      // -- Navigation / breadcrumbs --------------------------------------
       networks:  'Sieci',
       config:    'Konfiguracja',
 
-      // ── List view ─────────────────────────────────────────────────────
+      // -- List view -----------------------------------------------------
       noNetworksYet: 'Brak sieci. Utwórz jedną, aby zacząć.',
       newNetwork:    'Nowa sieć',
       nodeCount:     '{n} węzeł',
@@ -1184,7 +1188,7 @@
       builtCount:    '{n} zbudowanych',
       pendingCount:  '{n} oczekuje',
 
-      // ── Node row ──────────────────────────────────────────────────────
+      // -- Node row ------------------------------------------------------
       noDeviceSelected: 'Nie wybrano urządzenia',
       apNum:            'AP #{n}',
       router:           'Router',
@@ -1192,11 +1196,11 @@
       setup:            'Konfiguruj',
       builtAgo:         'zbudowano {ago}',
 
-      // ── Version selector ──────────────────────────────────────────────
+      // -- Version selector ----------------------------------------------
       defaultVersion: 'Domyślna ({v})',
       openWrtVersion: 'Wersja OpenWrt',
 
-      // ── Node panel fields ─────────────────────────────────────────────
+      // -- Node panel fields ---------------------------------------------
       deviceSpecificNote: 'To są ustawienia specyficzne dla urządzenia. Wszystkie inne ustawienia pochodzą z konfiguracji sieci.',
       device:             'Urządzenie',
       change:             'Zmień',
@@ -1212,7 +1216,7 @@
       selectDeviceFirst:  'Najpierw wybierz urządzenie',
       deleteNode:         'Usuń węzeł',
 
-      // ── Build progress ────────────────────────────────────────────────
+      // -- Build progress ------------------------------------------------
       preparing:          'Przygotowanie…',
       submittingBuild:    'Wysyłanie kompilacji…',
       submittingToServer: 'Wysyłanie na serwer kompilacji…',
@@ -1224,7 +1228,7 @@
       inBuildQueue:       'W kolejce kompilacji (#{n})',
       queueNum:           'Kolejka #{n}',
 
-      // ── Build errors ──────────────────────────────────────────────────
+      // -- Build errors --------------------------------------------------
       retry:                'Ponów',
       storageTip:           'Spróbuj przełączyć <strong>DNS i blokowanie reklam</strong> na dnsproxy (zamiast AdGuard Home) w konfiguracji sieci.',
       buildFailed:          'Kompilacja nie powiodła się: {msg}',
@@ -1236,13 +1240,13 @@
       unexpectedApiBuild:   'Nieoczekiwana odpowiedź z /api/build',
       unexpectedBuildServer:'Nieoczekiwana odpowiedź z serwera kompilacji',
 
-      // ── Flash note (HTML content) ─────────────────────────────────────
+      // -- Flash note (HTML content) -------------------------------------
       flashNote: 'Wgraj obraz "<strong>sysupgrade</strong>" przez "System → Kopia zapasowa / Wgrywanie firmware → Wgraj obraz". Upewnij się, że <strong>odznaczono "Zachowaj ustawienia i bieżącą konfigurację"</strong>.',
 
-      // ── Confirm dialogs ───────────────────────────────────────────────
+      // -- Confirm dialogs -----------------------------------------------
       confirmDeleteNode: 'Usunąć "{name}"? Tej operacji nie można cofnąć.',
 
-      // ── Build all ─────────────────────────────────────────────────────
+      // -- Build all -----------------------------------------------------
       noDevicesSelected:   'Żaden węzeł nie ma wybranego urządzenia.',
       buildingNodes:       'Kompilowanie {n} węzła…',
       buildingNodesPlural: 'Kompilowanie {n} węzłów…',
@@ -1250,7 +1254,7 @@
       download:            'Pobierz',
       error:               'Błąd',
 
-      // ── Device picker ─────────────────────────────────────────────────
+      // -- Device picker -------------------------------------------------
       loading:              'Ładowanie…',
       tzSearchPlaceholder:     'Wpisz, aby wyszukać (np. Warszawa)',
       deviceSearchPlaceholder: 'Wpisz, aby wyszukać (np. Archer C7)',
@@ -1259,26 +1263,27 @@
       errorLoadingDevices:  'Błąd ładowania urządzeń: {msg}',
       loadingDeviceDetails: 'Ładowanie szczegółów urządzenia…',
 
-      // ── Generic UI ────────────────────────────────────────────────────
+      // -- Generic UI ----------------------------------------------------
       save:               'Zapisz',
       cancel:             'Anuluj',
       delete:             'Usuń',
       deleteNetworkTitle: 'Usunąć sieć?',
+      deleteNodeTitle:    'Usunąć węzeł?',
 
-      // ── WARP ──────────────────────────────────────────────────────────
+      // -- WARP ----------------------------------------------------------
       fetchingWarp: 'Pobieranie WARP…',
       warpTooMany:  'Zbyt wiele żądań — poczekaj chwilę i spróbuj ponownie',
       warpFailed:   'Rejestracja WARP nie powiodła się — spróbuj ponownie za chwilę',
       warpSuccess:  '✓ Wypełniono z Cloudflare WARP',
 
-      // ── builder/index.html (build.js) ────────────────────────────────
+      // -- builder/index.html (build.js) --------------------------------
       pickDeviceFirst:  'Najpierw wybierz urządzenie.',
       fixVlanConflict:  'Napraw zduplikowane identyfikatory VLAN przed kompilacją.',
       wifiPassTooShort: 'Hasło WiFi musi mieć co najmniej 8 znaków ({field}).',
       preparingBuild:   'Przygotowywanie kompilacji…',
       pickDeviceHint:   'Wybierz urządzenie, aby włączyć kompilację.',
 
-      // ── Homepage (index.html) ─────────────────────────────────────────
+      // -- Homepage (index.html) -----------------------------------------
       heroTagline:        'OpenWrt · Budowany w przeglądarce · Zero SSH',
       heroSubtitle:       'Zbuduj w pełni skonfigurowany obraz OpenWrt — VLAN-y, WiFi, VPN, blokowanie reklam — w przeglądarce.',
       singleNodeBuilder:  'Kreator pojedynczego węzła →',
@@ -1298,7 +1303,7 @@
       footerNotAffiliated: 'Nie powiązane z Cloudflare, Inc. ani przez nią popierane.',
       footerTrademark:    'Cloudflare i WARP są zastrzeżonymi znakami towarowymi swoich właścicieli.',
 
-      // ── Shared form sections ──────────────────────────────────────────
+      // -- Shared form sections ------------------------------------------
       firmwareTarget:     'Cel firmware',
       system:             'System',
       firmwareBuilderSubtitle: 'kreator firmware',
@@ -1413,7 +1418,7 @@
       noBuildsYet:        'Brak kompilacji.',
       configPreview:      'Podgląd konfiguracji',
 
-      // ── networks/index.html only ──────────────────────────────────────
+      // -- networks/index.html only --------------------------------------
       eachNetworkHolds:   'Każda sieć zawiera router + węzły AP współdzielące tę samą konfigurację.',
       fleetBuilderTagline: 'Kreator floty wielu węzłów — zbuduj firmware dla całej sieci za jednym razem.',
       singleBuilderLink:  '← Kreator pojedynczego węzła',
@@ -1440,13 +1445,13 @@
     },
 
     fr: {
-      // ── Time ──────────────────────────────────────────────────────────
+      // -- Time ----------------------------------------------------------
       never:     'jamais',
       today:     "aujourd'hui",
       yesterday: 'hier',
       daysAgo:   'il y a {n} jours',
 
-      // ── Feature / chip labels ─────────────────────────────────────────
+      // -- Feature / chip labels -----------------------------------------
       notYetConfigured: 'Pas encore configuré',
       adguardHome:      'AdGuard Home',
       dnsproxy:         'dnsproxy',
@@ -1459,11 +1464,11 @@
       vlansTrunked:     'VLANs en trunk',
       wanBVlan:         'VLAN WAN-B',
 
-      // ── Navigation / breadcrumbs ──────────────────────────────────────
+      // -- Navigation / breadcrumbs --------------------------------------
       networks:  'Réseaux',
       config:    'Configuration',
 
-      // ── List view ─────────────────────────────────────────────────────
+      // -- List view -----------------------------------------------------
       noNetworksYet: 'Aucun réseau. Créez-en un pour commencer.',
       newNetwork:    'Nouveau réseau',
       nodeCount:     '{n} nœud',
@@ -1471,7 +1476,7 @@
       builtCount:    '{n} compilé',
       pendingCount:  '{n} en attente',
 
-      // ── Node row ──────────────────────────────────────────────────────
+      // -- Node row ------------------------------------------------------
       noDeviceSelected: 'Aucun appareil sélectionné',
       apNum:            'AP #{n}',
       router:           'Routeur',
@@ -1479,11 +1484,11 @@
       setup:            'Configurer',
       builtAgo:         'compilé {ago}',
 
-      // ── Version selector ──────────────────────────────────────────────
+      // -- Version selector ----------------------------------------------
       defaultVersion: 'Par défaut ({v})',
       openWrtVersion: 'Version OpenWrt',
 
-      // ── Node panel fields ─────────────────────────────────────────────
+      // -- Node panel fields ---------------------------------------------
       deviceSpecificNote: "Ce sont des paramètres spécifiques à l'appareil. Tous les autres paramètres proviennent de la configuration réseau.",
       device:             'Appareil',
       change:             'Modifier',
@@ -1499,7 +1504,7 @@
       selectDeviceFirst:  "Sélectionnez d'abord un appareil",
       deleteNode:         'Supprimer le nœud',
 
-      // ── Build progress ────────────────────────────────────────────────
+      // -- Build progress ------------------------------------------------
       preparing:          'Préparation…',
       submittingBuild:    'Envoi de la compilation…',
       submittingToServer: 'Envoi au serveur de compilation…',
@@ -1511,7 +1516,7 @@
       inBuildQueue:       "En file d'attente (#{n})",
       queueNum:           'File #{n}',
 
-      // ── Build errors ──────────────────────────────────────────────────
+      // -- Build errors --------------------------------------------------
       retry:                'Réessayer',
       storageTip:           "Essayez de passer <strong>DNS et blocage des publicités</strong> à dnsproxy (plutôt qu'AdGuard Home) dans la configuration réseau.",
       buildFailed:          'Compilation échouée : {msg}',
@@ -1523,13 +1528,13 @@
       unexpectedApiBuild:   'Réponse inattendue de /api/build',
       unexpectedBuildServer:'Réponse inattendue du serveur de compilation',
 
-      // ── Flash note (HTML content) ─────────────────────────────────────
+      // -- Flash note (HTML content) -------------------------------------
       flashNote: 'Flashez l\'image "<strong>sysupgrade</strong>" via "Système → Sauvegarde / Flasher le firmware → Flasher l\'image". Assurez-vous de <strong>décocher "Conserver les paramètres et la configuration actuelle"</strong>.',
 
-      // ── Confirm dialogs ───────────────────────────────────────────────
+      // -- Confirm dialogs -----------------------------------------------
       confirmDeleteNode: 'Supprimer "{name}" ? Cette action est irréversible.',
 
-      // ── Build all ─────────────────────────────────────────────────────
+      // -- Build all -----------------------------------------------------
       noDevicesSelected:   "Aucun nœud n'a d'appareil sélectionné.",
       buildingNodes:       'Compilation de {n} nœud…',
       buildingNodesPlural: 'Compilation de {n} nœuds…',
@@ -1537,7 +1542,7 @@
       download:            'Télécharger',
       error:               'Erreur',
 
-      // ── Device picker ─────────────────────────────────────────────────
+      // -- Device picker -------------------------------------------------
       loading:              'Chargement…',
       tzSearchPlaceholder:     'Tapez pour rechercher (ex. Paris)',
       deviceSearchPlaceholder: 'Tapez pour rechercher (ex. Archer C7)',
@@ -1546,26 +1551,27 @@
       errorLoadingDevices:  'Erreur de chargement des appareils : {msg}',
       loadingDeviceDetails: "Chargement des détails de l'appareil…",
 
-      // ── Generic UI ────────────────────────────────────────────────────
+      // -- Generic UI ----------------------------------------------------
       save:               'Enregistrer',
       cancel:             'Annuler',
       delete:             'Supprimer',
       deleteNetworkTitle: 'Supprimer le réseau ?',
+      deleteNodeTitle:    'Supprimer le nœud ?',
 
-      // ── WARP ──────────────────────────────────────────────────────────
+      // -- WARP ----------------------------------------------------------
       fetchingWarp: 'Récupération de WARP…',
       warpTooMany:  'Trop de requêtes — attendez un moment et réessayez',
       warpFailed:   "Échec de l'enregistrement WARP — réessayez dans un moment",
       warpSuccess:  '✓ Rempli depuis Cloudflare WARP',
 
-      // ── builder/index.html (build.js) ────────────────────────────────
+      // -- builder/index.html (build.js) --------------------------------
       pickDeviceFirst:  "Sélectionnez d'abord un appareil.",
       fixVlanConflict:  'Corrigez les ID VLAN dupliqués avant de compiler.',
       wifiPassTooShort: 'Le mot de passe WiFi doit contenir au moins 8 caractères ({field}).',
       preparingBuild:   'Préparation de la compilation…',
       pickDeviceHint:   'Sélectionnez un appareil pour activer la compilation.',
 
-      // ── Homepage (index.html) ─────────────────────────────────────────
+      // -- Homepage (index.html) -----------------------------------------
       heroTagline:        'OpenWrt · Compilé dans le navigateur · Zéro SSH',
       heroSubtitle:       'Créez une image OpenWrt entièrement configurée — VLANs, WiFi, VPN, blocage des publicités — dans votre navigateur.',
       singleNodeBuilder:  'Compilateur nœud unique →',
@@ -1585,7 +1591,7 @@
       footerNotAffiliated: 'Non affilié à Cloudflare, Inc. ni approuvé par elle.',
       footerTrademark:    'Cloudflare et WARP sont des marques déposées de leurs propriétaires respectifs.',
 
-      // ── Shared form sections ──────────────────────────────────────────
+      // -- Shared form sections ------------------------------------------
       firmwareTarget:     'Cible du firmware',
       system:             'Système',
       firmwareBuilderSubtitle: 'compilateur de firmware',
@@ -1700,7 +1706,7 @@
       noBuildsYet:        "Aucune compilation pour l'instant.",
       configPreview:      'Aperçu de la configuration',
 
-      // ── networks/index.html only ──────────────────────────────────────
+      // -- networks/index.html only --------------------------------------
       eachNetworkHolds:   'Chaque réseau contient un routeur + des nœuds AP partageant la même configuration.',
       fleetBuilderTagline: 'Compilateur de flotte multi-nœuds — compilez le firmware pour tout votre réseau en une fois.',
       singleBuilderLink:  '← Compilateur nœud unique',
@@ -1727,13 +1733,13 @@
     },
 
     es: {
-      // ── Time ──────────────────────────────────────────────────────────
+      // -- Time ----------------------------------------------------------
       never:     'nunca',
       today:     'hoy',
       yesterday: 'ayer',
       daysAgo:   'hace {n} días',
 
-      // ── Feature / chip labels ─────────────────────────────────────────
+      // -- Feature / chip labels -----------------------------------------
       notYetConfigured: 'Aún no configurado',
       adguardHome:      'AdGuard Home',
       dnsproxy:         'dnsproxy',
@@ -1746,11 +1752,11 @@
       vlansTrunked:     'VLANs en trunk',
       wanBVlan:         'VLAN WAN-B',
 
-      // ── Navigation / breadcrumbs ──────────────────────────────────────
+      // -- Navigation / breadcrumbs --------------------------------------
       networks:  'Redes',
       config:    'Configuración',
 
-      // ── List view ─────────────────────────────────────────────────────
+      // -- List view -----------------------------------------------------
       noNetworksYet: 'Sin redes aún. Crea una para empezar.',
       newNetwork:    'Nueva red',
       nodeCount:     '{n} nodo',
@@ -1758,7 +1764,7 @@
       builtCount:    '{n} compilado',
       pendingCount:  '{n} pendiente',
 
-      // ── Node row ──────────────────────────────────────────────────────
+      // -- Node row ------------------------------------------------------
       noDeviceSelected: 'Ningún dispositivo seleccionado',
       apNum:            'AP #{n}',
       router:           'Router',
@@ -1766,11 +1772,11 @@
       setup:            'Configurar',
       builtAgo:         'compilado {ago}',
 
-      // ── Version selector ──────────────────────────────────────────────
+      // -- Version selector ----------------------------------------------
       defaultVersion: 'Predeterminado ({v})',
       openWrtVersion: 'Versión de OpenWrt',
 
-      // ── Node panel fields ─────────────────────────────────────────────
+      // -- Node panel fields ---------------------------------------------
       deviceSpecificNote: 'Estos son ajustes específicos del dispositivo. Todos los demás ajustes provienen de la configuración de red.',
       device:             'Dispositivo',
       change:             'Cambiar',
@@ -1786,7 +1792,7 @@
       selectDeviceFirst:  'Selecciona un dispositivo primero',
       deleteNode:         'Eliminar nodo',
 
-      // ── Build progress ────────────────────────────────────────────────
+      // -- Build progress ------------------------------------------------
       preparing:          'Preparando…',
       submittingBuild:    'Enviando compilación…',
       submittingToServer: 'Enviando al servidor de compilación…',
@@ -1798,7 +1804,7 @@
       inBuildQueue:       'En cola de compilación (#{n})',
       queueNum:           'Cola #{n}',
 
-      // ── Build errors ──────────────────────────────────────────────────
+      // -- Build errors --------------------------------------------------
       retry:                'Reintentar',
       storageTip:           'Intenta cambiar <strong>DNS y bloqueo de anuncios</strong> a dnsproxy (en lugar de AdGuard Home) en la configuración de red.',
       buildFailed:          'Compilación fallida: {msg}',
@@ -1810,13 +1816,13 @@
       unexpectedApiBuild:   'Respuesta inesperada de /api/build',
       unexpectedBuildServer:'Respuesta inesperada del servidor de compilación',
 
-      // ── Flash note (HTML content) ─────────────────────────────────────
+      // -- Flash note (HTML content) -------------------------------------
       flashNote: 'Flashea la imagen "<strong>sysupgrade</strong>" mediante "Sistema → Copia de seguridad / Flashear firmware → Flashear imagen". Asegúrate de <strong>desmarcar "Mantener la configuración actual"</strong>.',
 
-      // ── Confirm dialogs ───────────────────────────────────────────────
+      // -- Confirm dialogs -----------------------------------------------
       confirmDeleteNode: '¿Eliminar "{name}"? Esta acción no se puede deshacer.',
 
-      // ── Build all ─────────────────────────────────────────────────────
+      // -- Build all -----------------------------------------------------
       noDevicesSelected:   'Ningún nodo tiene un dispositivo seleccionado todavía.',
       buildingNodes:       'Compilando {n} nodo…',
       buildingNodesPlural: 'Compilando {n} nodos…',
@@ -1824,7 +1830,7 @@
       download:            'Descargar',
       error:               'Error',
 
-      // ── Device picker ─────────────────────────────────────────────────
+      // -- Device picker -------------------------------------------------
       loading:              'Cargando…',
       tzSearchPlaceholder:     'Escribe para buscar (ej. Madrid)',
       deviceSearchPlaceholder: 'Escribe para buscar (ej. Archer C7)',
@@ -1833,26 +1839,27 @@
       errorLoadingDevices:  'Error al cargar dispositivos: {msg}',
       loadingDeviceDetails: 'Cargando detalles del dispositivo…',
 
-      // ── Generic UI ────────────────────────────────────────────────────
+      // -- Generic UI ----------------------------------------------------
       save:               'Guardar',
       cancel:             'Cancelar',
       delete:             'Eliminar',
       deleteNetworkTitle: '¿Eliminar red?',
+      deleteNodeTitle:    '¿Eliminar nodo?',
 
-      // ── WARP ──────────────────────────────────────────────────────────
+      // -- WARP ----------------------------------------------------------
       fetchingWarp: 'Obteniendo WARP…',
       warpTooMany:  'Demasiadas solicitudes — espera un momento e inténtalo de nuevo',
       warpFailed:   'Error en el registro WARP — inténtalo de nuevo en breve',
       warpSuccess:  '✓ Rellenado desde Cloudflare WARP',
 
-      // ── builder/index.html (build.js) ────────────────────────────────
+      // -- builder/index.html (build.js) --------------------------------
       pickDeviceFirst:  'Selecciona un dispositivo primero.',
       fixVlanConflict:  'Corrige los IDs de VLAN duplicados antes de compilar.',
       wifiPassTooShort: 'La contraseña WiFi debe tener al menos 8 caracteres ({field}).',
       preparingBuild:   'Preparando compilación…',
       pickDeviceHint:   'Selecciona un dispositivo para activar la compilación.',
 
-      // ── Homepage (index.html) ─────────────────────────────────────────
+      // -- Homepage (index.html) -----------------------------------------
       heroTagline:        'OpenWrt · Compilado en el navegador · Sin SSH',
       heroSubtitle:       'Crea una imagen OpenWrt completamente configurada — VLANs, WiFi, VPN, bloqueo de anuncios — en tu navegador.',
       singleNodeBuilder:  'Compilador de nodo único →',
@@ -1872,7 +1879,7 @@
       footerNotAffiliated: 'No afiliado ni respaldado por Cloudflare, Inc.',
       footerTrademark:    'Cloudflare y WARP son marcas registradas de sus respectivos propietarios.',
 
-      // ── Shared form sections ──────────────────────────────────────────
+      // -- Shared form sections ------------------------------------------
       firmwareTarget:     'Objetivo del firmware',
       system:             'Sistema',
       firmwareBuilderSubtitle: 'compilador de firmware',
@@ -1987,7 +1994,7 @@
       noBuildsYet:        'Sin compilaciones aún.',
       configPreview:      'Vista previa de configuración',
 
-      // ── networks/index.html only ──────────────────────────────────────
+      // -- networks/index.html only --------------------------------------
       eachNetworkHolds:   'Cada red contiene un router + nodos AP que comparten la misma configuración.',
       fleetBuilderTagline: 'Compilador de flota multinodo — compila el firmware para toda tu red de una vez.',
       singleBuilderLink:  '← Compilador de nodo único',
