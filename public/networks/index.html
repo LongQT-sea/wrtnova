@@ -452,84 +452,6 @@
         </div>
 
         <!-- ── WAN ── copied from /builder, note router-only context ─ -->
-        <div class="group card card-anim" id="card-wan" data-section="wan">
-          <div class="card-header">
-            <span class="dot" aria-label="Not started"></span>
-            <h2 class="flex-1 text-sm font-semibold"><span data-i18n="wan">WAN</span> <span class="chip ml-1">router node only</span></h2>
-            <svg class="w-4 h-4 text-zinc-400 card-chev transition-transform duration-200 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
-          </div>
-          <div class="card-body-wrap">
-          <div class="card-body">
-            <div class="form-row">
-              <label class="form-label" data-i18n="connectionType">Connection type</label>
-              <!-- NOTE: aria-label="WAN connection type" needs JS translation -->
-              <div class="radio-seg" role="radiogroup" aria-label="WAN connection type">
-                <label>
-                  <input type="radio" name="wan_type" value="dhcp" checked>
-                  <span>DHCP</span>
-                </label>
-                <label>
-                  <input type="radio" name="wan_type" value="pppoe">
-                  <span>PPPoE</span>
-                </label>
-              </div>
-            </div>
-            <div class="pppoe-only hidden">
-              <div class="form-row">
-                <label for="PPPOE_USERNAME" class="form-label">PPPoE username</label>
-                <input type="text" id="PPPOE_USERNAME" name="PPPOE_USERNAME" class="input-base" autocomplete="username">
-              </div>
-              <div class="form-row">
-                <label for="PPPOE_PASSWD" class="form-label">PPPoE password</label>
-                <input type="password" id="PPPOE_PASSWD" name="PPPOE_PASSWD" class="input-base" autocomplete="current-password">
-              </div>
-            </div>
-            <div class="form-row">
-              <label for="WAN_MAC_ADDR" class="form-label" data-i18n="wanMacAddress">WAN MAC address</label>
-              <div>
-                <!-- NOTE: placeholder needs JS translation -->
-                <input type="text" id="WAN_MAC_ADDR" name="WAN_MAC_ADDR" class="input-base" placeholder="aa:bb:cc:dd:ee:ff (optional)">
-              </div>
-            </div>
-            <div class="sub-section">
-              <p class="sub-section-title" data-i18n="wanOptions">WAN options</p>
-              <div class="mt-2 space-y-1">
-                <div>
-                  <label class="toggle-label">
-                    <span class="toggle-wrap">
-                      <input type="checkbox" id="WAN_IS_TAGGED" name="WAN_IS_TAGGED" value="1" class="toggle-input">
-                      <span class="toggle-track"></span>
-                      <span class="toggle-thumb"></span>
-                    </span>
-                    <span class="toggle-text"><span data-i18n="taggedWanVlan">Tagged WAN VLAN</span> <span class="text-zinc-500 dark:text-zinc-400" data-i18n="taggedWanVlanNote">(required by some ISPs)</span></span>
-                  </label>
-                  <div class="wan-vid-row wan-tagged-only hidden">
-                    <span class="wan-vid-label" data-i18n="wanVlanId">WAN VLAN ID</span>
-                    <input type="number" id="WAN_VLAN_ID" name="WAN_VLAN_ID" class="input-base wan-vid-inp" min="1" max="4094" placeholder="20">
-                    <span class="wan-vid-hint" data-i18n="wanVlanHint">802.1Q VLAN tag for the WAN interface. Default: 20.</span>
-                  </div>
-                </div>
-                <div>
-                  <label class="toggle-label">
-                    <span class="toggle-wrap">
-                      <input type="checkbox" id="WAN_B_ENABLE" name="WAN_B_ENABLE" value="1" class="toggle-input">
-                      <span class="toggle-track"></span>
-                      <span class="toggle-thumb"></span>
-                    </span>
-                    <span class="toggle-text" data-i18n="enableSecondaryWan">Enable secondary WAN (WAN-B)</span>
-                  </label>
-                  <div class="wan-vid-row wan-b-only hidden">
-                    <span class="wan-vid-label" data-i18n="wanBVlanId">WAN-B VLAN ID</span>
-                    <input type="number" id="WAN_B_VLAN_ID" name="WAN_B_VLAN_ID" class="input-base wan-vid-inp" min="1" max="4094" placeholder="21">
-                    <span class="wan-vid-hint" data-i18n="wanBVlanHint">802.1Q VLAN tag for WAN-B. Default: 21.</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          </div>
-        </div>
-
         <!-- ── WiFi ── copied from /builder verbatim ──────────────── -->
         <div class="group card card-anim" id="card-wifi" data-section="wifi">
           <div class="card-header">
@@ -639,6 +561,84 @@
                 </div>
               </div>
             </details>
+          </div>
+          </div>
+        </div>
+
+        <div class="group card card-anim" id="card-wan" data-section="wan">
+          <div class="card-header">
+            <span class="dot" aria-label="Not started"></span>
+            <h2 class="flex-1 text-sm font-semibold"><span data-i18n="wan">WAN</span> <span class="chip ml-1">router node only</span></h2>
+            <svg class="w-4 h-4 text-zinc-400 card-chev transition-transform duration-200 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="card-body-wrap">
+          <div class="card-body">
+            <div class="form-row">
+              <label class="form-label" data-i18n="connectionType">Connection type</label>
+              <!-- NOTE: aria-label="WAN connection type" needs JS translation -->
+              <div class="radio-seg" role="radiogroup" aria-label="WAN connection type">
+                <label>
+                  <input type="radio" name="wan_type" value="dhcp" checked>
+                  <span>DHCP</span>
+                </label>
+                <label>
+                  <input type="radio" name="wan_type" value="pppoe">
+                  <span>PPPoE</span>
+                </label>
+              </div>
+            </div>
+            <div class="pppoe-only hidden">
+              <div class="form-row">
+                <label for="PPPOE_USERNAME" class="form-label">PPPoE username</label>
+                <input type="text" id="PPPOE_USERNAME" name="PPPOE_USERNAME" class="input-base" autocomplete="username">
+              </div>
+              <div class="form-row">
+                <label for="PPPOE_PASSWD" class="form-label">PPPoE password</label>
+                <input type="password" id="PPPOE_PASSWD" name="PPPOE_PASSWD" class="input-base" autocomplete="current-password">
+              </div>
+            </div>
+            <div class="form-row">
+              <label for="WAN_MAC_ADDR" class="form-label" data-i18n="wanMacAddress">WAN MAC address</label>
+              <div>
+                <!-- NOTE: placeholder needs JS translation -->
+                <input type="text" id="WAN_MAC_ADDR" name="WAN_MAC_ADDR" class="input-base" placeholder="aa:bb:cc:dd:ee:ff (optional)">
+              </div>
+            </div>
+            <div class="sub-section">
+              <p class="sub-section-title" data-i18n="wanOptions">WAN options</p>
+              <div class="mt-2 space-y-1">
+                <div>
+                  <label class="toggle-label">
+                    <span class="toggle-wrap">
+                      <input type="checkbox" id="WAN_IS_TAGGED" name="WAN_IS_TAGGED" value="1" class="toggle-input">
+                      <span class="toggle-track"></span>
+                      <span class="toggle-thumb"></span>
+                    </span>
+                    <span class="toggle-text"><span data-i18n="taggedWanVlan">Tagged WAN VLAN</span> <span class="text-zinc-500 dark:text-zinc-400" data-i18n="taggedWanVlanNote">(required by some ISPs)</span></span>
+                  </label>
+                  <div class="wan-vid-row wan-tagged-only hidden">
+                    <span class="wan-vid-label" data-i18n="wanVlanId">WAN VLAN ID</span>
+                    <input type="number" id="WAN_VLAN_ID" name="WAN_VLAN_ID" class="input-base wan-vid-inp" min="1" max="4094" placeholder="20">
+                    <span class="wan-vid-hint" data-i18n="wanVlanHint">802.1Q VLAN tag for the WAN interface. Default: 20.</span>
+                  </div>
+                </div>
+                <div>
+                  <label class="toggle-label">
+                    <span class="toggle-wrap">
+                      <input type="checkbox" id="WAN_B_ENABLE" name="WAN_B_ENABLE" value="1" class="toggle-input">
+                      <span class="toggle-track"></span>
+                      <span class="toggle-thumb"></span>
+                    </span>
+                    <span class="toggle-text" data-i18n="enableSecondaryWan">Enable secondary WAN (WAN-B)</span>
+                  </label>
+                  <div class="wan-vid-row wan-b-only hidden">
+                    <span class="wan-vid-label" data-i18n="wanBVlanId">WAN-B VLAN ID</span>
+                    <input type="number" id="WAN_B_VLAN_ID" name="WAN_B_VLAN_ID" class="input-base wan-vid-inp" min="1" max="4094" placeholder="21">
+                    <span class="wan-vid-hint" data-i18n="wanBVlanHint">802.1Q VLAN tag for WAN-B. Default: 21.</span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
           </div>
         </div>

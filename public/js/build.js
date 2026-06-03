@@ -7,6 +7,11 @@
   const ASU_DEFAULT = 'https://sysupgrade.openwrt.org';
   let activeAsu = ASU_DEFAULT;
 
+  async function pwFingerprint(pw) {
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(pw));
+    return btoa(String.fromCharCode(...new Uint8Array(buf)));
+  }
+
   function statusError(msg) {
     ui.status(msg, 'error');
     if (/exceed.*storage|storage.*exceed/i.test(msg)) {
@@ -298,12 +303,13 @@ USB_TETHERING:  isRouter ? checkboxVal('USB_TETHERING') : '',
     const bcrypt = window.dcodeIO && window.dcodeIO.bcrypt;
     if (rootpw && bcrypt) {
       try {
+        const fp = await pwFingerprint(rootpw);
         const cached = JSON.parse(localStorage.getItem('wrtnova_adguard') || 'null');
-        if (cached && cached.pw === rootpw) {
+        if (cached && cached.fp === fp) {
           cfg.ADGUARD_PASSWD = cached.hash;
         } else {
           cfg.ADGUARD_PASSWD = bcrypt.hashSync(rootpw, 10);
-          localStorage.setItem('wrtnova_adguard', JSON.stringify({ pw: rootpw, hash: cfg.ADGUARD_PASSWD }));
+          localStorage.setItem('wrtnova_adguard', JSON.stringify({ fp, hash: cfg.ADGUARD_PASSWD }));
         }
       } catch (_) {}
     }

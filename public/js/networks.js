@@ -274,21 +274,31 @@
     return pkgs;
   }
 
-  function bcryptHash(pw) {
-    if (!pw) return Promise.resolve('');
-    try {
-      const cached = JSON.parse(localStorage.getItem('wrtnova_adguard') || 'null');
-      if (cached && cached.pw === pw) return Promise.resolve(cached.hash);
-    } catch (_) {}
-    return ui.loadScript('/js/bcrypt.js').then(() => {
-      const bcrypt = window.dcodeIO && window.dcodeIO.bcrypt;
-      if (!bcrypt) return '';
+  async function pwFingerprint(pw) {
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(pw));
+    return btoa(String.fromCharCode(...new Uint8Array(buf)));
+  }
+
+  async function bcryptHash(pw) {
+    if (!pw) return '';
+    let fp;
+    try { fp = await pwFingerprint(pw); } catch (_) {}
+    if (fp) {
       try {
-        const hash = bcrypt.hashSync(pw, 10);
-        try { localStorage.setItem('wrtnova_adguard', JSON.stringify({ pw, hash })); } catch (_) {}
-        return hash;
-      } catch (_) { return ''; }
-    }).catch(() => '');
+        const cached = JSON.parse(localStorage.getItem('wrtnova_adguard') || 'null');
+        if (cached && cached.fp === fp) return cached.hash;
+      } catch (_) {}
+    }
+    await ui.loadScript('/js/bcrypt.js');
+    const bcrypt = window.dcodeIO && window.dcodeIO.bcrypt;
+    if (!bcrypt) return '';
+    try {
+      const hash = bcrypt.hashSync(pw, 10);
+      if (fp) {
+        try { localStorage.setItem('wrtnova_adguard', JSON.stringify({ fp, hash })); } catch (_) {}
+      }
+      return hash;
+    } catch (_) { return ''; }
   }
 
   function panelActEl(nodeId) {
