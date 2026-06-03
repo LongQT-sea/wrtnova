@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2024 - 2026 Tieu Long <https://github.com/LongQT-sea>
 
-# WrtNova — Zero-touch provisioning and orchestration framework for OpenWrt
+# WrtNova - Opinionated uci-defaults script for OpenWrt
 
 # Router LAN IP is derived from NET_PREFIX.VLAN.1, e.g. 192.168.1.1 or 192.168.1.2 if AP mode
 
