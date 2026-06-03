@@ -100,8 +100,7 @@
           <label for="AP_INDEX" class="form-label" data-i18n="apIndex">AP Index</label>
           <div>
             <input type="number" id="AP_INDEX" name="AP_INDEX" class="input-base" min="2" max="19" value="2" style="max-width:120px" oninput="document.getElementById('ap-index-preview').textContent=this.value||'2'">
-            <!-- NOTE: dynamic <span> inside; translation needs JS -->
-            <p class="form-help">Last octet 2–19. LAN IP becomes 192.168.1.<span id="ap-index-preview">2</span></p>
+            <p class="form-help"><span data-i18n="apIndexHelp">Last octet 2–19. LAN IP becomes 192.168.1.</span><span id="ap-index-preview">2</span></p>
           </div>
         </div>
       </div>
@@ -576,7 +575,7 @@
         </div>
 
         <div class="info-note" role="note">
-          <p data-i18n="wifiDefaultNote">Default to 12345678 when password is empty.</p>
+          <p data-i18n="wifiDefaultNote">Leave password blank to use the default: 12345678</p>
           <p data-i18n="wifiRoamingNote">SSID and password must match between nodes for seamless roaming to work.</p>
         </div>
 
@@ -800,7 +799,7 @@
         <div class="form-row">
           <label for="additional_packages" class="form-label" data-i18n="extraPackages">Extra packages</label>
           <div>
-            <textarea id="additional_packages" name="additional_packages" class="input-base" placeholder="space- or newline-separated, e.g. htop tcpdump" rows="3"></textarea>
+            <textarea id="additional_packages" name="additional_packages" class="input-base" data-i18n-placeholder="packagesSeparatorPh" placeholder="space- or newline-separated, e.g. htop tcpdump" rows="3"></textarea>
             <p class="form-help" data-i18n="extraPackagesHelp">Appended to the final list. Prefix with - to remove an auto-added package.</p>
           </div>
         </div>

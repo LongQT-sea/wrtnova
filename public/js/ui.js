@@ -155,7 +155,7 @@
       const defEl = row.querySelector('.net-sub-def');
 
       if (pfxEl) pfxEl.placeholder = basePfx || '192.168';
-      if (defEl) defEl.textContent  = 'Default (' + (defSub || '/24') + ')';
+      if (defEl) defEl.textContent  = ui.t ? ui.t('defaultSubnetDynamic', { sub: defSub || '/24' }) : 'Default (' + (defSub || '/24') + ')';
 
       const effPfx  = (pfxEl && pfxEl.value.trim()) || basePfx || '192.168';
       const effVid  = (vidEl && vidEl.value.trim()) || row.dataset.defVid;
@@ -238,17 +238,6 @@ const wanTagged = ui.$('#WAN_IS_TAGGED') && ui.$('#WAN_IS_TAGGED').checked;
     refresh();
   };
 
-  // ----------------------------------------- expand sections after device pick
-  ui.expandSectionsOnDevice = function (hasWifi) {
-    ['system', 'network', 'wan'].forEach(function (id) {
-      const el = document.getElementById('card-' + id);
-      if (el) el.classList.add('open');
-    });
-    if (hasWifi) {
-      const wifi = document.getElementById('card-wifi');
-      if (wifi) wifi.classList.add('open');
-    }
-  };
 
   ui.updateAth10kVisibility = function (hasCt) {
     ui.$$('.ath10k-ct-row').forEach(el => el.classList.toggle('hidden', !hasCt));

@@ -95,7 +95,7 @@
     });
 
     $('#device').disabled = false;
-    $('#device-info').textContent = 'Required: ≥16MB flash, ≥128MB RAM';
+    $('#device-info').textContent = ui.t ? ui.t('deviceRequirement') : 'Required: ≥16MB flash, ≥128MB RAM';
     state.selectedTitle = ''; state.selectedProfile = null; state.profileDetails = null;
     ui.notifyTargetChanged && ui.notifyTargetChanged();
   }
@@ -130,12 +130,14 @@
   ui.loadOverview = async function () {
     const v = state.version;
     const OVERVIEW_KEY = 'wrtnova_overview_' + v;
+    const prevTitle = state.selectedTitle;
     $('#device').disabled = true;
     $('#device').value = '';
 
     const cached = cacheGet(OVERVIEW_KEY);
     if (cached) {
       applyOverviewData(cached);
+      if (prevTitle) await ui.selectDevice(prevTitle);
       // Background refresh
       fetch(versionToUrl(v) + '/.overview.json', { cache: 'no-cache' })
         .then(r => r.ok ? r.json() : Promise.reject())
@@ -148,6 +150,7 @@
       const data = await res.json();
       cacheSet(OVERVIEW_KEY, data);
       applyOverviewData(data);
+      if (prevTitle) await ui.selectDevice(prevTitle);
     }
   };
 
@@ -337,7 +340,6 @@
     const allPkgs = (data.default_packages || []).concat((dev.device_packages || []));
     const hasWifi = /\bwpad[-\w]|\bhostapd|\bmac80211/.test(allPkgs.join(' '));
     const hasCt   = allPkgs.some(p => /^ath10k-firmware-|^kmod-ath10k-ct/.test(p));
-    if (ui.expandSectionsOnDevice) ui.expandSectionsOnDevice(hasWifi);
     if (ui.updateAth10kVisibility) ui.updateAth10kVisibility(hasCt);
   }
 

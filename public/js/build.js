@@ -7,6 +7,17 @@
   const ASU_DEFAULT = 'https://sysupgrade.openwrt.org';
   let activeAsu = ASU_DEFAULT;
 
+  function statusError(msg) {
+    ui.status(msg, 'error');
+    if (/exceed.*storage|storage.*exceed/i.test(msg)) {
+      const el = ui.$('#status');
+      const tip = document.createElement('p');
+      tip.className = 'text-xs text-zinc-500 dark:text-zinc-400 mt-1';
+      tip.innerHTML = S.storageTip;
+      el.appendChild(tip);
+    }
+  }
+
   ui.loadAsuServers = async function () {
     let data;
     try {
@@ -384,7 +395,7 @@ USB_TETHERING:  isRouter ? checkboxVal('USB_TETHERING') : '',
     } catch (e) {
       $('#build-btn').disabled = false;
       ui.clearProgress();
-      ui.status(t('buildRequestFailed', { msg: e.message }), 'error');
+      statusError(t('buildRequestFailed', { msg: e.message }));
       return;
     }
 
@@ -434,7 +445,7 @@ USB_TETHERING:  isRouter ? checkboxVal('USB_TETHERING') : '',
           ui.status(S.buildComplete, 'success');
           renderResult(data, base);
         } else {
-          ui.status(t('buildFailed', { msg: data.detail || ('HTTP ' + r.status) }), 'error');
+          statusError(t('buildFailed', { msg: data.detail || ('HTTP ' + r.status) }));
           if (data.stderr) {
             $('#config-preview').textContent = data.stderr;
             $('#config-preview-wrap').classList.remove('hidden');
