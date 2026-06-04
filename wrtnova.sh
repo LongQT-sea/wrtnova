@@ -55,7 +55,8 @@ GUEST_ENABLE=1
 
 # 1 = enable IoT network
 IOT_ENABLE=
-IOT_INTERNET=
+IOT_INTERNET=		# 1 = let's IoT subnet access the internet
+IOT_ROUTE_VIA_WG=	# 1 = let's IoT subnet access the internet over WireGuard Client
 
 # Default: BASE_NET_PREFIX
 LAN_BASE_PREFIX=
@@ -658,8 +659,10 @@ wg_subnet=${LAN_WG_SUBNET:-$def_subnet}
 [ "$GUEST_ENABLE" = 1 ] && \
 	_uci network interface guest proto=static +ipaddr="${guest_net_pfx}.1${guest_subnet}"
 
-[ "$IOT_ENABLE" = 1 ] && \
+[ "$IOT_ENABLE" = 1 ] && {
 	_uci network interface iot proto=static +ipaddr="${iot_net_pfx}.1${iot_subnet}"
+	[ "$IOT_ROUTE_VIA_WG" = 1 ] && iot_via_wg=1
+}
 
 _uci network interface lan -netmask -ipaddr +ipaddr="${lan_net_pfx}.1${lan_subnet}"
 
@@ -707,6 +710,13 @@ has_pkg modemmanager || CELLULAR_MODEM=
 				_uci network rule$f "" in="lan_${wg_iface}" lookup=20 priority=990
 				_uci network rule$f "" in="lan_${wg_iface}" action=prohibit priority=991
 			done
+
+			[ "$iot_via_wg" = 1 ] && {
+				for f in '' 6; do
+					_uci network rule$f "" in=iot lookup=20 priority=990
+					_uci network rule$f "" in=iot action=prohibit priority=991
+				done
+			}
 		else
 			# mwan3 already handles PBR and kill switch
 			_uci network interface "${wg_iface}" -ip4table -ip6table
@@ -1013,6 +1023,11 @@ ula_prefix="$(uci -q get network.globals.ula_prefix)"
 
 	_uci mwan3 rule "lan_${wg_iface:0:5}_ipv6" \
 		src_ip="${ula_prefix%::*}:10::/60" use_policy="${wg_iface}_only" @3
+
+	[ "$iot_via_wg" = 1 ] && {
+		_uci mwan3 rule "iot_ipv4" \
+			src_ip="${iot_net_pfx}.0${iot_subnet}" use_policy="${wg_iface}_only" @4
+	}
 }
 
 [ "$AP_MODE" = 1 ] && [ -x /usr/sbin/mwan3 ] && /etc/init.d/mwan3 disable
@@ -1270,6 +1285,7 @@ fw_redirect_dns lan
 	fw_add_forwarding lan iot
 
 	[ "$IOT_INTERNET" = 1 ] && fw_add_forwarding iot wan
+	[ "$iot_via_wg" = 1 ] && fw_add_forwarding iot wan_nat6
 }
 
 [ "$AP_MODE" != 1 ] && [ "$WG_ENABLE" = 1 ] && {
