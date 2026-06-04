@@ -714,7 +714,6 @@ has_pkg modemmanager || CELLULAR_MODEM=
 			[ "$iot_via_wg" = 1 ] && {
 				for f in '' 6; do
 					_uci network rule$f "" in=iot lookup=20 priority=990
-					_uci network rule$f "" in=iot action=prohibit priority=991
 				done
 			}
 		else
