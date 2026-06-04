@@ -168,6 +168,7 @@
     set('PPPOE_PASSWD',   cfg.PPPOE_PASSWD);
     set('WAN_MAC_ADDR',   cfg.WAN_MAC_ADDR);
     check('WAN_IS_TAGGED', cfg.WAN_IS_TAGGED);
+    check('BRIDGE_WAN_PORT', cfg.BRIDGE_WAN_PORT);
     set('WAN_VLAN_ID',    cfg.WAN_VLAN_ID);
     check('WAN_B_ENABLE',  cfg.WAN_B_ENABLE);
     set('WAN_B_VLAN_ID',  cfg.WAN_B_VLAN_ID);

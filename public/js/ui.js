@@ -199,6 +199,7 @@
       ui.$$('.wifi-guest').forEach(el => el.classList.toggle('hidden', !guest));
 
       const wgEnabled = ui.$('#WG_ENABLE').checked;
+      ui.$$('.iot-wg-only').forEach(el => el.classList.toggle('hidden', !(iot && wgEnabled)));
       // WiFi WG SSID row: visible whenever WG_ENABLE is on, regardless of mode.
       // (AP mode still needs the SSID - it trunks WG-tagged traffic to the router.)
       ui.$$('.wifi-wg').forEach(el => el.classList.toggle('hidden', !wgEnabled));

@@ -310,6 +310,17 @@
             </label>
           </div>
 
+          <div class="iot-wg-only hidden mt-2 pl-1">
+            <label class="toggle-label">
+              <span class="toggle-wrap">
+                <input type="checkbox" id="IOT_ROUTE_VIA_WG" name="IOT_ROUTE_VIA_WG" value="1" class="toggle-input">
+                <span class="toggle-track"></span>
+                <span class="toggle-thumb"></span>
+              </span>
+              <span class="toggle-text text-xs" data-i18n="iotRouteViaWg">Route IoT internet traffic through WireGuard tunnel</span>
+            </label>
+          </div>
+
           <p class="form-help mt-1 net-dup-warn hidden" id="net-dup-warn" data-i18n="vlanDupWarn">⚠ Two or more enabled networks share a VLAN ID — fix the conflict before building.</p>
 
           <p class="form-help mt-2 wg-help-router" data-i18n="wgNetworkDesc">WireGuard VPN network is a dedicated network with its own WiFi SSID; all its traffic is routed through the WireGuard VPN client.</p>
@@ -568,9 +579,12 @@
             <input type="text" id="WAN_MAC_ADDR" name="WAN_MAC_ADDR" class="input-base" placeholder="aa:bb:cc:dd:ee:ff (optional)">
           </div>
         </div>
-        <div class="sub-section">
-          <p class="sub-section-title" data-i18n="wanOptions">WAN options</p>
-          <div class="mt-2 space-y-1">
+        <details class="mt-4">
+          <summary class="text-xs text-zinc-500 dark:text-zinc-400 cursor-pointer hover:text-zinc-700 dark:hover:text-zinc-200 select-none flex items-center gap-1">
+            <svg class="w-3 h-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+            <span data-i18n="advancedWan">Advanced WAN options</span>
+          </summary>
+          <div class="mt-2 pl-4 border-l-2 border-zinc-200 dark:border-zinc-700 space-y-1">
             <div>
               <label class="toggle-label">
                 <span class="toggle-wrap">
@@ -580,7 +594,7 @@
                 </span>
                 <span class="toggle-text"><span data-i18n="taggedWanVlan">Tagged WAN VLAN</span> <span class="text-zinc-500 dark:text-zinc-400" data-i18n="taggedWanVlanNote">(required by some ISPs)</span></span>
               </label>
-              <div class="wan-vid-row wan-tagged-only hidden">
+              <div class="wan-vid-row">
                 <span class="wan-vid-label" data-i18n="wanVlanId">WAN VLAN ID</span>
                 <input type="number" id="WAN_VLAN_ID" name="WAN_VLAN_ID" class="input-base wan-vid-inp" min="1" max="4094" placeholder="20">
                 <span class="wan-vid-hint" data-i18n="wanVlanHint">802.1Q VLAN tag for the WAN interface. Default: 20.</span>
@@ -595,14 +609,25 @@
                 </span>
                 <span class="toggle-text" data-i18n="enableSecondaryWan">Enable secondary WAN (WAN-B)</span>
               </label>
-              <div class="wan-vid-row wan-b-only hidden">
+              <div class="wan-vid-row">
                 <span class="wan-vid-label" data-i18n="wanBVlanId">WAN-B VLAN ID</span>
                 <input type="number" id="WAN_B_VLAN_ID" name="WAN_B_VLAN_ID" class="input-base wan-vid-inp" min="1" max="4094" placeholder="21">
                 <span class="wan-vid-hint" data-i18n="wanBVlanHint">802.1Q VLAN tag for WAN-B. Default: 21.</span>
               </div>
             </div>
+            <div class="pt-2">
+              <label class="toggle-label">
+                <span class="toggle-wrap">
+                  <input type="checkbox" id="BRIDGE_WAN_PORT" name="BRIDGE_WAN_PORT" value="1" class="toggle-input">
+                  <span class="toggle-track"></span>
+                  <span class="toggle-thumb"></span>
+                </span>
+                <span class="toggle-text" data-i18n="bridgeWanPort">Force bridge non-DSA WAN port</span>
+              </label>
+              <p class="form-help mt-1" data-i18n="bridgeWanPortNote">By default, WrtNova avoids adding non-DSA WAN port to br-vlan due to performance penalty. This option forces the non-DSA WAN port into the br-vlan bridge.</p>
+            </div>
           </div>
-        </div>
+        </details>
       </div>
       </div>
     </div>
@@ -835,7 +860,7 @@
             </span>
             <div>
               <span class="toggle-text" data-i18n="hardwareOffload">Hardware flow offload</span>
-              <p class="form-help mt-0" data-i18n="hardwareOffloadHelp">Higher network throughput and lower CPU usage where supported. Do not enable if using QoS/SQM.</p>
+              <p class="form-help mt-0" data-i18n="hardwareOffloadHelp">Higher network throughput where supported. Do not enable if using QoS/SQM.</p>
             </div>
           </label>
           <label class="toggle-label">

@@ -75,15 +75,17 @@
       PPPOE_PASSWD:   wanType === 'pppoe' ? textVal('PPPOE_PASSWD')   : '',
       WAN_MAC_ADDR:   textVal('WAN_MAC_ADDR'),
       WAN_IS_TAGGED:  checkboxVal('WAN_IS_TAGGED'),
-      WAN_VLAN_ID:    checkboxVal('WAN_IS_TAGGED') ? textVal('WAN_VLAN_ID') : '',
+      WAN_VLAN_ID:    textVal('WAN_VLAN_ID'),
       WAN_B_ENABLE:   isRouter ? checkboxVal('WAN_B_ENABLE') : '',
       WAN_B_VLAN_ID:  (isRouter && $('#WAN_B_ENABLE').checked) ? textVal('WAN_B_VLAN_ID') : '',
+      BRIDGE_WAN_PORT: isRouter ? checkboxVal('BRIDGE_WAN_PORT') : '',
 
       BASE_NET_PREFIX: textVal('BASE_NET_PREFIX'),
       DEFAULT_SUBNET:  textVal('DEFAULT_SUBNET'),
       GUEST_ENABLE:    checkboxVal('GUEST_ENABLE'),
       IOT_ENABLE:      checkboxVal('IOT_ENABLE'),
       IOT_INTERNET:    $('#IOT_ENABLE').checked ? checkboxVal('IOT_INTERNET') : '',
+      IOT_ROUTE_VIA_WG: ($('#IOT_ENABLE').checked && wgEnable) ? checkboxVal('IOT_ROUTE_VIA_WG') : '',
       WG_ENABLE:       wgEnable ? '1' : '',
 
       // -- Per-network addressing (blank = inherit default) ------------------

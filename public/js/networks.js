@@ -34,12 +34,13 @@
       PPPOE_PASSWD:   !isAp && c.wan_type === 'pppoe' ? (c.PPPOE_PASSWD   || '') : '',
       WAN_MAC_ADDR:   !isAp ? (c.WAN_MAC_ADDR  || '') : '',
       WAN_IS_TAGGED:  !isAp ? flag(c.WAN_IS_TAGGED) : '',
-      WAN_VLAN_ID:    !isAp && c.WAN_IS_TAGGED === '1' ? (c.WAN_VLAN_ID  || '') : '',
+      WAN_VLAN_ID:    !isAp ? (c.WAN_VLAN_ID || '') : '',
       WAN_B_ENABLE:   !isAp ? flag(c.WAN_B_ENABLE) : '',
       WAN_B_VLAN_ID:  !isAp && c.WAN_B_ENABLE  === '1' ? (c.WAN_B_VLAN_ID || '') : '',
+      BRIDGE_WAN_PORT: !isAp ? flag(c.BRIDGE_WAN_PORT) : '',
       BASE_NET_PREFIX: c.BASE_NET_PREFIX || '', DEFAULT_SUBNET: c.DEFAULT_SUBNET || '',
       GUEST_ENABLE: guestOn ? '1' : '', IOT_ENABLE: iotOn ? '1' : '',
-      IOT_INTERNET: iotOn ? flag(c.IOT_INTERNET) : '', WG_ENABLE: wgOn ? '1' : '',
+      IOT_INTERNET: iotOn ? flag(c.IOT_INTERNET) : '', IOT_ROUTE_VIA_WG: (iotOn && wgOn) ? flag(c.IOT_ROUTE_VIA_WG) : '', WG_ENABLE: wgOn ? '1' : '',
       LAN_BASE_PREFIX: c.LAN_BASE_PREFIX || '', LAN_VLAN_ID: c.LAN_VLAN_ID || '', LAN_SUBNET: c.LAN_SUBNET || '',
       GUEST_BASE_PREFIX: guestOn ? (c.GUEST_BASE_PREFIX || '') : '', GUEST_VLAN_ID: guestOn ? (c.GUEST_VLAN_ID || '') : '', GUEST_SUBNET: guestOn ? (c.GUEST_SUBNET || '') : '',
       IOT_BASE_PREFIX:   iotOn   ? (c.IOT_BASE_PREFIX   || '') : '', IOT_VLAN_ID:   iotOn   ? (c.IOT_VLAN_ID   || '') : '', IOT_SUBNET:   iotOn   ? (c.IOT_SUBNET   || '') : '',
@@ -112,7 +113,7 @@
       LAN_BASE_PREFIX: '', LAN_VLAN_ID: '', LAN_SUBNET: '',
       GUEST_ENABLE: '1', GUEST_BASE_PREFIX: '', GUEST_VLAN_ID: '', GUEST_SUBNET: '',
       IOT_ENABLE: '', IOT_BASE_PREFIX: '', IOT_VLAN_ID: '', IOT_SUBNET: '',
-      IOT_INTERNET: '',
+      IOT_INTERNET: '', IOT_ROUTE_VIA_WG: '',
       WG_ENABLE: '', LAN_WG_BASE_PREFIX: '', LAN_WG_VLAN_ID: '', LAN_WG_SUBNET: '',
       ADDITIONAL_VLAN_LIST: '',
       WG_PRIVATE_KEY: '', PEER_PUBLIC_KEY: '', ENDPOINT: '',
@@ -120,7 +121,7 @@
       ALLOWED_IPS: '',
       wan_type: 'dhcp', PPPOE_USERNAME: '', PPPOE_PASSWD: '',
       WAN_MAC_ADDR: '', WAN_IS_TAGGED: '', WAN_VLAN_ID: '',
-      WAN_B_ENABLE: '', WAN_B_VLAN_ID: '',
+      WAN_B_ENABLE: '', WAN_B_VLAN_ID: '', BRIDGE_WAN_PORT: '',
       COUNTRY_CODE: '', DENSE_ENV: '', WIRELESS_MESH: '',
       MESH_ID: '', MESH_PASSWD: '',
       LAN_WIFI_SSID: '', LAN_WIFI_PASSWD: '',
@@ -819,6 +820,7 @@
     sv('IOT_ENABLE', cfg.IOT_ENABLE);
     sv('IOT_BASE_PREFIX', cfg.IOT_BASE_PREFIX); sv('IOT_VLAN_ID', cfg.IOT_VLAN_ID); sv('IOT_SUBNET', cfg.IOT_SUBNET);
     sv('IOT_INTERNET', cfg.IOT_INTERNET);
+    sv('IOT_ROUTE_VIA_WG', cfg.IOT_ROUTE_VIA_WG);
     sv('WG_ENABLE', cfg.WG_ENABLE);
     sv('LAN_WG_BASE_PREFIX', cfg.LAN_WG_BASE_PREFIX); sv('LAN_WG_VLAN_ID', cfg.LAN_WG_VLAN_ID); sv('LAN_WG_SUBNET', cfg.LAN_WG_SUBNET);
     sv('ADDITIONAL_VLAN_LIST', cfg.ADDITIONAL_VLAN_LIST);
@@ -831,6 +833,7 @@
     sv('WAN_MAC_ADDR', cfg.WAN_MAC_ADDR);
     sv('WAN_IS_TAGGED', cfg.WAN_IS_TAGGED); sv('WAN_VLAN_ID', cfg.WAN_VLAN_ID);
     sv('WAN_B_ENABLE', cfg.WAN_B_ENABLE); sv('WAN_B_VLAN_ID', cfg.WAN_B_VLAN_ID);
+    sv('BRIDGE_WAN_PORT', cfg.BRIDGE_WAN_PORT);
     sv('COUNTRY_CODE', cfg.COUNTRY_CODE);
     sv('DENSE_ENV', cfg.DENSE_ENV); sv('WIRELESS_MESH', cfg.WIRELESS_MESH);
     sv('MESH_ID', cfg.MESH_ID); sv('MESH_PASSWD', cfg.MESH_PASSWD);
@@ -881,6 +884,7 @@
       IOT_ENABLE: gv('IOT_ENABLE'),
       IOT_BASE_PREFIX: gv('IOT_BASE_PREFIX'), IOT_VLAN_ID: gv('IOT_VLAN_ID'), IOT_SUBNET: gv('IOT_SUBNET'),
       IOT_INTERNET: gv('IOT_INTERNET'),
+      IOT_ROUTE_VIA_WG: gv('IOT_ROUTE_VIA_WG'),
       WG_ENABLE: gv('WG_ENABLE'),
       LAN_WG_BASE_PREFIX: gv('LAN_WG_BASE_PREFIX'), LAN_WG_VLAN_ID: gv('LAN_WG_VLAN_ID'), LAN_WG_SUBNET: gv('LAN_WG_SUBNET'),
       ADDITIONAL_VLAN_LIST: gv('ADDITIONAL_VLAN_LIST'),
@@ -892,6 +896,7 @@
       WAN_MAC_ADDR: gv('WAN_MAC_ADDR'),
       WAN_IS_TAGGED: gv('WAN_IS_TAGGED'), WAN_VLAN_ID: gv('WAN_VLAN_ID'),
       WAN_B_ENABLE: gv('WAN_B_ENABLE'), WAN_B_VLAN_ID: gv('WAN_B_VLAN_ID'),
+      BRIDGE_WAN_PORT: gv('BRIDGE_WAN_PORT'),
       COUNTRY_CODE: gv('COUNTRY_CODE').toUpperCase(),
       DENSE_ENV: gv('DENSE_ENV'), WIRELESS_MESH: gv('WIRELESS_MESH'),
       MESH_ID: gv('MESH_ID'), MESH_PASSWD: gv('MESH_PASSWD'),
