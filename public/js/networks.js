@@ -78,8 +78,19 @@
 
   // -- Storage ------------------------------------------------------
   function loadNetworks() {
-    try { return JSON.parse(localStorage.getItem(STORE_KEY) || '[]'); }
+    let nets;
+    try { nets = JSON.parse(localStorage.getItem(STORE_KEY) || '[]'); }
     catch (e) { return []; }
+    // Migration: WAN_MAC_ADDR was mistakenly placed in router overrides, causing it
+    // to clobber the shared_config value. Remove it from any saved router overrides.
+    for (const net of nets) {
+      for (const node of (net.nodes || [])) {
+        if (node.overrides && node.overrides.AP_MODE !== '1' && 'WAN_MAC_ADDR' in node.overrides) {
+          delete node.overrides.WAN_MAC_ADDR;
+        }
+      }
+    }
+    return nets;
   }
   function saveNetworks() {
     try { localStorage.setItem(STORE_KEY, JSON.stringify(st.networks)); }
@@ -133,7 +144,7 @@
       DDNS_ENABLE: '', LOOKUP_HOSTNAME: '', CLOUDFLARE_API_KEY: '',
       USB_TETHERING: '', CELLULAR_MODEM: '',
       DNS_MODE: 'adguardhome', BLOCK_DOT_DOQ: '',
-      SOFTWARE_OFFLOAD: '', HARDWARE_OFFLOAD: '',
+      SOFTWARE_OFFLOAD: '1', HARDWARE_OFFLOAD: '',
       additional_packages: '',
     };
   }
@@ -142,7 +153,7 @@
     return {
       id: uid(), name: 'Main Router',
       device_target: emptyTarget(),
-      overrides: { AP_MODE: '0', WAN_MAC_ADDR: '', WIRELESS_MESH: '' },
+      overrides: { AP_MODE: '', WIRELESS_MESH: '' },
       last_build: null,
     };
   }
