@@ -220,11 +220,13 @@ USB_TETHERING:  isRouter ? checkboxVal('USB_TETHERING') : '',
   const HISTORY_MAX = 5;
   const HISTORY_SENSITIVE = new Set();
 
-  function saveHistoryLocal(payload, result) {
-    const cfg = {};
-    for (const [k, v] of Object.entries(payload.wrtnova_config || {})) {
-      if (HISTORY_SENSITIVE.has(k)) continue;
-      cfg[k] = v;
+  function saveHistoryLocal(payload, result, fullCfg) {
+    const cfg = fullCfg || {};
+    if (!fullCfg) {
+      for (const [k, v] of Object.entries(payload.wrtnova_config || {})) {
+        if (HISTORY_SENSITIVE.has(k)) continue;
+        cfg[k] = v;
+      }
     }
     const entry = {
       ts: Date.now(),
@@ -349,10 +351,8 @@ USB_TETHERING:  isRouter ? checkboxVal('USB_TETHERING') : '',
       return;
     }
 
-    if (resp.config_preview) {
-      $('#config-preview').textContent = resp.config_preview;
-      $('#config-preview-wrap').classList.remove('hidden');
-    }
+    $('#config-preview').textContent = ui.renderConfigBlockMasked(cfg);
+    $('#config-preview-wrap').classList.remove('hidden');
 
     if (!resp.packages || !resp.asu_url) {
       ui.status(S.unexpectedApiBuild, 'error');
@@ -408,7 +408,7 @@ USB_TETHERING:  isRouter ? checkboxVal('USB_TETHERING') : '',
     const asuBase = resp.asu_url.replace('/api/v1/build', '');
 
     if (asuR.status === 200) {
-      saveHistoryLocal(payload, { status: 'success', firmware_url: null });
+      saveHistoryLocal(payload, { status: 'success', firmware_url: null }, cfg);
       renderResult(asuData, asuBase);
       ui.setProgress(S.doneCachedBuild, 100);
       ui.status(S.buildComplete, 'success');
@@ -422,7 +422,7 @@ USB_TETHERING:  isRouter ? checkboxVal('USB_TETHERING') : '',
       return;
     }
 
-    saveHistoryLocal(payload, { status: 'queued', firmware_url: null });
+    saveHistoryLocal(payload, { status: 'queued', firmware_url: null }, cfg);
     pollAsu(asuData.request_hash, asuBase);
   };
 

@@ -308,6 +308,19 @@ const wanTagged = ui.$('#WAN_IS_TAGGED') && ui.$('#WAN_IS_TAGGED').checked;
     return lines.join('\n') + '\n';
   };
 
+  ui.renderConfigBlockMasked = function (cfg) {
+    const lines = [];
+    for (const [k, v] of Object.entries(cfg)) {
+      if (k.startsWith('_')) continue;
+      if (_BUILD_ONLY_KEYS.has(k)) continue;
+      if (v === undefined || v === null) continue;
+      const s = String(v);
+      if (s === '' || s === '0') continue;
+      lines.push(k + (ui.SENSITIVE_FIELDS.has(k) ? "='****'" : '=' + _shQuote(s)));
+    }
+    return lines.join('\n') + '\n';
+  };
+
   ui.fetchWrtnovaBody = function () {
     if (_wrtnovaBodyCache !== null) return Promise.resolve(_wrtnovaBodyCache);
     if (!_wrtnovaBodyPromise) {

@@ -776,8 +776,10 @@
       net.updated_at = Date.now();
       saveNetworks();
       showDetail(networkId);
-      const router = net.nodes.find(n => n.overrides.AP_MODE !== '1');
-      if (router) setTimeout(() => togglePanel(net, router.id, true), 80);
+      if (isNew) {
+        const router = net.nodes.find(n => n.overrides.AP_MODE !== '1');
+        if (router) setTimeout(() => togglePanel(net, router.id, true), 80);
+      }
     };
 
     showView('config');
@@ -1273,8 +1275,10 @@
       const sub = row.querySelector('.text-xs.text-zinc-500');
       if (sub) {
         const isAp = node.overrides.AP_MODE === '1';
+        const ipStr = nodeLanIp(net, node);
         sub.textContent = (node.device_target.title || '') + ' · ' +
           (isAp ? t('apNum', { n: node.overrides.AP_INDEX || '2' }) : S.router) +
+          (ipStr ? ' · ' + ipStr : '') +
           ' · ' + t('builtAgo', { ago: timeAgo(node.last_build.timestamp) });
       }
     }
