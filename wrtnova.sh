@@ -1085,10 +1085,11 @@ _uci dhcp "" "$IFACE" \
 	instance="${IFACE}_dns" interface="$IFACE" \
 	start="$START" limit="$LIMIT" leasetime="$TIME"
 
-[ "$IPV6" = 1 ] && _uci dhcp "" "$IFACE" \
-	ra=server dhcpv6=server ra_default=1 \
-	ra_flags="managed-config other-config" \
-	-dns "${DEV:++dns=$(ip -6 a s dev "$DEV" | grep -o 'fe80[^/]*')}"
+[ "$IPV6" = 1 ] && \
+	_uci dhcp "" "$IFACE" \
+		ra=server dhcpv6=server \
+		ra_flags="managed-config other-config" \
+		-dns "${DEV:++dns=$(ip -6 a s dev "$DEV" | grep -o 'fe80[^/]*')}"
 EOF
 chmod +x /sbin/dhcp-instance-add
 
@@ -1109,11 +1110,11 @@ while uci -q del dhcp.@dhcp[0]; do :; done
 
 [ "$WG_ENABLE" = 1 ] && {
 	dhcp-instance-add "lan_${wg_iface}" 24h "${wg_iface}.lan"
+	_uci dhcp "" "lan_${wg_iface}" ra_default=1
 	_uci dhcp dnsmasq "lan_${wg_iface}_dns" +rebind_domain=lan +server=/lan/127.0.0.1
 }
 
 dhcp-instance-add lan 24h lan lan 1 "$LAN_DHCP_START"
-_uci dhcp "" lan -ra_default
 uci del dhcp.lan_dns.notinterface
 
 [ "$WG_ENABLE" = 1 ] && \
