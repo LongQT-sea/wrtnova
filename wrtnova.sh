@@ -886,7 +886,7 @@ done >/dev/null
 		uci set network."${i}".disabled=1
 	done
 
-	_uci network interface lan -ipaddr \
+	_uci network interface lan -ipaddr -ip6assign \
 		+ipaddr="${lan_net_pfx}.${AP_INDEX}${lan_subnet}" \
 		gateway="${lan_net_pfx}.1" dns="${lan_net_pfx}.1" metric=5
 
@@ -962,7 +962,7 @@ calc_metric() {
 	echo $((m ? m+5 : 5))
 }
 
-uci set "network.${IFACE}.metric=$(calc_metric)"
+uci -q get "network.${IFACE}.metric" || uci set "network.${IFACE}.metric=$(calc_metric)"
 
 _uci mwan3 interface "$IFACE" enabled=1 family="$FAMILY" -track_ip +track_ip="$TRACK_IP"
 
@@ -974,7 +974,7 @@ _uci mwan3 policy "${BASE_IFACE:0:10}_only" ^use_member="$NAME" +use_member="$NA
 EOF
 chmod +x /sbin/mwan3-iface-add
 
-cat > /etc/config/mwan3 << EOF
+[ -z "$no_mwan3" ] && cat > /etc/config/mwan3 << EOF
 
 config globals 'globals'
 	option mmx_mask '0x3F00'
@@ -1000,36 +1000,38 @@ config rule 'default_rule_v6'
 	option family 'ipv6'
 EOF
 
-mwan3-iface-add wan
-mwan3-iface-add wan_6 ipv6
-
-[ "$WAN_B_ENABLE" = 1 ] && {
-	mwan3-iface-add wanb
-	mwan3-iface-add wanb_6 ipv6
-}
-
-[ "$CELLULAR_MODEM" = 1 ] && mwan3-iface-add cellular "" 2 2
-[ "$USB_TETHERING" = 1 ] && mwan3-iface-add usb0 "" 2 2
-
 ula_prefix="$(uci -q get network.globals.ula_prefix)"
 
-[ "$WG_ENABLE" = 1 ] && [ -z "$no_mwan3" ] && [ "$AP_MODE" != 1 ] && {
-	mwan3-iface-add "${wg_iface}" "" 1 1 0
-	mwan3-iface-add "${wg_iface}_6" ipv6 1 1 0
+[ -z "$no_mwan3" ] && {
+	mwan3-iface-add wan
+	mwan3-iface-add wan_6 ipv6
 
-	_uci mwan3 rule "lan_${wg_iface:0:5}_ipv4" \
-		src_ip="${wg_net_pfx}.0${wg_subnet}" use_policy="${wg_iface}_only" @2
+	[ "$WAN_B_ENABLE" = 1 ] && {
+		mwan3-iface-add wanb
+		mwan3-iface-add wanb_6 ipv6
+	}
 
-	_uci mwan3 rule "lan_${wg_iface:0:5}_ipv6" \
-		src_ip="${ula_prefix%::*}:10::/60" use_policy="${wg_iface}_only" @3
+	[ "$CELLULAR_MODEM" = 1 ] && mwan3-iface-add cellular "" 2 2
+	[ "$USB_TETHERING" = 1 ] && mwan3-iface-add usb0 "" 2 2
 
-	[ "$iot_via_wg" = 1 ] && {
-		_uci mwan3 rule "iot_ipv4" \
-			src_ip="${iot_net_pfx}.0${iot_subnet}" use_policy="${wg_iface}_only" @4
+	[ "$WG_ENABLE" = 1 ] && [ "$AP_MODE" != 1 ] && {
+		mwan3-iface-add "${wg_iface}" "" 1 1 0
+		mwan3-iface-add "${wg_iface}_6" ipv6 1 1 0
+
+		_uci mwan3 rule "lan_${wg_iface:0:5}_ipv4" \
+			src_ip="${wg_net_pfx}.0${wg_subnet}" use_policy="${wg_iface}_only" @2
+
+		_uci mwan3 rule "lan_${wg_iface:0:5}_ipv6" \
+			src_ip="${ula_prefix%::*}:10::/60" use_policy="${wg_iface}_only" @3
+
+		[ "$iot_via_wg" = 1 ] && {
+			_uci mwan3 rule "iot_ipv4" \
+				src_ip="${iot_net_pfx}.0${iot_subnet}" use_policy="${wg_iface}_only" @4
+		}
 	}
 }
 
-[ "$AP_MODE" = 1 ] && [ -x /usr/sbin/mwan3 ] && /etc/init.d/mwan3 disable
+[ "$AP_MODE" = 1 ] && [ -z "$no_mwan3" ] && /etc/init.d/mwan3 disable
 
 # === DHCP/DNS ===
 cat > /sbin/dhcp-instance-add <<'EOF'
