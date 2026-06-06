@@ -280,8 +280,9 @@ EOF
 	[ "$SSH_PASSWD_AUTH" = off ] && _uci dropbear "" @dropbear[0] PasswordAuth=off RootPasswordAuth=off
 }
 
-OS_VERSION=$(. /etc/os-release; echo "${VERSION%%.*}")
-[ "$OS_VERSION" = 25 ] && ZONE_NAME="${ZONE_NAME// /_}"
+board_info=$(ubus call system board)
+os_version=$(echo "$board_info" | jsonfilter -e '@.release.version' | cut -d. -f1)
+[ "$os_version" = 25 ] && ZONE_NAME="${ZONE_NAME// /_}"
 
 HOST_NAME="${HOST_NAME:-WrtNova}"
 
@@ -1151,7 +1152,7 @@ EOF
 }
 
 ADGUARD_PASSWD=${ADGUARD_PASSWD:-\$2y\$10\$aRfh9IbImR8PIf/FWlLvkeW6wiyp47BjY0KqW/FD/F14QloYuV00a}
-[ "$OS_VERSION" = "25" ] && { mkdir -p /etc/adguardhome; adguard_dir=/etc/adguardhome; }
+[ "$os_version" = "25" ] && { mkdir -p /etc/adguardhome; adguard_dir=/etc/adguardhome; }
 cat > "${adguard_dir:-/etc}"/adguardhome.yaml << EOF
 http:
   address: 0.0.0.0:3000
