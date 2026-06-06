@@ -16,7 +16,7 @@
 // Cloudflare dashboard (Security → WAF → Rate Limiting Rules):
 //
 //   • /api/build          — 5 req / 1 min / IP   (ASU build quota protection)
-//   • /api/warp/register  — 3 req / 1 min / IP   (WARP device creation)
+//   • /api/warp/register  — 3 req / 10 sec / IP  (WARP device creation)
 //   • /api/session        — 10 req / 1 min / IP  (prevent cookie farming)
 //
 // Without those rules the guards below are speed bumps only.

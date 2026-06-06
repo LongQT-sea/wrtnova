@@ -99,8 +99,8 @@
         <div class="form-row ap-only hidden">
           <label for="AP_INDEX" class="form-label" data-i18n="apIndex">AP Index</label>
           <div>
-            <input type="number" id="AP_INDEX" name="AP_INDEX" class="input-base" min="2" max="19" value="2" style="max-width:120px" oninput="document.getElementById('ap-index-preview').textContent=this.value||'2'">
-            <p class="form-help"><span data-i18n="apIndexHelp">Last octet 2–19. LAN IP becomes 192.168.1.</span><span id="ap-index-preview">2</span></p>
+            <input type="number" id="AP_INDEX" name="AP_INDEX" class="input-base" min="2" max="254" value="2" style="max-width:120px" oninput="document.getElementById('ap-index-preview').textContent=this.value||'2'" onblur="var v=Math.min(254,Math.max(2,parseInt(this.value)||2));this.value=v;document.getElementById('ap-index-preview').textContent=v;this.dispatchEvent(new Event('input',{bubbles:true}))">
+            <p class="form-help"><span data-i18n="apIndexHelp">Last octet 2–254. LAN IP becomes 192.168.1.</span><span id="ap-index-preview">2</span></p>
           </div>
         </div>
       </div>
@@ -897,6 +897,8 @@
       </summary>
       <pre class="config-preview" id="config-preview"></pre>
     </details>
+
+    <div class="warn-note" role="note" data-i18n="asuSecurityWarning">Leave passwords and sensitive fields empty. Defaults are safe for first boot: no root password, Wi-Fi password is 12345678. Anything you enter is sent to the ASU build server and baked into the firmware — set real credentials after first boot via LuCI or SSH.</div>
 
     <div class="build-actions">
       <button class="btn btn-primary" type="button" id="build-btn" disabled data-i18n="buildFirmware">Build firmware</button>

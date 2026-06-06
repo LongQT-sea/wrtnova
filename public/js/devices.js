@@ -6,8 +6,10 @@
   const $   = ui.$, $$ = ui.$$;
   const DL  = 'https://downloads.openwrt.org';
 
-  // PLAN: only latest patch of each major.minor branch - plus SNAPSHOT.
+  // PLAN: only latest patch of each major.minor branch - plus branch snapshots for
+  // recent branches and the rolling SNAPSHOT.
   const SUPPORTED_BRANCHES = ['23.05', '24.10', '25.12'];
+  const SNAPSHOT_BRANCHES  = new Set(['24.10', '25.12']);
 
   const state = ui.devicesState = {
     version: '',
@@ -57,7 +59,10 @@
 
   function applyVersionsData(data) {
     const picks = [];
-    SUPPORTED_BRANCHES.forEach(b => picks.push(...pickLatestNPatches(data.versions_list || [], b, 2)));
+    SUPPORTED_BRANCHES.forEach(b => {
+      picks.push(...pickLatestNPatches(data.versions_list || [], b, 2));
+      if (SNAPSHOT_BRANCHES.has(b)) picks.push(b + '-SNAPSHOT');
+    });
     picks.push('SNAPSHOT');
 
     const sel = $('#version');
@@ -71,7 +76,7 @@
     if (data.stable_version && picks.includes(data.stable_version)) {
       sel.value = data.stable_version;
     } else {
-      sel.value = picks.filter(v => v !== 'SNAPSHOT').pop() || picks[0];
+      sel.value = picks.filter(v => !v.includes('SNAPSHOT')).pop() || picks[0];
     }
     state.version = sel.value;
   }

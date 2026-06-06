@@ -333,15 +333,15 @@
     const id = 'retry-' + uid();
     const isStorageFull = /exceed.*storage|storage.*exceed/i.test(msg);
     actEl.innerHTML =
-      '<div class="w-full">' +
-      '<div class="flex items-start gap-2">' +
-      '<p class="text-xs text-red-500 dark:text-red-400 flex-1">' + esc(msg) + '</p>' +
+      '<div class="status error w-full mt-0">' +
+      '<div class="flex items-center gap-2">' +
+      '<p class="flex-1">' + esc(msg) + '</p>' +
       '<button type="button" class="btn text-xs flex-shrink-0" id="' + id + '">' + S.retry + '</button>' +
+      '</div>' +
       '</div>' +
       (isStorageFull
         ? '<p class="text-xs text-zinc-500 dark:text-zinc-400 mt-1.5">' + S.storageTip + '</p>'
-        : '') +
-      '</div>';
+        : '');
     actEl.querySelector('#' + id)?.addEventListener('click', onRetry);
   }
 
@@ -552,7 +552,7 @@
     const sharedSel = document.getElementById('shared-version');
     const versions = sharedSel && sharedSel.options.length > 1
       ? Array.from(sharedSel.options).map(o => o.value)
-      : BRANCHES.slice().reverse().concat(['SNAPSHOT']);
+      : BRANCHES.slice().reverse();
     const effectiveShared = sharedVersion
       || sharedSel?.value
       || '';
@@ -1594,7 +1594,6 @@
 
     const picks = [];
     BRANCHES.forEach(b => picks.push(...pickLatestN(data.versions_list || [], b, 2)));
-    picks.push('SNAPSHOT');
 
     if (sharedSel) {
       sharedSel.innerHTML = '';
