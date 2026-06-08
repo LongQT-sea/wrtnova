@@ -20,7 +20,7 @@ TIME_ZONE=""
 # === WiFi ===
 DEFAULT_WIFI_PASSWD=""	# Default: 12345678
 COUNTRY_CODE=
-WIFI_KVR=		# 0 = disable 802.11k/v/r
+WIFI_KVR=1		# 1 = Enable fast roaming & band-steering 802.11k/v/r
 DENSE_ENV=		# 1 = optimize roaming and steering for high-interference areas
 
 LAN_WIFI_SSID=""	# Default: HOST_NAME
@@ -374,7 +374,7 @@ add_wifi_iface() {
 
 	[ "$mode" = mesh ] && set -- "$@" -ssid mesh_id="$ssid" ifname="$net" ${BATMAN_ADV:+mesh_fwding=0}
 
-	[ "${WIFI_KVR:=1}" = 1 ] && [ "$mode" = ap ] && [ "$net" != iot ] && has_pkg wpad-mb wpad-op wpad-wo && {
+	[ "$WIFI_KVR" = 1 ] && [ "$mode" = ap ] && [ "$net" != iot ] && has_pkg wpad-mb wpad-op wpad-wo && {
 		[ "$enc" = psk2 ] && set -- "$@" ft_psk_generate_local=1
 		set -- "$@" ieee80211r=1 ft_over_ds=0 ieee80211k=1 bss_transition=1
 	}
