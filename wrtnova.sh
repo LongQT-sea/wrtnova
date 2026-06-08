@@ -432,10 +432,10 @@ mesh_iface=${BATMAN_ADV:+bat0_}mesh0
 # Fields: mode|ssid|key|network|bands|enabled|enc_override (empty = band default)
 wifi_networks="
 ap|$lan_ssid|$lan_pass|lan|2g 5g 6g|1|
-ap|$guest_ssid|$guest_pass|guest|2g 5g 6g|${GUEST_ENABLE:-0}|
-ap|$iot_ssid|$iot_pass|iot|2g|${IOT_ENABLE:-0}|
-ap|$lan_wg_ssid|$lan_wg_pass|lan_${wg_iface}|2g 5g 6g|${WG_ENABLE:-0}|
-mesh|$mesh_id|$mesh_pass|$mesh_iface|5g|${WIRELESS_MESH:-0}|sae
+ap|$guest_ssid|$guest_pass|guest|2g 5g 6g|$GUEST_ENABLE|
+ap|$iot_ssid|$iot_pass|iot|2g|$IOT_ENABLE|
+ap|$lan_wg_ssid|$lan_wg_pass|lan_${wg_iface}|2g 5g 6g|$WG_ENABLE|
+mesh|$mesh_id|$mesh_pass|$mesh_iface|5g|$WIRELESS_MESH|sae
 "
 
 while uci -q del wireless.@wifi-iface[0]; do :; done
@@ -471,7 +471,7 @@ for radio in $radios; do
 		[ "$chan" = "$min" ] && role=mesh || role=ap
 	}
 
-	[ "$band" = 5g ] && [ "$role" = solo ] && [ -n "$has_6g" ] && role=mesh
+	[ "$WIRELESS_MESH" = 1 ] && [ "$band" = 5g ] && [ "$role" = solo ] && [ -n "$has_6g" ] && role=mesh
 
 	setup_radio "$radio" "$([ "$role" != ap ] && echo "$ch")"
 
@@ -509,7 +509,9 @@ done
 			min_snr='-80'
 	}
 
-	[ "$WIFI_KVR" != 1 ] || [ "$no_wifi" = 1 ] && /etc/init.d/usteer disable
+	if [ "$WIFI_KVR" != 1 ] || [ "$no_wifi" = 1 ]; then
+		/etc/init.d/usteer disable
+	fi
 }
 
 # === Network ===
