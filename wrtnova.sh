@@ -148,6 +148,9 @@ SOFTWARE_OFFLOAD=
 # 1 = block DNS over TLS/QUIC
 BLOCK_DOT_DOQ=
 
+# 1 = Block guest internet access at night 
+DENY_GUEST_NIGHT=
+
 # AdGuardHome admin passwd in bcrypt hash (default 12345678)
 ADGUARD_PASSWD=''
 
@@ -1281,6 +1284,11 @@ fw_redirect_dns lan
 	fw_add_base_rules guest
 	fw_redirect_dns guest
 	fw_add_forwarding guest wan
+
+	[ "$DENY_GUEST_NIGHT" = 1 ] && \
+		_uci firewall rule "" \
+			name="Block guest at night" src=guest dest=wan \
+			proto=all target=DROP start_time=21:00:00 stop_time=07:00:00
 }
 
 [ "$IOT_ENABLE" = 1 ] && {
