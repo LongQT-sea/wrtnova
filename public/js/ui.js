@@ -253,10 +253,15 @@ const wanTagged = ui.$('#WAN_IS_TAGGED') && ui.$('#WAN_IS_TAGGED').checked;
   // (SVG icons stay intact). Updates aria-label for screen reader context.
   ui.initPasswordToggles = function () {
     [
-      ['toggle-rootpw',     'ROOT_PASSWD'],
-      ['toggle-wg-privkey', 'WG_PRIVATE_KEY'],
-      ['toggle-wg-psk',     'PRESHARED_KEY'],
-      ['toggle-cfkey',      'CLOUDFLARE_API_KEY'],
+      ['toggle-rootpw',       'ROOT_PASSWD'],
+      ['toggle-wg-privkey',   'WG_PRIVATE_KEY'],
+      ['toggle-wg-psk',       'PRESHARED_KEY'],
+      ['toggle-cfkey',        'CLOUDFLARE_API_KEY'],
+      ['toggle-mesh-pw',      'MESH_PASSWD'],
+      ['toggle-lan-wifi-pw',  'LAN_WIFI_PASSWD'],
+      ['toggle-guest-wifi-pw','GUEST_WIFI_PASSWD'],
+      ['toggle-iot-wifi-pw',  'IOT_WIFI_PASSWD'],
+      ['toggle-wg-wifi-pw',   'LAN_WG_WIFI_PASSWD'],
     ].forEach(([btnId, inpId]) => {
       const b = document.getElementById(btnId);
       const i = document.getElementById(inpId);

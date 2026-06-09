@@ -146,6 +146,7 @@
       LAN_WIFI_PASSWD:    textVal('LAN_WIFI_PASSWD'),
       GUEST_WIFI_SSID:    $('#GUEST_ENABLE').checked ? textVal('GUEST_WIFI_SSID')   : '',
       GUEST_WIFI_PASSWD:  $('#GUEST_ENABLE').checked ? textVal('GUEST_WIFI_PASSWD') : '',
+      GUEST_ISOLATE:      $('#GUEST_ENABLE').checked ? checkboxVal('GUEST_ISOLATE') : '',
       IOT_WIFI_SSID:      $('#IOT_ENABLE').checked   ? textVal('IOT_WIFI_SSID')     : '',
       IOT_WIFI_PASSWD:    $('#IOT_ENABLE').checked   ? textVal('IOT_WIFI_PASSWD')   : '',
       LAN_WG_WIFI_SSID:   wgEnable ? textVal('LAN_WG_WIFI_SSID')   : '',
@@ -539,14 +540,12 @@ USB_TETHERING:  isRouter ? checkboxVal('USB_TETHERING') : '',
     const btn = $('#warp-prefill-btn');
     if (!btn) return;
     const msg = $('#warp-prefill-msg');
-    let dismissTimer;
 
     btn.addEventListener('click', async () => {
       btn.disabled = true;
       const origText = btn.textContent;
       btn.textContent = S.fetchingWarp;
       if (msg) { msg.textContent = ''; msg.classList.add('hidden'); }
-      clearTimeout(dismissTimer);
 
       try {
         const r = await fetch('/api/warp/register', {
@@ -584,7 +583,6 @@ USB_TETHERING:  isRouter ? checkboxVal('USB_TETHERING') : '',
           msg.textContent = S.warpSuccess;
           msg.style.color = '#16a34a';
           msg.classList.remove('hidden');
-          dismissTimer = setTimeout(() => msg.classList.add('hidden'), 5000);
         }
       } catch (e) {
         if (msg) {

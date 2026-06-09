@@ -511,7 +511,14 @@
               </div>
               <div class="form-row">
                 <label for="MESH_PASSWD" class="form-label" data-i18n="meshPassword">Mesh password</label>
-                <input type="password" id="MESH_PASSWD" name="MESH_PASSWD" class="input-base" placeholder="password" autocomplete="new-password">
+                <div class="relative">
+                  <input type="password" id="MESH_PASSWD" name="MESH_PASSWD" class="input-base" style="padding-right:2.5rem" placeholder="password" autocomplete="new-password">
+                  <button type="button" id="toggle-mesh-pw"
+                          class="btn btn-ghost btn-icon absolute right-1.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
+                          aria-label="Show password">
+                    <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -521,28 +528,56 @@
                 <label class="form-label">LAN</label>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   <input type="text" id="LAN_WIFI_SSID" name="LAN_WIFI_SSID" class="input-base" placeholder="WrtNova">
-                  <input type="password" id="LAN_WIFI_PASSWD" name="LAN_WIFI_PASSWD" class="input-base" placeholder="password" autocomplete="new-password">
+                  <div class="relative">
+                    <input type="password" id="LAN_WIFI_PASSWD" name="LAN_WIFI_PASSWD" class="input-base" style="padding-right:2.5rem" placeholder="password" autocomplete="new-password">
+                    <button type="button" id="toggle-lan-wifi-pw"
+                            class="btn btn-ghost btn-icon absolute right-1.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
+                            aria-label="Show password">
+                      <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                    </button>
+                  </div>
                 </div>
               </div>
               <div class="form-row wifi-guest hidden">
                 <label class="form-label">Guest</label>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   <input type="text" id="GUEST_WIFI_SSID" name="GUEST_WIFI_SSID" class="input-base" placeholder="WrtNova_Guest">
-                  <input type="password" id="GUEST_WIFI_PASSWD" name="GUEST_WIFI_PASSWD" class="input-base" placeholder="password" autocomplete="new-password">
+                  <div class="relative">
+                    <input type="password" id="GUEST_WIFI_PASSWD" name="GUEST_WIFI_PASSWD" class="input-base" style="padding-right:2.5rem" placeholder="password" autocomplete="new-password">
+                    <button type="button" id="toggle-guest-wifi-pw"
+                            class="btn btn-ghost btn-icon absolute right-1.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
+                            aria-label="Show password">
+                      <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                    </button>
+                  </div>
                 </div>
               </div>
               <div class="form-row wifi-iot hidden">
                 <label class="form-label">IoT</label>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   <input type="text" id="IOT_WIFI_SSID" name="IOT_WIFI_SSID" class="input-base" placeholder="WrtNova_IoT">
-                  <input type="password" id="IOT_WIFI_PASSWD" name="IOT_WIFI_PASSWD" class="input-base" placeholder="password" autocomplete="new-password">
+                  <div class="relative">
+                    <input type="password" id="IOT_WIFI_PASSWD" name="IOT_WIFI_PASSWD" class="input-base" style="padding-right:2.5rem" placeholder="password" autocomplete="new-password">
+                    <button type="button" id="toggle-iot-wifi-pw"
+                            class="btn btn-ghost btn-icon absolute right-1.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
+                            aria-label="Show password">
+                      <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                    </button>
+                  </div>
                 </div>
               </div>
               <div class="form-row wifi-wg hidden">
                 <label class="form-label">WireGuard VPN</label>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   <input type="text" id="LAN_WG_WIFI_SSID" name="LAN_WG_WIFI_SSID" class="input-base" placeholder="WrtNova_VPN">
-                  <input type="password" id="LAN_WG_WIFI_PASSWD" name="LAN_WG_WIFI_PASSWD" class="input-base" placeholder="password" autocomplete="new-password">
+                  <div class="relative">
+                    <input type="password" id="LAN_WG_WIFI_PASSWD" name="LAN_WG_WIFI_PASSWD" class="input-base" style="padding-right:2.5rem" placeholder="password" autocomplete="new-password">
+                    <button type="button" id="toggle-wg-wifi-pw"
+                            class="btn btn-ghost btn-icon absolute right-1.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
+                            aria-label="Show password">
+                      <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                    </button>
+                  </div>
                 </div>
               </div>
               <p class="form-help"></p>
@@ -565,6 +600,17 @@
                       <span class="toggle-thumb"></span>
                     </span>
                     <span class="toggle-text" data-i18n="enableFastRoaming">Enable fast roaming and band-steering</span>
+                  </label>
+                </div>
+                <div class="form-row wifi-guest hidden">
+                  <label class="form-label" data-i18n="guestIsolate">Guest isolation</label>
+                  <label class="toggle-label">
+                    <span class="toggle-wrap">
+                      <input type="checkbox" id="GUEST_ISOLATE" name="GUEST_ISOLATE" value="1" class="toggle-input">
+                      <span class="toggle-track"></span>
+                      <span class="toggle-thumb"></span>
+                    </span>
+                    <span class="toggle-text" data-i18n="guestIsolateHelp">Prevent communication between guest clients</span>
                   </label>
                 </div>
                 <div class="form-row">
@@ -646,7 +692,7 @@
                   <div class="wan-vid-row">
                     <span class="wan-vid-label" data-i18n="wanVlanId">WAN VLAN ID</span>
                     <input type="number" id="WAN_VLAN_ID" name="WAN_VLAN_ID" class="input-base wan-vid-inp" min="1" max="4094" placeholder="20">
-                    <span class="wan-vid-hint" data-i18n="wanVlanHint">802.1Q VLAN tag for the WAN interface. Default: 20.</span>
+                    <span class="wan-vid-hint" data-i18n="wanVlanHint">802.1Q VLAN tag for the WAN interface.</span>
                   </div>
                 </div>
                 <div>
@@ -661,7 +707,7 @@
                   <div class="wan-vid-row">
                     <span class="wan-vid-label" data-i18n="wanBVlanId">WAN-B VLAN ID</span>
                     <input type="number" id="WAN_B_VLAN_ID" name="WAN_B_VLAN_ID" class="input-base wan-vid-inp" min="1" max="4094" placeholder="21">
-                    <span class="wan-vid-hint" data-i18n="wanBVlanHint">802.1Q VLAN tag for WAN-B. Default: 21.</span>
+                    <span class="wan-vid-hint" data-i18n="wanBVlanHint">802.1Q VLAN tag for WAN-B.</span>
                   </div>
                 </div>
                 <div class="pt-2">
