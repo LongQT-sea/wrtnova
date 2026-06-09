@@ -107,7 +107,7 @@ PPPOE_PASSWD=""
 
 WAN_IS_TAGGED=		# 1 = tag WAN_VLAN_ID on wan interface
 WAN_MAC_ADDR=
-BRIDGE_WAN_PORT=	# 1 = force non-DSA wan port into br-vlan bridge
+BRIDGE_WAN_PORT=	# 1 = add wan port to br-vlan bridge (for IPTV, VoIP, and multi-PPPoE)
 
 WAN_B_ENABLE=
 
@@ -751,7 +751,7 @@ wan_port="$(uci -q get network.wan.device)"
 
 # DSA/x86/SBC: always use bridge VLAN filtering
 use_bridge_vlan=1
-bridge_wan_port=1
+bridge_wan_port=
 
 # Single NIC: reuse lan port as tagged WAN
 [ -z "$wan_port" ] && WAN_IS_TAGGED=1
@@ -759,11 +759,11 @@ bridge_wan_port=1
 # Cannot enslave a bridge to another bridge
 [ "$wan_port" = br-wan ] && BRIDGE_WAN_PORT=
 
-if [ "$hw_type" = "dsa" ] && [ "$AP_MODE" != 1 ] && [ "$BRIDGE_WAN_PORT" != 1 ]; then
-	# Avoid adding non-DSA WAN port to br-vlan due to performance penalty.
-	grep -sq DEVTYPE=dsa /sys/class/net/"${wan_port}"/uevent || bridge_wan_port=
+if [ "$hw_type" = "dsa" ] && [ "$AP_MODE" != 1 ]; then
+	[ "$BRIDGE_WAN_PORT" = 1 ] && bridge_wan_port=1
 
 elif [ "$hw_type" = "swconfig" ]; then
+	bridge_wan_port=1
 	use_bridge_vlan=
 	lan_eth="${lan_ports%%.*}"
 	wan_eth="$wan_port"
