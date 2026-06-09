@@ -28,6 +28,7 @@ LAN_WIFI_PASSWD=""
 
 GUEST_WIFI_SSID=""	# Default: HOST_NAME_Guest
 GUEST_WIFI_PASSWD=""
+GUEST_ISOLATE=		# 1 = Isolates guest wifi clients from each other
 
 IOT_WIFI_SSID=""	# Default: HOST_NAME_IoT
 IOT_WIFI_PASSWD=""
@@ -374,6 +375,8 @@ add_wifi_iface() {
 	local dev="$1" mode="$2" ssid="$3" key="$4" net="$5" enc="$6"
 
 	set -- device="$dev" mode="$mode" ssid="$ssid" key="$key" network="$net" encryption="$enc"
+
+	[ "$mode" = ap ] && [ "$net" = guest ] && [ -n "$GUEST_ISOLATE" ] && set -- "$@" isolate=1
 
 	[ "$mode" = mesh ] && set -- "$@" -ssid mesh_id="$ssid" ifname="$net" ${BATMAN_ADV:+mesh_fwding=0}
 
