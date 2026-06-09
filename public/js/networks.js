@@ -46,7 +46,7 @@
       IOT_BASE_PREFIX:   iotOn   ? (c.IOT_BASE_PREFIX   || '') : '', IOT_VLAN_ID:   iotOn   ? (c.IOT_VLAN_ID   || '') : '', IOT_SUBNET:   iotOn   ? (c.IOT_SUBNET   || '') : '',
       LAN_WG_BASE_PREFIX: wgOn  ? (c.LAN_WG_BASE_PREFIX || '') : '', LAN_WG_VLAN_ID: wgOn  ? (c.LAN_WG_VLAN_ID || '') : '', LAN_WG_SUBNET: wgOn  ? (c.LAN_WG_SUBNET || '') : '',
       ADDITIONAL_VLAN_LIST: c.ADDITIONAL_VLAN_LIST || '',
-      COUNTRY_CODE: c.COUNTRY_CODE || '', DENSE_ENV: flag(c.DENSE_ENV), WIRELESS_MESH: flag(c.WIRELESS_MESH),
+      COUNTRY_CODE: c.COUNTRY_CODE || '', DENSE_ENV: flag(c.DENSE_ENV), WIRELESS_MESH: flag(c.WIRELESS_MESH), WIFI_KVR: flag(c.WIFI_KVR),
       MESH_ID: meshOn ? (c.MESH_ID || '') : '', MESH_PASSWD: meshOn ? (c.MESH_PASSWD || '') : '',
       LAN_WIFI_SSID: c.LAN_WIFI_SSID || '', LAN_WIFI_PASSWD: c.LAN_WIFI_PASSWD || '',
       GUEST_WIFI_SSID:  guestOn ? (c.GUEST_WIFI_SSID   || '') : '', GUEST_WIFI_PASSWD:  guestOn ? (c.GUEST_WIFI_PASSWD   || '') : '',
@@ -72,6 +72,9 @@
       DNS_MODE:         c.DNS_MODE || 'adguardhome',
       SOFTWARE_OFFLOAD: flag(c.SOFTWARE_OFFLOAD), HARDWARE_OFFLOAD: flag(c.HARDWARE_OFFLOAD),
       BLOCK_DOT_DOQ:    flag(c.BLOCK_DOT_DOQ),
+      DENY_GUEST_NIGHT: flag(c.DENY_GUEST_NIGHT),
+      QUARTERLY_REBOOT: flag(c.QUARTERLY_REBOOT),
+      LOG:              flag(c.LOG),
       NON_CT_ATH10K:    flag(c.NON_CT_ATH10K),
     };
   }
@@ -139,11 +142,12 @@
       GUEST_WIFI_SSID: '', GUEST_WIFI_PASSWD: '',
       IOT_WIFI_SSID: '', IOT_WIFI_PASSWD: '',
       LAN_WG_WIFI_SSID: '', LAN_WG_WIFI_PASSWD: '',
-      CHANNEL_2G: '', CHANNEL_5G: '', CHANNEL_6G: '', WIFI_LOG_LVL: '',
+      CHANNEL_2G: '', CHANNEL_5G: '', CHANNEL_6G: '', WIFI_LOG_LVL: '', WIFI_KVR: '1',
       PORT_FORWARD_LIST: '', IPV6_SERVER_LIST: '',
       DDNS_ENABLE: '', LOOKUP_HOSTNAME: '', CLOUDFLARE_API_KEY: '',
       USB_TETHERING: '', CELLULAR_MODEM: '',
       DNS_MODE: 'adguardhome', BLOCK_DOT_DOQ: '',
+      DENY_GUEST_NIGHT: '', QUARTERLY_REBOOT: '', LOG: '',
       SOFTWARE_OFFLOAD: '1', HARDWARE_OFFLOAD: '',
       additional_packages: '',
     };
@@ -274,7 +278,8 @@
       pkgs.push('luci-app-mwan3');
     const hasWifi = /\bwpad-?|\bhostapd|\bmac80211/.test(base.join(' ')) ||
       Object.entries(cfg).some(([k, v]) => /WIFI/.test(k) && v);
-    if (hasWifi) pkgs.push('-wpad-basic-mbedtls', 'wpad-mbedtls', 'luci-app-usteer');
+    if (hasWifi) pkgs.push('-wpad-basic-mbedtls', 'wpad-mbedtls');
+    if (hasWifi && cfg.WIFI_KVR === '1') pkgs.push('luci-app-usteer');
     const isAth10kCt = p => /^ath10k-firmware-|^kmod-ath10k-ct/.test(p);
     const ctPkgs = base.filter(isAth10kCt);
     if (cfg.NON_CT_ATH10K === '1' && ctPkgs.length)
@@ -847,6 +852,7 @@
     sv('BRIDGE_WAN_PORT', cfg.BRIDGE_WAN_PORT);
     sv('COUNTRY_CODE', cfg.COUNTRY_CODE);
     sv('DENSE_ENV', cfg.DENSE_ENV); sv('WIRELESS_MESH', cfg.WIRELESS_MESH);
+    const kvrEl = document.getElementById('WIFI_KVR'); if (kvrEl) kvrEl.checked = cfg.WIFI_KVR === '1';
     sv('MESH_ID', cfg.MESH_ID); sv('MESH_PASSWD', cfg.MESH_PASSWD);
     sv('LAN_WIFI_SSID', cfg.LAN_WIFI_SSID); sv('LAN_WIFI_PASSWD', cfg.LAN_WIFI_PASSWD);
     sv('GUEST_WIFI_SSID', cfg.GUEST_WIFI_SSID); sv('GUEST_WIFI_PASSWD', cfg.GUEST_WIFI_PASSWD);
@@ -859,6 +865,9 @@
     sv('USB_TETHERING', cfg.USB_TETHERING); sv('CELLULAR_MODEM', cfg.CELLULAR_MODEM);
     sr('DNS_MODE', cfg.DNS_MODE || 'adguardhome');
     sv('BLOCK_DOT_DOQ', cfg.BLOCK_DOT_DOQ);
+    sv('DENY_GUEST_NIGHT', cfg.DENY_GUEST_NIGHT);
+    sv('QUARTERLY_REBOOT', cfg.QUARTERLY_REBOOT);
+    sv('LOG', cfg.LOG);
     sv('SOFTWARE_OFFLOAD', cfg.SOFTWARE_OFFLOAD);
     sv('HARDWARE_OFFLOAD', cfg.HARDWARE_OFFLOAD);
     sv('additional_packages', cfg.additional_packages);
@@ -917,12 +926,14 @@
       LAN_WG_WIFI_SSID: gv('LAN_WG_WIFI_SSID'), LAN_WG_WIFI_PASSWD: gv('LAN_WG_WIFI_PASSWD'),
       CHANNEL_2G: gv('CHANNEL_2G'), CHANNEL_5G: gv('CHANNEL_5G'), CHANNEL_6G: gv('CHANNEL_6G'),
       WIFI_LOG_LVL: gv('WIFI_LOG_LVL'),
+      WIFI_KVR: (document.getElementById('WIFI_KVR') || {}).checked ? '1' : '',
       PORT_FORWARD_LIST: ui.serializeRows ? ui.serializeRows('portfwd') : readTable('portfwd-table'),
       IPV6_SERVER_LIST:  ui.serializeRows ? ui.serializeRows('ipv6')    : readTable('ipv6-table'),
       DDNS_ENABLE: gv('DDNS_ENABLE'), LOOKUP_HOSTNAME: gv('LOOKUP_HOSTNAME'),
       CLOUDFLARE_API_KEY: gv('CLOUDFLARE_API_KEY'),
       USB_TETHERING: gv('USB_TETHERING'), CELLULAR_MODEM: gv('CELLULAR_MODEM'),
       DNS_MODE: gr('DNS_MODE'), BLOCK_DOT_DOQ: gv('BLOCK_DOT_DOQ'),
+      DENY_GUEST_NIGHT: gv('DENY_GUEST_NIGHT'), QUARTERLY_REBOOT: gv('QUARTERLY_REBOOT'), LOG: gv('LOG'),
       SOFTWARE_OFFLOAD: gv('SOFTWARE_OFFLOAD'), HARDWARE_OFFLOAD: gv('HARDWARE_OFFLOAD'),
       additional_packages: gv('additional_packages'),
     };

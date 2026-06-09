@@ -12,7 +12,39 @@
     return btoa(String.fromCharCode(...new Uint8Array(buf)));
   }
 
+  function clearRetryNote() {
+    const n = $('#retry-note');
+    if (n) { n.textContent = ''; n.className = 'status hidden'; }
+  }
+
+  function tryAutoRetry(errMsg) {
+    if (!/exceed.*storage|storage.*exceed/i.test(errMsg)) return false;
+    const dnsRadio = $('input[name="DNS_MODE"]:checked');
+    const dnsVal = dnsRadio ? dnsRadio.value : '';
+    if (dnsVal !== 'adguardhome' && dnsVal !== 'dnsproxy') return false;
+    const nextVal = dnsVal === 'adguardhome' ? 'dnsproxy' : 'none';
+    const nextRadio = $('input[name="DNS_MODE"][value="' + nextVal + '"]');
+    if (nextRadio) nextRadio.checked = true;
+    const rn = $('#retry-note');
+    if (rn) {
+      rn.innerHTML = '';
+      rn.className = 'status error';
+      const errLine = document.createElement('p');
+      errLine.style.margin = '0';
+      errLine.textContent = errMsg;
+      rn.appendChild(errLine);
+      const tip = document.createElement('p');
+      tip.className = 'text-xs text-zinc-500 dark:text-zinc-400 mt-1';
+      tip.textContent = t(dnsVal === 'adguardhome' ? 'autoSwitchedDnsproxy' : 'autoSwitchedDnsmasq');
+      rn.appendChild(tip);
+    }
+    $('#build-btn').disabled = true;
+    setTimeout(() => ui.startBuild(), 2000);
+    return true;
+  }
+
   function statusError(msg) {
+    clearRetryNote();
     ui.status(msg, 'error');
     if (/exceed.*storage|storage.*exceed/i.test(msg)) {
       const el = ui.$('#status');
@@ -105,6 +137,7 @@
 
       COUNTRY_CODE:   textVal('COUNTRY_CODE').toUpperCase(),
       DENSE_ENV:      checkboxVal('DENSE_ENV'),
+      WIFI_KVR:       $('#WIFI_KVR').checked ? '1' : '',
       WIRELESS_MESH:  checkboxVal('WIRELESS_MESH'),
       MESH_ID:        meshEnable ? textVal('MESH_ID')     : '',
       MESH_PASSWD:    meshEnable ? textVal('MESH_PASSWD') : '',
@@ -142,9 +175,12 @@
 USB_TETHERING:  isRouter ? checkboxVal('USB_TETHERING') : '',
 
       DNS_MODE:         ($('input[name="DNS_MODE"]:checked') || {}).value || 'adguardhome',
-      SOFTWARE_OFFLOAD: checkboxVal('SOFTWARE_OFFLOAD'),
-      HARDWARE_OFFLOAD: checkboxVal('HARDWARE_OFFLOAD'),
-      BLOCK_DOT_DOQ:    checkboxVal('BLOCK_DOT_DOQ'),
+      SOFTWARE_OFFLOAD:  checkboxVal('SOFTWARE_OFFLOAD'),
+      HARDWARE_OFFLOAD:  checkboxVal('HARDWARE_OFFLOAD'),
+      BLOCK_DOT_DOQ:     checkboxVal('BLOCK_DOT_DOQ'),
+      DENY_GUEST_NIGHT:  checkboxVal('DENY_GUEST_NIGHT'),
+      QUARTERLY_REBOOT:  checkboxVal('QUARTERLY_REBOOT'),
+      LOG:               checkboxVal('LOG'),
       NON_CT_ATH10K:    checkboxVal('NON_CT_ATH10K'),
     };
   }
@@ -176,7 +212,8 @@ USB_TETHERING:  isRouter ? checkboxVal('USB_TETHERING') : '',
 
     const hasWifi = /\bwpad-?|\bhostapd|\bmac80211/.test(base.join(' ')) ||
                     Object.entries(cfg).some(([k, v]) => /WIFI/.test(k) && v);
-    if (hasWifi) pkgs.push('-wpad-basic-mbedtls', 'wpad-mbedtls', 'luci-app-usteer');
+    if (hasWifi) pkgs.push('-wpad-basic-mbedtls', 'wpad-mbedtls');
+    if (hasWifi && cfg.WIFI_KVR === '1') pkgs.push('luci-app-usteer');
 
     const isAth10kCt = p => /^ath10k-firmware-|^kmod-ath10k-ct/.test(p);
     const ctPkgs = base.filter(isAth10kCt);
@@ -269,7 +306,6 @@ USB_TETHERING:  isRouter ? checkboxVal('USB_TETHERING') : '',
   }
 
   let polling = null;
-
   ui.startBuild = async function () {
     if (polling) return;
     ui.clearStatus(); ui.clearProgress();
@@ -332,7 +368,6 @@ USB_TETHERING:  isRouter ? checkboxVal('USB_TETHERING') : '',
     };
 
     $('#build-btn').disabled = true;
-    ui.status(S.submittingBuild, 'info');
     ui.setProgress(S.submittingBuild, 2);
 
     let resp;
@@ -362,7 +397,6 @@ USB_TETHERING:  isRouter ? checkboxVal('USB_TETHERING') : '',
       return;
     }
 
-    ui.status(S.preparingBuild, 'info');
     ui.setProgress(S.preparingBuild, 5);
 
     let wrtnovaBody;
@@ -386,7 +420,6 @@ USB_TETHERING:  isRouter ? checkboxVal('USB_TETHERING') : '',
       client:       'wrtnova/1.0',
     };
 
-    ui.status(S.submittingToServer, 'info');
     ui.setProgress(S.submittingToServer, 8);
 
     let asuR, asuData;
@@ -403,7 +436,9 @@ USB_TETHERING:  isRouter ? checkboxVal('USB_TETHERING') : '',
     } catch (e) {
       $('#build-btn').disabled = false;
       ui.clearProgress();
-      statusError(t('buildRequestFailed', { msg: e.message }));
+      if (!tryAutoRetry(e.message)) {
+        statusError(t('buildRequestFailed', { msg: e.message }));
+      }
       return;
     }
 
@@ -413,7 +448,7 @@ USB_TETHERING:  isRouter ? checkboxVal('USB_TETHERING') : '',
       saveHistoryLocal(payload, { status: 'success', firmware_url: null }, cfg);
       renderResult(asuData, asuBase);
       ui.setProgress(S.doneCachedBuild, 100);
-      ui.status(S.buildComplete, 'success');
+      clearRetryNote(); ui.status(S.buildComplete, 'success');
       $('#build-btn').disabled = false;
       return;
     }
@@ -450,13 +485,16 @@ USB_TETHERING:  isRouter ? checkboxVal('USB_TETHERING') : '',
         $('#build-btn').disabled = false;
         if (r.status === 200) {
           ui.setProgress(S.done, 100);
-          ui.status(S.buildComplete, 'success');
+          clearRetryNote(); ui.status(S.buildComplete, 'success');
           renderResult(data, base);
         } else {
-          statusError(t('buildFailed', { msg: data.detail || ('HTTP ' + r.status) }));
-          if (data.stderr) {
-            $('#config-preview').textContent = data.stderr;
-            $('#config-preview-wrap').classList.remove('hidden');
+          const errMsg = data.detail || ('HTTP ' + r.status);
+          if (!tryAutoRetry(errMsg)) {
+            statusError(t('buildFailed', { msg: errMsg }));
+            if (data.stderr) {
+              $('#config-preview').textContent = data.stderr;
+              $('#config-preview-wrap').classList.remove('hidden');
+            }
           }
         }
       } catch (e) {

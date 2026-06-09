@@ -557,6 +557,17 @@
               </summary>
               <div class="mt-2 pl-4 border-l-2 border-zinc-200 dark:border-zinc-700">
                 <div class="form-row">
+                  <label class="form-label" data-i18n="fastRoaming">802.11k/v/r</label>
+                  <label class="toggle-label">
+                    <span class="toggle-wrap">
+                      <input type="checkbox" id="WIFI_KVR" name="WIFI_KVR" class="toggle-input" checked>
+                      <span class="toggle-track"></span>
+                      <span class="toggle-thumb"></span>
+                    </span>
+                    <span class="toggle-text" data-i18n="enableFastRoaming">Enable fast roaming and band-steering</span>
+                  </label>
+                </div>
+                <div class="form-row">
                   <label for="CHANNEL_2G" class="form-label" data-i18n="channel2g">2.4 GHz channel</label>
                   <input type="text" id="CHANNEL_2G" name="CHANNEL_2G" class="input-base" placeholder="default" style="max-width:120px">
                 </div>
@@ -911,6 +922,39 @@
                 <div>
                   <span class="toggle-text" data-i18n="blockDotDoq">Block DoT and DoQ</span>
                   <p class="form-help mt-0" data-i18n="blockDotDoqHelp">Enforce ad blocking on stubborn client devices.</p>
+                </div>
+              </label>
+              <label class="toggle-label">
+                <span class="toggle-wrap">
+                  <input type="checkbox" id="DENY_GUEST_NIGHT" name="DENY_GUEST_NIGHT" value="1" class="toggle-input">
+                  <span class="toggle-track"></span>
+                  <span class="toggle-thumb"></span>
+                </span>
+                <div>
+                  <span class="toggle-text" data-i18n="denyGuestNight">Block guest at night</span>
+                  <p class="form-help mt-0" data-i18n="denyGuestNightHelp">Block guest internet from 9 PM to 7 AM. Requires guest network.</p>
+                </div>
+              </label>
+              <label class="toggle-label">
+                <span class="toggle-wrap">
+                  <input type="checkbox" id="QUARTERLY_REBOOT" name="QUARTERLY_REBOOT" value="1" class="toggle-input">
+                  <span class="toggle-track"></span>
+                  <span class="toggle-thumb"></span>
+                </span>
+                <div>
+                  <span class="toggle-text" data-i18n="quarterlyReboot">Quarterly auto-reboot</span>
+                  <p class="form-help mt-0" data-i18n="quarterlyRebootHelp">Reboot at 3:30 AM once every quarter.</p>
+                </div>
+              </label>
+              <label class="toggle-label">
+                <span class="toggle-wrap">
+                  <input type="checkbox" id="LOG" name="LOG" value="1" class="toggle-input">
+                  <span class="toggle-track"></span>
+                  <span class="toggle-thumb"></span>
+                </span>
+                <div>
+                  <span class="toggle-text" data-i18n="buildLog">Enable debug log</span>
+                  <p class="form-help mt-0" data-i18n="buildLogHelp">Trace first-boot script execution to /root/99-asu-defaults.log.</p>
                 </div>
               </label>
             </div>
