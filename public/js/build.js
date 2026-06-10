@@ -81,110 +81,72 @@
 
   function checkboxVal(id) { const el = $('#' + id); return el && el.checked ? '1' : ''; }
   function textVal(id)     { return ($('#' + id) || {}).value || ''; }
+  function radioVal(name)  { return ($('input[name="' + name + '"]:checked') || {}).value || ''; }
 
-  function collectConfig() {
-    const apMode  = $('input[name="AP_MODE"]:checked').value;
-    const wanType = ($('input[name="wan_type"]:checked') || {}).value || 'dhcp';
-    const tz      = ui.collectTimezone();
+  // -- Config store (single source of truth) --------------------------------
+  // The DOM is a view. readRawForm() reads+normalizes every field into a raw
+  // object (no cross-field gating); the store holds it; ui.deriveBuilderConfig()
+  // (builder-config.mjs) is the pure selector that applies the gating. Build
+  // payload, preview and chips all read the store via collectConfig().
 
-    const isRouter   = apMode !== '1';
-    const wgEnable   = $('#WG_ENABLE').checked;
-    const meshEnable = $('#WIRELESS_MESH') && $('#WIRELESS_MESH').checked;
+  const RADIO_KEYS = ['AP_MODE', 'wan_type', 'SSH_PASSWD_AUTH', 'DNS_MODE'];
+  const CHECKBOX_KEYS = [
+    'WAN_IS_TAGGED', 'WAN_B_ENABLE', 'BRIDGE_WAN_PORT',
+    'GUEST_ENABLE', 'IOT_ENABLE', 'IOT_INTERNET', 'IOT_ROUTE_VIA_WG', 'WG_ENABLE',
+    'WIFI_KVR', 'DENSE_ENV', 'WIRELESS_MESH', 'GUEST_ISOLATE',
+    'DDNS_ENABLE', 'CELLULAR_MODEM', 'USB_TETHERING',
+    'SOFTWARE_OFFLOAD', 'HARDWARE_OFFLOAD', 'BLOCK_DOT_DOQ',
+    'DENY_GUEST_NIGHT', 'QUARTERLY_REBOOT', 'LOG', 'NON_CT_ATH10K',
+  ];
+  const TEXT_KEYS = [
+    'AP_INDEX', 'HOST_NAME', 'ROOT_PASSWD', 'SSH_PUBLIC_KEY',
+    'PPPOE_USERNAME', 'PPPOE_PASSWD', 'WAN_MAC_ADDR', 'WAN_VLAN_ID', 'WAN_B_VLAN_ID',
+    'BASE_NET_PREFIX', 'DEFAULT_SUBNET',
+    'LAN_BASE_PREFIX', 'LAN_VLAN_ID', 'LAN_SUBNET',
+    'GUEST_BASE_PREFIX', 'GUEST_VLAN_ID', 'GUEST_SUBNET',
+    'IOT_BASE_PREFIX', 'IOT_VLAN_ID', 'IOT_SUBNET',
+    'LAN_WG_BASE_PREFIX', 'LAN_WG_VLAN_ID', 'LAN_WG_SUBNET',
+    'ADDITIONAL_VLAN_LIST',
+    'MESH_ID', 'MESH_PASSWD',
+    'LAN_WIFI_SSID', 'LAN_WIFI_PASSWD', 'GUEST_WIFI_SSID', 'GUEST_WIFI_PASSWD',
+    'IOT_WIFI_SSID', 'IOT_WIFI_PASSWD', 'LAN_WG_WIFI_SSID', 'LAN_WG_WIFI_PASSWD',
+    'CHANNEL_2G', 'CHANNEL_5G', 'CHANNEL_6G', 'WIFI_LOG_LVL',
+    'WG_PRIVATE_KEY', 'PEER_PUBLIC_KEY', 'ENDPOINT', 'ENDPOINT_PORT',
+    'PRESHARED_KEY', 'WG_IPV4', 'WG_IPV6', 'ALLOWED_IPS',
+    'LOOKUP_HOSTNAME', 'CLOUDFLARE_API_KEY',
+  ];
 
-
-    return {
-      AP_MODE:  apMode,
-      AP_INDEX: isRouter ? '' : textVal('AP_INDEX'),
-
-      HOST_NAME:       textVal('HOST_NAME'),
-      ROOT_PASSWD:     textVal('ROOT_PASSWD'),
-      SSH_PUBLIC_KEY:  textVal('SSH_PUBLIC_KEY'),
-      SSH_PASSWD_AUTH: ($('input[name="SSH_PASSWD_AUTH"]:checked') || {}).value || '',
-      ZONE_NAME:       tz.ZONE_NAME,
-      TIME_ZONE:       tz.TIME_ZONE,
-
-      PPPOE_USERNAME: wanType === 'pppoe' ? textVal('PPPOE_USERNAME') : '',
-      PPPOE_PASSWD:   wanType === 'pppoe' ? textVal('PPPOE_PASSWD')   : '',
-      WAN_MAC_ADDR:   textVal('WAN_MAC_ADDR'),
-      WAN_IS_TAGGED:  checkboxVal('WAN_IS_TAGGED'),
-      WAN_VLAN_ID:    textVal('WAN_VLAN_ID'),
-      WAN_B_ENABLE:   isRouter ? checkboxVal('WAN_B_ENABLE') : '',
-      WAN_B_VLAN_ID:  (isRouter && $('#WAN_B_ENABLE').checked) ? textVal('WAN_B_VLAN_ID') : '',
-      BRIDGE_WAN_PORT: isRouter ? checkboxVal('BRIDGE_WAN_PORT') : '',
-
-      BASE_NET_PREFIX: textVal('BASE_NET_PREFIX'),
-      DEFAULT_SUBNET:  textVal('DEFAULT_SUBNET'),
-      GUEST_ENABLE:    checkboxVal('GUEST_ENABLE'),
-      IOT_ENABLE:      checkboxVal('IOT_ENABLE'),
-      IOT_INTERNET:    $('#IOT_ENABLE').checked ? checkboxVal('IOT_INTERNET') : '',
-      IOT_ROUTE_VIA_WG: ($('#IOT_ENABLE').checked && wgEnable) ? checkboxVal('IOT_ROUTE_VIA_WG') : '',
-      WG_ENABLE:       wgEnable ? '1' : '',
-
-      // -- Per-network addressing (blank = inherit default) ------------------
-      LAN_BASE_PREFIX:    textVal('LAN_BASE_PREFIX'),
-      LAN_VLAN_ID:        textVal('LAN_VLAN_ID'),
-      LAN_SUBNET:         textVal('LAN_SUBNET'),
-      GUEST_BASE_PREFIX:  $('#GUEST_ENABLE').checked ? textVal('GUEST_BASE_PREFIX') : '',
-      GUEST_VLAN_ID:      $('#GUEST_ENABLE').checked ? textVal('GUEST_VLAN_ID')     : '',
-      GUEST_SUBNET:       $('#GUEST_ENABLE').checked ? textVal('GUEST_SUBNET')       : '',
-      IOT_BASE_PREFIX:    $('#IOT_ENABLE').checked   ? textVal('IOT_BASE_PREFIX')   : '',
-      IOT_VLAN_ID:        $('#IOT_ENABLE').checked   ? textVal('IOT_VLAN_ID')       : '',
-      IOT_SUBNET:         $('#IOT_ENABLE').checked   ? textVal('IOT_SUBNET')         : '',
-      LAN_WG_BASE_PREFIX: wgEnable ? textVal('LAN_WG_BASE_PREFIX') : '',
-      LAN_WG_VLAN_ID:     wgEnable ? textVal('LAN_WG_VLAN_ID')     : '',
-      LAN_WG_SUBNET:      wgEnable ? textVal('LAN_WG_SUBNET')       : '',
-      ADDITIONAL_VLAN_LIST: textVal('ADDITIONAL_VLAN_LIST'),
-
-      COUNTRY_CODE:   textVal('COUNTRY_CODE').toUpperCase(),
-      DENSE_ENV:      checkboxVal('DENSE_ENV'),
-      WIFI_KVR:       $('#WIFI_KVR').checked ? '1' : '',
-      WIRELESS_MESH:  checkboxVal('WIRELESS_MESH'),
-      MESH_ID:        meshEnable ? textVal('MESH_ID')     : '',
-      MESH_PASSWD:    meshEnable ? textVal('MESH_PASSWD') : '',
-
-      LAN_WIFI_SSID:      textVal('LAN_WIFI_SSID'),
-      LAN_WIFI_PASSWD:    textVal('LAN_WIFI_PASSWD'),
-      GUEST_WIFI_SSID:    $('#GUEST_ENABLE').checked ? textVal('GUEST_WIFI_SSID')   : '',
-      GUEST_WIFI_PASSWD:  $('#GUEST_ENABLE').checked ? textVal('GUEST_WIFI_PASSWD') : '',
-      GUEST_ISOLATE:      $('#GUEST_ENABLE').checked ? checkboxVal('GUEST_ISOLATE') : '',
-      IOT_WIFI_SSID:      $('#IOT_ENABLE').checked   ? textVal('IOT_WIFI_SSID')     : '',
-      IOT_WIFI_PASSWD:    $('#IOT_ENABLE').checked   ? textVal('IOT_WIFI_PASSWD')   : '',
-      LAN_WG_WIFI_SSID:   wgEnable ? textVal('LAN_WG_WIFI_SSID')   : '',
-      LAN_WG_WIFI_PASSWD: wgEnable ? textVal('LAN_WG_WIFI_PASSWD') : '',
-      CHANNEL_2G:   textVal('CHANNEL_2G'),
-      CHANNEL_5G:   textVal('CHANNEL_5G'),
-      CHANNEL_6G:   textVal('CHANNEL_6G'),
-      WIFI_LOG_LVL: textVal('WIFI_LOG_LVL'),
-
-      WG_PRIVATE_KEY: wgEnable ? textVal('WG_PRIVATE_KEY') : '',
-      PEER_PUBLIC_KEY: wgEnable ? textVal('PEER_PUBLIC_KEY') : '',
-      ENDPOINT:        wgEnable ? textVal('ENDPOINT')        : '',
-      ENDPOINT_PORT:   wgEnable ? textVal('ENDPOINT_PORT')   : '',
-      PRESHARED_KEY:   wgEnable ? textVal('PRESHARED_KEY')   : '',
-      WG_IPV4:         wgEnable ? textVal('WG_IPV4')         : '',
-      WG_IPV6:         wgEnable ? textVal('WG_IPV6')         : '',
-      ALLOWED_IPS:     wgEnable ? textVal('ALLOWED_IPS')     : '',
-
-      PORT_FORWARD_LIST: isRouter ? ui.serializeRows('portfwd') : '',
-      IPV6_SERVER_LIST:  isRouter ? ui.serializeRows('ipv6')    : '',
-
-      DDNS_ENABLE:        isRouter ? checkboxVal('DDNS_ENABLE') : '',
-      LOOKUP_HOSTNAME:    isRouter ? textVal('LOOKUP_HOSTNAME')    : '',
-      CLOUDFLARE_API_KEY: isRouter ? textVal('CLOUDFLARE_API_KEY') : '',
-
-      CELLULAR_MODEM: isRouter ? checkboxVal('CELLULAR_MODEM') : '',
-USB_TETHERING:  isRouter ? checkboxVal('USB_TETHERING') : '',
-
-      DNS_MODE:         ($('input[name="DNS_MODE"]:checked') || {}).value || 'adguardhome',
-      SOFTWARE_OFFLOAD:  checkboxVal('SOFTWARE_OFFLOAD'),
-      HARDWARE_OFFLOAD:  checkboxVal('HARDWARE_OFFLOAD'),
-      BLOCK_DOT_DOQ:     checkboxVal('BLOCK_DOT_DOQ'),
-      DENY_GUEST_NIGHT:  checkboxVal('DENY_GUEST_NIGHT'),
-      QUARTERLY_REBOOT:  checkboxVal('QUARTERLY_REBOOT'),
-      LOG:               checkboxVal('LOG'),
-      NON_CT_ATH10K:    checkboxVal('NON_CT_ATH10K'),
-    };
+  // DOM -> raw config object, normalized once at the boundary (checkboxes ''/'1',
+  // COUNTRY_CODE uppercased, tz + dynamic tables resolved). No gating here.
+  function readRawForm() {
+    const raw = {};
+    RADIO_KEYS.forEach(k => { raw[k] = radioVal(k); });
+    CHECKBOX_KEYS.forEach(k => { raw[k] = checkboxVal(k); });
+    TEXT_KEYS.forEach(k => { raw[k] = textVal(k); });
+    raw.COUNTRY_CODE = textVal('COUNTRY_CODE').toUpperCase();
+    const tz = ui.collectTimezone();
+    raw.ZONE_NAME = tz.ZONE_NAME;
+    raw.TIME_ZONE = tz.TIME_ZONE;
+    raw.PORT_FORWARD_LIST = ui.serializeRows('portfwd');
+    raw.IPV6_SERVER_LIST  = ui.serializeRows('ipv6');
+    // Not a config key (deriveConfig never emits it); held in the store only so
+    // editing extras notifies subscribers and re-renders the final package list.
+    raw.additional_packages = textVal('additional_packages');
+    return raw;
   }
+
+  let store = null;
+
+  // The gated config: pure derivation of the store (falls back to a direct form
+  // read if called before the store is initialized).
+  function collectConfig() {
+    return ui.deriveBuilderConfig(store ? store.get() : readRawForm());
+  }
+
+  function refreshStore() {
+    if (store) store.set(readRawForm());
+  }
+  ui.refreshConfigStore = refreshStore;
 
   function parseAdditionalPackages() {
     return ($('#additional_packages').value || '')
@@ -193,68 +155,115 @@ USB_TETHERING:  isRouter ? checkboxVal('USB_TETHERING') : '',
       .filter(Boolean);
   }
 
-  function computeAutoPackages() {
-    const target  = ui.collectTarget && ui.collectTarget();
-    const cfg     = collectConfig();
-    const base    = target ? [...(target.default_packages || []), ...(target.device_packages || [])] : [];
-    const pkgs    = [];
-
-    pkgs.push('curl', 'ip-full', 'umdns', 'luci');
-    if (cfg.AP_MODE !== '1') {
-      const dnsMode = cfg.DNS_MODE || 'adguardhome';
-      if (dnsMode === 'adguardhome') pkgs.push('adguardhome');
-      else if (dnsMode === 'dnsproxy') pkgs.push('dnsproxy');
-    }
-    pkgs.push('zram-swap', 'luci-app-commands', 'ip-bridge');
-
-    const multiWan = cfg.WAN_B_ENABLE === '1' || cfg.WWAN_ENABLE === '1' ||
-                     cfg.CELLULAR_MODEM === '1' || cfg.USB_TETHERING === '1';
-    if (multiWan) pkgs.push('luci-app-mwan3');
-
-    const hasWifi = /\bwpad-?|\bhostapd|\bmac80211/.test(base.join(' ')) ||
-                    Object.entries(cfg).some(([k, v]) => /WIFI/.test(k) && v);
-    if (hasWifi) pkgs.push('-wpad-basic-mbedtls', 'wpad-mbedtls');
-    if (hasWifi && cfg.WIFI_KVR === '1') pkgs.push('luci-app-usteer');
-
-    const isAth10kCt = p => /^ath10k-firmware-|^kmod-ath10k-ct/.test(p);
-    const ctPkgs = base.filter(isAth10kCt);
-    if (cfg.NON_CT_ATH10K === '1' && ctPkgs.length) {
-      ctPkgs.forEach(p => { pkgs.push('-' + p); pkgs.push(p.replace(/-ct.*$/, '')); });
-    }
-
-    pkgs.push('luci-app-ddns', 'ddns-scripts-cloudflare');
-    if (cfg.WG_ENABLE === '1' && cfg.AP_MODE !== '1') pkgs.push('luci-proto-wireguard');
-    if (cfg.CELLULAR_MODEM === '1') pkgs.push('luci-proto-modemmanager', 'kmod-usb-net-cdc-mbim');
-    if (cfg.USB_TETHERING === '1') pkgs.push('kmod-usb-net-rndis', 'kmod-usb-net-cdc-ncm', 'kmod-usb-net-ipheth');
-
-    return pkgs;
+  // The exact, ordered package set sent to ASU - the full resolved list (base +
+  // device + WrtNova additions + user extras, removals collapsed/sorted), via the
+  // shared resolvePackages. Byte-identical to what the worker returns.
+  function computeFinalPackages() {
+    if (!ui.computeFinalPackages) return [];
+    const target = ui.collectTarget && ui.collectTarget();
+    return ui.computeFinalPackages(target, collectConfig(), parseAdditionalPackages());
   }
+
+  const CHIP_NEUTRAL = 'inline-flex items-center px-2 py-0.5 rounded text-xs font-mono bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300';
+  const CHIP_REMOVAL = 'inline-flex items-center px-2 py-0.5 rounded text-xs font-mono bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400 line-through';
 
   function renderAutoPackages() {
     const el = $('#auto-packages');
     if (!el) return;
-    const pkgs = computeAutoPackages();
-    el.innerHTML = pkgs.map(p => {
-      const isRemoval = p.startsWith('-');
-      const cls = isRemoval
-        ? 'inline-flex items-center px-2 py-0.5 rounded text-xs font-mono bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400 line-through'
-        : 'inline-flex items-center px-2 py-0.5 rounded text-xs font-mono bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300';
-      return `<span class="${cls}">${p}</span>`;
-    }).join(' ');
+    const pkgs = computeFinalPackages();
+    // Build chips with textContent (not innerHTML): the list now includes
+    // user-typed extra package names, which must not be rendered as markup.
+    el.textContent = '';
+    pkgs.forEach((p, i) => {
+      const span = document.createElement('span');
+      span.className = p.startsWith('-') ? CHIP_REMOVAL : CHIP_NEUTRAL;
+      span.textContent = p;
+      el.appendChild(span);
+      if (i < pkgs.length - 1) el.appendChild(document.createTextNode(' '));
+    });
+    const copyBtn = $('#copy-packages');
+    if (copyBtn) copyBtn.dataset.pkgs = pkgs.join(' ');
   }
 
   ui.renderAutoPackages = renderAutoPackages;
 
-  function initAutoPackages() {
-    document.body.addEventListener('change', renderAutoPackages);
-    document.body.addEventListener('input',  renderAutoPackages);
+  // -- Live config / script preview (always-on selectors of the store) ----------
+  let previewRevealed = false;   // mask sensitive values unless explicitly revealed
+  let previewFullScript = false; // config block vs the full assembled script
+
+  function renderPreview() {
+    const pre = $('#config-preview');
+    if (!pre) return;
+    if (!previewFullScript) {
+      const cfg = collectConfig();
+      pre.textContent = previewRevealed ? ui.renderConfigBlock(cfg) : ui.renderConfigBlockMasked(cfg);
+      return;
+    }
+    // Full script needs the cached wrtnova.sh body; recompute cfg in the .then so
+    // the latest store state wins if it changed while fetching.
+    ui.fetchWrtnovaBody().then(body => {
+      if (!previewFullScript) return;
+      pre.textContent = ui.assembleScript(collectConfig(), body, !previewRevealed);
+    }).catch(e => { pre.textContent = t('failedLoadTemplate', { msg: e.message }); });
+  }
+  ui.renderPreview = renderPreview;
+
+  function initPreviewControls() {
+    const reveal = $('#preview-reveal');
+    const full   = $('#preview-fullscript');
+    if (reveal) reveal.addEventListener('change', () => { previewRevealed = reveal.checked; renderPreview(); });
+    if (full)   full.addEventListener('change',   () => { previewFullScript = full.checked; renderPreview(); });
+
+    const copyBtn = $('#copy-packages');
+    if (copyBtn) copyBtn.addEventListener('click', async () => {
+      const ok = await ui.copyToClipboard(copyBtn.dataset.pkgs || '');
+      copyBtn.textContent = ok ? (S.copied || 'Copied') : (S.error || 'Error');
+      setTimeout(() => { copyBtn.textContent = t('copy'); }, 1200);
+    });
+  }
+
+  // SSID placeholders track the hostname - a pure selector of the store.
+  function syncSsidPlaceholders() {
+    const name = ((store ? store.get().HOST_NAME : textVal('HOST_NAME')) || '').trim() || 'WrtNova';
+    [
+      ['LAN_WIFI_SSID',    name],
+      ['GUEST_WIFI_SSID',  name + '_Guest'],
+      ['IOT_WIFI_SSID',    name + '_IoT'],
+      ['LAN_WG_WIFI_SSID', name + '_VPN'],
+    ].forEach(([id, ph]) => { const el = $('#' + id); if (el) el.placeholder = ph; });
+  }
+  ui.syncSsidPlaceholders = syncSsidPlaceholders;
+
+  // AP-mode LAN IP shown in the AP-index help text - a store selector that mirrors
+  // the LAN row's ROUTER IP (effective LAN prefix + LAN VLAN + AP index), so the
+  // help text and the Networks table never disagree.
+  function syncApIndexPreview() {
+    const el = $('#ap-index-preview');
+    if (!el) return;
+    const s = store ? store.get() : readRawForm();
+    const prefix = (s.LAN_BASE_PREFIX || '').trim() || (s.BASE_NET_PREFIX || '').trim() || '192.168';
+    const vlan   = (s.LAN_VLAN_ID || '').trim() || '1';
+    const idx    = (s.AP_INDEX || '').trim() || '2';
+    el.textContent = prefix + '.' + vlan + '.' + idx;
+  }
+  ui.syncApIndexPreview = syncApIndexPreview;
+
+  // Build the store from the (fully-initialized) form, subscribe the derived
+  // selectors, and wire the one boundary listener that feeds the store. Called
+  // by app.js after the dynamic tables exist (so serializeRows sees them).
+  ui.initConfigStore = function () {
+    if (store) return;
+    store = ui.createStore(readRawForm());
+    ui.configStore = store;
+    store.subscribe(() => { renderAutoPackages(); syncSsidPlaceholders(); syncApIndexPreview(); renderPreview(); });
+    document.body.addEventListener('input',  refreshStore);
+    document.body.addEventListener('change', refreshStore);
+    initPreviewControls();
     renderAutoPackages();
-  }
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initAutoPackages);
-  } else {
-    initAutoPackages();
-  }
+    syncSsidPlaceholders();
+    syncApIndexPreview();
+    renderPreview();
+  };
 
   const HISTORY_KEY = 'wrtnova_history';
   const HISTORY_MAX = 5;
@@ -312,7 +321,7 @@ USB_TETHERING:  isRouter ? checkboxVal('USB_TETHERING') : '',
     if (polling) return;
     ui.clearStatus(); ui.clearProgress();
     $('#result').classList.add('hidden');
-    $('#config-preview-wrap').classList.add('hidden');
+    // The config preview is an always-live selector now; not gated on Build.
 
     const target = ui.collectTarget();
     if (!target) { ui.status(S.pickDeviceFirst, 'error'); return; }
@@ -389,9 +398,6 @@ USB_TETHERING:  isRouter ? checkboxVal('USB_TETHERING') : '',
       ui.status(t('buildSubmitFailed', { msg: e.message }), 'error');
       return;
     }
-
-    $('#config-preview').textContent = ui.renderConfigBlockMasked(cfg);
-    $('#config-preview-wrap').classList.remove('hidden');
 
     if (!resp.packages || !resp.asu_url) {
       ui.status(S.unexpectedApiBuild, 'error');
@@ -494,8 +500,10 @@ USB_TETHERING:  isRouter ? checkboxVal('USB_TETHERING') : '',
           if (!tryAutoRetry(errMsg)) {
             statusError(t('buildFailed', { msg: errMsg }));
             if (data.stderr) {
+              // Surface the build stderr in the (always-present) preview pane;
+              // expand it so it is visible. Overwritten on the next config edit.
               $('#config-preview').textContent = data.stderr;
-              $('#config-preview-wrap').classList.remove('hidden');
+              $('#config-preview-wrap').open = true;
             }
           }
         }
@@ -582,6 +590,9 @@ USB_TETHERING:  isRouter ? checkboxVal('USB_TETHERING') : '',
           _warpSessionToken = data.warp_refresh_token;
         }
 
+        // WG fields were set programmatically (no input event); sync the store
+        // so they reach the build payload / preview.
+        refreshStore();
         ui.setDot('wg', 'touched');
 
         if (msg) {
@@ -614,5 +625,8 @@ USB_TETHERING:  isRouter ? checkboxVal('USB_TETHERING') : '',
     $('#build-btn').disabled = !ok;
     $('#build-hint').textContent = ok ? '' : S.pickDeviceHint;
     if (ok) ui.setDot('target', 'valid');
+    // Chips depend on the target's base/device packages, which are not part of
+    // the config store; re-render on target change.
+    renderAutoPackages();
   };
 })();

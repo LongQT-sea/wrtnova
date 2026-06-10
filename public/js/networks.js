@@ -16,68 +16,9 @@
   const ui = window.WrtNova = window.WrtNova || {};
   const S = ui.S, t = ui.t;
 
-  // -- Node config merge (mirrors Worker's mergeNodeConfig in functions/api/build.js) --
-  function mergeNodeConfig(sharedConfig, nodeOverrides) {
-    const c = Object.assign({}, sharedConfig, nodeOverrides);
-    const isAp    = c.AP_MODE       === '1';
-    const wgOn    = c.WG_ENABLE     === '1';
-    const meshOn  = c.WIRELESS_MESH === '1';
-    const guestOn = c.GUEST_ENABLE  === '1';
-    const iotOn   = c.IOT_ENABLE    === '1';
-    const flag = v => v === '1' ? '1' : '';
-    return {
-      AP_MODE: isAp ? '1' : '', AP_INDEX: isAp ? (c.AP_INDEX || '2') : '',
-      HOST_NAME: c.HOST_NAME || '', ROOT_PASSWD: c.ROOT_PASSWD || '',
-      SSH_PUBLIC_KEY: c.SSH_PUBLIC_KEY || '', SSH_PASSWD_AUTH: c.SSH_PASSWD_AUTH || '',
-      ZONE_NAME: c.ZONE_NAME || '', TIME_ZONE: c.TIME_ZONE || '',
-      PPPOE_USERNAME: !isAp && c.wan_type === 'pppoe' ? (c.PPPOE_USERNAME || '') : '',
-      PPPOE_PASSWD:   !isAp && c.wan_type === 'pppoe' ? (c.PPPOE_PASSWD   || '') : '',
-      WAN_MAC_ADDR:   !isAp ? (c.WAN_MAC_ADDR  || '') : '',
-      WAN_IS_TAGGED:  !isAp ? flag(c.WAN_IS_TAGGED) : '',
-      WAN_VLAN_ID:    !isAp ? (c.WAN_VLAN_ID || '') : '',
-      WAN_B_ENABLE:   !isAp ? flag(c.WAN_B_ENABLE) : '',
-      WAN_B_VLAN_ID:  !isAp && c.WAN_B_ENABLE  === '1' ? (c.WAN_B_VLAN_ID || '') : '',
-      BRIDGE_WAN_PORT: !isAp ? flag(c.BRIDGE_WAN_PORT) : '',
-      BASE_NET_PREFIX: c.BASE_NET_PREFIX || '', DEFAULT_SUBNET: c.DEFAULT_SUBNET || '',
-      GUEST_ENABLE: guestOn ? '1' : '', IOT_ENABLE: iotOn ? '1' : '',
-      IOT_INTERNET: iotOn ? flag(c.IOT_INTERNET) : '', IOT_ROUTE_VIA_WG: (iotOn && wgOn) ? flag(c.IOT_ROUTE_VIA_WG) : '', WG_ENABLE: wgOn ? '1' : '',
-      LAN_BASE_PREFIX: c.LAN_BASE_PREFIX || '', LAN_VLAN_ID: c.LAN_VLAN_ID || '', LAN_SUBNET: c.LAN_SUBNET || '',
-      GUEST_BASE_PREFIX: guestOn ? (c.GUEST_BASE_PREFIX || '') : '', GUEST_VLAN_ID: guestOn ? (c.GUEST_VLAN_ID || '') : '', GUEST_SUBNET: guestOn ? (c.GUEST_SUBNET || '') : '',
-      IOT_BASE_PREFIX:   iotOn   ? (c.IOT_BASE_PREFIX   || '') : '', IOT_VLAN_ID:   iotOn   ? (c.IOT_VLAN_ID   || '') : '', IOT_SUBNET:   iotOn   ? (c.IOT_SUBNET   || '') : '',
-      LAN_WG_BASE_PREFIX: wgOn  ? (c.LAN_WG_BASE_PREFIX || '') : '', LAN_WG_VLAN_ID: wgOn  ? (c.LAN_WG_VLAN_ID || '') : '', LAN_WG_SUBNET: wgOn  ? (c.LAN_WG_SUBNET || '') : '',
-      ADDITIONAL_VLAN_LIST: c.ADDITIONAL_VLAN_LIST || '',
-      COUNTRY_CODE: c.COUNTRY_CODE || '', DENSE_ENV: flag(c.DENSE_ENV), WIRELESS_MESH: flag(c.WIRELESS_MESH), WIFI_KVR: flag(c.WIFI_KVR), GUEST_ISOLATE: guestOn ? flag(c.GUEST_ISOLATE) : '',
-      MESH_ID: meshOn ? (c.MESH_ID || '') : '', MESH_PASSWD: meshOn ? (c.MESH_PASSWD || '') : '',
-      LAN_WIFI_SSID: c.LAN_WIFI_SSID || '', LAN_WIFI_PASSWD: c.LAN_WIFI_PASSWD || '',
-      GUEST_WIFI_SSID:  guestOn ? (c.GUEST_WIFI_SSID   || '') : '', GUEST_WIFI_PASSWD:  guestOn ? (c.GUEST_WIFI_PASSWD   || '') : '',
-      IOT_WIFI_SSID:    iotOn   ? (c.IOT_WIFI_SSID     || '') : '', IOT_WIFI_PASSWD:    iotOn   ? (c.IOT_WIFI_PASSWD     || '') : '',
-      LAN_WG_WIFI_SSID: wgOn   ? (c.LAN_WG_WIFI_SSID  || '') : '', LAN_WG_WIFI_PASSWD: wgOn   ? (c.LAN_WG_WIFI_PASSWD  || '') : '',
-      CHANNEL_2G: c.CHANNEL_2G || '', CHANNEL_5G: c.CHANNEL_5G || '', CHANNEL_6G: c.CHANNEL_6G || '',
-      WIFI_LOG_LVL: c.WIFI_LOG_LVL || '',
-      WG_PRIVATE_KEY:  wgOn && !isAp ? (c.WG_PRIVATE_KEY  || '') : '',
-      PEER_PUBLIC_KEY: wgOn && !isAp ? (c.PEER_PUBLIC_KEY  || '') : '',
-      ENDPOINT:        wgOn && !isAp ? (c.ENDPOINT         || '') : '',
-      ENDPOINT_PORT:   wgOn && !isAp ? (c.ENDPOINT_PORT    || '') : '',
-      PRESHARED_KEY:   wgOn && !isAp ? (c.PRESHARED_KEY    || '') : '',
-      WG_IPV4:         wgOn && !isAp ? (c.WG_IPV4          || '') : '',
-      WG_IPV6:         wgOn && !isAp ? (c.WG_IPV6          || '') : '',
-      ALLOWED_IPS:     wgOn && !isAp ? (c.ALLOWED_IPS      || '') : '',
-      PORT_FORWARD_LIST: !isAp ? (c.PORT_FORWARD_LIST || '') : '',
-      IPV6_SERVER_LIST:  !isAp ? (c.IPV6_SERVER_LIST  || '') : '',
-      DDNS_ENABLE:        !isAp ? flag(c.DDNS_ENABLE)        : '',
-      LOOKUP_HOSTNAME:    !isAp ? (c.LOOKUP_HOSTNAME    || '') : '',
-      CLOUDFLARE_API_KEY: !isAp ? (c.CLOUDFLARE_API_KEY || '') : '',
-      CELLULAR_MODEM: !isAp ? flag(c.CELLULAR_MODEM) : '',
-      USB_TETHERING:  !isAp ? flag(c.USB_TETHERING)  : '',
-      DNS_MODE:         c.DNS_MODE || 'adguardhome',
-      SOFTWARE_OFFLOAD: flag(c.SOFTWARE_OFFLOAD), HARDWARE_OFFLOAD: flag(c.HARDWARE_OFFLOAD),
-      BLOCK_DOT_DOQ:    flag(c.BLOCK_DOT_DOQ),
-      DENY_GUEST_NIGHT: flag(c.DENY_GUEST_NIGHT),
-      QUARTERLY_REBOOT: flag(c.QUARTERLY_REBOOT),
-      LOG:              flag(c.LOG),
-      NON_CT_ATH10K:    flag(c.NON_CT_ATH10K),
-    };
-  }
+  // Node config merge: shared definition (config-merge.mjs), assigned onto
+  // window.WrtNova by shared-boot.mjs (which loads before this script).
+  const mergeNodeConfig = ui.mergeNodeConfig;
 
   // -- Storage ------------------------------------------------------
   function loadNetworks() {
@@ -261,34 +202,6 @@
     if (node.last_build) return 'dot valid';
     if (node.device_target.profile) return 'dot touched';
     return 'dot';
-  }
-
-  function computeNodePackages(cfg, target) {
-    const base = [...(target.default_packages || []), ...(target.device_packages || [])];
-    const pkgs = [];
-    const isAp = cfg.AP_MODE === '1';
-    pkgs.push('curl', 'ip-full', 'umdns', 'luci');
-    if (!isAp) {
-      const dns = cfg.DNS_MODE || 'adguardhome';
-      if (dns === 'adguardhome') pkgs.push('adguardhome');
-      else if (dns === 'dnsproxy') pkgs.push('dnsproxy');
-    }
-    pkgs.push('zram-swap', 'luci-app-commands', 'ip-bridge');
-    if (cfg.WAN_B_ENABLE === '1' || cfg.CELLULAR_MODEM === '1' || cfg.USB_TETHERING === '1')
-      pkgs.push('luci-app-mwan3');
-    const hasWifi = /\bwpad-?|\bhostapd|\bmac80211/.test(base.join(' ')) ||
-      Object.entries(cfg).some(([k, v]) => /WIFI/.test(k) && v);
-    if (hasWifi) pkgs.push('-wpad-basic-mbedtls', 'wpad-mbedtls');
-    if (hasWifi && cfg.WIFI_KVR === '1') pkgs.push('luci-app-usteer');
-    const isAth10kCt = p => /^ath10k-firmware-|^kmod-ath10k-ct/.test(p);
-    const ctPkgs = base.filter(isAth10kCt);
-    if (cfg.NON_CT_ATH10K === '1' && ctPkgs.length)
-      ctPkgs.forEach(p => { pkgs.push('-' + p); pkgs.push(p.replace(/-ct.*$/, '')); });
-    pkgs.push('luci-app-ddns', 'ddns-scripts-cloudflare');
-    if (cfg.WG_ENABLE === '1' && !isAp) pkgs.push('luci-proto-wireguard');
-    if (cfg.CELLULAR_MODEM === '1') pkgs.push('luci-proto-modemmanager', 'kmod-usb-net-cdc-mbim');
-    if (cfg.USB_TETHERING === '1') pkgs.push('kmod-usb-net-rndis', 'kmod-usb-net-cdc-ncm', 'kmod-usb-net-ipheth');
-    return pkgs;
   }
 
   async function pwFingerprint(pw) {

@@ -99,8 +99,8 @@
         <div class="form-row ap-only hidden">
           <label for="AP_INDEX" class="form-label" data-i18n="apIndex">AP Index</label>
           <div>
-            <input type="number" id="AP_INDEX" name="AP_INDEX" class="input-base" min="2" max="254" value="2" style="max-width:120px" oninput="document.getElementById('ap-index-preview').textContent=this.value||'2'" onblur="var v=Math.min(254,Math.max(2,parseInt(this.value)||2));this.value=v;document.getElementById('ap-index-preview').textContent=v;this.dispatchEvent(new Event('input',{bubbles:true}))">
-            <p class="form-help"><span data-i18n="apIndexHelp">Last octet 2–254. LAN IP becomes 192.168.1.</span><span id="ap-index-preview">2</span></p>
+            <input type="number" id="AP_INDEX" name="AP_INDEX" class="input-base" min="2" max="254" value="2" style="max-width:120px" onblur="var v=Math.min(254,Math.max(2,parseInt(this.value)||2));this.value=v;this.dispatchEvent(new Event('input',{bubbles:true}))">
+            <p class="form-help"><span data-i18n="apIndexHelp">Last octet 2–254. LAN IP becomes </span><span id="ap-index-preview">192.168.1.2</span></p>
           </div>
         </div>
       </div>
@@ -874,7 +874,10 @@
       <div class="card-body-wrap">
       <div class="card-body">
         <div class="form-row">
-          <label class="form-label" data-i18n="autoAdded">Auto-added</label>
+          <div class="flex items-center justify-between gap-2">
+            <label class="form-label" data-i18n="finalPackages">Final packages</label>
+            <button type="button" id="copy-packages" class="btn btn-ghost text-xs py-0.5 px-2" data-i18n="copy">Copy</button>
+          </div>
           <div id="auto-packages" class="flex flex-wrap gap-1 py-1 min-h-[1.75rem]"></div>
         </div>
         <div class="form-row">
@@ -981,10 +984,20 @@
       <p id="progress-label" class="form-help mt-1.5"></p>
     </div>
     <div id="result" class="hidden"></div>
-    <details id="config-preview-wrap" class="hidden mt-4">
+    <details id="config-preview-wrap" class="mt-4">
       <summary class="text-xs text-zinc-500 dark:text-zinc-400 cursor-pointer hover:text-zinc-700 dark:hover:text-zinc-200 select-none" data-i18n="configPreview">
         Config preview
       </summary>
+      <div class="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2">
+        <label class="flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400 cursor-pointer select-none">
+          <input type="checkbox" id="preview-reveal" class="align-middle">
+          <span data-i18n="revealSecrets">Reveal secrets</span>
+        </label>
+        <label class="flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400 cursor-pointer select-none">
+          <input type="checkbox" id="preview-fullscript" class="align-middle">
+          <span data-i18n="fullScript">Full script</span>
+        </label>
+      </div>
       <pre class="config-preview" id="config-preview"></pre>
     </details>
 
@@ -1012,6 +1025,7 @@
 
   </main>
 
+  <script type="module" src="/js/shared-boot.mjs"></script>
   <script defer src="/js/theme.js"></script>
   <script defer src="/js/ui.js"></script>
   <script defer src="/js/i18n.js"></script>
