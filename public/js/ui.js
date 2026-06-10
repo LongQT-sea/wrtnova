@@ -270,6 +270,23 @@
       block + _SCRIPT_MARKER + wrtnovaBody;
   };
 
+  // Render a final-package list as chips into `el` (shared by /builder and the
+  // /networks per-node panel). Removal tokens ('-pkg') render struck-through.
+  // textContent only - the list can include user-typed names, never markup.
+  const _CHIP_NEUTRAL = 'inline-flex items-center px-2 py-0.5 rounded text-xs font-mono bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300';
+  const _CHIP_REMOVAL = 'inline-flex items-center px-2 py-0.5 rounded text-xs font-mono bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400 line-through';
+  ui.renderPackageChips = function (el, pkgs) {
+    if (!el) return;
+    el.textContent = '';
+    pkgs.forEach((p, i) => {
+      const span = document.createElement('span');
+      span.className = p.startsWith('-') ? _CHIP_REMOVAL : _CHIP_NEUTRAL;
+      span.textContent = p;
+      el.appendChild(span);
+      if (i < pkgs.length - 1) el.appendChild(document.createTextNode(' '));
+    });
+  };
+
   // The exact, ordered package set sent to ASU (the shared resolvePackages, so it
   // is byte-identical to what the worker returns). Includes '-' removal tokens.
   ui.computeFinalPackages = function (target, cfg, extra) {

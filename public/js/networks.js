@@ -147,38 +147,6 @@
     return i;
   }
 
-  function inheritedChips(network, node) {
-    const c = network.shared_config;
-    const chips = [];
-    const isAp = node.overrides.AP_MODE === '1';
-    if (isAp) {
-      chips.push('AP_MODE=1');
-      if (c.LAN_WIFI_SSID || c.HOST_NAME)
-        chips.push('SSID: ' + (c.LAN_WIFI_SSID || c.HOST_NAME || 'WrtNova'));
-      if (c.GUEST_ENABLE === '1') chips.push(S.guestNetwork);
-      if (c.IOT_ENABLE === '1') chips.push(S.iotNetwork);
-      if (c.WG_ENABLE === '1') chips.push(S.vpnSsid);
-      if (c.ROOT_PASSWD) chips.push(S.rootPassword);
-      if (c.SSH_PUBLIC_KEY) chips.push(S.sshKey);
-      if (c.COUNTRY_CODE) chips.push('Country: ' + c.COUNTRY_CODE);
-      chips.push(S.vlansTrunked);
-      if (c.WAN_B_ENABLE === '1') chips.push(S.wanBVlan);
-    } else {
-      if (c.LAN_WIFI_SSID || c.HOST_NAME)
-        chips.push('SSID: ' + (c.LAN_WIFI_SSID || c.HOST_NAME || 'WrtNova'));
-      if (c.WG_ENABLE === '1') chips.push(S.wireGuardVpn);
-      if (c.GUEST_ENABLE === '1') chips.push(S.guestNetwork);
-      if (c.IOT_ENABLE === '1') chips.push(S.iotNetwork);
-      if (c.DNS_MODE && c.DNS_MODE !== 'none')
-        chips.push(c.DNS_MODE === 'adguardhome' ? S.adguardHome : S.dnsproxy);
-      if (c.DDNS_ENABLE === '1' && c.LOOKUP_HOSTNAME)
-        chips.push('DDNS: ' + c.LOOKUP_HOSTNAME);
-      if (c.COUNTRY_CODE) chips.push('Country: ' + c.COUNTRY_CODE);
-      if (c.BASE_NET_PREFIX) chips.push(c.BASE_NET_PREFIX + '.x.0/24');
-    }
-    return chips;
-  }
-
   function netSummary(network) {
     const c = network.shared_config;
     const p = [];
@@ -489,6 +457,69 @@
   }
 
 
+  // Per-node final-package list + Copy and a collapsible config/script preview
+  // (parity with /builder). Only shown once a device is selected, since the
+  // package set depends on the device's base/device package lists.
+  function nodeExtrasHTML(id, hasDevice) {
+    if (!hasDevice) return '';
+    const sid = esc(id);
+    const sumCls = 'text-xs text-zinc-500 dark:text-zinc-400 cursor-pointer hover:text-zinc-700 dark:hover:text-zinc-200 select-none';
+    return (
+      '<div class="mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-800">' +
+        '<details>' +
+          '<summary class="' + sumCls + '">' + S.advancedOptions + '</summary>' +
+          '<div class="mt-2 pl-1 space-y-2">' +
+            '<details>' +
+              '<summary class="' + sumCls + '">' + S.showFinalPackages + '</summary>' +
+              '<div id="np-pkgs-' + sid + '" class="flex flex-wrap gap-1 py-1 mt-2 min-h-[1.75rem]"></div>' +
+            '</details>' +
+            '<details>' +
+              '<summary class="' + sumCls + '">' + S.configPreview + '</summary>' +
+              '<div class="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2">' +
+                '<label class="flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400 cursor-pointer select-none">' +
+                  '<input type="checkbox" id="np-reveal-' + sid + '" class="align-middle"><span>' + S.revealSecrets + '</span></label>' +
+                '<label class="flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400 cursor-pointer select-none">' +
+                  '<input type="checkbox" id="np-full-' + sid + '" class="align-middle"><span>' + S.fullScript + '</span></label>' +
+              '</div>' +
+              '<pre class="config-preview" id="np-preview-' + sid + '"></pre>' +
+            '</details>' +
+          '</div>' +
+        '</details>' +
+      '</div>'
+    );
+  }
+
+  // Recompute and render a node's final-package chips + preview from the current
+  // shared_config + overrides (the merged node config is the shared derivation).
+  function updateNodeExtras(net, node) {
+    const pkgsEl = document.getElementById('np-pkgs-' + node.id);
+    if (!pkgsEl) return;   // device not selected / extras not rendered
+    const cfg = mergeNodeConfig(net.shared_config, node.overrides);
+    const extra = (net.shared_config.additional_packages || '').split(/[\s,]+/).filter(Boolean);
+    const pkgs = ui.computeFinalPackages ? ui.computeFinalPackages(node.device_target, cfg, extra) : [];
+    ui.renderPackageChips(pkgsEl, pkgs);
+    renderNodePreview(net, node);
+  }
+
+  // Per-node config/script preview - mirrors /builder renderPreview: masked
+  // config block by default, with reveal + full-script toggles. ADGUARD_PASSWD
+  // is omitted by design (build-time bcrypt only).
+  function renderNodePreview(net, node) {
+    const pre = document.getElementById('np-preview-' + node.id);
+    if (!pre) return;
+    const reveal = !!(document.getElementById('np-reveal-' + node.id) || {}).checked;
+    const full   = !!(document.getElementById('np-full-' + node.id) || {}).checked;
+    const cfg = mergeNodeConfig(net.shared_config, node.overrides);
+    if (!full) {
+      pre.textContent = reveal ? ui.renderConfigBlock(cfg) : ui.renderConfigBlockMasked(cfg);
+      return;
+    }
+    ui.fetchWrtnovaBody().then(body => {
+      if (!(document.getElementById('np-full-' + node.id) || {}).checked) return;
+      pre.textContent = ui.assembleScript(cfg, body, !reveal);
+    }).catch(e => { pre.textContent = ui.t ? ui.t('failedLoadTemplate', { msg: e.message }) : ('Error: ' + e.message); });
+  }
+
   function panelHTML(net, node) {
     const isAp = node.overrides.AP_MODE === '1';
     const cfg = net.shared_config;
@@ -569,7 +600,7 @@
           imageFilesHtml(node.last_build.images, node.last_build.bin_dir, node.last_build.asu_base)
         : '') +
       (isAp ? '<button type="button" class="btn text-xs ml-auto text-red-500 hover:text-red-400 border-red-800/40 hover:border-red-600/60" data-deletenode="' + id + '">' + S.deleteNode + '</button>' : '') +
-      '</div></div>'
+      '</div>' + nodeExtrasHTML(id, hasDevice) + '</div>'
     );
   }
 
@@ -619,6 +650,10 @@
       document.getElementById('modal-delete-node').showModal();
     });
 
+    // Config/script preview toggles (parity with /builder).
+    panel.querySelector('#np-reveal-' + node.id)?.addEventListener('change', () => renderNodePreview(net, node));
+    panel.querySelector('#np-full-' + node.id)?.addEventListener('change', () => renderNodePreview(net, node));
+    updateNodeExtras(net, node);   // initial render
   }
 
   function saveNodePanel(net, node) {
@@ -657,6 +692,8 @@
         subEl.textContent = devLabel + ' · ' + (isAp ? t('apNum', { n: node.overrides.AP_INDEX || '2' }) : S.router) + ' · ' + status;
       }
     }
+
+    updateNodeExtras(net, node);   // refresh packages/preview after an override change
   }
 
   // -- Config form view ----------------------------------------------

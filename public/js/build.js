@@ -25,6 +25,8 @@
     const nextVal = dnsVal === 'adguardhome' ? 'dnsproxy' : 'none';
     const nextRadio = $('input[name="DNS_MODE"][value="' + nextVal + '"]');
     if (nextRadio) nextRadio.checked = true;
+    refreshStore();   // DOM is a view: sync the downgraded DNS_MODE into the store
+                      // so the auto-retry rebuild (collectConfig) actually uses it
     const rn = $('#retry-note');
     if (rn) {
       rn.innerHTML = '';
@@ -164,23 +166,11 @@
     return ui.computeFinalPackages(target, collectConfig(), parseAdditionalPackages());
   }
 
-  const CHIP_NEUTRAL = 'inline-flex items-center px-2 py-0.5 rounded text-xs font-mono bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300';
-  const CHIP_REMOVAL = 'inline-flex items-center px-2 py-0.5 rounded text-xs font-mono bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400 line-through';
-
   function renderAutoPackages() {
     const el = $('#auto-packages');
     if (!el) return;
     const pkgs = computeFinalPackages();
-    // Build chips with textContent (not innerHTML): the list now includes
-    // user-typed extra package names, which must not be rendered as markup.
-    el.textContent = '';
-    pkgs.forEach((p, i) => {
-      const span = document.createElement('span');
-      span.className = p.startsWith('-') ? CHIP_REMOVAL : CHIP_NEUTRAL;
-      span.textContent = p;
-      el.appendChild(span);
-      if (i < pkgs.length - 1) el.appendChild(document.createTextNode(' '));
-    });
+    ui.renderPackageChips(el, pkgs);   // shared chip renderer (ui.js)
     const copyBtn = $('#copy-packages');
     if (copyBtn) copyBtn.dataset.pkgs = pkgs.join(' ');
   }
