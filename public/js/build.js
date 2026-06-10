@@ -276,8 +276,9 @@ USB_TETHERING:  isRouter ? checkboxVal('USB_TETHERING') : '',
         target:  payload.target,
         version: payload.version,
       },
-      config:              cfg,
-      additional_packages: payload.additional_packages || [],
+      config:               cfg,
+      additional_packages:  payload.additional_packages || [],
+      warp_refresh_token:   _warpSessionToken,
       result,
     };
     try {
@@ -536,6 +537,10 @@ USB_TETHERING:  isRouter ? checkboxVal('USB_TETHERING') : '',
     wrap.innerHTML = html;
   }
 
+  // Scoped to page lifetime — cleared on reload so each new page load gets a fresh reg.
+  let _warpSessionToken = '';
+  ui.setWarpSessionToken = function (t) { _warpSessionToken = t || ''; };
+
   function initWarpPrefill() {
     const btn = $('#warp-prefill-btn');
     if (!btn) return;
@@ -552,7 +557,7 @@ USB_TETHERING:  isRouter ? checkboxVal('USB_TETHERING') : '',
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            warp_refresh_token: localStorage.getItem('wrtnova_warp_refresh') || '',
+            warp_refresh_token: _warpSessionToken,
           }),
         });
         let data;
@@ -574,7 +579,7 @@ USB_TETHERING:  isRouter ? checkboxVal('USB_TETHERING') : '',
         setField('ALLOWED_IPS',     data.ALLOWED_IPS);
 
         if (data.warp_refresh_token) {
-          localStorage.setItem('wrtnova_warp_refresh', data.warp_refresh_token);
+          _warpSessionToken = data.warp_refresh_token;
         }
 
         ui.setDot('wg', 'touched');

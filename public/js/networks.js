@@ -768,6 +768,7 @@
     document.getElementById('config-name-edit')?.classList.add('hidden');
 
     loadConfig(net.shared_config);
+    _warpSessionToken = net.warp_refresh_token || '';
     if (isNew) document.getElementById('card-target')?.classList.add('open');
 
     // Auto-save: teardown previous listeners, then attach fresh ones
@@ -1767,6 +1768,9 @@
   }
 
   // -- WARP prefill -------------------------------------------------
+  // Scoped to page lifetime — cleared on reload so each new page load gets a fresh reg.
+  let _warpSessionToken = '';
+
   async function prefillWarp() {
     const btn = document.getElementById('warp-prefill-btn');
     const msg = document.getElementById('warp-prefill-msg');
@@ -1778,7 +1782,7 @@
     try {
       const r = await fetch('/api/warp/register', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ warp_refresh_token: localStorage.getItem('wrtnova_warp_refresh') || '' }),
+        body: JSON.stringify({ warp_refresh_token: _warpSessionToken }),
       });
       let data;
       try { data = await r.json(); } catch (_) { data = {}; }
@@ -1796,7 +1800,11 @@
       f('WG_IPV4',         data.WG_IPV4);
       f('WG_IPV6',         data.WG_IPV6);
       f('ALLOWED_IPS',     data.ALLOWED_IPS);
-      if (data.warp_refresh_token) localStorage.setItem('wrtnova_warp_refresh', data.warp_refresh_token);
+      if (data.warp_refresh_token) {
+        _warpSessionToken = data.warp_refresh_token;
+        const net = getNet(st.networkId);
+        if (net) { net.warp_refresh_token = _warpSessionToken; saveNetworks(); }
+      }
       if (ui.setDot) ui.setDot('wg', 'touched');
       if (msg) { msg.textContent = S.warpSuccess; msg.style.color = '#16a34a'; msg.classList.remove('hidden'); }
     } catch(e) {

@@ -92,6 +92,8 @@
 
     if (entry.config) restoreConfig(entry.config);
 
+    if (ui.setWarpSessionToken) ui.setWarpSessionToken(entry.warp_refresh_token);
+
     const pkgEl = document.getElementById('additional_packages');
     if (pkgEl) pkgEl.value = (entry.additional_packages || []).join(' ');
 

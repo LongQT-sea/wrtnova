@@ -282,7 +282,7 @@
                       </span>
                     </td>
                     <td data-label="Network"><span class="net-name">LAN</span></td>
-                    <td class="col-pfx" data-label="Prefix"><input type="text" id="LAN_BASE_PREFIX" name="LAN_BASE_PREFIX" class="input-base" placeholder="192.168"></td>
+                    <td class="col-pfx" data-label="Prefix"><input type="text" id="LAN_BASE_PREFIX" name="LAN_BASE_PREFIX" class="input-base" placeholder="192.168" list="prefix-options"></td>
                     <td class="col-vid" data-label="VLAN"><input type="number" id="LAN_VLAN_ID" name="LAN_VLAN_ID" class="input-base" min="1" max="255" placeholder="1"></td>
                     <td class="col-sub" data-label="Subnet">
                       <select id="LAN_SUBNET" name="LAN_SUBNET" class="input-base" aria-label="LAN subnet">
@@ -303,7 +303,7 @@
                       </span>
                     </td>
                     <td data-label="Network"><span class="net-name">Guest</span></td>
-                    <td class="col-pfx" data-label="Prefix"><input type="text" id="GUEST_BASE_PREFIX" name="GUEST_BASE_PREFIX" class="input-base" placeholder="192.168"></td>
+                    <td class="col-pfx" data-label="Prefix"><input type="text" id="GUEST_BASE_PREFIX" name="GUEST_BASE_PREFIX" class="input-base" placeholder="192.168" list="prefix-options"></td>
                     <td class="col-vid" data-label="VLAN"><input type="number" id="GUEST_VLAN_ID" name="GUEST_VLAN_ID" class="input-base" min="1" max="255" placeholder="5"></td>
                     <td class="col-sub" data-label="Subnet">
                       <select id="GUEST_SUBNET" name="GUEST_SUBNET" class="input-base" aria-label="Guest subnet">
@@ -324,7 +324,7 @@
                       </span>
                     </td>
                     <td data-label="Network"><span class="net-name">IoT</span></td>
-                    <td class="col-pfx" data-label="Prefix"><input type="text" id="IOT_BASE_PREFIX" name="IOT_BASE_PREFIX" class="input-base" placeholder="192.168"></td>
+                    <td class="col-pfx" data-label="Prefix"><input type="text" id="IOT_BASE_PREFIX" name="IOT_BASE_PREFIX" class="input-base" placeholder="192.168" list="prefix-options"></td>
                     <td class="col-vid" data-label="VLAN"><input type="number" id="IOT_VLAN_ID" name="IOT_VLAN_ID" class="input-base" min="1" max="255" placeholder="10"></td>
                     <td class="col-sub" data-label="Subnet">
                       <select id="IOT_SUBNET" name="IOT_SUBNET" class="input-base" aria-label="IoT subnet">
@@ -345,7 +345,7 @@
                       </span>
                     </td>
                     <td data-label="Network"><span class="net-name">WireGuard VPN</span></td>
-                    <td class="col-pfx" data-label="Prefix"><input type="text" id="LAN_WG_BASE_PREFIX" name="LAN_WG_BASE_PREFIX" class="input-base" placeholder="192.168"></td>
+                    <td class="col-pfx" data-label="Prefix"><input type="text" id="LAN_WG_BASE_PREFIX" name="LAN_WG_BASE_PREFIX" class="input-base" placeholder="192.168" list="prefix-options"></td>
                     <td class="col-vid" data-label="VLAN"><input type="number" id="LAN_WG_VLAN_ID" name="LAN_WG_VLAN_ID" class="input-base" min="1" max="255" placeholder="15"></td>
                     <td class="col-sub" data-label="Subnet">
                       <select id="LAN_WG_SUBNET" name="LAN_WG_SUBNET" class="input-base" aria-label="WireGuard VPN subnet">
