@@ -754,19 +754,17 @@ wan_port="$(uci -q get network.wan.device)"
 
 # DSA/x86/SBC: always use bridge VLAN filtering
 use_bridge_vlan=1
-bridge_wan_port=
+bridge_wan_port=1
 
 # Single NIC: reuse lan port as tagged WAN
 [ -z "$wan_port" ] && WAN_IS_TAGGED=1
 
-# Cannot enslave a bridge to another bridge
-[ "$wan_port" = br-wan ] && BRIDGE_WAN_PORT=
-
 if [ "$hw_type" = "dsa" ] && [ "$AP_MODE" != 1 ]; then
-	[ "$BRIDGE_WAN_PORT" = 1 ] && bridge_wan_port=1
+	[ "$BRIDGE_WAN_PORT" != 1 ] && bridge_wan_port=
+	# Cannot enslave a bridge to another bridge
+	[ "$wan_port" = br-wan ] && bridge_wan_port=
 
 elif [ "$hw_type" = "swconfig" ]; then
-	bridge_wan_port=1
 	use_bridge_vlan=
 	lan_eth="${lan_ports%%.*}"
 	wan_eth="$wan_port"
