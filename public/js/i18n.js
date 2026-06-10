@@ -125,6 +125,7 @@
       warpTooMany:  'Too many requests — wait a moment and try again',
       warpFailed:   'WARP registration failed — try again shortly',
       warpSuccess:  '✓ Filled from Cloudflare WARP',
+      wgConfigNote: 'You can change to a different WireGuard config later via <strong>LuCI &rarr; Network &rarr; Interfaces &rarr; vpn &rarr; Edit &rarr; Load configuration</strong>. After importing a config, remember to enable <em>Route Allowed IPs</em> in the Peers settings.',
 
       // -- builder/index.html (build.js) --------------------------------
       pickDeviceFirst:  'Pick a device first.',
@@ -429,6 +430,7 @@
       warpTooMany:  '请求过多——请稍候再试',
       warpFailed:   'WARP 注册失败——请稍后再试',
       warpSuccess:  '✓ 已从 Cloudflare WARP 填充',
+      wgConfigNote: '您可以稍后通过 <strong>LuCI &rarr; 网络 &rarr; 接口 &rarr; vpn &rarr; 编辑 &rarr; 加载配置</strong> 更换 WireGuard 配置。导入配置后，请记得在对等点设置中启用<em>路由允许的 IP</em>。',
 
       // -- builder/index.html (build.js) --------------------------------
       pickDeviceFirst:  '请先选择设备。',
@@ -734,6 +736,7 @@
       warpTooMany:  'Zu viele Anfragen — warten Sie einen Moment und versuchen Sie es erneut',
       warpFailed:   'WARP-Registrierung fehlgeschlagen — versuchen Sie es in Kürze erneut',
       warpSuccess:  '✓ Aus Cloudflare WARP ausgefüllt',
+      wgConfigNote: 'Sie können die WireGuard-Konfiguration später unter <strong>LuCI &rarr; Netzwerk &rarr; Schnittstellen &rarr; vpn &rarr; Bearbeiten &rarr; Konfiguration laden</strong> wechseln. Denken Sie nach dem Import daran, in den Peer-Einstellungen <em>Erlaubte IPs routen</em> zu aktivieren.',
 
       // -- builder/index.html (build.js) --------------------------------
       pickDeviceFirst:  'Zuerst ein Gerät auswählen.',
@@ -1038,6 +1041,7 @@
       warpTooMany:  'Слишком много запросов — подождите и повторите попытку',
       warpFailed:   'Регистрация WARP не удалась — повторите попытку позже',
       warpSuccess:  '✓ Заполнено из Cloudflare WARP',
+      wgConfigNote: 'Вы можете позже сменить конфигурацию WireGuard через <strong>LuCI &rarr; Сеть &rarr; Интерфейсы &rarr; vpn &rarr; Изменить &rarr; Загрузить конфигурацию</strong>. После импорта не забудьте включить <em>Маршрутизировать разрешённые IP</em> в настройках пиров.',
 
       // -- builder/index.html (build.js) --------------------------------
       pickDeviceFirst:  'Сначала выберите устройство.',
@@ -1342,6 +1346,7 @@
       warpTooMany:  'Zbyt wiele żądań — poczekaj chwilę i spróbuj ponownie',
       warpFailed:   'Rejestracja WARP nie powiodła się — spróbuj ponownie za chwilę',
       warpSuccess:  '✓ Wypełniono z Cloudflare WARP',
+      wgConfigNote: 'Możesz później zmienić konfigurację WireGuard przez <strong>LuCI &rarr; Sieć &rarr; Interfejsy &rarr; vpn &rarr; Edytuj &rarr; Załaduj konfigurację</strong>. Po zaimportowaniu konfiguracji pamiętaj, aby w ustawieniach peerów włączyć <em>Trasuj dozwolone IP</em>.',
 
       // -- builder/index.html (build.js) --------------------------------
       pickDeviceFirst:  'Najpierw wybierz urządzenie.',
@@ -1646,6 +1651,7 @@
       warpTooMany:  'Trop de requêtes — attendez un moment et réessayez',
       warpFailed:   "Échec de l'enregistrement WARP — réessayez dans un moment",
       warpSuccess:  '✓ Rempli depuis Cloudflare WARP',
+      wgConfigNote: "Vous pouvez changer de configuration WireGuard plus tard via <strong>LuCI &rarr; Réseau &rarr; Interfaces &rarr; vpn &rarr; Modifier &rarr; Charger la configuration</strong>. Après l'importation, pensez à activer <em>Router les IP autorisées</em> dans les paramètres des pairs.",
 
       // -- builder/index.html (build.js) --------------------------------
       pickDeviceFirst:  "Sélectionnez d'abord un appareil.",
@@ -1950,6 +1956,7 @@
       warpTooMany:  'Demasiadas solicitudes — espera un momento e inténtalo de nuevo',
       warpFailed:   'Error en el registro WARP — inténtalo de nuevo en breve',
       warpSuccess:  '✓ Rellenado desde Cloudflare WARP',
+      wgConfigNote: 'Puedes cambiar a una configuración de WireGuard diferente más tarde en <strong>LuCI &rarr; Red &rarr; Interfaces &rarr; vpn &rarr; Editar &rarr; Cargar configuración</strong>. Tras importar, recuerda activar <em>Enrutar IPs permitidas</em> en los ajustes de pares.',
 
       // -- builder/index.html (build.js) --------------------------------
       pickDeviceFirst:  'Selecciona un dispositivo primero.',
@@ -2151,6 +2158,10 @@
     document.querySelectorAll('[data-i18n]').forEach(function (el) {
       const v = t(el.dataset.i18n);
       if (v !== el.dataset.i18n) el.textContent = v;
+    });
+    document.querySelectorAll('[data-i18n-html]').forEach(function (el) {
+      const v = S[el.dataset.i18nHtml];
+      if (v) el.innerHTML = v;
     });
     document.querySelectorAll('[data-i18n-placeholder]').forEach(function (el) {
       const v = t(el.dataset.i18nPlaceholder);

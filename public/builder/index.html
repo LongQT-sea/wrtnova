@@ -401,10 +401,9 @@
           <input type="text" id="ALLOWED_IPS" name="ALLOWED_IPS" class="input-base" placeholder="0.0.0.0/0, ::/0">
         </div>
 
-        <!-- NOTE: inner <strong>/<em> prevents data-i18n on this note; translation needs innerHTML approach -->
-        <div class="info-note" role="note">
+        <div class="info-note" role="note" data-i18n-html="wgConfigNote">
           You can change to a different WireGuard config later via
-          <strong>LuCI → Network → Interfaces → vpn → Edit → Load configuration</strong>.
+          <strong>LuCI &rarr; Network &rarr; Interfaces &rarr; vpn &rarr; Edit &rarr; Load configuration</strong>.
           After importing a config, remember to enable <em>Route Allowed IPs</em> in the Peers settings.
         </div>
       </div>
