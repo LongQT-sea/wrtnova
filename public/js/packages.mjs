@@ -1,3 +1,4 @@
+// @ts-check
 // Shared package resolution - one definition, two runtimes.
 //
 // computeAdds: the WrtNova-mandated additions, driven by config flags. This is
@@ -11,6 +12,10 @@
 // A token of the form "-foo" means "remove foo from the final list". If both
 // "foo" and "-foo" appear anywhere, the removal wins.
 
+/**
+ * @param {{ base?: string[], device?: string[], config?: import('./types.mjs').Config }} args
+ * @returns {string[]}
+ */
 export function computeAdds({ base = [], device = [], config = {} }) {
   const adds = [];
 
@@ -55,6 +60,10 @@ export function computeAdds({ base = [], device = [], config = {} }) {
   return adds;
 }
 
+/**
+ * @param {{ base?: string[], device?: string[], extra?: string[], config?: import('./types.mjs').Config }} args
+ * @returns {string[]}
+ */
 export function resolvePackages({ base = [], device = [], extra = [], config = {} }) {
   const adds = computeAdds({ base, device, config });
   const merged = [...base, ...device, ...adds, ...extra];

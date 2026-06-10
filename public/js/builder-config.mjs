@@ -1,3 +1,4 @@
+// @ts-check
 // /builder config derivation - the pure cross-field gating selector.
 //
 // deriveConfig(raw) takes the raw, already-normalized form values (the store
@@ -14,6 +15,10 @@
 // raw carries a few gating-only helpers (wan_type) that are NOT emitted, exactly
 // as the old collectConfig output omitted them.
 
+/**
+ * @param {import('./types.mjs').Config} raw
+ * @returns {import('./types.mjs').Config}
+ */
 export function deriveConfig(raw) {
   const r = raw || {};
   const v = k => r[k] || '';                 // textVal semantics: '' default, '0' kept

@@ -222,19 +222,16 @@
     const tbody = document.querySelector('#' + kind + '-table tbody');
     if (!tbody) return;
     tbody.innerHTML = '';
-    const lines = String(list).split('\n')
-      .map(function (l) { return l.trim(); })
-      .filter(function (l) { return l && l.includes('|'); });
-    if (!lines.length) { ui.addRow(kind); return; }
-    lines.forEach(function (line) {
-      const parts = line.split('|').map(function (p) { return p.trim(); });
-      const tr    = ui.addRow(kind);
+    const rows = ui.parseList(list);
+    if (!rows.length) { ui.addRow(kind); return; }
+    rows.forEach(function (row) {
+      const tr = ui.addRow(kind);
       const h = tr.querySelector('[data-col="host"]');
       const o = tr.querySelector('[data-col="octet"]');
       const p = tr.querySelector('[data-col="ports"]');
-      if (h && parts[0]) h.value = parts[0];
-      if (o && parts[1]) o.value = parts[1];
-      if (p && parts[2]) p.value = parts[2];
+      if (h && row.host)  h.value = row.host;
+      if (o && row.octet) o.value = row.octet;
+      if (p && row.ports) p.value = row.ports;
     });
   }
 })();

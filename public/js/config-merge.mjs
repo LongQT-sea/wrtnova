@@ -1,3 +1,4 @@
+// @ts-check
 // Shared node-config merge - one definition, two runtimes.
 //
 // Imported by the browser (via shared-boot.mjs onto window.WrtNova) and by the
@@ -8,6 +9,11 @@
 // Boolean flags use flag(v) so '0' never leaks through (Section 1 invariant:
 // off-state is '' never '0').
 
+/**
+ * @param {import('./types.mjs').Config} sharedConfig
+ * @param {import('./types.mjs').Config} nodeOverrides
+ * @returns {import('./types.mjs').Config}
+ */
 export function mergeNodeConfig(sharedConfig, nodeOverrides) {
   const c = Object.assign({}, sharedConfig, nodeOverrides);
   const isAp    = c.AP_MODE       === '1';

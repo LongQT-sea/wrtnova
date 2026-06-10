@@ -1,0 +1,33 @@
+name: CI
+
+# The gates are npm scripts (scripts/ci/*.mjs) so they run identically locally
+# via `npm run ci`. This workflow just provisions the toolchain and invokes them.
+# Node 22+ is required (the gate scripts use the stable fs.globSync).
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build CSS (Tailwind)
+        run: npm run build:css
+
+      - name: Regenerate wrtnova.sh artifact
+        run: npm run embed
+
+      - name: Run gates (typecheck, tests, invariants, budget)
+        run: npm run ci

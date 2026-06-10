@@ -1,3 +1,4 @@
+// @ts-check
 // Shared config-block rendering + POSIX shell quoting - one definition, two runtimes.
 //
 // renderConfigBlock turns a config object into the per-build shell assignment
@@ -15,11 +16,20 @@ export const BUILD_ONLY_KEYS = new Set(['DNS_MODE', 'NON_CT_ATH10K']);
 // POSIX-safe quoting. Single quotes suppress all expansion (critical for values
 // like bcrypt hashes that contain $). Fall back to double-quote escaping only
 // when the value itself contains a single quote.
+/**
+ * @param {string} s
+ * @returns {string}
+ */
 export function shQuote(s) {
   if (!s.includes("'")) return "'" + s + "'";
   return '"' + s.replace(/\\/g, '\\\\').replace(/\$/g, '\\$').replace(/`/g, '\\`').replace(/"/g, '\\"') + '"';
 }
 
+/**
+ * @param {import('./types.mjs').Config} cfg
+ * @param {ReadonlySet<string>} [maskKeys]
+ * @returns {string}
+ */
 export function renderConfigBlock(cfg, maskKeys) {
   const lines = [];
   for (const [k, v] of Object.entries(cfg)) {

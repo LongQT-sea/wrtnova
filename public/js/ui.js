@@ -101,18 +101,16 @@
     });
   };
 
-  // serialize a dynamic table into the wrtnova.sh multi-line list format
+  // serialize a dynamic table into the wrtnova.sh multi-line list format.
+  // The grammar lives in list-grammar.mjs (ui.serializeList); this reads the
+  // DOM rows and hands them to the shared serializer.
   ui.serializeRows = function (kind) {
-    const rows = ui.$$('#' + kind + '-table tbody tr');
-    const lines = [];
-    rows.forEach(tr => {
-      const host  = tr.querySelector('[data-col="host"]').value.trim();
-      const octet = tr.querySelector('[data-col="octet"]').value.trim();
-      const ports = tr.querySelector('[data-col="ports"]').value.trim();
-      if (!host && !octet) return;
-      lines.push('\t' + host + ' | ' + octet + ' | ' + ports);
-    });
-    return lines.length ? '\n' + lines.join('\n') + '\n' : '';
+    const rows = ui.$$('#' + kind + '-table tbody tr').map(tr => ({
+      host:  tr.querySelector('[data-col="host"]').value,
+      octet: tr.querySelector('[data-col="octet"]').value,
+      ports: tr.querySelector('[data-col="ports"]').value,
+    }));
+    return ui.serializeList(rows);
   };
 
   ui.syncNetworkRows = function () {
@@ -278,14 +276,9 @@ const wanTagged = ui.$('#WAN_IS_TAGGED') && ui.$('#WAN_IS_TAGGED').checked;
 
   // Fields the browser strips before sending config to /api/build.
   // The Worker only needs feature flags for package resolution - never passwords.
-  ui.SENSITIVE_FIELDS = new Set([
-    'ROOT_PASSWD', 'PPPOE_PASSWD',
-    'LAN_WIFI_PASSWD', 'GUEST_WIFI_PASSWD', 'IOT_WIFI_PASSWD', 'LAN_WG_WIFI_PASSWD',
-    'MESH_PASSWD',
-    'WG_PRIVATE_KEY', 'PEER_PUBLIC_KEY', 'PRESHARED_KEY',
-    'ENDPOINT', 'ENDPOINT_PORT', 'WG_IPV4', 'WG_IPV6', 'ALLOWED_IPS',
-    'CLOUDFLARE_API_KEY', 'ADGUARD_PASSWD',
-  ]);
+  // Canonical set lives in types.mjs (ui.SENSITIVE_KEYS), assigned by shared-boot
+  // before this script runs; kept as ui.SENSITIVE_FIELDS for existing callers.
+  ui.SENSITIVE_FIELDS = ui.SENSITIVE_KEYS;
 
   ui.stripSensitive = function (cfg) {
     return Object.fromEntries(Object.entries(cfg).filter(([k]) => !ui.SENSITIVE_FIELDS.has(k)));

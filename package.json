@@ -4,10 +4,19 @@
   "private": true,
   "scripts": {
     "build:css": "tailwindcss -i src/style.css -o public/style.css --minify",
-    "watch:css": "tailwindcss -i src/style.css -o public/style.css --watch"
+    "watch:css": "tailwindcss -i src/style.css -o public/style.css --watch",
+    "embed": "node scripts/embed-wrtnova.mjs",
+    "test": "node --test",
+    "typecheck": "tsc -p jsconfig.json",
+    "check:no-zero": "node scripts/ci/check-no-zero.mjs",
+    "check:marker": "node scripts/ci/check-marker.mjs",
+    "check:no-dupes": "node scripts/ci/check-no-dupes.mjs",
+    "check:budget": "node scripts/ci/check-budget.mjs",
+    "ci": "npm run typecheck && npm test && npm run check:no-zero && npm run check:marker && npm run check:no-dupes && npm run check:budget"
   },
   "devDependencies": {
     "playwright": "^1.60.0",
-    "tailwindcss": "^3.4.0"
+    "tailwindcss": "^3.4.0",
+    "typescript": "^5.4.0"
   }
 }

@@ -872,16 +872,13 @@
     const tbody = document.querySelector('#' + tableId + ' tbody');
     if (!tbody) return;
     tbody.innerHTML = '';
-    const lines = listStr.trim().split('\n').filter(l => l.trim() && l.includes('|'));
-    if (!lines.length) {
+    const rows = ui.parseList(listStr);
+    if (!rows.length) {
       if (tableId === 'ipv6-table') addTableRow(tableId, 'docker-host', '20', '80 443');
       else addTableRow(tableId);
       return;
     }
-    lines.forEach(line => {
-      const p = line.split('|').map(s => s.trim());
-      addTableRow(tableId, p[0], p[1], p[2]);
-    });
+    rows.forEach(r => addTableRow(tableId, r.host, r.octet, r.ports));
   }
 
   function addTableRow(tableId, host, octet, ports) {
@@ -898,14 +895,15 @@
   }
 
   function readTable(tableId) {
-    const lines = [];
+    const rows = [];
     document.querySelectorAll('#' + tableId + ' tbody tr').forEach(tr => {
-      const h = tr.querySelector('[data-col="host"]').value.trim();
-      const o = tr.querySelector('[data-col="octet"]').value.trim();
-      const p = tr.querySelector('[data-col="ports"]').value.trim();
-      if (h || o) lines.push('\t' + h + ' | ' + o + ' | ' + p);
+      rows.push({
+        host:  tr.querySelector('[data-col="host"]').value,
+        octet: tr.querySelector('[data-col="octet"]').value,
+        ports: tr.querySelector('[data-col="ports"]').value,
+      });
     });
-    return lines.length ? '\n' + lines.join('\n') + '\n' : '';
+    return ui.serializeList(rows);
   }
 
   // -- New network ---------------------------------------------------
