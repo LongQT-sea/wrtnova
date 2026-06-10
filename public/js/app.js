@@ -7,7 +7,6 @@
   async function init() {
     ui.initCardToggles();
     ui.initDynamicRows();
-    ui.initConditionalVisibility();
     ui.initPasswordToggles();
     ui.wireDotTouches();
     ui.initDeviceCombo();
@@ -16,6 +15,11 @@
     // Build the config store now that the dynamic tables and tz combo exist;
     // SSID placeholders are a store selector wired inside initConfigStore.
     ui.initConfigStore();
+
+    // Conditional visibility is a store selector now; init it AFTER the store
+    // exists and after its boundary listener is wired (so the store is updated
+    // before the visibility handler reads it).
+    ui.initConditionalVisibility();
 
     $('#build-btn').addEventListener('click', () => ui.startBuild());
 

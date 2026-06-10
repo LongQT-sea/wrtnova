@@ -22,6 +22,9 @@ const CANONICAL = {
   shQuote: 'render-config.mjs',
   parseList: 'list-grammar.mjs',
   serializeList: 'list-grammar.mjs',
+  deriveVisibility: 'visibility.mjs',
+  deriveNetRows: 'visibility.mjs',
+  detectVlanConflict: 'visibility.mjs',
   deriveConfig: 'builder-config.mjs',
 };
 

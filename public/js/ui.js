@@ -113,125 +113,72 @@
     return ui.serializeList(rows);
   };
 
-  ui.syncNetworkRows = function () {
-    const basePfx  = (ui.$('#BASE_NET_PREFIX') || {}).value || '';
-    const defSub   = (ui.$('#DEFAULT_SUBNET')  || {}).value || '/24';
-    const rows     = ui.$$('.net-table tbody tr');
-    const seen     = {};
-    let   hasDup   = false;
-
-    const trunkVids = {};
-    ((ui.$('#ADDITIONAL_VLAN_LIST') || {}).value || '').trim().split(/\s+/).forEach(function (tok) {
-      const rng = tok.match(/^(\d+)-(\d+)$/);
-      if (rng) { for (let v = +rng[1]; v <= +rng[2]; v++) trunkVids[v] = true; }
-      else if (/^\d+$/.test(tok)) trunkVids[+tok] = true;
-    });
-
-    const ap = (ui.$('input[name="AP_MODE"]:checked') || {}).value === '1';
-
-    // In router mode, WAN and WAN_B VLANs are always part of resolve_vlans pool.
-    if (!ap) {
-      const wanVid = +(ui.$('#WAN_VLAN_ID') || {}).value || 20;
-      if (trunkVids[wanVid]) hasDup = true;
-      seen[wanVid] = true;
-      const wanBEl = ui.$('#WAN_B_ENABLE');
-      if (wanBEl && wanBEl.checked) {
-        const wanBVid = +(ui.$('#WAN_B_VLAN_ID') || {}).value || 21;
-        if (seen[wanBVid] || trunkVids[wanBVid]) hasDup = true;
-        seen[wanBVid] = true;
-      }
-    }
-
-    rows.forEach(function (row) {
-      const isLan = row.dataset.net === 'lan';
-      const tog   = ui.$('.toggle-input', row);
-      const on    = isLan || (tog && tog.checked);
+  // Render the per-network derived rows (prefix placeholder, router IP, default-
+  // subnet label, net-off greying) and the VLAN-conflict warning from a config
+  // object. Pure logic is in visibility.mjs (ui.deriveNetRows/detectVlanConflict);
+  // this is the DOM-writing view layer that consumes it.
+  ui.applyNetworkRows = function (cfg) {
+    const byKey = {};
+    ui.deriveNetRows(cfg).forEach(r => { byKey[r.key] = r; });
+    ui.$$('.net-table tbody tr').forEach(function (row) {
+      const r = byKey[row.dataset.net];
+      if (!r) return;
       const pfxEl = row.querySelector('[id$="_BASE_PREFIX"]');
-      const vidEl = row.querySelector('[id$="_VLAN_ID"]');
-      const subEl = row.querySelector('select.input-base');
       const ipEl  = ui.$('.net-derived', row);
       const defEl = row.querySelector('.net-sub-def');
 
-      if (pfxEl) pfxEl.placeholder = basePfx || '192.168';
-      if (defEl) defEl.textContent  = ui.t ? ui.t('defaultSubnetDynamic', { sub: defSub || '/24' }) : 'Default (' + (defSub || '/24') + ')';
-
-      const effPfx  = (pfxEl && pfxEl.value.trim()) || basePfx || '192.168';
-      const effVid  = (vidEl && vidEl.value.trim()) || row.dataset.defVid;
-      const effSub  = (subEl && subEl.value)        || defSub || '/24';
-      // In AP mode: LAN gets the AP index as last octet; Guest/IoT/WG get proto=none (no IP)
-      const hasIp   = on && effVid && (!ap || isLan);
-      const lastOct = (ap && isLan) ? ((ui.$('#AP_INDEX') || {}).value || '2') : '1';
-
+      if (pfxEl) pfxEl.placeholder = r.basePfx;
+      if (defEl) defEl.textContent  = ui.t ? ui.t('defaultSubnetDynamic', { sub: r.defSub }) : 'Default (' + r.defSub + ')';
       if (ipEl) {
-        ipEl.innerHTML = hasIp
-          ? effPfx + '.' + effVid + '.' + lastOct + '<span class="net-derived-sfx">' + effSub + '</span>'
+        ipEl.innerHTML = r.hasIp
+          ? r.effPfx + '.' + r.effVid + '.' + r.lastOct + '<span class="net-derived-sfx">' + r.effSub + '</span>'
           : '<span class="net-derived-sfx">—</span>';
       }
-
-      if (on && effVid) {
-        const vid = +effVid;
-        if (seen[vid] || trunkVids[vid]) hasDup = true;
-        seen[vid] = true;
-      }
+      if (row.dataset.net !== 'lan') row.classList.toggle('net-off', !r.on);
     });
 
-    ui.hasVlanConflict = hasDup;
+    ui.hasVlanConflict = ui.detectVlanConflict(cfg);
     const warn = ui.$('#net-dup-warn');
-    if (warn) warn.classList.toggle('hidden', !hasDup);
+    if (warn) warn.classList.toggle('hidden', !ui.hasVlanConflict);
   };
 
+  // Back-compat: re-render rows from the current store config.
+  ui.syncNetworkRows = function () {
+    const cfg = ui.configState ? ui.configState() : null;
+    if (cfg) ui.applyNetworkRows(cfg);
+  };
+
+  // Apply all conditional-visibility class toggles + the network rows from a
+  // config object (pure ui.deriveVisibility). DOM-writing view layer.
+  ui.applyVisibility = function (cfg) {
+    const vis = ui.deriveVisibility(cfg);
+    Object.keys(vis).forEach(function (cls) {
+      const hidden = vis[cls];
+      ui.$$('.' + cls).forEach(function (el) { el.classList.toggle('hidden', hidden); });
+    });
+    ui.applyNetworkRows(cfg);
+  };
+
+  // Conditional visibility is now a store selector: the page registers
+  // ui.configState (() => store.get()); on every input/change the store is
+  // updated at its boundary (before this body-level handler runs) and we render
+  // from it. The only event-dependent behavior is the WG-card auto-open, which
+  // must fire only on a direct WG_ENABLE toggle-on (CLAUDE.md).
   ui.initConditionalVisibility = function () {
     function refresh(e) {
-      const ap = ui.$('input[name="AP_MODE"]:checked').value === '1';
-      ui.$$('.router-only').forEach(el => el.classList.toggle('hidden', ap));
-      ui.$$('.ap-only').forEach(el => el.classList.toggle('hidden', !ap));
-
-      const wanType = (ui.$('input[name="wan_type"]:checked') || {}).value;
-      ui.$$('.pppoe-only').forEach(el => el.classList.toggle('hidden', wanType !== 'pppoe'));
-
-      const iot = ui.$('#IOT_ENABLE').checked;
-      ui.$$('.iot-only').forEach(el => el.classList.toggle('hidden', !iot));
-      ui.$$('.wifi-iot').forEach(el => el.classList.toggle('hidden', !iot));
-
-      const guest = ui.$('#GUEST_ENABLE').checked;
-      ui.$$('.wifi-guest').forEach(el => el.classList.toggle('hidden', !guest));
-
-      const wgEnabled = ui.$('#WG_ENABLE').checked;
-      ui.$$('.iot-wg-only').forEach(el => el.classList.toggle('hidden', !(iot && wgEnabled)));
-      // WiFi WG SSID row: visible whenever WG_ENABLE is on, regardless of mode.
-      // (AP mode still needs the SSID - it trunks WG-tagged traffic to the router.)
-      ui.$$('.wifi-wg').forEach(el => el.classList.toggle('hidden', !wgEnabled));
-      // WireGuard client card: router-only - AP trunks back, no client config needed.
-      const wgRouter = wgEnabled && !ap;
-      const wgCard = ui.$('#card-wg');
-      ui.$$('.wg-only').forEach(el => el.classList.toggle('hidden', !wgRouter));
-      if (wgRouter && e?.target?.id === 'WG_ENABLE') {
-        if (wgCard.tagName === 'DETAILS') wgCard.open = true;
-        else wgCard.classList.add('open');
+      const cfg = ui.configState ? ui.configState() : null;
+      if (!cfg) return;                       // store not ready (e.g. no network open yet)
+      ui.applyVisibility(cfg);
+      const wgRouter = cfg.WG_ENABLE === '1' && cfg.AP_MODE !== '1';
+      if (wgRouter && e && e.target && e.target.id === 'WG_ENABLE') {
+        const wgCard = ui.$('#card-wg');
+        if (wgCard) {
+          if (wgCard.tagName === 'DETAILS') wgCard.open = true;
+          else wgCard.classList.add('open');
+        }
       }
-      // Help text: swap between router and AP explanation when WG_ENABLE is on.
-      ui.$$('.wg-help-router').forEach(el => el.classList.toggle('hidden', ap));
-
-      const hasKeys = ui.$('#SSH_PUBLIC_KEY').value.trim().length > 0;
-      ui.$$('.ssh-pw-row').forEach(el => el.classList.toggle('hidden', !hasKeys));
-
-      const mesh = ui.$('#WIRELESS_MESH') && ui.$('#WIRELESS_MESH').checked;
-      ui.$$('.mesh-only').forEach(el => el.classList.toggle('hidden', !mesh));
-
-const wanTagged = ui.$('#WAN_IS_TAGGED') && ui.$('#WAN_IS_TAGGED').checked;
-      ui.$$('.wan-tagged-only').forEach(el => el.classList.toggle('hidden', !wanTagged));
-
-      const wanB = ui.$('#WAN_B_ENABLE') && ui.$('#WAN_B_ENABLE').checked;
-      ui.$$('.wan-b-only').forEach(el => el.classList.toggle('hidden', !wanB));
-
-      // Per-row net-off grey-out
-      ui.$$('.net-table tbody tr').forEach(function (row) {
-        if (row.dataset.net === 'lan') return;
-        const tog = ui.$('.toggle-input', row);
-        if (tog) row.classList.toggle('net-off', !tog.checked);
-      });
-      ui.syncNetworkRows();
     }
+    ui.refreshConditionalVisibility = refresh;
     document.body.addEventListener('change', refresh);
     document.body.addEventListener('input', refresh);
     refresh();

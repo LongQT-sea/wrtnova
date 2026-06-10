@@ -255,6 +255,8 @@
     if (store) return;
     store = ui.createStore(readRawForm());
     ui.configStore = store;
+    // Source of truth for the shared conditional-visibility selectors (ui.js).
+    ui.configState = () => store.get();
     store.subscribe(() => { renderAutoPackages(); syncSsidPlaceholders(); syncApIndexPreview(); renderPreview(); });
     document.body.addEventListener('input',  refreshStore);
     document.body.addEventListener('change', refreshStore);

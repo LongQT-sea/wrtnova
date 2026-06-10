@@ -680,32 +680,49 @@
     document.getElementById('config-name-display')?.classList.remove('hidden');
     document.getElementById('config-name-edit')?.classList.add('hidden');
 
-    loadConfig(net.shared_config);
-    _warpSessionToken = net.warp_refresh_token || '';
-    if (isNew) document.getElementById('card-target')?.classList.add('open');
-
-    // Auto-save: teardown previous listeners, then attach fresh ones
+    // Teardown previous config-view listeners/subscriptions before re-entering.
     if (st.configSaveAbort) st.configSaveAbort.abort();
     st.configSaveAbort = new AbortController();
     const { signal } = st.configSaveAbort;
+
+    // Single source of truth for this network's shared config. The DOM is a
+    // view; readConfig() is the normalize-at-boundary reader that feeds it, and
+    // the conditional-visibility selectors (ui.js) read it via ui.configState.
+    st.configStore = ui.createStore(Object.assign(defaultConfig(), net.shared_config));
+    ui.configState = () => st.configStore.get();
+
+    loadConfig(net.shared_config);   // render store -> DOM (+ refresh visibility)
+    _warpSessionToken = net.warp_refresh_token || '';
+    if (isNew) document.getElementById('card-target')?.classList.add('open');
+
+    // Align the store with the normalized DOM (timezone, uppercased COUNTRY_CODE,
+    // serialized tables) before wiring save, so auto-save persists canonical values.
+    st.configStore.set(readConfig());
+
     let saveTimer;
-    const autoSave = () => {
-      clearTimeout(saveTimer);
-      saveTimer = setTimeout(() => {
-        net.shared_config = readConfig();
-        net.updated_at = Date.now();
-        saveNetworks();
-      }, 300);
+    const flushSave = () => {
+      net.shared_config = st.configStore.get();
+      net.updated_at = Date.now();
+      saveNetworks();
     };
+    const unsub = st.configStore.subscribe(() => {
+      clearTimeout(saveTimer);
+      saveTimer = setTimeout(flushSave, 300);   // 300ms debounced auto-save
+    });
+    signal.addEventListener('abort', () => { unsub(); clearTimeout(saveTimer); }, { once: true });
+
+    // Boundary listener on the form: normalize DOM -> store on every edit. It is
+    // form-level, so it runs (and updates the store) before the body-level
+    // visibility handler in ui.js reads the store.
+    const syncStore = () => st.configStore.set(readConfig());
     const form = document.getElementById('config-form');
-    form.addEventListener('change', autoSave, { signal });
-    form.addEventListener('blur', autoSave, { capture: true, signal });
+    form.addEventListener('input', syncStore, { signal });
+    form.addEventListener('change', syncStore, { signal });
 
     document.getElementById('btn-save-config').onclick = () => {
       clearTimeout(saveTimer);
-      net.shared_config = readConfig();
-      net.updated_at = Date.now();
-      saveNetworks();
+      st.configStore.set(readConfig());
+      flushSave();
       showDetail(networkId);
       if (isNew) {
         const router = net.nodes.find(n => n.overrides.AP_MODE !== '1');

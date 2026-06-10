@@ -19,6 +19,7 @@
     "public/js/config-merge.mjs",
     "public/js/packages.mjs",
     "public/js/render-config.mjs",
-    "public/js/list-grammar.mjs"
+    "public/js/list-grammar.mjs",
+    "public/js/visibility.mjs"
   ]
 }
