@@ -505,11 +505,11 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'], ...BASE_SCHE
         '<details>' +
           '<summary class="' + sumCls + '">' + S.advancedOptions + '</summary>' +
           '<div class="mt-2 pl-1 space-y-2">' +
-            '<details>' +
-              '<summary class="' + sumCls + '">' + S.showFinalPackages + '</summary>' +
+            '<details open>' +
+              '<summary class="' + sumCls + '">' + S.finalPackages + '</summary>' +
               '<div id="np-pkgs-' + sid + '" class="flex flex-wrap gap-1 py-1 mt-2 min-h-[1.75rem]"></div>' +
             '</details>' +
-            '<details>' +
+            '<details open>' +
               '<summary class="' + sumCls + '">' + S.configPreview + '</summary>' +
               '<div class="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2">' +
                 '<label class="flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400 cursor-pointer select-none">' +

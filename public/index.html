@@ -38,7 +38,7 @@
 
   <main>
 
-  <section class="w-full xl:w-[64%] mx-auto px-4 py-14 md:py-20">
+  <section class="max-w-[68rem] mx-auto px-4 py-14 md:py-20">
     <div class="flex flex-col md:flex-row md:items-center gap-12 md:gap-12 lg:gap-20">
 
 
@@ -64,10 +64,11 @@
         </div>
       </div>
 
-      <div class="flex-shrink-0 w-full md:w-[420px] lg:w-[500px]">
+      <div class="flex-shrink-0 w-full md:w-[420px] lg:w-[500px]"
+           style="filter:drop-shadow(0 10px 44px rgba(246,130,31,0.12))">
         <svg viewBox="0 0 400 290" fill="none" xmlns="http://www.w3.org/2000/svg"
              role="img" aria-label="WrtNova firmware builder interface preview"
-             style="width:100%;height:auto;display:block;margin:0 auto;filter:blur(0.5px)">
+             style="width:100%;height:auto;display:block;margin:0 auto;filter:blur(0.3px) saturate(1.06);-webkit-mask-image:radial-gradient(ellipse 100% 100% at center,#000 85%,transparent);mask-image:radial-gradient(ellipse 100% 100% at center,#000 85%,transparent)">
 
           <rect width="400" height="290" rx="9" fill="#18181b" stroke="#27272a"/>
 
@@ -120,7 +121,7 @@
     </div>
   </section>
 
-  <section class="w-full xl:w-[64%] mx-auto px-4 pb-14 md:pb-20">
+  <section class="max-w-[68rem] mx-auto px-4 pb-14 md:pb-20">
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
 <div class="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-lg p-5 md:p-6">
@@ -184,7 +185,7 @@
   </section>
 
   <section class="border-t border-zinc-200 dark:border-zinc-800 py-14 md:py-20">
-    <div class="w-full xl:w-[64%] mx-auto px-4 text-center">
+    <div class="max-w-[68rem] mx-auto px-4 text-center">
       <p class="text-zinc-500 dark:text-zinc-400 text-xs mb-6" data-i18n="ctaTagline">Your router, your config — baked in from the first boot.</p>
       <div class="flex flex-col sm:flex-row gap-3 items-center justify-center">
         <a href="/builder" class="btn btn-primary btn-lg" data-i18n="singleNodeBuilder">Single-node builder →</a>
@@ -205,6 +206,6 @@
   </footer>
 
   <script defer src="/js/theme.js"></script>
-  <script defer src="/js/i18n.js"></script>
+  <script type="module" src="/js/i18n.js"></script>
 </body>
 </html>
