@@ -1,5 +1,24 @@
-(function () {
-  'use strict';
+// /networks fleet builder: per-network shared-config editor, multi-node build
+// orchestration, device picker, WARP prefill. ES module. Imports ui.js (DOM
+// helpers) and i18n.js (ui.S/ui.t) for their side effects so the values captured
+// at module-eval time below exist; tzdata.js is pulled for the timezone combo
+// used at runtime. Pure logic (mergeNodeConfig, createStore, renderConfigBlock,
+// parseList, config-form) is imported directly from the typed .mjs; the UI-method
+// wrappers (computeFinalPackages, renderConfigBlockMasked, ...) come off ui.
+import { ui } from './ui-ns.mjs';
+import './ui.js';
+import './i18n.js';
+import './tzdata.js';
+import { BASE_SCHEMA, readForm, writeForm } from './config-form.mjs';
+import { mergeNodeConfig } from './config-merge.mjs';
+import { renderConfigBlock } from './render-config.mjs';
+import { parseList } from './list-grammar.mjs';
+import { createStore } from './store.mjs';
+
+// Shared-config field schema for /networks: the canonical BASE_SCHEMA with the
+// per-network OpenWrt version select prepended (the only /networks-specific
+// field; AP_MODE/AP_INDEX/NON_CT_ATH10K live on the per-node panel, not here).
+const NET_SCHEMA = [['shared_version', 'select', 'shared-version'], ...BASE_SCHEMA];
 
   // -- Constants ----------------------------------------------------
   const STORE_KEY = 'wrtnova_networks';
@@ -12,13 +31,7 @@
 
   const nodeBuilds = new Map();
 
-  // ui.js helpers (loaded before us)
-  const ui = window.WrtNova = window.WrtNova || {};
   const S = ui.S, t = ui.t;
-
-  // Node config merge: shared definition (config-merge.mjs), assigned onto
-  // window.WrtNova by shared-boot.mjs (which loads before this script).
-  const mergeNodeConfig = ui.mergeNodeConfig;
 
   // -- Storage ------------------------------------------------------
   function loadNetworks() {
@@ -511,7 +524,7 @@
     const full   = !!(document.getElementById('np-full-' + node.id) || {}).checked;
     const cfg = mergeNodeConfig(net.shared_config, node.overrides);
     if (!full) {
-      pre.textContent = reveal ? ui.renderConfigBlock(cfg) : ui.renderConfigBlockMasked(cfg);
+      pre.textContent = reveal ? renderConfigBlock(cfg) : ui.renderConfigBlockMasked(cfg);
       return;
     }
     ui.fetchWrtnovaBody().then(body => {
@@ -725,7 +738,7 @@
     // Single source of truth for this network's shared config. The DOM is a
     // view; readConfig() is the normalize-at-boundary reader that feeds it, and
     // the conditional-visibility selectors (ui.js) read it via ui.configState.
-    st.configStore = ui.createStore(Object.assign(defaultConfig(), net.shared_config));
+    st.configStore = createStore(Object.assign(defaultConfig(), net.shared_config));
     ui.configState = () => st.configStore.get();
 
     loadConfig(net.shared_config);   // render store -> DOM (+ refresh visibility)
@@ -773,73 +786,20 @@
     if (autoRename) setTimeout(() => enterRenameMode(net), 60);
   }
 
+  // Shared config -> DOM (full render). The per-field write loop is the schema-
+  // driven writeForm (config-form.mjs, shared with /builder's renderConfigToDom);
+  // the version select, timezone and dynamic tables are page-orchestrated here.
   function loadConfig(cfg) {
-    function sv(id, v) {
-      const el = document.getElementById(id);
-      if (!el) return;
-      if (el.type === 'checkbox') el.checked = (v === '1' || v === true);
-      else el.value = v || '';
-    }
-    function sr(name, v) {
-      document.querySelectorAll('input[name="' + name + '"]').forEach(r => { r.checked = r.value === v; });
-    }
-
     const verSel = document.getElementById('shared-version');
     if (verSel) verSel.dataset.desired = cfg.shared_version || '';
 
-    sv('HOST_NAME', cfg.HOST_NAME);
-    sv('ROOT_PASSWD', cfg.ROOT_PASSWD);
-    sv('SSH_PUBLIC_KEY', cfg.SSH_PUBLIC_KEY);
-    sr('SSH_PASSWD_AUTH', cfg.SSH_PASSWD_AUTH || '');
+    writeForm(BASE_SCHEMA, cfg);
+
     // Timezone - mirrors history.js restore: update state + input via setTimezone
     if (cfg.ZONE_NAME && ui.setTimezone && !ui.setTimezone(cfg.ZONE_NAME)) {
       const tzInp = document.getElementById('timezone');
       if (tzInp) tzInp.value = cfg.ZONE_NAME;
     }
-    sv('BASE_NET_PREFIX', cfg.BASE_NET_PREFIX);
-    sv('DEFAULT_SUBNET', cfg.DEFAULT_SUBNET);
-    sv('LAN_BASE_PREFIX', cfg.LAN_BASE_PREFIX); sv('LAN_VLAN_ID', cfg.LAN_VLAN_ID); sv('LAN_SUBNET', cfg.LAN_SUBNET);
-    sv('GUEST_ENABLE', cfg.GUEST_ENABLE);
-    sv('GUEST_BASE_PREFIX', cfg.GUEST_BASE_PREFIX); sv('GUEST_VLAN_ID', cfg.GUEST_VLAN_ID); sv('GUEST_SUBNET', cfg.GUEST_SUBNET);
-    sv('IOT_ENABLE', cfg.IOT_ENABLE);
-    sv('IOT_BASE_PREFIX', cfg.IOT_BASE_PREFIX); sv('IOT_VLAN_ID', cfg.IOT_VLAN_ID); sv('IOT_SUBNET', cfg.IOT_SUBNET);
-    sv('IOT_INTERNET', cfg.IOT_INTERNET);
-    sv('IOT_ROUTE_VIA_WG', cfg.IOT_ROUTE_VIA_WG);
-    sv('WG_ENABLE', cfg.WG_ENABLE);
-    sv('LAN_WG_BASE_PREFIX', cfg.LAN_WG_BASE_PREFIX); sv('LAN_WG_VLAN_ID', cfg.LAN_WG_VLAN_ID); sv('LAN_WG_SUBNET', cfg.LAN_WG_SUBNET);
-    sv('ADDITIONAL_VLAN_LIST', cfg.ADDITIONAL_VLAN_LIST);
-    sv('WG_PRIVATE_KEY', cfg.WG_PRIVATE_KEY); sv('PEER_PUBLIC_KEY', cfg.PEER_PUBLIC_KEY);
-    sv('ENDPOINT', cfg.ENDPOINT); sv('ENDPOINT_PORT', cfg.ENDPOINT_PORT);
-    sv('PRESHARED_KEY', cfg.PRESHARED_KEY); sv('WG_IPV4', cfg.WG_IPV4);
-    sv('WG_IPV6', cfg.WG_IPV6); sv('ALLOWED_IPS', cfg.ALLOWED_IPS);
-    sr('wan_type', cfg.wan_type || 'dhcp');
-    sv('PPPOE_USERNAME', cfg.PPPOE_USERNAME); sv('PPPOE_PASSWD', cfg.PPPOE_PASSWD);
-    sv('WAN_MAC_ADDR', cfg.WAN_MAC_ADDR);
-    sv('WAN_IS_TAGGED', cfg.WAN_IS_TAGGED); sv('WAN_VLAN_ID', cfg.WAN_VLAN_ID);
-    sv('WAN_B_ENABLE', cfg.WAN_B_ENABLE); sv('WAN_B_VLAN_ID', cfg.WAN_B_VLAN_ID);
-    sv('BRIDGE_WAN_PORT', cfg.BRIDGE_WAN_PORT);
-    sv('COUNTRY_CODE', cfg.COUNTRY_CODE);
-    sv('DENSE_ENV', cfg.DENSE_ENV); sv('WIRELESS_MESH', cfg.WIRELESS_MESH);
-    const kvrEl = document.getElementById('WIFI_KVR'); if (kvrEl) kvrEl.checked = cfg.WIFI_KVR === '1';
-    sv('MESH_ID', cfg.MESH_ID); sv('MESH_PASSWD', cfg.MESH_PASSWD);
-    sv('LAN_WIFI_SSID', cfg.LAN_WIFI_SSID); sv('LAN_WIFI_PASSWD', cfg.LAN_WIFI_PASSWD);
-    sv('GUEST_WIFI_SSID', cfg.GUEST_WIFI_SSID); sv('GUEST_WIFI_PASSWD', cfg.GUEST_WIFI_PASSWD);
-    sv('GUEST_ISOLATE', cfg.GUEST_ISOLATE);
-    sv('IOT_WIFI_SSID', cfg.IOT_WIFI_SSID); sv('IOT_WIFI_PASSWD', cfg.IOT_WIFI_PASSWD);
-    sv('LAN_WG_WIFI_SSID', cfg.LAN_WG_WIFI_SSID); sv('LAN_WG_WIFI_PASSWD', cfg.LAN_WG_WIFI_PASSWD);
-    sv('CHANNEL_2G', cfg.CHANNEL_2G); sv('CHANNEL_5G', cfg.CHANNEL_5G); sv('CHANNEL_6G', cfg.CHANNEL_6G);
-    sv('WIFI_LOG_LVL', cfg.WIFI_LOG_LVL);
-    sv('DDNS_ENABLE', cfg.DDNS_ENABLE); sv('LOOKUP_HOSTNAME', cfg.LOOKUP_HOSTNAME);
-    sv('CLOUDFLARE_API_KEY', cfg.CLOUDFLARE_API_KEY);
-    sv('USB_TETHERING', cfg.USB_TETHERING); sv('CELLULAR_MODEM', cfg.CELLULAR_MODEM);
-    sr('DNS_MODE', cfg.DNS_MODE || 'adguardhome');
-    sv('BLOCK_DOT_DOQ', cfg.BLOCK_DOT_DOQ);
-    sv('DENY_GUEST_NIGHT', cfg.DENY_GUEST_NIGHT);
-    sv('QUARTERLY_REBOOT', cfg.QUARTERLY_REBOOT);
-    sv('LOG', cfg.LOG);
-    sv('SOFTWARE_OFFLOAD', cfg.SOFTWARE_OFFLOAD);
-    sv('HARDWARE_OFFLOAD', cfg.HARDWARE_OFFLOAD);
-    sv('additional_packages', cfg.additional_packages);
 
     loadTable('portfwd-table', cfg.PORT_FORWARD_LIST || '');
     loadTable('ipv6-table', cfg.IPV6_SERVER_LIST || '');
@@ -850,62 +810,10 @@
     if (ui.$ && ui.$('#HOST_NAME')) syncSsidPlaceholders();
   }
 
+  // DOM -> shared config, normalized at the boundary. The field list + ordering
+  // live in config-form.mjs (NET_SCHEMA), shared with /builder's readRawForm.
   function readConfig() {
-    function gv(id) {
-      const el = document.getElementById(id);
-      if (!el) return '';
-      return el.type === 'checkbox' ? (el.checked ? '1' : '') : (el.value || '');
-    }
-    function gr(name) {
-      const el = document.querySelector('input[name="' + name + '"]:checked');
-      return el ? el.value : '';
-    }
-    const tzInp = document.getElementById('timezone');
-    return {
-      shared_version: gv('shared-version'),
-      HOST_NAME: gv('HOST_NAME'), ROOT_PASSWD: gv('ROOT_PASSWD'),
-      SSH_PUBLIC_KEY: gv('SSH_PUBLIC_KEY'), SSH_PASSWD_AUTH: gr('SSH_PASSWD_AUTH'),
-      ...(ui.collectTimezone ? ui.collectTimezone() : { ZONE_NAME: tzInp ? tzInp.value : '', TIME_ZONE: '' }),
-      BASE_NET_PREFIX: gv('BASE_NET_PREFIX'), DEFAULT_SUBNET: gv('DEFAULT_SUBNET'),
-      LAN_BASE_PREFIX: gv('LAN_BASE_PREFIX'), LAN_VLAN_ID: gv('LAN_VLAN_ID'), LAN_SUBNET: gv('LAN_SUBNET'),
-      GUEST_ENABLE: gv('GUEST_ENABLE'),
-      GUEST_BASE_PREFIX: gv('GUEST_BASE_PREFIX'), GUEST_VLAN_ID: gv('GUEST_VLAN_ID'), GUEST_SUBNET: gv('GUEST_SUBNET'),
-      IOT_ENABLE: gv('IOT_ENABLE'),
-      IOT_BASE_PREFIX: gv('IOT_BASE_PREFIX'), IOT_VLAN_ID: gv('IOT_VLAN_ID'), IOT_SUBNET: gv('IOT_SUBNET'),
-      IOT_INTERNET: gv('IOT_INTERNET'),
-      IOT_ROUTE_VIA_WG: gv('IOT_ROUTE_VIA_WG'),
-      WG_ENABLE: gv('WG_ENABLE'),
-      LAN_WG_BASE_PREFIX: gv('LAN_WG_BASE_PREFIX'), LAN_WG_VLAN_ID: gv('LAN_WG_VLAN_ID'), LAN_WG_SUBNET: gv('LAN_WG_SUBNET'),
-      ADDITIONAL_VLAN_LIST: gv('ADDITIONAL_VLAN_LIST'),
-      WG_PRIVATE_KEY: gv('WG_PRIVATE_KEY'), PEER_PUBLIC_KEY: gv('PEER_PUBLIC_KEY'),
-      ENDPOINT: gv('ENDPOINT'), ENDPOINT_PORT: gv('ENDPOINT_PORT'),
-      PRESHARED_KEY: gv('PRESHARED_KEY'), WG_IPV4: gv('WG_IPV4'),
-      WG_IPV6: gv('WG_IPV6'), ALLOWED_IPS: gv('ALLOWED_IPS'),
-      wan_type: gr('wan_type'), PPPOE_USERNAME: gv('PPPOE_USERNAME'), PPPOE_PASSWD: gv('PPPOE_PASSWD'),
-      WAN_MAC_ADDR: gv('WAN_MAC_ADDR'),
-      WAN_IS_TAGGED: gv('WAN_IS_TAGGED'), WAN_VLAN_ID: gv('WAN_VLAN_ID'),
-      WAN_B_ENABLE: gv('WAN_B_ENABLE'), WAN_B_VLAN_ID: gv('WAN_B_VLAN_ID'),
-      BRIDGE_WAN_PORT: gv('BRIDGE_WAN_PORT'),
-      COUNTRY_CODE: gv('COUNTRY_CODE').toUpperCase(),
-      DENSE_ENV: gv('DENSE_ENV'), WIRELESS_MESH: gv('WIRELESS_MESH'),
-      MESH_ID: gv('MESH_ID'), MESH_PASSWD: gv('MESH_PASSWD'),
-      LAN_WIFI_SSID: gv('LAN_WIFI_SSID'), LAN_WIFI_PASSWD: gv('LAN_WIFI_PASSWD'),
-      GUEST_WIFI_SSID: gv('GUEST_WIFI_SSID'), GUEST_WIFI_PASSWD: gv('GUEST_WIFI_PASSWD'), GUEST_ISOLATE: gv('GUEST_ISOLATE'),
-      IOT_WIFI_SSID: gv('IOT_WIFI_SSID'), IOT_WIFI_PASSWD: gv('IOT_WIFI_PASSWD'),
-      LAN_WG_WIFI_SSID: gv('LAN_WG_WIFI_SSID'), LAN_WG_WIFI_PASSWD: gv('LAN_WG_WIFI_PASSWD'),
-      CHANNEL_2G: gv('CHANNEL_2G'), CHANNEL_5G: gv('CHANNEL_5G'), CHANNEL_6G: gv('CHANNEL_6G'),
-      WIFI_LOG_LVL: gv('WIFI_LOG_LVL'),
-      WIFI_KVR: (document.getElementById('WIFI_KVR') || {}).checked ? '1' : '',
-      PORT_FORWARD_LIST: ui.serializeRows ? ui.serializeRows('portfwd') : readTable('portfwd-table'),
-      IPV6_SERVER_LIST:  ui.serializeRows ? ui.serializeRows('ipv6')    : readTable('ipv6-table'),
-      DDNS_ENABLE: gv('DDNS_ENABLE'), LOOKUP_HOSTNAME: gv('LOOKUP_HOSTNAME'),
-      CLOUDFLARE_API_KEY: gv('CLOUDFLARE_API_KEY'),
-      USB_TETHERING: gv('USB_TETHERING'), CELLULAR_MODEM: gv('CELLULAR_MODEM'),
-      DNS_MODE: gr('DNS_MODE'), BLOCK_DOT_DOQ: gv('BLOCK_DOT_DOQ'),
-      DENY_GUEST_NIGHT: gv('DENY_GUEST_NIGHT'), QUARTERLY_REBOOT: gv('QUARTERLY_REBOOT'), LOG: gv('LOG'),
-      SOFTWARE_OFFLOAD: gv('SOFTWARE_OFFLOAD'), HARDWARE_OFFLOAD: gv('HARDWARE_OFFLOAD'),
-      additional_packages: gv('additional_packages'),
-    };
+    return readForm(NET_SCHEMA);
   }
 
   function syncSsidPlaceholders() {
@@ -926,7 +834,7 @@
     const tbody = document.querySelector('#' + tableId + ' tbody');
     if (!tbody) return;
     tbody.innerHTML = '';
-    const rows = ui.parseList(listStr);
+    const rows = parseList(listStr);
     if (!rows.length) {
       if (tableId === 'ipv6-table') addTableRow(tableId, 'docker-host', '20', '80 443');
       else addTableRow(tableId);
@@ -946,18 +854,6 @@
       '<td><button class="btn btn-icon" type="button" aria-label="Remove row">×</button></td>';
     tr.querySelector('button').addEventListener('click', () => tr.remove());
     tbody.appendChild(tr);
-  }
-
-  function readTable(tableId) {
-    const rows = [];
-    document.querySelectorAll('#' + tableId + ' tbody tr').forEach(tr => {
-      rows.push({
-        host:  tr.querySelector('[data-col="host"]').value,
-        octet: tr.querySelector('[data-col="octet"]').value,
-        ports: tr.querySelector('[data-col="ports"]').value,
-      });
-    });
-    return ui.serializeList(rows);
   }
 
   // -- New network ---------------------------------------------------
@@ -1880,4 +1776,3 @@
   } else {
     init();
   }
-})();

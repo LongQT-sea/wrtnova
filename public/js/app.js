@@ -1,7 +1,13 @@
-// Theme toggle is handled by theme.js (loaded separately).
-(function () {
-  'use strict';
-  const ui = window.WrtNova = window.WrtNova || {};
+// /builder page entry. ES module: imports the page's modules so the whole graph
+// evaluates (the pure .mjs are pulled transitively via ui.js / build.js). Theme
+// toggle is handled by theme.js (a standalone classic script).
+import { ui } from './ui-ns.mjs';
+import './ui.js';
+import './i18n.js';
+import './tzdata.js';
+import { initDeviceCombo, loadVersions } from './devices.js';
+import './build.js';
+
   const $ = ui.$;
 
   async function init() {
@@ -9,7 +15,7 @@
     ui.initDynamicRows();
     ui.initPasswordToggles();
     ui.wireDotTouches();
-    ui.initDeviceCombo();
+    initDeviceCombo();
     ui.initTzCombo();
 
     // Build the config store now that the dynamic tables and tz combo exist;
@@ -29,7 +35,7 @@
     ui.loadAsuServers && ui.loadAsuServers();
 
     try {
-      await Promise.all([ui.loadVersions(), ui.loadTzdata()]);
+      await Promise.all([loadVersions(), ui.loadTzdata()]);
     } catch (e) {
       ui.status('Init failed: ' + e.message, 'error');
     }
@@ -38,7 +44,7 @@
     const historyCard = document.getElementById('card-history');
     if (historyCard) {
       historyCard.addEventListener('toggle', () => {
-        ui.loadScript('/js/history.js').then(() => ui.loadHistory && ui.loadHistory());
+        import('/js/history.js').then(() => ui.loadHistory && ui.loadHistory());
       }, { once: true });
     }
   }
@@ -48,4 +54,3 @@
   } else {
     init();
   }
-})();

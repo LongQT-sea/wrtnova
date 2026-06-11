@@ -1,7 +1,12 @@
-(function () {
-  'use strict';
+// /builder/advanced Monaco editor build page. ES module. Imports ui.js (side
+// effects) and the device API from devices.js; the Monaco AMD loader exposes
+// `require`/`monaco` as globals, used directly here. Stubs renderAutoPackages /
+// updateAth10kVisibility (no package chips on this page) and must set them at
+// eval time, before devices.js calls ui.notifyTargetChanged.
+import { ui } from './ui-ns.mjs';
+import './ui.js';
+import { initDeviceCombo, loadVersions, collectTarget } from './devices.js';
 
-  const ui = window.WrtNova = window.WrtNova || {};
   const ASU_DEFAULT = 'https://sysupgrade.openwrt.org';
 
   let editor  = null;  // Monaco IStandaloneCodeEditor instance
@@ -10,7 +15,7 @@
   ui.renderAutoPackages      = function () {};
   ui.updateAth10kVisibility  = function () {};
   ui.notifyTargetChanged     = function () {
-    const ok  = !!(ui.collectTarget && ui.collectTarget());
+    const ok  = !!collectTarget();
     const btn = document.getElementById('build-btn');
     const hint = document.getElementById('build-hint');
     if (btn)  btn.disabled = !ok;
@@ -75,7 +80,7 @@
     ui.clearStatus(); ui.clearProgress();
     document.getElementById('result').classList.add('hidden');
 
-    const target = ui.collectTarget && ui.collectTarget();
+    const target = collectTarget();
     if (!target) { ui.status('Pick a device first.', 'error'); return; }
     if (!editor)  { ui.status('Editor not ready yet.', 'error'); return; }
 
@@ -274,11 +279,11 @@
     document.getElementById('editor-fs-btn').addEventListener('click', toggleFullscreen);
 
     initPresets();
-    ui.initDeviceCombo();
+    initDeviceCombo();
 
     const [templateResult] = await Promise.allSettled([
       fetchAssets(),
-      ui.loadVersions().catch(function (e) {
+      loadVersions().catch(function (e) {
         ui.status('Failed to load device list: ' + e.message, 'error');
       }),
     ]);
@@ -289,4 +294,3 @@
       ui.status('Failed to load editor assets: ' + templateResult.reason.message, 'error');
     }
   });
-})();

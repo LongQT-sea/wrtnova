@@ -26,6 +26,8 @@ const CANONICAL = {
   deriveNetRows: 'visibility.mjs',
   detectVlanConflict: 'visibility.mjs',
   deriveConfig: 'builder-config.mjs',
+  readForm: 'config-form.mjs',
+  writeForm: 'config-form.mjs',
 };
 
 const files = [

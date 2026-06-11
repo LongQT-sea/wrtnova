@@ -1,8 +1,13 @@
 // Card toggle animation for .card-anim elements; <details> used only for card-history.
-(function () {
-  'use strict';
-
-  const ui = window.WrtNova = window.WrtNova || {};
+// Publishes its DOM helpers onto the shared namespace (ui) for the other UI
+// scripts; the pure logic it consumes is imported directly from the typed .mjs
+// modules (no more shared-boot bridge).
+import { ui } from './ui-ns.mjs';
+import { renderConfigBlock } from './render-config.mjs';
+import { resolvePackages } from './packages.mjs';
+import { serializeList } from './list-grammar.mjs';
+import { deriveVisibility, deriveNetRows, detectVlanConflict } from './visibility.mjs';
+import { SENSITIVE_KEYS } from './types.mjs';
 
   ui.$  = (sel, root) => (root || document).querySelector(sel);
   ui.$$ = (sel, root) => Array.from((root || document).querySelectorAll(sel));
@@ -102,7 +107,7 @@
   };
 
   // serialize a dynamic table into the wrtnova.sh multi-line list format.
-  // The grammar lives in list-grammar.mjs (ui.serializeList); this reads the
+  // The grammar lives in list-grammar.mjs (serializeList); this reads the
   // DOM rows and hands them to the shared serializer.
   ui.serializeRows = function (kind) {
     const rows = ui.$$('#' + kind + '-table tbody tr').map(tr => ({
@@ -110,16 +115,16 @@
       octet: tr.querySelector('[data-col="octet"]').value,
       ports: tr.querySelector('[data-col="ports"]').value,
     }));
-    return ui.serializeList(rows);
+    return serializeList(rows);
   };
 
   // Render the per-network derived rows (prefix placeholder, router IP, default-
   // subnet label, net-off greying) and the VLAN-conflict warning from a config
-  // object. Pure logic is in visibility.mjs (ui.deriveNetRows/detectVlanConflict);
+  // object. Pure logic is in visibility.mjs (deriveNetRows/detectVlanConflict);
   // this is the DOM-writing view layer that consumes it.
   ui.applyNetworkRows = function (cfg) {
     const byKey = {};
-    ui.deriveNetRows(cfg).forEach(r => { byKey[r.key] = r; });
+    deriveNetRows(cfg).forEach(r => { byKey[r.key] = r; });
     ui.$$('.net-table tbody tr').forEach(function (row) {
       const r = byKey[row.dataset.net];
       if (!r) return;
@@ -137,7 +142,7 @@
       if (row.dataset.net !== 'lan') row.classList.toggle('net-off', !r.on);
     });
 
-    ui.hasVlanConflict = ui.detectVlanConflict(cfg);
+    ui.hasVlanConflict = detectVlanConflict(cfg);
     const warn = ui.$('#net-dup-warn');
     if (warn) warn.classList.toggle('hidden', !ui.hasVlanConflict);
   };
@@ -149,9 +154,9 @@
   };
 
   // Apply all conditional-visibility class toggles + the network rows from a
-  // config object (pure ui.deriveVisibility). DOM-writing view layer.
+  // config object (pure deriveVisibility). DOM-writing view layer.
   ui.applyVisibility = function (cfg) {
-    const vis = ui.deriveVisibility(cfg);
+    const vis = deriveVisibility(cfg);
     Object.keys(vis).forEach(function (cls) {
       const hidden = vis[cls];
       ui.$$('.' + cls).forEach(function (el) { el.classList.toggle('hidden', hidden); });
@@ -223,9 +228,9 @@
 
   // Fields the browser strips before sending config to /api/build.
   // The Worker only needs feature flags for package resolution - never passwords.
-  // Canonical set lives in types.mjs (ui.SENSITIVE_KEYS), assigned by shared-boot
-  // before this script runs; kept as ui.SENSITIVE_FIELDS for existing callers.
-  ui.SENSITIVE_FIELDS = ui.SENSITIVE_KEYS;
+  // Canonical set lives in types.mjs (SENSITIVE_KEYS, imported above); kept as
+  // ui.SENSITIVE_FIELDS for existing callers.
+  ui.SENSITIVE_FIELDS = SENSITIVE_KEYS;
 
   ui.stripSensitive = function (cfg) {
     return Object.fromEntries(Object.entries(cfg).filter(([k]) => !ui.SENSITIVE_FIELDS.has(k)));
@@ -235,12 +240,10 @@
   let _wrtnovaBodyCache = null;
   let _wrtnovaBodyPromise = null;  // deduplicate concurrent first fetches
 
-  // ui.renderConfigBlock, ui.shQuote, ui.BUILD_ONLY_KEYS are assigned by the
-  // shared-boot.mjs shim (render-config.mjs) before this script runs. The masked
-  // preview reuses the shared renderer, passing SENSITIVE_FIELDS so secrets show
-  // as KEY='****'.
+  // The masked preview reuses the shared renderer (render-config.mjs, imported
+  // above), passing SENSITIVE_FIELDS so secrets show as KEY='****'.
   ui.renderConfigBlockMasked = function (cfg) {
-    return ui.renderConfigBlock(cfg, ui.SENSITIVE_FIELDS);
+    return renderConfigBlock(cfg, ui.SENSITIVE_FIELDS);
   };
 
   ui.fetchWrtnovaBody = function () {
@@ -265,7 +268,7 @@
   // masked=true renders the config block with sensitive values as '****' (used by
   // the live full-script preview). Default false: the real script POSTed to ASU.
   ui.assembleScript = function (cfg, wrtnovaBody, masked) {
-    const block = masked ? ui.renderConfigBlockMasked(cfg) : ui.renderConfigBlock(cfg);
+    const block = masked ? ui.renderConfigBlockMasked(cfg) : renderConfigBlock(cfg);
     return '#!/bin/sh\n# WrtNova — generated by the WrtNova frontend\n' +
       block + _SCRIPT_MARKER + wrtnovaBody;
   };
@@ -291,7 +294,7 @@
   // is byte-identical to what the worker returns). Includes '-' removal tokens.
   ui.computeFinalPackages = function (target, cfg, extra) {
     const t = target || {};
-    return ui.resolvePackages({
+    return resolvePackages({
       base:   t.default_packages || [],
       device: t.device_packages  || [],
       extra:  extra || [],
@@ -324,4 +327,3 @@
     } catch (_) { return false; }
   }
 
-})();

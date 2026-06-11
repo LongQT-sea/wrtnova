@@ -1,8 +1,8 @@
 // @ts-check
 // Shared node-config merge - one definition, two runtimes.
 //
-// Imported by the browser (via shared-boot.mjs onto window.WrtNova) and by the
-// Workers runtime (functions/api/build.js). Merges shared network config with
+// Imported directly by the browser UI (networks.js) and by the Workers runtime
+// (functions/api/build.js). Merges shared network config with
 // per-node overrides, applying all conditional suppression rules (AP vs router,
 // sub-fields gated on their parent flag, etc.).
 //

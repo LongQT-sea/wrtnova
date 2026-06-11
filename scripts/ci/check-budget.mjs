@@ -29,27 +29,33 @@ const PAGES = {
 
 const gz = (abs) => gzipSync(readFileSync(abs)).length;
 
-// Resolve the transitive ./*.mjs import graph of an entry module.
+// Resolve the transitive STATIC relative-import graph (.js + .mjs) of a module
+// entry. Follows both `import ... from './x'` and side-effect `import './x'`;
+// ignores dynamic import() and absolute specifiers (e.g. import('/js/history.js'),
+// lazy-loaded, not initial payload).
 function moduleGraph(entryAbs, seen = new Set()) {
   if (seen.has(entryAbs) || !existsSync(entryAbs)) return seen;
   seen.add(entryAbs);
   const src = readFileSync(entryAbs, 'utf8');
   const dir = dirname(entryAbs);
-  const re = /(?:import|export)[^'"]*from\s*['"](\.\.?\/[^'"]+\.mjs)['"]/g;
-  let m;
-  while ((m = re.exec(src))) moduleGraph(resolve(dir, m[1]), seen);
+  const res = [
+    /(?:import|export)[^'"]*\sfrom\s*['"](\.\.?\/[^'"]+\.m?js)['"]/g,  // ... from './x'
+    /import\s+['"](\.\.?\/[^'"]+\.m?js)['"]/g,                          // side-effect import './x'
+  ];
+  for (const re of res) { let m; while ((m = re.exec(src))) moduleGraph(resolve(dir, m[1]), seen); }
   return seen;
 }
 
-// All JS files an initial page load pulls in (script src + module imports).
+// All JS files an initial page load pulls in. type="module" tags are graph roots
+// (follow their static import graph); classic scripts (defer) are single files.
 function pageJsFiles(htmlRel) {
   const html = readFileSync(resolve(root, htmlRel), 'utf8');
   const files = new Set();
-  const re = /<script[^>]*\ssrc="(\/js\/[^"]+)"/g;
+  const re = /<script([^>]*)\ssrc="(\/js\/[^"]+)"/g;
   let m;
   while ((m = re.exec(html))) {
-    const abs = resolve(root, 'public', m[1].replace(/^\//, ''));
-    if (m[1].endsWith('.mjs')) for (const f of moduleGraph(abs)) files.add(f);
+    const abs = resolve(root, 'public', m[2].replace(/^\//, ''));
+    if (/\stype="module"/.test(m[1])) for (const f of moduleGraph(abs)) files.add(f);
     else files.add(abs);
   }
   return [...files];

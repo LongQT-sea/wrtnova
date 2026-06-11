@@ -1,7 +1,24 @@
-(function () {
-  'use strict';
+// /builder build flow, config store, live preview, WARP prefill. ES module.
+// Imports ui.js (DOM helpers) and i18n.js (ui.t/ui.S) for their side effects so
+// the values captured below exist at module-eval time; pure logic (deriveConfig,
+// createStore, renderConfigBlock, config-form) is imported directly from the
+// typed .mjs. Still publishes its own callbacks (renderAutoPackages,
+// notifyTargetChanged, ...) onto the shared namespace for devices.js / history.js
+// until those import it directly.
+import { ui } from './ui-ns.mjs';
+import './ui.js';
+import './i18n.js';
+import { BASE_SCHEMA, readForm, keySets, textVal } from './config-form.mjs';
+import { deriveConfig } from './builder-config.mjs';
+import { createStore } from './store.mjs';
+import { renderConfigBlock } from './render-config.mjs';
+import { collectTarget } from './devices.js';
 
-  const ui = window.WrtNova = window.WrtNova || {};
+// Shared-config field schema for /builder: the canonical BASE_SCHEMA plus the
+// single-device fields (AP mode + AP index + non-CT ath10k) that only /builder
+// edits inline; /networks carries those as per-node overrides instead.
+const BUILDER_SCHEMA = [...BASE_SCHEMA, ['AP_MODE', 'radio'], ['AP_INDEX', 'text'], ['NON_CT_ATH10K', 'checkbox']];
+
   const $  = ui.$, $$ = ui.$$;
   const S = ui.S, t = ui.t;
   const ASU_DEFAULT = 'https://sysupgrade.openwrt.org';
@@ -23,10 +40,9 @@
     const dnsVal = dnsRadio ? dnsRadio.value : '';
     if (dnsVal !== 'adguardhome' && dnsVal !== 'dnsproxy') return false;
     const nextVal = dnsVal === 'adguardhome' ? 'dnsproxy' : 'none';
-    const nextRadio = $('input[name="DNS_MODE"][value="' + nextVal + '"]');
-    if (nextRadio) nextRadio.checked = true;
-    refreshStore();   // DOM is a view: sync the downgraded DNS_MODE into the store
-                      // so the auto-retry rebuild (collectConfig) actually uses it
+    // Store-first: downgrade DNS_MODE in the store (single source of truth) and
+    // reflect it into the radio, so the auto-retry rebuild uses the new value.
+    ui.applyStorePatch({ DNS_MODE: nextVal });
     const rn = $('#retry-note');
     if (rn) {
       rn.innerHTML = '';
@@ -81,60 +97,18 @@
     $('#asu-server-row').classList.remove('hidden');
   };
 
-  function checkboxVal(id) { const el = $('#' + id); return el && el.checked ? '1' : ''; }
-  function textVal(id)     { return ($('#' + id) || {}).value || ''; }
-  function radioVal(name)  { return ($('input[name="' + name + '"]:checked') || {}).value || ''; }
-
   // -- Config store (single source of truth) --------------------------------
   // The DOM is a view. readRawForm() reads+normalizes every field into a raw
-  // object (no cross-field gating); the store holds it; ui.deriveBuilderConfig()
+  // object (no cross-field gating); the store holds it; deriveConfig()
   // (builder-config.mjs) is the pure selector that applies the gating. Build
   // payload, preview and chips all read the store via collectConfig().
 
-  const RADIO_KEYS = ['AP_MODE', 'wan_type', 'SSH_PASSWD_AUTH', 'DNS_MODE'];
-  const CHECKBOX_KEYS = [
-    'WAN_IS_TAGGED', 'WAN_B_ENABLE', 'BRIDGE_WAN_PORT',
-    'GUEST_ENABLE', 'IOT_ENABLE', 'IOT_INTERNET', 'IOT_ROUTE_VIA_WG', 'WG_ENABLE',
-    'WIFI_KVR', 'DENSE_ENV', 'WIRELESS_MESH', 'GUEST_ISOLATE',
-    'DDNS_ENABLE', 'CELLULAR_MODEM', 'USB_TETHERING',
-    'SOFTWARE_OFFLOAD', 'HARDWARE_OFFLOAD', 'BLOCK_DOT_DOQ',
-    'DENY_GUEST_NIGHT', 'QUARTERLY_REBOOT', 'LOG', 'NON_CT_ATH10K',
-  ];
-  const TEXT_KEYS = [
-    'AP_INDEX', 'HOST_NAME', 'ROOT_PASSWD', 'SSH_PUBLIC_KEY',
-    'PPPOE_USERNAME', 'PPPOE_PASSWD', 'WAN_MAC_ADDR', 'WAN_VLAN_ID', 'WAN_B_VLAN_ID',
-    'BASE_NET_PREFIX', 'DEFAULT_SUBNET',
-    'LAN_BASE_PREFIX', 'LAN_VLAN_ID', 'LAN_SUBNET',
-    'GUEST_BASE_PREFIX', 'GUEST_VLAN_ID', 'GUEST_SUBNET',
-    'IOT_BASE_PREFIX', 'IOT_VLAN_ID', 'IOT_SUBNET',
-    'LAN_WG_BASE_PREFIX', 'LAN_WG_VLAN_ID', 'LAN_WG_SUBNET',
-    'ADDITIONAL_VLAN_LIST',
-    'MESH_ID', 'MESH_PASSWD',
-    'LAN_WIFI_SSID', 'LAN_WIFI_PASSWD', 'GUEST_WIFI_SSID', 'GUEST_WIFI_PASSWD',
-    'IOT_WIFI_SSID', 'IOT_WIFI_PASSWD', 'LAN_WG_WIFI_SSID', 'LAN_WG_WIFI_PASSWD',
-    'CHANNEL_2G', 'CHANNEL_5G', 'CHANNEL_6G', 'WIFI_LOG_LVL',
-    'WG_PRIVATE_KEY', 'PEER_PUBLIC_KEY', 'ENDPOINT', 'ENDPOINT_PORT',
-    'PRESHARED_KEY', 'WG_IPV4', 'WG_IPV6', 'ALLOWED_IPS',
-    'LOOKUP_HOSTNAME', 'CLOUDFLARE_API_KEY',
-  ];
-
   // DOM -> raw config object, normalized once at the boundary (checkboxes ''/'1',
-  // COUNTRY_CODE uppercased, tz + dynamic tables resolved). No gating here.
+  // COUNTRY_CODE uppercased, tz + dynamic tables resolved). No gating here. The
+  // field list + ordering live in config-form.mjs (BUILDER_SCHEMA), shared with
+  // /networks' readConfig.
   function readRawForm() {
-    const raw = {};
-    RADIO_KEYS.forEach(k => { raw[k] = radioVal(k); });
-    CHECKBOX_KEYS.forEach(k => { raw[k] = checkboxVal(k); });
-    TEXT_KEYS.forEach(k => { raw[k] = textVal(k); });
-    raw.COUNTRY_CODE = textVal('COUNTRY_CODE').toUpperCase();
-    const tz = ui.collectTimezone();
-    raw.ZONE_NAME = tz.ZONE_NAME;
-    raw.TIME_ZONE = tz.TIME_ZONE;
-    raw.PORT_FORWARD_LIST = ui.serializeRows('portfwd');
-    raw.IPV6_SERVER_LIST  = ui.serializeRows('ipv6');
-    // Not a config key (deriveConfig never emits it); held in the store only so
-    // editing extras notifies subscribers and re-renders the final package list.
-    raw.additional_packages = textVal('additional_packages');
-    return raw;
+    return readForm(BUILDER_SCHEMA);
   }
 
   let store = null;
@@ -142,13 +116,49 @@
   // The gated config: pure derivation of the store (falls back to a direct form
   // read if called before the store is initialized).
   function collectConfig() {
-    return ui.deriveBuilderConfig(store ? store.get() : readRawForm());
+    return deriveConfig(store ? store.get() : readRawForm());
   }
 
   function refreshStore() {
     if (store) store.set(readRawForm());
   }
   ui.refreshConfigStore = refreshStore;
+
+  // -- Store-first programmatic writes (single-writer model) -----------------
+  // The store is the single source of truth. Programmatic config changes (WARP
+  // prefill, DNS auto-retry) go through applyStorePatch: write the store first
+  // (which notifies the derived selectors), then reflect the changed keys into
+  // the form controls via renderConfigToDom (the inverse of readRawForm). This
+  // removes the "wrote the DOM but forgot to sync the store" hazard class: there
+  // is no separate refreshStore() call to forget. (History restore reconstructs
+  // tables / timezone / wan_type and stays DOM-first, then re-syncs explicitly.)
+  const { radio: RADIO_SET, checkbox: CHECKBOX_SET } = keySets(BUILDER_SCHEMA);
+  function renderConfigToDom(patch) {
+    for (const k in patch) {
+      const val = patch[k];
+      if (k === 'ZONE_NAME') { if (val) ui.setTimezone(val); continue; }
+      if (k === 'TIME_ZONE') continue;                 // set together with ZONE_NAME
+      if (RADIO_SET.has(k)) {
+        const el = $('input[name="' + k + '"][value="' + (val || '') + '"]');
+        if (el) el.checked = true;
+        continue;
+      }
+      if (CHECKBOX_SET.has(k)) {
+        const el = $('#' + k);
+        if (el) el.checked = val === '1';
+        continue;
+      }
+      const el = $('#' + k);                            // text / select / textarea
+      if (el && 'value' in el) el.value = val == null ? '' : val;
+    }
+  }
+
+  function applyStorePatch(patch) {
+    if (store) store.set(patch);
+    renderConfigToDom(patch);
+  }
+  ui.applyStorePatch  = applyStorePatch;
+  ui.renderConfigToDom = renderConfigToDom;
 
   function parseAdditionalPackages() {
     return ($('#additional_packages').value || '')
@@ -162,7 +172,7 @@
   // shared resolvePackages. Byte-identical to what the worker returns.
   function computeFinalPackages() {
     if (!ui.computeFinalPackages) return [];
-    const target = ui.collectTarget && ui.collectTarget();
+    const target = collectTarget();
     return ui.computeFinalPackages(target, collectConfig(), parseAdditionalPackages());
   }
 
@@ -186,7 +196,7 @@
     if (!pre) return;
     if (!previewFullScript) {
       const cfg = collectConfig();
-      pre.textContent = previewRevealed ? ui.renderConfigBlock(cfg) : ui.renderConfigBlockMasked(cfg);
+      pre.textContent = previewRevealed ? renderConfigBlock(cfg) : ui.renderConfigBlockMasked(cfg);
       return;
     }
     // Full script needs the cached wrtnova.sh body; recompute cfg in the .then so
@@ -243,7 +253,7 @@
   // by app.js after the dynamic tables exist (so serializeRows sees them).
   ui.initConfigStore = function () {
     if (store) return;
-    store = ui.createStore(readRawForm());
+    store = createStore(readRawForm());
     ui.configStore = store;
     // Source of truth for the shared conditional-visibility selectors (ui.js).
     ui.configState = () => store.get();
@@ -315,7 +325,7 @@
     $('#result').classList.add('hidden');
     // The config preview is an always-live selector now; not gated on Build.
 
-    const target = ui.collectTarget();
+    const target = collectTarget();
     if (!target) { ui.status(S.pickDeviceFirst, 'error'); return; }
     if (ui.hasVlanConflict) { ui.status(S.fixVlanConflict, 'error'); return; }
 
@@ -337,8 +347,8 @@
     }
 
     await Promise.all([
-      ui.loadScript('/js/bcrypt.js'),
-      ui.loadScript('/js/history.js'),
+      ui.loadScript('/js/bcrypt.js'),     // classic global (window.dcodeIO)
+      import('/js/history.js'),           // ES module - dynamic import
     ]);
 
     const cfg = collectConfig();
@@ -569,22 +579,22 @@
           throw new Error(friendly);
         }
 
-        const setField = (id, val) => { const el = $('#' + id); if (el) el.value = val || ''; };
-        setField('WG_PRIVATE_KEY',  data.WG_PRIVATE_KEY);
-        setField('PEER_PUBLIC_KEY', data.PEER_PUBLIC_KEY);
-        setField('ENDPOINT',        data.ENDPOINT);
-        setField('ENDPOINT_PORT',   data.ENDPOINT_PORT);
-        setField('WG_IPV4',         data.WG_IPV4);
-        setField('WG_IPV6',         data.WG_IPV6);
-        setField('ALLOWED_IPS',     data.ALLOWED_IPS);
+        // Store-first: write the WARP-derived WG fields into the store (single
+        // source of truth) and reflect them into the form. No separate sync.
+        ui.applyStorePatch({
+          WG_PRIVATE_KEY:  data.WG_PRIVATE_KEY  || '',
+          PEER_PUBLIC_KEY: data.PEER_PUBLIC_KEY || '',
+          ENDPOINT:        data.ENDPOINT        || '',
+          ENDPOINT_PORT:   data.ENDPOINT_PORT   || '',
+          WG_IPV4:         data.WG_IPV4         || '',
+          WG_IPV6:         data.WG_IPV6         || '',
+          ALLOWED_IPS:     data.ALLOWED_IPS     || '',
+        });
 
         if (data.warp_refresh_token) {
           _warpSessionToken = data.warp_refresh_token;
         }
 
-        // WG fields were set programmatically (no input event); sync the store
-        // so they reach the build payload / preview.
-        refreshStore();
         ui.setDot('wg', 'touched');
 
         if (msg) {
@@ -612,7 +622,7 @@
   }
 
   ui.notifyTargetChanged = function () {
-    const t = ui.collectTarget && ui.collectTarget();
+    const t = collectTarget();
     const ok = !!t;
     $('#build-btn').disabled = !ok;
     $('#build-hint').textContent = ok ? '' : S.pickDeviceHint;
@@ -621,4 +631,3 @@
     // the config store; re-render on target change.
     renderAutoPackages();
   };
-})();

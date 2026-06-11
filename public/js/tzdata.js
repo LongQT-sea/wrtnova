@@ -1,7 +1,9 @@
-(function () {
-  'use strict';
+// Timezone combobox + tzdata.lua parsing. Dual-mode ES module: publishes its
+// helpers onto the shared namespace for /networks while /builder imports it.
+// Imports ui.js for its side effects so ui.$/ui.$$ exist at module-eval time.
+import { ui } from './ui-ns.mjs';
+import './ui.js';
 
-  const ui = window.WrtNova = window.WrtNova || {};
   const $  = ui.$, $$ = ui.$$;
 
   const state = ui.tzState = {
@@ -83,4 +85,3 @@
     if (help) help.textContent = 'ZONE_NAME="' + zone.zoneName + '"  TIME_ZONE="' + zone.tzString + '"';
     return true;
   };
-})();

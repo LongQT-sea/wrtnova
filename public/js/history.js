@@ -1,7 +1,8 @@
-(function () {
-  'use strict';
-
-  const ui = window.WrtNova = window.WrtNova || {};
+// Build history panel (lazy-loaded via dynamic import()). Dual-mode ES module:
+// publishes ui.loadHistory/restoreFromHistory onto the shared namespace.
+import { ui } from './ui-ns.mjs';
+import { parseList } from './list-grammar.mjs';
+import { selectDevice, loadOverview, devicesState } from './devices.js';
 
   function timeAgo(ts) {
     const m = Math.floor((Date.now() - ts) / 60000);
@@ -82,12 +83,12 @@
     const best = findBestVersion(dev.version, sel);
     if (sel && best && sel.value !== best) {
       sel.value = best;
-      if (ui.devicesState) ui.devicesState.version = best;
-      await ui.loadOverview().catch(function () {});
+      devicesState.version = best;
+      await loadOverview().catch(function () {});
     }
 
-    if (dev.title && ui.selectDevice) {
-      await ui.selectDevice(dev.title).catch(function () {});
+    if (dev.title) {
+      await selectDevice(dev.title).catch(function () {});
     }
 
     if (entry.config) restoreConfig(entry.config);
@@ -97,8 +98,12 @@
     const pkgEl = document.getElementById('additional_packages');
     if (pkgEl) pkgEl.value = (entry.additional_packages || []).join(' ');
 
-
-    document.body.dispatchEvent(new Event('change'));
+    // restoreConfig wrote the DOM directly (tables / timezone / wan_type
+    // inference). Re-sync the store (single source of truth) from the form and
+    // refresh the derived views from it - replaces the old synthetic body
+    // 'change' event that used to drive both.
+    if (ui.refreshConfigStore) ui.refreshConfigStore();
+    if (ui.refreshConditionalVisibility) ui.refreshConditionalVisibility();
 
     ui.status('Config restored from ' + timeAgo(entry.ts) + '.', 'info');
   };
@@ -222,7 +227,7 @@
     const tbody = document.querySelector('#' + kind + '-table tbody');
     if (!tbody) return;
     tbody.innerHTML = '';
-    const rows = ui.parseList(list);
+    const rows = parseList(list);
     if (!rows.length) { ui.addRow(kind); return; }
     rows.forEach(function (row) {
       const tr = ui.addRow(kind);
@@ -234,4 +239,3 @@
       if (p && row.ports) p.value = row.ports;
     });
   }
-})();

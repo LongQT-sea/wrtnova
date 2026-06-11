@@ -1,7 +1,7 @@
-(function () {
-  'use strict';
-
-  const ui = window.WrtNova = window.WrtNova || {};
+// i18n locale tables + t()/S + DOM application. Dual-mode ES module: publishes
+// ui.t/ui.S onto the shared namespace for the not-yet-migrated /networks IIFE,
+// while migrated /builder modules import it (for its ui side effects).
+import { ui } from './ui-ns.mjs';
 
   const locales = {
     en: {
@@ -2223,4 +2223,3 @@
   } else {
     applyTranslations();
   }
-})();

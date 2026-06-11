@@ -1,8 +1,13 @@
 // On mobile (<768px) the combobox opens as a full-screen native <dialog>.
-(function () {
-  'use strict';
+// ES module used by /builder and /builder/advanced (NOT /networks - that page
+// has its own device picker). Its public API is exported directly; the page-
+// specific callbacks it fires (notifyTargetChanged / renderAutoPackages /
+// updateAth10kVisibility) are injected via the shared ui namespace - build.js
+// defines them on /builder, advanced.js stubs them on /builder/advanced. Imports
+// ui.js for side effects so ui.$/ui.$$ exist at module-eval time.
+import { ui } from './ui-ns.mjs';
+import './ui.js';
 
-  const ui  = window.WrtNova = window.WrtNova || {};
   const $   = ui.$, $$ = ui.$$;
   const DL  = 'https://downloads.openwrt.org';
 
@@ -11,7 +16,7 @@
   const SUPPORTED_BRANCHES = ['23.05', '24.10', '25.12'];
   const SNAPSHOT_BRANCHES  = new Set(['24.10', '25.12']);
 
-  const state = ui.devicesState = {
+  export const devicesState = {
     version: '',
     overview: null,                 // raw .overview.json
     devicesByTitle: null,           // { title: profile }
@@ -19,6 +24,7 @@
     selectedProfile: null,          // overview entry
     profileDetails: null,           // result of profiles.json fetch
   };
+  const state = devicesState;
 
   function pickLatestNPatches(versions, branch, n) {
     return versions.filter(v => v.startsWith(branch + '.'))
@@ -105,7 +111,7 @@
     ui.notifyTargetChanged && ui.notifyTargetChanged();
   }
 
-  ui.loadVersions = async function () {
+  export const loadVersions = async function () {
     const VERSIONS_KEY = 'wrtnova_versions';
     const cachedVersions = cacheGet(VERSIONS_KEY);
 
@@ -116,23 +122,23 @@
         .then(r => r.ok ? r.json() : Promise.reject())
         .then(d => cacheSet(VERSIONS_KEY, d))
         .catch(() => {});
-      await ui.loadOverview();
+      await loadOverview();
     } else {
       const res = await fetch(DL + '/.versions.json', { cache: 'no-cache' });
       if (!res.ok) throw new Error('versions fetch failed: ' + res.status);
       const data = await res.json();
       cacheSet(VERSIONS_KEY, data);
       applyVersionsData(data);
-      await ui.loadOverview();
+      await loadOverview();
     }
 
     $('#version').addEventListener('change', () => {
       state.version = $('#version').value;
-      ui.loadOverview().catch(err => ui.status('Failed to load device list: ' + err.message, 'error'));
+      loadOverview().catch(err => ui.status('Failed to load device list: ' + err.message, 'error'));
     });
   };
 
-  ui.loadOverview = async function () {
+  export const loadOverview = async function () {
     const v = state.version;
     const OVERVIEW_KEY = 'wrtnova_overview_' + v;
     const prevTitle = state.selectedTitle;
@@ -142,7 +148,7 @@
     const cached = cacheGet(OVERVIEW_KEY);
     if (cached) {
       applyOverviewData(cached);
-      if (prevTitle) await ui.selectDevice(prevTitle);
+      if (prevTitle) await selectDevice(prevTitle);
       // Background refresh
       fetch(versionToUrl(v) + '/.overview.json', { cache: 'no-cache' })
         .then(r => r.ok ? r.json() : Promise.reject())
@@ -155,11 +161,11 @@
       const data = await res.json();
       cacheSet(OVERVIEW_KEY, data);
       applyOverviewData(data);
-      if (prevTitle) await ui.selectDevice(prevTitle);
+      if (prevTitle) await selectDevice(prevTitle);
     }
   };
 
-  ui.initDeviceCombo = function () {
+  export const initDeviceCombo = function () {
     const inp = $('#device'), list = $('#device-list');
     let active = -1;
 
@@ -349,7 +355,7 @@
   }
 
   // -------------------------------------- programmatic device selection (used by history restore)
-  ui.selectDevice = async function (title) {
+  export const selectDevice = async function (title) {
     const profile = state.devicesByTitle && state.devicesByTitle[title];
     if (!profile) return false;
     $('#device').value    = title;
@@ -360,7 +366,7 @@
     return true;
   };
 
-  ui.collectTarget = function () {
+  export const collectTarget = function () {
     const prof = state.selectedProfile, det = state.profileDetails;
     if (!prof || !det) return null;
     const dev = (det.profiles || {})[prof.id] || {};
@@ -374,4 +380,3 @@
       images: dev.images || [],
     };
   };
-})();
