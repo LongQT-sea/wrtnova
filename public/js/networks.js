@@ -164,7 +164,9 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'], ...BASE_SCHE
     const c = network.shared_config;
     const p = [];
     if (c.shared_version) p.push('OpenWrt ' + c.shared_version);
-    if (c.BASE_NET_PREFIX) p.push(c.BASE_NET_PREFIX + '.x.0/24');
+    const lanPrefix = c.LAN_BASE_PREFIX || c.BASE_NET_PREFIX;   // matches nodeLanIp
+    const lanMask = c.LAN_SUBNET || c.DEFAULT_SUBNET || '/24';  // LAN override, else network default
+    if (lanPrefix) p.push(lanPrefix + '.' + (c.LAN_VLAN_ID || '1') + '.0' + lanMask);
     if (c.DNS_MODE && c.DNS_MODE !== 'none')
       p.push(c.DNS_MODE === 'adguardhome' ? S.adguardHome : S.dnsproxy);
     if (c.WG_ENABLE === '1') p.push(S.wireGuardVpn);
