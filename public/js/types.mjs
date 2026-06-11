@@ -15,9 +15,9 @@
 export { BUILD_ONLY_KEYS } from './render-config.mjs';
 
 /**
- * Keys the browser strips before POSTing config to /api/build, and which the
- * masked preview renders as '****'. The Worker only needs feature flags for
- * package resolution - never secrets. Single source for ui.SENSITIVE_FIELDS.
+ * Keys the masked preview renders as '****' and which are stripped from saved
+ * build history so secrets are never persisted in plaintext. Single source for
+ * ui.SENSITIVE_FIELDS.
  * @type {ReadonlySet<string>}
  */
 export const SENSITIVE_KEYS = new Set([

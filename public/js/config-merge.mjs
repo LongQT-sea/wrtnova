@@ -1,8 +1,7 @@
 // @ts-check
 // Shared node-config merge - one definition, two runtimes.
 //
-// Imported directly by the browser UI (networks.js) and by the Workers runtime
-// (functions/api/build.js). Merges shared network config with
+// Imported by the browser UI (networks.js) to merge shared network config with
 // per-node overrides, applying all conditional suppression rules (AP vs router,
 // sub-fields gated on their parent flag, etc.).
 //

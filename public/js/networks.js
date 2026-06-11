@@ -265,14 +265,35 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'], ...BASE_SCHE
       : '';
   }
 
-  function showPanelDone(actEl, firmwareUrl, images, bin_dir, asuBase, onDone) {
+  function deleteNodeBtnHtml(id) {
+    return '<button type="button" class="btn text-xs ml-auto text-red-500 hover:text-red-400 border-red-800/40 hover:border-red-600/60" data-deletenode="' + id + '">' + S.deleteNode + '</button>';
+  }
+
+  function wireDeleteNode(net, node, scopeEl) {
+    scopeEl.querySelector('[data-deletenode]')?.addEventListener('click', () => {
+      document.getElementById('modal-delete-node-name').textContent = node.name;
+      document.getElementById('btn-confirm-delete-node').onclick = () => {
+        net.nodes = net.nodes.filter(n => n.id !== node.id);
+        net.updated_at = Date.now();
+        saveNetworks();
+        document.getElementById('modal-delete-node').close();
+        renderNodeList(net);
+      };
+      document.getElementById('modal-delete-node').showModal();
+    });
+  }
+
+  function showPanelDone(net, node, actEl, firmwareUrl, images, bin_dir, asuBase, onDone) {
     if (!actEl) return;
     const id = 'buildbtn-' + uid();
+    const isAp = node.overrides.AP_MODE === '1';
     actEl.innerHTML =
       '<button type="button" class="btn btn-primary text-xs" id="' + id + '">' + S.buildFirmware + '</button>' +
+      (isAp ? deleteNodeBtnHtml(node.id) : '') +
       flashNoteHtml(images) +
       imageFilesHtml(images, bin_dir, asuBase);
     actEl.querySelector('#' + id)?.addEventListener('click', onDone);
+    wireDeleteNode(net, node, actEl);
   }
 
   // -- View routing -------------------------------------------------
@@ -493,6 +514,11 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'], ...BASE_SCHE
                   '<input type="checkbox" id="np-reveal-' + sid + '" class="align-middle"><span>' + S.revealSecrets + '</span></label>' +
                 '<label class="flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400 cursor-pointer select-none">' +
                   '<input type="checkbox" id="np-full-' + sid + '" class="align-middle"><span>' + S.fullScript + '</span></label>' +
+                '<button type="button" id="np-copy-' + sid + '" aria-label="' + esc(S.copy) + '" title="' + esc(S.copy) + '"' +
+                  ' class="ml-auto p-1.5 rounded-md text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors focus:outline-none focus:ring-2 focus:ring-accent">' +
+                  '<svg class="icon-copy w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>' +
+                  '<svg class="icon-check w-4 h-4 hidden" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>' +
+                '</button>' +
               '</div>' +
               '<pre class="config-preview" id="np-preview-' + sid + '"></pre>' +
             '</details>' +
@@ -531,6 +557,15 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'], ...BASE_SCHE
       if (!(document.getElementById('np-full-' + node.id) || {}).checked) return;
       pre.textContent = ui.assembleScript(cfg, body, !reveal);
     }).catch(e => { pre.textContent = ui.t ? ui.t('failedLoadTemplate', { msg: e.message }) : ('Error: ' + e.message); });
+  }
+
+  // Always-unmasked text for the node's Copy button, regardless of the reveal
+  // toggle: copying masked asterisks would paste an unusable config.
+  function nodePreviewUnmasked(net, node) {
+    const cfg = mergeNodeConfig(net.shared_config, node.overrides);
+    const full = !!(document.getElementById('np-full-' + node.id) || {}).checked;
+    if (!full) return Promise.resolve(renderConfigBlock(cfg));
+    return ui.fetchWrtnovaBody().then(body => ui.assembleScript(cfg, body, false));
   }
 
   function panelHTML(net, node) {
@@ -608,11 +643,11 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'], ...BASE_SCHE
       '<button type="button" class="btn btn-primary text-xs" data-savenode="' + id + '"' +
       (hasDevice ? '' : ' disabled style="opacity:0.4;cursor:not-allowed"') + '>' +
       (hasDevice ? S.buildFirmware : S.selectDeviceFirst) + '</button>' +
+      (isAp ? deleteNodeBtnHtml(id) : '') +
       (hasDevice && node.last_build?.images?.length
         ? flashNoteHtml(node.last_build.images) +
           imageFilesHtml(node.last_build.images, node.last_build.bin_dir, node.last_build.asu_base)
         : '') +
-      (isAp ? '<button type="button" class="btn text-xs ml-auto text-red-500 hover:text-red-400 border-red-800/40 hover:border-red-600/60" data-deletenode="' + id + '">' + S.deleteNode + '</button>' : '') +
       '</div>' + nodeExtrasHTML(id, hasDevice) + '</div>'
     );
   }
@@ -651,21 +686,18 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'], ...BASE_SCHE
       }
     }
 
-    panel.querySelector('[data-deletenode]')?.addEventListener('click', () => {
-      document.getElementById('modal-delete-node-name').textContent = node.name;
-      document.getElementById('btn-confirm-delete-node').onclick = () => {
-        net.nodes = net.nodes.filter(n => n.id !== node.id);
-        net.updated_at = Date.now();
-        saveNetworks();
-        document.getElementById('modal-delete-node').close();
-        renderNodeList(net);
-      };
-      document.getElementById('modal-delete-node').showModal();
-    });
+    wireDeleteNode(net, node, panel);
 
     // Config/script preview toggles (parity with /builder).
     panel.querySelector('#np-reveal-' + node.id)?.addEventListener('change', () => renderNodePreview(net, node));
     panel.querySelector('#np-full-' + node.id)?.addEventListener('change', () => renderNodePreview(net, node));
+
+    const npCopy = panel.querySelector('#np-copy-' + node.id);
+    if (npCopy) npCopy.addEventListener('click', async () => {
+      let ok = false;
+      try { ok = await ui.copyToClipboard(await nodePreviewUnmasked(net, node)); } catch (_) { ok = false; }
+      ui.flashCopied(npCopy, ok);
+    });
     updateNodeExtras(net, node);   // initial render
   }
 
@@ -981,6 +1013,38 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'], ...BASE_SCHE
   }
 
   // -- Build ---------------------------------------------------------
+
+  // Auto-downgrade DNS for a router node whose firmware does not fit (ASU
+  // "storage exceeded"), mirroring /builder's tryAutoRetry: adguardhome ->
+  // dnsproxy -> dnsmasq (none). DNS_MODE lives in the shared network config, so
+  // the change is network-wide - which is fine, because AP nodes install no DNS
+  // package and are unaffected (hence the router-only guard). builtDns is the
+  // DNS_MODE the failed build actually used; comparing it against the current
+  // shared value keeps concurrent build-all retries from double-downgrading (one
+  // router's downgrade already covers its siblings). Returns the DNS mode the
+  // rebuild should use, or '' when no auto-retry applies.
+  function planDnsAutoRetry(net, node, builtDns, errMsg) {
+    if (!/exceed.*storage|storage.*exceed/i.test(errMsg)) return '';
+    if (node.overrides.AP_MODE === '1') return '';            // router-only
+    const cur = net.shared_config.DNS_MODE || 'adguardhome';
+    if (cur !== builtDns) return cur;                         // a sibling already downgraded - rebuild at current mode
+    if (cur !== 'adguardhome' && cur !== 'dnsproxy') return ''; // already dnsmasq - nothing left to try
+    const next = cur === 'adguardhome' ? 'dnsproxy' : 'none';
+    net.shared_config.DNS_MODE = next;
+    if (st.configStore && st.networkId === net.id) st.configStore.set({ DNS_MODE: next });
+    net.updated_at = Date.now();
+    saveNetworks();
+    // The build runs in-place on the detail view (showDetail isn't re-run), so
+    // refresh the header subtitle to reflect the new DNS mode without a reload.
+    const sumEl = document.getElementById('detail-summary');
+    if (sumEl && st.networkId === net.id) sumEl.textContent = netSummary(net);
+    return next;
+  }
+
+  function dnsAutoRetryNote(mode) {
+    return mode === 'none' ? S.autoSwitchedDnsmasq : S.autoSwitchedDnsproxy;
+  }
+
   function buildNode(net, node) {
     if (!node.device_target.profile) return;
     if (nodeBuilds.has(node.id)) return;
@@ -1000,6 +1064,9 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'], ...BASE_SCHE
     const extraPkgs = (net.shared_config.additional_packages || '').split(/[\s,]+/).filter(Boolean);
     const rootPasswd = node.overrides.ROOT_PASSWD || net.shared_config.ROOT_PASSWD || '';
     const effectiveVersion = node.overrides.version || tgt.version || net.shared_config.shared_version;
+    // DNS mode this build uses - captured up front so an auto-retry compares
+    // against it rather than a value a concurrent sibling build may have moved.
+    const builtDns = net.shared_config.DNS_MODE || 'adguardhome';
 
     const getVersionedTarget = async () => {
       if (!node.overrides.version || node.overrides.version === tgt.version)
@@ -1022,38 +1089,14 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'], ...BASE_SCHE
 
     Promise.all([bcryptHash(rootPasswd), getVersionedTarget()])
       .then(async ([adguardHash, vt]) => {
-      const payload = {
-        profile: tgt.profile, target: tgt.target,
-        version: effectiveVersion,
-        version_code: vt.version_code,
-        default_packages: vt.default_packages,
-        device_packages: vt.device_packages,
-        device_title: tgt.title,
-        shared_config: ui.stripSensitive(net.shared_config),
-        node_overrides: ui.stripSensitive(node.overrides),
-        additional_packages: extraPkgs,
-      };
-      showPanelProgress(actEl, 2, S.submittingBuild);
-      let resp;
-      try {
-        const r = await fetch('/api/build', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-        });
-        resp = await r.json();
-        if (!r.ok) throw new Error(
-          [resp.error, resp.detail, resp.message].filter(Boolean).join(' — ') || 'HTTP ' + r.status
-        );
-      } catch (e) {
-        showPanelError(panelActEl(node.id) || actEl, t('buildFailed', { msg: e.message }), () => buildNode(net, node));
-        return;
-      }
+      showPanelProgress(actEl, 5, S.preparingBuild);
 
-      if (!resp.packages || !resp.asu_url) {
-        showPanelError(panelActEl(node.id) || actEl, S.unexpectedApiBuild, () => buildNode(net, node));
-        return;
-      }
+      // Packages + ASU endpoint are resolved client-side (no /api/build).
+      // computeFinalPackages over the same versioned target is byte-identical
+      // to what the old worker returned.
+      const packages = ui.computeFinalPackages(
+        vt, mergeNodeConfig(net.shared_config, node.overrides), extraPkgs);
+      const asuUrl = activeAsu.replace(/\/+$/, '') + '/api/v1/build';
 
       let wrtnovaBody;
       try {
@@ -1068,7 +1111,7 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'], ...BASE_SCHE
       const asuBody = {
         profile: tgt.profile, target: tgt.target,
         version: effectiveVersion, version_code: vt.version_code,
-        packages: resp.packages,
+        packages: packages,
         defaults: ui.assembleScript(fullCfg, wrtnovaBody),
         diff_packages: true, client: 'wrtnova/1.0',
       };
@@ -1076,7 +1119,7 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'], ...BASE_SCHE
       showPanelProgress(panelActEl(node.id) || actEl, 8, S.submittingToServer);
       let asuR, asuData;
       try {
-        asuR = await fetch(resp.asu_url, {
+        asuR = await fetch(asuUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(asuBody),
@@ -1086,11 +1129,18 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'], ...BASE_SCHE
           asuData.detail || ('ASU HTTP ' + asuR.status)
         );
       } catch (e) {
-        showPanelError(panelActEl(node.id) || actEl, t('buildFailed', { msg: e.message }), () => buildNode(net, node));
+        const el = panelActEl(node.id) || actEl;
+        const mode = planDnsAutoRetry(net, node, builtDns, e.message);
+        if (mode) {
+          showPanelProgress(el, 2, dnsAutoRetryNote(mode));
+          setTimeout(() => buildNode(net, node), 2000);
+        } else {
+          showPanelError(el, t('buildFailed', { msg: e.message }), () => buildNode(net, node));
+        }
         return;
       }
 
-      const asuBase = resp.asu_url.replace('/api/v1/build', '');
+      const asuBase = asuUrl.replace('/api/v1/build', '');
 
       if (asuR.status === 200) {
         finishNodeBuild(net, node, panelActEl(node.id) || actEl, asuData, asuBase);
@@ -1101,13 +1151,13 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'], ...BASE_SCHE
         showPanelError(panelActEl(node.id) || actEl, S.unexpectedBuildServer, () => buildNode(net, node));
         return;
       }
-      pollNodeBuild(net, node, panelActEl(node.id) || actEl, asuData.request_hash, asuBase);
+      pollNodeBuild(net, node, panelActEl(node.id) || actEl, asuData.request_hash, asuBase, builtDns);
     })
     .catch(err => showPanelError(panelActEl(node.id) || actEl,
       t('buildFailed', { msg: err.message }), () => buildNode(net, node)));
   }
 
-  function pollNodeBuild(net, node, actEl, hash, asuBase) {
+  function pollNodeBuild(net, node, actEl, hash, asuBase, builtDns) {
     const base = (asuBase || activeAsu).replace(/\/+$/, '');
     let tries = 0;
     let pct = 15;
@@ -1132,7 +1182,14 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'], ...BASE_SCHE
           showPanelProgress(el, 100, S.buildCompleteExcl);
           setTimeout(() => finishNodeBuild(net, node, panelActEl(node.id) || el, data, base), 1500);
         } else {
-          showPanelError(el, t('buildFailed', { msg: data.detail || 'HTTP ' + r.status }), () => buildNode(net, node));
+          const errMsg = data.detail || 'HTTP ' + r.status;
+          const mode = planDnsAutoRetry(net, node, builtDns, errMsg);
+          if (mode) {
+            showPanelProgress(el, 2, dnsAutoRetryNote(mode));
+            setTimeout(() => buildNode(net, node), 2000);
+          } else {
+            showPanelError(el, t('buildFailed', { msg: errMsg }), () => buildNode(net, node));
+          }
         }
       } catch (e) {
         if (tries > 200) {
@@ -1172,7 +1229,7 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'], ...BASE_SCHE
           ' · ' + t('builtAgo', { ago: timeAgo(node.last_build.timestamp) });
       }
     }
-    showPanelDone(actEl, firmwareUrl, images, data.bin_dir || '', base, () => buildNode(net, node));
+    showPanelDone(net, node, actEl, firmwareUrl, images, data.bin_dir || '', base, () => buildNode(net, node));
     updateBuildAllRow(node.id, firmwareUrl, null);
   }
 
@@ -1257,6 +1314,9 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'], ...BASE_SCHE
     const extraPkgs = (net.shared_config.additional_packages || '').split(/[\s,]+/).filter(Boolean);
     const rootPasswd = node.overrides.ROOT_PASSWD || net.shared_config.ROOT_PASSWD || '';
     const adguardHash = await bcryptHash(rootPasswd);
+    // DNS mode this build uses - captured before any concurrent sibling build
+    // can downgrade the shared value (see planDnsAutoRetry).
+    const builtDns = net.shared_config.DNS_MODE || 'adguardhome';
 
     const effectiveVersion = node.overrides.version || tgt.version || net.shared_config.shared_version;
     let version_code = tgt.version_code;
@@ -1282,40 +1342,12 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'], ...BASE_SCHE
       }
     }
 
-    const payload = {
-      profile: tgt.profile, target: tgt.target,
-      version: effectiveVersion,
-      version_code,
-      default_packages,
-      device_packages,
-      device_title: tgt.title,
-      shared_config: ui.stripSensitive(net.shared_config),
-      node_overrides: ui.stripSensitive(node.overrides),
-      additional_packages: extraPkgs,
-    };
-
-    let resp;
-    try {
-      const r = await fetch('/api/build', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-      resp = await r.json();
-      if (!r.ok) throw new Error(
-        [resp.error, resp.detail, resp.message].filter(Boolean).join(' — ') || 'HTTP ' + r.status
-      );
-    } catch (e) {
-      updateBuildAllRow(node.id, null, e.message);
-      onComplete();
-      return;
-    }
-
-    if (!resp.packages || !resp.asu_url) {
-      updateBuildAllRow(node.id, null, S.unexpectedApiBuild);
-      onComplete();
-      return;
-    }
+    // Packages + ASU endpoint are resolved client-side (no /api/build).
+    const packages = ui.computeFinalPackages(
+      { default_packages, device_packages },
+      mergeNodeConfig(net.shared_config, node.overrides),
+      extraPkgs);
+    const asuUrl = activeAsu.replace(/\/+$/, '') + '/api/v1/build';
 
     let wrtnovaBody;
     try {
@@ -1331,14 +1363,14 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'], ...BASE_SCHE
     const asuBody = {
       profile: tgt.profile, target: tgt.target,
       version: effectiveVersion, version_code,
-      packages: resp.packages,
+      packages: packages,
       defaults: ui.assembleScript(fullCfg, wrtnovaBody),
       diff_packages: true, client: 'wrtnova/1.0',
     };
 
     let asuR, asuData;
     try {
-      asuR = await fetch(resp.asu_url, {
+      asuR = await fetch(asuUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(asuBody),
@@ -1348,12 +1380,17 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'], ...BASE_SCHE
         asuData.detail || ('ASU HTTP ' + asuR.status)
       );
     } catch (e) {
-      updateBuildAllRow(node.id, null, t('buildFailed', { msg: e.message }));
-      onComplete();
+      if (planDnsAutoRetry(net, node, builtDns, e.message)) {
+        updateBuildAllProgress(node.id, 5);
+        setTimeout(() => startBuildAllNode(net, node, onComplete), 2000);
+      } else {
+        updateBuildAllRow(node.id, null, t('buildFailed', { msg: e.message }));
+        onComplete();
+      }
       return;
     }
 
-    const asuBase = resp.asu_url.replace('/api/v1/build', '');
+    const asuBase = asuUrl.replace('/api/v1/build', '');
 
     if (asuR.status === 200) {
       finishBuildAllNode(net, node, asuData, asuBase);
@@ -1366,10 +1403,10 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'], ...BASE_SCHE
       onComplete();
       return;
     }
-    pollBuildAllNode(net, node, asuData.request_hash, asuBase, onComplete);
+    pollBuildAllNode(net, node, asuData.request_hash, asuBase, onComplete, builtDns);
   }
 
-  function pollBuildAllNode(net, node, hash, asuBase, onComplete) {
+  function pollBuildAllNode(net, node, hash, asuBase, onComplete, builtDns) {
     const base = (asuBase || activeAsu).replace(/\/+$/, '');
     let tries = 0;
     let pct = 15;
@@ -1393,7 +1430,13 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'], ...BASE_SCHE
           updateBuildAllProgress(node.id, 100, S.done);
           finishBuildAllNode(net, node, data, base);
         } else {
-          updateBuildAllRow(node.id, null, data.detail || 'HTTP ' + r.status);
+          const errMsg = data.detail || 'HTTP ' + r.status;
+          if (planDnsAutoRetry(net, node, builtDns, errMsg)) {
+            updateBuildAllProgress(node.id, 5);
+            setTimeout(() => startBuildAllNode(net, node, onComplete), 2000);
+            return;   // the rebuild owns onComplete()
+          }
+          updateBuildAllRow(node.id, null, errMsg);
         }
         onComplete();
       } catch (e) {

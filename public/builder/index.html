@@ -874,10 +874,7 @@
       <div class="card-body-wrap">
       <div class="card-body">
         <div class="form-row">
-          <div class="flex items-center justify-between gap-2">
-            <label class="form-label" data-i18n="finalPackages">Final packages</label>
-            <button type="button" id="copy-packages" class="btn btn-ghost text-xs py-0.5 px-2" data-i18n="copy">Copy</button>
-          </div>
+          <label class="form-label" data-i18n="finalPackages">Final packages</label>
           <div id="auto-packages" class="flex flex-wrap gap-1 py-1 min-h-[1.75rem]"></div>
         </div>
         <div class="form-row">
@@ -997,6 +994,11 @@
           <input type="checkbox" id="preview-fullscript" class="align-middle">
           <span data-i18n="fullScript">Full script</span>
         </label>
+        <button type="button" id="copy-config" aria-label="Copy" title="Copy"
+                class="ml-auto p-1.5 rounded-md text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors focus:outline-none focus:ring-2 focus:ring-accent">
+          <svg class="icon-copy w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          <svg class="icon-check w-4 h-4 hidden" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+        </button>
       </div>
       <pre class="config-preview" id="config-preview"></pre>
     </details>

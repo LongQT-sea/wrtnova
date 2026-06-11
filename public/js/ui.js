@@ -226,10 +226,10 @@ import { SENSITIVE_KEYS } from './types.mjs';
 
   // -- Script assembly (shared between /builder and /networks) ------------------
 
-  // Fields the browser strips before sending config to /api/build.
-  // The Worker only needs feature flags for package resolution - never passwords.
-  // Canonical set lives in types.mjs (SENSITIVE_KEYS, imported above); kept as
-  // ui.SENSITIVE_FIELDS for existing callers.
+  // Sensitive fields: masked as '****' in the config preview and stripped from
+  // saved build history (never persisted in plaintext). Canonical set lives in
+  // types.mjs (SENSITIVE_KEYS, imported above); kept as ui.SENSITIVE_FIELDS for
+  // existing callers.
   ui.SENSITIVE_FIELDS = SENSITIVE_KEYS;
 
   ui.stripSensitive = function (cfg) {
@@ -326,4 +326,19 @@ import { SENSITIVE_KEYS } from './types.mjs';
       return ok;
     } catch (_) { return false; }
   }
+
+  // Transient success feedback for an icon-only copy button: swap the .icon-copy
+  // glyph for .icon-check for ~1.2s. No-op on failure (button keeps its copy icon).
+  ui.flashCopied = function (btn, ok) {
+    if (!btn || !ok) return;
+    const copy = btn.querySelector('.icon-copy');
+    const check = btn.querySelector('.icon-check');
+    if (!copy || !check) return;
+    copy.classList.add('hidden');
+    check.classList.remove('hidden');
+    setTimeout(function () {
+      check.classList.add('hidden');
+      copy.classList.remove('hidden');
+    }, 1200);
+  };
 

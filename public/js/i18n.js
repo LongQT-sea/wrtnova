@@ -66,7 +66,6 @@ import { ui } from './ui-ns.mjs';
 
       // -- Build progress ------------------------------------------------
       preparing:          'Preparing…',
-      submittingBuild:    'Submitting build…',
       submittingToServer: 'Submitting to build server…',
       building:           'Building…',
       buildCompleteExcl:  'Build complete!',
@@ -82,12 +81,10 @@ import { ui } from './ui-ns.mjs';
       autoSwitchedDnsproxy: 'Switching AdGuard Home to dnsproxy and retrying...',
       autoSwitchedDnsmasq:  'Switching dnsproxy to dnsmasq only and retrying...',
       buildFailed:          'Build failed: {msg}',
-      buildSubmitFailed:    'Build submit failed: {msg}',
       buildRequestFailed:   'Build request failed: {msg}',
       failedLoadTemplate:   'Failed to load build template: {msg}',
       pollingFailed:        'Polling failed: {msg}',
       pollingFailedSimple:  'Polling failed',
-      unexpectedApiBuild:   'Unexpected response from /api/build',
       unexpectedBuildServer:'Unexpected response from build server',
 
       // -- Flash note (HTML content) -------------------------------------
@@ -378,7 +375,6 @@ import { ui } from './ui-ns.mjs';
 
       // -- Build progress ------------------------------------------------
       preparing:          '准备中…',
-      submittingBuild:    '提交构建…',
       submittingToServer: '提交到构建服务器…',
       building:           '构建中…',
       buildCompleteExcl:  '构建完成！',
@@ -394,12 +390,10 @@ import { ui } from './ui-ns.mjs';
       autoSwitchedDnsproxy: '正在将 AdGuard Home 切换为 dnsproxy 并重试...',
       autoSwitchedDnsmasq:  '正在将 dnsproxy 切换为仅使用 dnsmasq 并重试...',
       buildFailed:          '构建失败：{msg}',
-      buildSubmitFailed:    '构建提交失败：{msg}',
       buildRequestFailed:   '构建请求失败：{msg}',
       failedLoadTemplate:   '加载构建模板失败：{msg}',
       pollingFailed:        '轮询失败：{msg}',
       pollingFailedSimple:  '轮询失败',
-      unexpectedApiBuild:   '/api/build 返回意外响应',
       unexpectedBuildServer:'构建服务器返回意外响应',
 
       // -- Flash note (HTML content) -------------------------------------
@@ -691,7 +685,6 @@ import { ui } from './ui-ns.mjs';
 
       // -- Build progress ------------------------------------------------
       preparing:          'Vorbereiten…',
-      submittingBuild:    'Build wird übermittelt…',
       submittingToServer: 'Wird an den Build-Server übermittelt…',
       building:           'Wird erstellt…',
       buildCompleteExcl:  'Build abgeschlossen!',
@@ -707,12 +700,10 @@ import { ui } from './ui-ns.mjs';
       autoSwitchedDnsproxy: 'Wechsel von AdGuard Home zu dnsproxy, erneuter Versuch...',
       autoSwitchedDnsmasq:  'Wechsel von dnsproxy zu nur dnsmasq, erneuter Versuch...',
       buildFailed:          'Build fehlgeschlagen: {msg}',
-      buildSubmitFailed:    'Build-Übermittlung fehlgeschlagen: {msg}',
       buildRequestFailed:   'Build-Anfrage fehlgeschlagen: {msg}',
       failedLoadTemplate:   'Fehler beim Laden der Build-Vorlage: {msg}',
       pollingFailed:        'Abfrage fehlgeschlagen: {msg}',
       pollingFailedSimple:  'Abfrage fehlgeschlagen',
-      unexpectedApiBuild:   'Unerwartete Antwort von /api/build',
       unexpectedBuildServer:'Unerwartete Antwort vom Build-Server',
 
       // -- Flash note (HTML content) -------------------------------------
@@ -1003,7 +994,6 @@ import { ui } from './ui-ns.mjs';
 
       // -- Build progress ------------------------------------------------
       preparing:          'Подготовка…',
-      submittingBuild:    'Отправка сборки…',
       submittingToServer: 'Отправка на сервер сборки…',
       building:           'Сборка…',
       buildCompleteExcl:  'Сборка завершена!',
@@ -1019,12 +1009,10 @@ import { ui } from './ui-ns.mjs';
       autoSwitchedDnsproxy: 'Переключение с AdGuard Home на dnsproxy, повторная попытка...',
       autoSwitchedDnsmasq:  'Переключение с dnsproxy на только dnsmasq, повторная попытка...',
       buildFailed:          'Сборка не удалась: {msg}',
-      buildSubmitFailed:    'Не удалось отправить сборку: {msg}',
       buildRequestFailed:   'Запрос сборки не удался: {msg}',
       failedLoadTemplate:   'Не удалось загрузить шаблон сборки: {msg}',
       pollingFailed:        'Опрос не удался: {msg}',
       pollingFailedSimple:  'Опрос не удался',
-      unexpectedApiBuild:   'Неожиданный ответ от /api/build',
       unexpectedBuildServer:'Неожиданный ответ от сервера сборки',
 
       // -- Flash note (HTML content) -------------------------------------
@@ -1315,7 +1303,6 @@ import { ui } from './ui-ns.mjs';
 
       // -- Build progress ------------------------------------------------
       preparing:          'Przygotowanie…',
-      submittingBuild:    'Wysyłanie kompilacji…',
       submittingToServer: 'Wysyłanie na serwer kompilacji…',
       building:           'Kompilowanie…',
       buildCompleteExcl:  'Kompilacja zakończona!',
@@ -1331,12 +1318,10 @@ import { ui } from './ui-ns.mjs';
       autoSwitchedDnsproxy: 'Przełączanie z AdGuard Home na dnsproxy, ponowna próba...',
       autoSwitchedDnsmasq:  'Przełączanie z dnsproxy na tylko dnsmasq, ponowna próba...',
       buildFailed:          'Kompilacja nie powiodła się: {msg}',
-      buildSubmitFailed:    'Wysyłanie kompilacji nie powiodło się: {msg}',
       buildRequestFailed:   'Żądanie kompilacji nie powiodło się: {msg}',
       failedLoadTemplate:   'Nie udało się załadować szablonu kompilacji: {msg}',
       pollingFailed:        'Odpytywanie nie powiodło się: {msg}',
       pollingFailedSimple:  'Odpytywanie nie powiodło się',
-      unexpectedApiBuild:   'Nieoczekiwana odpowiedź z /api/build',
       unexpectedBuildServer:'Nieoczekiwana odpowiedź z serwera kompilacji',
 
       // -- Flash note (HTML content) -------------------------------------
@@ -1627,7 +1612,6 @@ import { ui } from './ui-ns.mjs';
 
       // -- Build progress ------------------------------------------------
       preparing:          'Préparation…',
-      submittingBuild:    'Envoi de la compilation…',
       submittingToServer: 'Envoi au serveur de compilation…',
       building:           'Compilation…',
       buildCompleteExcl:  'Compilation terminée !',
@@ -1643,12 +1627,10 @@ import { ui } from './ui-ns.mjs';
       autoSwitchedDnsproxy: 'Passage d\'AdGuard Home a dnsproxy, nouvelle tentative...',
       autoSwitchedDnsmasq:  'Passage de dnsproxy a dnsmasq uniquement, nouvelle tentative...',
       buildFailed:          'Compilation échouée : {msg}',
-      buildSubmitFailed:    'Envoi de la compilation échoué : {msg}',
       buildRequestFailed:   'Demande de compilation échouée : {msg}',
       failedLoadTemplate:   'Échec du chargement du modèle de compilation : {msg}',
       pollingFailed:        'Sondage échoué : {msg}',
       pollingFailedSimple:  'Sondage échoué',
-      unexpectedApiBuild:   'Réponse inattendue de /api/build',
       unexpectedBuildServer:'Réponse inattendue du serveur de compilation',
 
       // -- Flash note (HTML content) -------------------------------------
@@ -1939,7 +1921,6 @@ import { ui } from './ui-ns.mjs';
 
       // -- Build progress ------------------------------------------------
       preparing:          'Preparando…',
-      submittingBuild:    'Enviando compilación…',
       submittingToServer: 'Enviando al servidor de compilación…',
       building:           'Compilando…',
       buildCompleteExcl:  '¡Compilación completada!',
@@ -1955,12 +1936,10 @@ import { ui } from './ui-ns.mjs';
       autoSwitchedDnsproxy: 'Cambiando de AdGuard Home a dnsproxy, reintentando...',
       autoSwitchedDnsmasq:  'Cambiando de dnsproxy a solo dnsmasq, reintentando...',
       buildFailed:          'Compilación fallida: {msg}',
-      buildSubmitFailed:    'Envío de compilación fallido: {msg}',
       buildRequestFailed:   'Solicitud de compilación fallida: {msg}',
       failedLoadTemplate:   'Error al cargar la plantilla de compilación: {msg}',
       pollingFailed:        'Sondeo fallido: {msg}',
       pollingFailedSimple:  'Sondeo fallido',
-      unexpectedApiBuild:   'Respuesta inesperada de /api/build',
       unexpectedBuildServer:'Respuesta inesperada del servidor de compilación',
 
       // -- Flash note (HTML content) -------------------------------------

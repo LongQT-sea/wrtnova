@@ -15,10 +15,10 @@ ALLOWED_ORIGIN = "https://wrtnova.com,https://wrtnova.pages.dev,https://*.wrtnov
 # ASU_URL_3 = "https://asu2.example.com"         # add more as needed
 
 # ── Rate limiting (configure in CF dashboard, not here) ──────────────────────
-# Security → WAF → Rate Limiting Rules:
-#   /api/build          5  req / 1 min / IP
+# Security -> WAF -> Rate Limiting Rules:
 #   /api/warp/register  3  req / 1 min / IP
 #   /api/session        10 req / 1 min / IP
+# (No /api/build: the build path is client-side and POSTs straight to ASU.)
 
 [[kv_namespaces]]
 binding = "wrtnova_kv"

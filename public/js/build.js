@@ -181,8 +181,6 @@ const BUILDER_SCHEMA = [...BASE_SCHEMA, ['AP_MODE', 'radio'], ['AP_INDEX', 'text
     if (!el) return;
     const pkgs = computeFinalPackages();
     ui.renderPackageChips(el, pkgs);   // shared chip renderer (ui.js)
-    const copyBtn = $('#copy-packages');
-    if (copyBtn) copyBtn.dataset.pkgs = pkgs.join(' ');
   }
 
   ui.renderAutoPackages = renderAutoPackages;
@@ -208,17 +206,25 @@ const BUILDER_SCHEMA = [...BASE_SCHEMA, ['AP_MODE', 'radio'], ['AP_INDEX', 'text
   }
   ui.renderPreview = renderPreview;
 
+  // Always-unmasked text for the Copy button, regardless of the reveal toggle:
+  // copying masked asterisks would paste an unusable config.
+  function previewUnmaskedText() {
+    const cfg = collectConfig();
+    if (!previewFullScript) return Promise.resolve(renderConfigBlock(cfg));
+    return ui.fetchWrtnovaBody().then(body => ui.assembleScript(cfg, body, false));
+  }
+
   function initPreviewControls() {
     const reveal = $('#preview-reveal');
     const full   = $('#preview-fullscript');
     if (reveal) reveal.addEventListener('change', () => { previewRevealed = reveal.checked; renderPreview(); });
     if (full)   full.addEventListener('change',   () => { previewFullScript = full.checked; renderPreview(); });
 
-    const copyBtn = $('#copy-packages');
-    if (copyBtn) copyBtn.addEventListener('click', async () => {
-      const ok = await ui.copyToClipboard(copyBtn.dataset.pkgs || '');
-      copyBtn.textContent = ok ? (S.copied || 'Copied') : (S.error || 'Error');
-      setTimeout(() => { copyBtn.textContent = t('copy'); }, 1200);
+    const copyCfg = $('#copy-config');
+    if (copyCfg) copyCfg.addEventListener('click', async () => {
+      let ok = false;
+      try { ok = await ui.copyToClipboard(await previewUnmaskedText()); } catch (_) { ok = false; }
+      ui.flashCopied(copyCfg, ok);
     });
   }
 
@@ -381,33 +387,13 @@ const BUILDER_SCHEMA = [...BASE_SCHEMA, ['AP_MODE', 'radio'], ['AP_INDEX', 'text
     };
 
     $('#build-btn').disabled = true;
-    ui.setProgress(S.submittingBuild, 2);
-
-    let resp;
-    try {
-      const r = await fetch('/api/build', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-      resp = await r.json();
-      if (!r.ok) throw new Error(
-        [resp.error, resp.detail, resp.message].filter(Boolean).join(' — ') || ('HTTP ' + r.status)
-      );
-    } catch (e) {
-      $('#build-btn').disabled = false;
-      ui.clearProgress();
-      ui.status(t('buildSubmitFailed', { msg: e.message }), 'error');
-      return;
-    }
-
-    if (!resp.packages || !resp.asu_url) {
-      ui.status(S.unexpectedApiBuild, 'error');
-      $('#build-btn').disabled = false;
-      return;
-    }
-
     ui.setProgress(S.preparingBuild, 5);
+
+    // Package set + ASU endpoint are both resolved client-side (no /api/build).
+    // computeFinalPackages() is the shared resolvePackages - byte-identical to
+    // what the old worker returned. asuUrl is the user-selected (or default) ASU.
+    const packages = computeFinalPackages();
+    const asuUrl   = activeAsu.replace(/\/+$/, '') + '/api/v1/build';
 
     let wrtnovaBody;
     try {
@@ -424,7 +410,7 @@ const BUILDER_SCHEMA = [...BASE_SCHEMA, ['AP_MODE', 'radio'], ['AP_INDEX', 'text
       target:       target.target,
       version:      target.version,
       version_code: target.version_code,
-      packages:     resp.packages,
+      packages:     packages,
       defaults:     ui.assembleScript(cfg, wrtnovaBody),
       diff_packages: true,
       client:       'wrtnova/1.0',
@@ -434,7 +420,7 @@ const BUILDER_SCHEMA = [...BASE_SCHEMA, ['AP_MODE', 'radio'], ['AP_INDEX', 'text
 
     let asuR, asuData;
     try {
-      asuR = await fetch(resp.asu_url, {
+      asuR = await fetch(asuUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(asuBody),
@@ -452,7 +438,7 @@ const BUILDER_SCHEMA = [...BASE_SCHEMA, ['AP_MODE', 'radio'], ['AP_INDEX', 'text
       return;
     }
 
-    const asuBase = resp.asu_url.replace('/api/v1/build', '');
+    const asuBase = asuUrl.replace('/api/v1/build', '');
 
     if (asuR.status === 200) {
       saveHistoryLocal(payload, { status: 'success', firmware_url: null }, cfg);

@@ -12,14 +12,16 @@
 //     anyone, so this is friction, not a lock. A determined caller can always
 //     get a real session and replay it.
 //
-// THE REAL ENFORCEMENT IS CF RATE LIMITING — configure these rules in the
-// Cloudflare dashboard (Security → WAF → Rate Limiting Rules):
+// THE REAL ENFORCEMENT IS CF RATE LIMITING - configure these rules in the
+// Cloudflare dashboard (Security -> WAF -> Rate Limiting Rules):
 //
-//   • /api/build          — 5 req / 1 min / IP   (ASU build quota protection)
-//   • /api/warp/register  — 3 req / 10 sec / IP  (WARP device creation)
-//   • /api/session        — 10 req / 1 min / IP  (prevent cookie farming)
+//   * /api/warp/register  - 3 req / 10 sec / IP  (WARP device creation)
+//   * /api/session        - 10 req / 1 min / IP  (prevent cookie farming)
 //
-// Without those rules the guards below are speed bumps only.
+// Without those rules the guards below are speed bumps only. (The build path is
+// fully client-side: the browser resolves packages and POSTs straight to ASU,
+// so there is no /api/build endpoint to rate-limit and ASU throttles its own
+// build submissions server-side.)
 
 export function originAllowed(request, env) {
   const allowed = env.ALLOWED_ORIGIN;
