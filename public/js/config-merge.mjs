@@ -66,6 +66,8 @@ export function mergeNodeConfig(sharedConfig, nodeOverrides) {
     CELLULAR_MODEM: !isAp ? flag(c.CELLULAR_MODEM) : '',
     USB_TETHERING:  !isAp ? flag(c.USB_TETHERING)  : '',
     DNS_MODE:         c.DNS_MODE || 'adguardhome',
+    // Only meaningful with AdGuard Home; never emit it for dnsproxy/none.
+    ADGUARD_MAIN_DNS: (c.DNS_MODE || 'adguardhome') === 'adguardhome' ? flag(c.ADGUARD_MAIN_DNS) : '',
     SOFTWARE_OFFLOAD: flag(c.SOFTWARE_OFFLOAD), HARDWARE_OFFLOAD: flag(c.HARDWARE_OFFLOAD),
     BLOCK_DOT_DOQ:    flag(c.BLOCK_DOT_DOQ),
     DENY_GUEST_NIGHT: flag(c.DENY_GUEST_NIGHT),

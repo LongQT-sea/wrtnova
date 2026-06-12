@@ -903,6 +903,32 @@
                 </label>
               </div>
             </div>
+            <div class="form-row form-row--full">
+              <div class="space-y-3">
+                <label class="toggle-label">
+                  <span class="toggle-wrap">
+                    <input type="checkbox" id="ADGUARD_MAIN_DNS" name="ADGUARD_MAIN_DNS" value="1" class="toggle-input">
+                    <span class="toggle-track"></span>
+                    <span class="toggle-thumb"></span>
+                  </span>
+                  <div>
+                    <span class="toggle-text" data-i18n="adguardMainDns">AdGuard Home as main DNS resolver</span>
+                    <p class="form-help mt-0" data-i18n="adguardMainDnsHelp">Bind AdGuard Home to port 53, use as the primary DNS resolver.</p>
+                  </div>
+                </label>
+                <label class="toggle-label">
+                  <span class="toggle-wrap">
+                    <input type="checkbox" id="BLOCK_DOT_DOQ" name="BLOCK_DOT_DOQ" value="1" class="toggle-input">
+                    <span class="toggle-track"></span>
+                    <span class="toggle-thumb"></span>
+                  </span>
+                  <div>
+                    <span class="toggle-text" data-i18n="blockDotDoq">Block DoT and DoQ</span>
+                    <p class="form-help mt-0" data-i18n="blockDotDoqHelp">Enforce ad blocking on stubborn client devices.</p>
+                  </div>
+                </label>
+              </div>
+            </div>
           </div>
           </div>
         </div>
@@ -961,17 +987,6 @@
               </label>
               <label class="toggle-label">
                 <span class="toggle-wrap">
-                  <input type="checkbox" id="BLOCK_DOT_DOQ" name="BLOCK_DOT_DOQ" value="1" class="toggle-input">
-                  <span class="toggle-track"></span>
-                  <span class="toggle-thumb"></span>
-                </span>
-                <div>
-                  <span class="toggle-text" data-i18n="blockDotDoq">Block DoT and DoQ</span>
-                  <p class="form-help mt-0" data-i18n="blockDotDoqHelp">Enforce ad blocking on stubborn client devices.</p>
-                </div>
-              </label>
-              <label class="toggle-label">
-                <span class="toggle-wrap">
                   <input type="checkbox" id="DENY_GUEST_NIGHT" name="DENY_GUEST_NIGHT" value="1" class="toggle-input">
                   <span class="toggle-track"></span>
                   <span class="toggle-thumb"></span>
@@ -1026,7 +1041,7 @@
   </main>
 
 
-  <!-- ═══════════════ MODAL: Delete confirm ═══════════════ -->
+  <!-- ============= MODAL: Delete confirm ============= -->
   <dialog id="modal-delete"
           class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-lg p-6 w-full max-w-sm text-zinc-900 dark:text-zinc-100 font-mono shadow-xl backdrop:bg-zinc-950/60">
     <h3 class="font-semibold mb-2" data-i18n="deleteNetworkTitle">Delete network?</h3>
@@ -1055,7 +1070,7 @@
   </dialog>
 
 
-  <!-- ═══════════════ MODAL: Device picker ════════════════ -->
+  <!-- ============= MODAL: Device picker ============= -->
   <dialog id="modal-device-picker">
     <div class="flex flex-col h-full bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 font-mono text-sm">
       <div class="flex items-center gap-2 px-3 py-2 border-b border-zinc-200 dark:border-zinc-800 flex-shrink-0">

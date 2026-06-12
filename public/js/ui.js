@@ -174,6 +174,19 @@ import { SENSITIVE_KEYS } from './types.mjs';
       const cfg = ui.configState ? ui.configState() : null;
       if (!cfg) return;                       // store not ready (e.g. no network open yet)
       ui.applyVisibility(cfg);
+
+      // ADGUARD_MAIN_DNS only applies in AdGuard Home mode. When the user
+      // switches DNS mode away from AdGuard Home, force the toggle off. Read
+      // straight from the DOM (order-independent of the store-sync listener)
+      // and dispatch a bubbling change so each page's store re-syncs.
+      const agMain = ui.$('#ADGUARD_MAIN_DNS');
+      if (agMain && agMain.checked) {
+        const dnsMode = (ui.$('input[name="DNS_MODE"]:checked') || {}).value;
+        if (dnsMode && dnsMode !== 'adguardhome') {
+          agMain.checked = false;
+          agMain.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+      }
       const wgRouter = cfg.WG_ENABLE === '1' && cfg.AP_MODE !== '1';
       if (wgRouter && e && e.target && e.target.id === 'WG_ENABLE') {
         const wgCard = ui.$('#card-wg');
@@ -236,6 +249,48 @@ import { SENSITIVE_KEYS } from './types.mjs';
     return Object.fromEntries(Object.entries(cfg).filter(([k]) => !ui.SENSITIVE_FIELDS.has(k)));
   };
 
+  // -- AdGuard Home admin password (derived from ROOT_PASSWD) -------------------
+  // bcrypt hash of the root password, used as the AdGuard Home admin password so
+  // the user logs in with the same credential. The salt is derived
+  // deterministically from the password (SHA-256 -> first 16 bytes) so the SAME
+  // password always yields the SAME hash: the preview can show it and rebuilds
+  // are byte-identical, which lets the ASU server reuse a cached image. bcrypt's
+  // cost factor still protects the hash; identical passwords share a hash, an
+  // acceptable trade for a derived router admin credential.
+  const _agHashPromises = new Map();   // pw -> Promise<hash>  (dedupe compute)
+  const _agHashResolved = new Map();   // pw -> hash           (sync lookup)
+
+  ui.adguardHashFromRoot = function (pw) {
+    if (!pw) return Promise.resolve('');
+    if (_agHashPromises.has(pw)) return _agHashPromises.get(pw);
+    const p = (async () => {
+      await ui.loadScript('/js/bcrypt.js');             // classic global (window.dcodeIO)
+      const bcrypt = window.dcodeIO && window.dcodeIO.bcrypt;
+      if (!bcrypt) return '';
+      const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(pw));
+      const saltBytes = new Uint8Array(digest).subarray(0, 16);
+      const salt = '$2a$10$' + bcrypt.encodeBase64(saltBytes, 16);
+      const hash = bcrypt.hashSync(pw, salt);
+      _agHashResolved.set(pw, hash);
+      return hash;
+    })();
+    _agHashPromises.set(pw, p);
+    return p;
+  };
+
+  // Inject the derived ADGUARD_PASSWD into cfg for previews. If the hash for the
+  // current ROOT_PASSWD is already computed it is set synchronously; otherwise
+  // computation is kicked off and `onReady` fires once it lands so the caller can
+  // re-render. Returns cfg (mutated in place).
+  ui.injectAdguardPasswd = function (cfg, onReady) {
+    const pw = cfg && cfg.ROOT_PASSWD;
+    if (!pw) return cfg;
+    const cached = _agHashResolved.get(pw);
+    if (cached) { cfg.ADGUARD_PASSWD = cached; return cfg; }
+    ui.adguardHashFromRoot(pw).then(h => { if (h && onReady) onReady(); });
+    return cfg;
+  };
+
   const _SCRIPT_MARKER = '# ===================\n# End config section\n# ===================\n';
   let _wrtnovaBodyCache = null;
   let _wrtnovaBodyPromise = null;  // deduplicate concurrent first fetches
@@ -290,8 +345,6 @@ import { SENSITIVE_KEYS } from './types.mjs';
     });
   };
 
-  // The exact, ordered package set sent to ASU (the shared resolvePackages, so it
-  // is byte-identical to what the worker returns). Includes '-' removal tokens.
   ui.computeFinalPackages = function (target, cfg, extra) {
     const t = target || {};
     return resolvePackages({

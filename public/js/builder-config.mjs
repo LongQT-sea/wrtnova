@@ -114,6 +114,8 @@ export function deriveConfig(raw) {
     USB_TETHERING:  isRouter ? v('USB_TETHERING')  : '',
 
     DNS_MODE:         v('DNS_MODE') || 'adguardhome',
+    // Only meaningful with AdGuard Home; never emit it for dnsproxy/none.
+    ADGUARD_MAIN_DNS: (v('DNS_MODE') || 'adguardhome') === 'adguardhome' ? v('ADGUARD_MAIN_DNS') : '',
     SOFTWARE_OFFLOAD: v('SOFTWARE_OFFLOAD'),
     HARDWARE_OFFLOAD: v('HARDWARE_OFFLOAD'),
     BLOCK_DOT_DOQ:    v('BLOCK_DOT_DOQ'),

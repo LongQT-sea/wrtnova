@@ -3,23 +3,13 @@ pages_build_output_dir = "public"
 compatibility_date = "2026-05-01"
 compatibility_flags = ["nodejs_compat"]
 
-# Cloudflare Pages build step — runs before the public/ directory is published.
-# Both CSS compilation and script embedding must complete before deploy.
-#[build]
-#command = "npm run build:css && node scripts/embed-wrtnova.mjs"
-
 [vars]
 ALLOWED_ORIGIN = "https://wrtnova.com,https://wrtnova.pages.dev,https://*.wrtnova.pages.dev"
-# ASU_URL   = "https://sysupgrade.openwrt.org"  # primary ASU; defaults to official if unset
+# ASU_URL   = "https://sysupgrade.openwrt.org"   # primary ASU; defaults to official if unset
 # ASU_URL_2 = "https://asu.example.com"          # additional ASU shown in endpoint dropdown
 # ASU_URL_3 = "https://asu2.example.com"         # add more as needed
 
-# ── Rate limiting (configure in CF dashboard, not here) ──────────────────────
-# Security -> WAF -> Rate Limiting Rules:
-#   /api/warp/register  3  req / 1 min / IP
-#   /api/session        10 req / 1 min / IP
-# (No /api/build: the build path is client-side and POSTs straight to ASU.)
-
-[[kv_namespaces]]
-binding = "wrtnova_kv"
-id = "8b7fded68a9f47698e73b6ca5e5306cb"  # Set via `wrangler kv namespace create` per developer (see README.md)
+# For future use
+# [[kv_namespaces]]
+# binding = ""
+# id = ""

@@ -24,11 +24,6 @@ const BUILDER_SCHEMA = [...BASE_SCHEMA, ['AP_MODE', 'radio'], ['AP_INDEX', 'text
   const ASU_DEFAULT = 'https://sysupgrade.openwrt.org';
   let activeAsu = ASU_DEFAULT;
 
-  async function pwFingerprint(pw) {
-    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(pw));
-    return btoa(String.fromCharCode(...new Uint8Array(buf)));
-  }
-
   function clearRetryNote() {
     const n = $('#retry-note');
     if (n) { n.textContent = ''; n.className = 'status hidden'; }
@@ -42,7 +37,8 @@ const BUILDER_SCHEMA = [...BASE_SCHEMA, ['AP_MODE', 'radio'], ['AP_INDEX', 'text
     const nextVal = dnsVal === 'adguardhome' ? 'dnsproxy' : 'none';
     // Store-first: downgrade DNS_MODE in the store (single source of truth) and
     // reflect it into the radio, so the auto-retry rebuild uses the new value.
-    ui.applyStorePatch({ DNS_MODE: nextVal });
+    // The downgrade always leaves AdGuard Home mode, so clear ADGUARD_MAIN_DNS too.
+    ui.applyStorePatch({ DNS_MODE: nextVal, ADGUARD_MAIN_DNS: '' });
     const rn = $('#retry-note');
     if (rn) {
       rn.innerHTML = '';
@@ -193,7 +189,7 @@ const BUILDER_SCHEMA = [...BASE_SCHEMA, ['AP_MODE', 'radio'], ['AP_INDEX', 'text
     const pre = $('#config-preview');
     if (!pre) return;
     if (!previewFullScript) {
-      const cfg = collectConfig();
+      const cfg = ui.injectAdguardPasswd(collectConfig(), renderPreview);
       pre.textContent = previewRevealed ? renderConfigBlock(cfg) : ui.renderConfigBlockMasked(cfg);
       return;
     }
@@ -201,17 +197,23 @@ const BUILDER_SCHEMA = [...BASE_SCHEMA, ['AP_MODE', 'radio'], ['AP_INDEX', 'text
     // the latest store state wins if it changed while fetching.
     ui.fetchWrtnovaBody().then(body => {
       if (!previewFullScript) return;
-      pre.textContent = ui.assembleScript(collectConfig(), body, !previewRevealed);
+      const cfg = ui.injectAdguardPasswd(collectConfig(), renderPreview);
+      pre.textContent = ui.assembleScript(cfg, body, !previewRevealed);
     }).catch(e => { pre.textContent = t('failedLoadTemplate', { msg: e.message }); });
   }
   ui.renderPreview = renderPreview;
 
   // Always-unmasked text for the Copy button, regardless of the reveal toggle:
   // copying masked asterisks would paste an unusable config.
-  function previewUnmaskedText() {
+  async function previewUnmaskedText() {
     const cfg = collectConfig();
-    if (!previewFullScript) return Promise.resolve(renderConfigBlock(cfg));
-    return ui.fetchWrtnovaBody().then(body => ui.assembleScript(cfg, body, false));
+    if (cfg.ROOT_PASSWD) {
+      const h = await ui.adguardHashFromRoot(cfg.ROOT_PASSWD);
+      if (h) cfg.ADGUARD_PASSWD = h;
+    }
+    if (!previewFullScript) return renderConfigBlock(cfg);
+    const body = await ui.fetchWrtnovaBody();
+    return ui.assembleScript(cfg, body, false);
   }
 
   function initPreviewControls() {
@@ -352,25 +354,15 @@ const BUILDER_SCHEMA = [...BASE_SCHEMA, ['AP_MODE', 'radio'], ['AP_INDEX', 'text
       }
     }
 
-    await Promise.all([
-      ui.loadScript('/js/bcrypt.js'),     // classic global (window.dcodeIO)
-      import('/js/history.js'),           // ES module - dynamic import
-    ]);
+    await import('/js/history.js');       // ES module - dynamic import
 
     const cfg = collectConfig();
-    const rootpw = cfg.ROOT_PASSWD;
-    const bcrypt = window.dcodeIO && window.dcodeIO.bcrypt;
-    if (rootpw && bcrypt) {
-      try {
-        const fp = await pwFingerprint(rootpw);
-        const cached = JSON.parse(localStorage.getItem('wrtnova_adguard') || 'null');
-        if (cached && cached.fp === fp) {
-          cfg.ADGUARD_PASSWD = cached.hash;
-        } else {
-          cfg.ADGUARD_PASSWD = bcrypt.hashSync(rootpw, 10);
-          localStorage.setItem('wrtnova_adguard', JSON.stringify({ fp, hash: cfg.ADGUARD_PASSWD }));
-        }
-      } catch (_) {}
+    // AdGuard Home admin password = deterministic bcrypt of the root password
+    // (ui.adguardHashFromRoot loads bcrypt + derives a stable salt), so the
+    // emitted script is byte-identical across rebuilds and the ASU cache hits.
+    if (cfg.ROOT_PASSWD) {
+      const h = await ui.adguardHashFromRoot(cfg.ROOT_PASSWD);
+      if (h) cfg.ADGUARD_PASSWD = h;
     }
 
     const payload = {

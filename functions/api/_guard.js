@@ -16,7 +16,7 @@
 // Cloudflare dashboard (Security -> WAF -> Rate Limiting Rules):
 //
 //   * /api/warp/register  - 3 req / 10 sec / IP  (WARP device creation)
-//   * /api/session        - 10 req / 1 min / IP  (prevent cookie farming)
+//   * /api/session        - 2 req / 10 sec / IP  (prevent cookie farming)
 //
 // Without those rules the guards below are speed bumps only. (The build path is
 // fully client-side: the browser resolves packages and POSTs straight to ASU,

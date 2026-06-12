@@ -219,6 +219,7 @@ import { selectDevice, loadOverview, devicesState } from './devices.js';
 
     check('SOFTWARE_OFFLOAD', cfg.SOFTWARE_OFFLOAD);
     check('HARDWARE_OFFLOAD', cfg.HARDWARE_OFFLOAD);
+    check('ADGUARD_MAIN_DNS', cfg.ADGUARD_MAIN_DNS);
     check('BLOCK_DOT_DOQ',    cfg.BLOCK_DOT_DOQ);
     check('NON_CT_ATH10K',    cfg.NON_CT_ATH10K);
   }

@@ -100,7 +100,7 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'], ...BASE_SCHE
       PORT_FORWARD_LIST: '', IPV6_SERVER_LIST: '',
       DDNS_ENABLE: '', LOOKUP_HOSTNAME: '', CLOUDFLARE_API_KEY: '',
       USB_TETHERING: '', CELLULAR_MODEM: '',
-      DNS_MODE: 'adguardhome', BLOCK_DOT_DOQ: '',
+      DNS_MODE: 'adguardhome', ADGUARD_MAIN_DNS: '', BLOCK_DOT_DOQ: '',
       DENY_GUEST_NIGHT: '', QUARTERLY_REBOOT: '', LOG: '',
       SOFTWARE_OFFLOAD: '1', HARDWARE_OFFLOAD: '',
       additional_packages: '',
@@ -187,31 +187,12 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'], ...BASE_SCHE
     return 'dot';
   }
 
-  async function pwFingerprint(pw) {
-    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(pw));
-    return btoa(String.fromCharCode(...new Uint8Array(buf)));
-  }
-
-  async function bcryptHash(pw) {
-    if (!pw) return '';
-    let fp;
-    try { fp = await pwFingerprint(pw); } catch (_) {}
-    if (fp) {
-      try {
-        const cached = JSON.parse(localStorage.getItem('wrtnova_adguard') || 'null');
-        if (cached && cached.fp === fp) return cached.hash;
-      } catch (_) {}
-    }
-    await ui.loadScript('/js/bcrypt.js');
-    const bcrypt = window.dcodeIO && window.dcodeIO.bcrypt;
-    if (!bcrypt) return '';
-    try {
-      const hash = bcrypt.hashSync(pw, 10);
-      if (fp) {
-        try { localStorage.setItem('wrtnova_adguard', JSON.stringify({ fp, hash })); } catch (_) {}
-      }
-      return hash;
-    } catch (_) { return ''; }
+  // AdGuard Home admin password = deterministic bcrypt of the root password.
+  // Shared with /builder via ui.adguardHashFromRoot: a stable salt means the
+  // same password always yields the same hash, so rebuilds are byte-identical
+  // and the ASU server can reuse a cached image.
+  function bcryptHash(pw) {
+    return ui.adguardHashFromRoot(pw);
   }
 
   function panelActEl(nodeId) {
@@ -543,14 +524,15 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'], ...BASE_SCHE
   }
 
   // Per-node config/script preview - mirrors /builder renderPreview: masked
-  // config block by default, with reveal + full-script toggles. ADGUARD_PASSWD
-  // is omitted by design (build-time bcrypt only).
+  // config block by default, with reveal + full-script toggles. The derived
+  // ADGUARD_PASSWD is injected so the preview matches the built script.
   function renderNodePreview(net, node) {
     const pre = document.getElementById('np-preview-' + node.id);
     if (!pre) return;
     const reveal = !!(document.getElementById('np-reveal-' + node.id) || {}).checked;
     const full   = !!(document.getElementById('np-full-' + node.id) || {}).checked;
-    const cfg = mergeNodeConfig(net.shared_config, node.overrides);
+    const cfg = ui.injectAdguardPasswd(
+      mergeNodeConfig(net.shared_config, node.overrides), () => renderNodePreview(net, node));
     if (!full) {
       pre.textContent = reveal ? renderConfigBlock(cfg) : ui.renderConfigBlockMasked(cfg);
       return;
@@ -563,11 +545,16 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'], ...BASE_SCHE
 
   // Always-unmasked text for the node's Copy button, regardless of the reveal
   // toggle: copying masked asterisks would paste an unusable config.
-  function nodePreviewUnmasked(net, node) {
+  async function nodePreviewUnmasked(net, node) {
     const cfg = mergeNodeConfig(net.shared_config, node.overrides);
+    if (cfg.ROOT_PASSWD) {
+      const h = await ui.adguardHashFromRoot(cfg.ROOT_PASSWD);
+      if (h) cfg.ADGUARD_PASSWD = h;
+    }
     const full = !!(document.getElementById('np-full-' + node.id) || {}).checked;
-    if (!full) return Promise.resolve(renderConfigBlock(cfg));
-    return ui.fetchWrtnovaBody().then(body => ui.assembleScript(cfg, body, false));
+    if (!full) return renderConfigBlock(cfg);
+    const body = await ui.fetchWrtnovaBody();
+    return ui.assembleScript(cfg, body, false);
   }
 
   function panelHTML(net, node) {
@@ -1093,9 +1080,6 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'], ...BASE_SCHE
       .then(async ([adguardHash, vt]) => {
       showPanelProgress(actEl, 5, S.preparingBuild);
 
-      // Packages + ASU endpoint are resolved client-side (no /api/build).
-      // computeFinalPackages over the same versioned target is byte-identical
-      // to what the old worker returned.
       const packages = ui.computeFinalPackages(
         vt, mergeNodeConfig(net.shared_config, node.overrides), extraPkgs);
       const asuUrl = activeAsu.replace(/\/+$/, '') + '/api/v1/build';
@@ -1344,7 +1328,6 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'], ...BASE_SCHE
       }
     }
 
-    // Packages + ASU endpoint are resolved client-side (no /api/build).
     const packages = ui.computeFinalPackages(
       { default_packages, device_packages },
       mergeNodeConfig(net.shared_config, node.overrides),

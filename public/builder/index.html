@@ -82,7 +82,6 @@
         <div class="form-row">
           <label class="form-label" data-i18n="mode">Mode</label>
           <div>
-            <!-- NOTE: aria-label="Device mode" on radiogroup needs JS translation -->
             <div class="radio-seg" role="radiogroup" aria-label="Device mode">
               <label>
                 <input type="radio" name="AP_MODE" value="" checked>
@@ -136,14 +135,12 @@
         <div class="form-row">
           <label for="SSH_PUBLIC_KEY" class="form-label" data-i18n="sshPublicKeys">SSH public keys</label>
           <div>
-            <!-- NOTE: placeholder="ssh-ed25519 AAAA… user@host" needs JS translation -->
             <textarea id="SSH_PUBLIC_KEY" name="SSH_PUBLIC_KEY" class="input-base" placeholder="ssh-ed25519 AAAA… user@host" rows="3"></textarea>
             <p class="form-help" data-i18n="oneKeyPerLine">One key per line.</p>
           </div>
         </div>
         <div class="form-row ssh-pw-row hidden">
           <label class="form-label" data-i18n="sshPasswordAuth">SSH password auth</label>
-          <!-- NOTE: aria-label="SSH password auth" on radiogroup needs JS translation -->
           <div class="radio-seg" role="radiogroup" aria-label="SSH password auth">
             <label>
               <input type="radio" name="SSH_PASSWD_AUTH" value="" checked>
@@ -329,7 +326,6 @@
           <div class="form-row" style="margin-top:1.25rem">
             <label for="ADDITIONAL_VLAN_LIST" class="form-label" data-i18n="additionalTrunkVlans">Additional trunk VLANs</label>
             <div>
-              <!-- NOTE: placeholder needs JS translation -->
               <input type="text" id="ADDITIONAL_VLAN_LIST" name="ADDITIONAL_VLAN_LIST" class="input-base" placeholder="e.g. 25 30 40  or  30-50">
               <p class="form-help" data-i18n="additionalTrunkHelp">Extra VLAN IDs to trunk (tagged) through every port on this device. Space-separated; ranges as low-high.</p>
             </div>
@@ -621,7 +617,6 @@
         <div class="pppoe-only hidden">
           <div class="form-row">
             <label for="PPPOE_USERNAME" class="form-label">PPPoE username</label>
-            <!-- NOTE: "PPPoE username/password" are proper names, not translated -->
             <input type="text" id="PPPOE_USERNAME" name="PPPOE_USERNAME" class="input-base" autocomplete="username">
           </div>
           <div class="form-row">
@@ -861,6 +856,32 @@
             </label>
           </div>
         </div>
+        <div class="form-row form-row--full">
+          <div class="space-y-3">
+            <label class="toggle-label">
+              <span class="toggle-wrap">
+                <input type="checkbox" id="ADGUARD_MAIN_DNS" name="ADGUARD_MAIN_DNS" value="1" class="toggle-input">
+                <span class="toggle-track"></span>
+                <span class="toggle-thumb"></span>
+              </span>
+              <div>
+                <span class="toggle-text" data-i18n="adguardMainDns">AdGuard Home as main DNS resolver</span>
+                <p class="form-help mt-0" data-i18n="adguardMainDnsHelp">Bind AdGuard Home to port 53, use as the primary DNS resolver.</p>
+              </div>
+            </label>
+            <label class="toggle-label">
+              <span class="toggle-wrap">
+                <input type="checkbox" id="BLOCK_DOT_DOQ" name="BLOCK_DOT_DOQ" value="1" class="toggle-input">
+                <span class="toggle-track"></span>
+                <span class="toggle-thumb"></span>
+              </span>
+              <div>
+                <span class="toggle-text" data-i18n="blockDotDoq">Block DoT and DoQ</span>
+                <p class="form-help mt-0" data-i18n="blockDotDoqHelp">Enforce ad blocking on stubborn client devices.</p>
+              </div>
+            </label>
+          </div>
+        </div>
       </div>
       </div>
     </div>
@@ -917,17 +938,6 @@
             <div>
               <span class="toggle-text" data-i18n="hardwareOffload">Hardware flow offload</span>
               <p class="form-help mt-0" data-i18n="hardwareOffloadHelp">Higher network throughput where supported. Do not enable if using QoS/SQM.</p>
-            </div>
-          </label>
-          <label class="toggle-label">
-            <span class="toggle-wrap">
-              <input type="checkbox" id="BLOCK_DOT_DOQ" name="BLOCK_DOT_DOQ" value="1" class="toggle-input">
-              <span class="toggle-track"></span>
-              <span class="toggle-thumb"></span>
-            </span>
-            <div>
-              <span class="toggle-text" data-i18n="blockDotDoq">Block DoT and DoQ</span>
-              <p class="form-help mt-0" data-i18n="blockDotDoqHelp">Enforce ad blocking on stubborn client devices.</p>
             </div>
           </label>
           <label class="toggle-label">

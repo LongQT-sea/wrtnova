@@ -64,7 +64,7 @@ export const BASE_SCHEMA = /** @type {[string,string,(string|undefined)?,(string
   ['PORT_FORWARD_LIST', 'table', 'portfwd'], ['IPV6_SERVER_LIST', 'table', 'ipv6'],
   ['DDNS_ENABLE', 'checkbox'], ['LOOKUP_HOSTNAME', 'text'], ['CLOUDFLARE_API_KEY', 'text'],
   ['USB_TETHERING', 'checkbox'], ['CELLULAR_MODEM', 'checkbox'],
-  ['DNS_MODE', 'radio', undefined, 'adguardhome'], ['BLOCK_DOT_DOQ', 'checkbox'],
+  ['DNS_MODE', 'radio', undefined, 'adguardhome'], ['ADGUARD_MAIN_DNS', 'checkbox'], ['BLOCK_DOT_DOQ', 'checkbox'],
   ['DENY_GUEST_NIGHT', 'checkbox'], ['QUARTERLY_REBOOT', 'checkbox'], ['LOG', 'checkbox'],
   ['SOFTWARE_OFFLOAD', 'checkbox'], ['HARDWARE_OFFLOAD', 'checkbox'],
   // Not a config key (deriveConfig never emits it); carried in the store as a raw

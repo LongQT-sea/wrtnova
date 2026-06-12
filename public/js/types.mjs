@@ -109,6 +109,7 @@ export const SENSITIVE_KEYS = new Set([
  * @property {string} [USB_TETHERING]      flag
  * @property {string} [WWAN_ENABLE]        flag (vestigial; affects multi-WAN package only)
  * @property {string} [DNS_MODE]           BUILD-ONLY: 'adguardhome' | 'dnsproxy' | ...
+ * @property {string} [ADGUARD_MAIN_DNS]   flag
  * @property {string} [SOFTWARE_OFFLOAD]   flag
  * @property {string} [HARDWARE_OFFLOAD]   flag
  * @property {string} [BLOCK_DOT_DOQ]      flag
