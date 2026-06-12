@@ -402,11 +402,12 @@
         <div class="group card card-anim router-only wg-only hidden" id="card-wg" data-section="wg">
           <div class="card-header">
             <span class="dot" aria-label="Not started"></span>
-            <h2 class="flex-1 text-sm font-semibold" data-i18n="wgVpnClient">WireGuard VPN client</h2>
+            <h2 class="flex-1 text-sm font-semibold"><span data-i18n="wgVpnClient">WireGuard VPN client</span> <span class="chip ml-1" data-i18n="routerNodeOnly">router node only</span></h2>
             <svg class="w-4 h-4 text-zinc-400 card-chev transition-transform duration-200 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
           </div>
           <div class="card-body-wrap">
           <div class="card-body">
+            <p class="form-help" data-i18n="wgNeedConfig">Don't have a WireGuard config? Use Cloudflare's free WARP.</p>
             <div class="mt-1.5">
               <button id="warp-prefill-btn" type="button" class="btn" style="font-size:0.8125rem;padding:0.3rem 0.625rem;min-height:unset" data-i18n="prefillWithWarp">Prefill with Cloudflare WARP</button>
               <p id="warp-prefill-msg" class="form-help mt-1 hidden"></p>
@@ -459,7 +460,11 @@
               <label for="ALLOWED_IPS" class="form-label" data-i18n="allowedIps">Allowed IPs</label>
               <input type="text" id="ALLOWED_IPS" name="ALLOWED_IPS" class="input-base" placeholder="0.0.0.0/0, ::/0">
             </div>
-            <div class="info-note mt-2" role="note" data-i18n="wgRouterNote">Router terminates the tunnel, AP nodes bridge the VPN VLAN and broadcast the VPN SSID automatically.</div>
+            <div class="info-note mt-2" role="note" data-i18n-html="wgConfigNote">
+              You can change to a different WireGuard config later via
+              <strong>LuCI &rarr; Network &rarr; Interfaces &rarr; vpn &rarr; Edit &rarr; Load configuration</strong>.
+              After importing a config, remember to enable <em>Route Allowed IPs</em> in the Peers settings.
+            </div>
           </div>
           </div>
         </div>

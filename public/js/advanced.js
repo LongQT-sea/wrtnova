@@ -6,13 +6,17 @@
 import { ui } from './ui-ns.mjs';
 import './ui.js';
 import { initDeviceCombo, loadVersions, collectTarget } from './devices.js';
+import { collapsePackages } from './packages.mjs';
 
   const ASU_DEFAULT = 'https://sysupgrade.openwrt.org';
 
   let editor  = null;  // Monaco IStandaloneCodeEditor instance
   let polling = null;
 
-  ui.renderAutoPackages      = function () {};
+  ui.renderAutoPackages      = function () {
+    const el = document.getElementById('auto-packages');
+    if (el) ui.renderPackageChips(el, finalPackages());
+  };
   ui.updateAth10kVisibility  = function () {};
   ui.notifyTargetChanged     = function () {
     const ok  = !!collectTarget();
@@ -21,6 +25,7 @@ import { initDeviceCombo, loadVersions, collectTarget } from './devices.js';
     if (btn)  btn.disabled = !ok;
     if (hint) hint.textContent = ok ? '' : 'Pick a device to enable build.';
     if (ok)   ui.setDot('target', 'valid');
+    ui.renderAutoPackages();
   };
 
   async function fetchAssets() {
@@ -60,6 +65,42 @@ import { initDeviceCombo, loadVersions, collectTarget } from './devices.js';
     return editor ? editor.getValue() : '';
   }
 
+  // Marker splitting the per-build config block from the embedded body
+  // (CLAUDE.md invariant). Only the config block is de-commented; the body
+  // below the marker is left verbatim.
+  const CONFIG_MARK = '# ===================\n# End config section\n# ===================';
+
+  // Strip a trailing '#' comment, quote-aware: '#' starts a comment only outside
+  // quotes and at a word boundary, so values like ROOT_PASSWD="p#ss" survive.
+  function stripTrailingComment(line) {
+    let q = null;
+    for (let i = 0; i < line.length; i++) {
+      const c = line[i];
+      if (q) { if (c === q) q = null; }
+      else if (c === '"' || c === "'") q = c;
+      else if (c === '#' && (i === 0 || /\s/.test(line[i - 1])))
+        return line.slice(0, i).replace(/\s+$/, '');
+    }
+    return line;
+  }
+
+  // Drop full-line and trailing comments from the config block, collapsing the
+  // blank-line runs the removals leave behind. The shebang is a comment line and
+  // is dropped too - uci-defaults runs via `sh /etc/uci-defaults/xxx`, so it is
+  // not needed. The body below the marker is returned unchanged.
+  function stripConfigComments(script) {
+    const idx  = script.indexOf(CONFIG_MARK);
+    const head = idx === -1 ? script : script.slice(0, idx);
+    const tail = idx === -1 ? ''     : script.slice(idx);
+    const lines = head.split('\n')
+      .map(function (line) { return /^\s*#/.test(line) ? null : stripTrailingComment(line); })
+      .filter(function (l) { return l !== null; });
+    const cleaned = lines.filter(function (l, i) {
+      return !(l.trim() === '' && i > 0 && lines[i - 1].trim() === '');
+    });
+    return cleaned.join('\n') + tail;
+  }
+
   function asuBase() {
     return (document.getElementById('asu-url').value || ASU_DEFAULT).trim().replace(/\/+$/, '');
   }
@@ -75,6 +116,22 @@ import { initDeviceCombo, loadVersions, collectTarget } from './devices.js';
     return user;
   }
 
+  // The exact list POSTed to ASU, and what the "Final packages" chips preview.
+  // diff_packages: true makes ASU treat this as the COMPLETE desired set and
+  // remove every default not listed, so the device base (default + device
+  // packages) MUST be included or the kmods/switch/wifi drivers get stripped
+  // and the image soft-bricks. collapsePackages folds in any "-foo" removals
+  // from the textarea presets - same shape /builder sends.
+  function finalPackages() {
+    const target = collectTarget();
+    if (!target) return [];
+    return collapsePackages([
+      ...target.default_packages,
+      ...target.device_packages,
+      ...parsePackages(),
+    ]);
+  }
+
   async function startBuild() {
     if (polling) return;
     ui.clearStatus(); ui.clearProgress();
@@ -84,15 +141,16 @@ import { initDeviceCombo, loadVersions, collectTarget } from './devices.js';
     if (!target) { ui.status('Pick a device first.', 'error'); return; }
     if (!editor)  { ui.status('Editor not ready yet.', 'error'); return; }
 
-    const script = editorValue();
+    const script = stripConfigComments(editorValue());
 
     const asu     = asuBase();
+    const packages = finalPackages();
     const payload = {
       target:        target.target,
       version:       target.version,
       version_code:  target.version_code,
       profile:       target.profile,
-      packages:      parsePackages(),
+      packages:      packages,
       defaults:      script,
       diff_packages: true,
       client:        'wrtnova-advanced/1.0',
@@ -240,6 +298,7 @@ import { initDeviceCombo, loadVersions, collectTarget } from './devices.js';
     const toAdd = pkgs.filter(function (p) { return !existing.has(p); });
     if (!toAdd.length) return;
     ta.value = (ta.value.trimEnd() ? ta.value.trimEnd() + '\n' : '') + toAdd.join(' ');
+    ui.renderAutoPackages();
   }
 
   function initPresets() {
@@ -280,6 +339,7 @@ import { initDeviceCombo, loadVersions, collectTarget } from './devices.js';
 
     initPresets();
     initDeviceCombo();
+    document.getElementById('packages').addEventListener('input', ui.renderAutoPackages);
 
     const [templateResult] = await Promise.allSettled([
       fetchAssets(),

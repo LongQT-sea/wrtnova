@@ -106,7 +106,11 @@
         <div id="preset-buttons" class="flex flex-wrap gap-1.5 mb-3"></div>
         <textarea id="packages" class="input-base font-mono" rows="4"
           placeholder="space or newline separated&#10;e.g. luci-app-ttyd kmod-usb3&#10;prefix with - to remove: -dnsmasq"></textarea>
-        <p class="form-help mt-2">Applied as a diff on top of the device's default packages (<code>diff_packages: true</code>). No WrtNova auto-resolution — you own the full list.</p>
+        <p class="form-help mt-2">Your packages are merged on top of the device defaults (<code>diff_packages: true</code>); prefix with <code>-</code> to remove one.</p>
+        <div class="sub-section">
+          <p class="sub-section-title">Final packages</p>
+          <div id="auto-packages" class="flex flex-wrap gap-1 py-1 min-h-[1.75rem]"></div>
+        </div>
       </div>
     </details>
 

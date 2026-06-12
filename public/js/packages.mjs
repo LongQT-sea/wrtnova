@@ -66,8 +66,18 @@ export function computeAdds({ base = [], device = [], config = {} }) {
  */
 export function resolvePackages({ base = [], device = [], extra = [], config = {} }) {
   const adds = computeAdds({ base, device, config });
-  const merged = [...base, ...device, ...adds, ...extra];
+  return collapsePackages([...base, ...device, ...adds, ...extra]);
+}
 
+/**
+ * Collapse a flat package list: drop empties, dedupe, let removal tokens
+ * ("-foo") cancel the matching positive, and sort. Shared so any page that
+ * sends `diff_packages: true` (which makes ASU treat the list as the complete
+ * desired set) emits the same unambiguous shape resolvePackages produces.
+ * @param {string[]} merged
+ * @returns {string[]}
+ */
+export function collapsePackages(merged) {
   // Collect removals (tokens starting with '-') and positives separately.
   const removals = new Set();
   const positives = new Set();
