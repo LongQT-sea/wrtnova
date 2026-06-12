@@ -1149,6 +1149,16 @@ EOF
 [ -x "/usr/bin/AdGuardHome" ] && {
 	read -r _ TOTAL_RAM_KB _ < /proc/meminfo
 	if [ "$TOTAL_RAM_KB" -ge 235520 ]; then
+		[ -n "$ADGUARD_MAIN_DNS" ] && {
+			adguard_main=true
+			adguard_bind_host=0.0.0.0
+			adguard_dns_port=53
+			dnsmasq_dns_port=54
+			adguard_upstream="    - '[/lan/]127.0.0.1:54'"
+			[ "$WG_ENABLE" = 1 ] && adguard_upstream="$adguard_upstream
+    - '[/${wg_iface}.lan/]${wg_net_pfx}.1:54'"
+		}
+
 		setup_dnsmasq_upstream
 		echo "0 3 */3 * * /etc/init.d/adguardhome restart" >> /etc/crontabs/root
 		echo "sleep 30; /etc/init.d/adguardhome restart &" >> "$hplug_ifup_wan"
@@ -1157,13 +1167,6 @@ EOF
 	else
 		/etc/init.d/adguardhome disable
 	fi
-
-	[ -n "$ADGUARD_MAIN_DNS" ] && {
-		adguard_main=true
-		adguard_bind_host=0.0.0.0
-		adguard_dns_port=53
-		dnsmasq_dns_port=54
-	}
 }
 
 ADGUARD_PASSWD=${ADGUARD_PASSWD:-\$2y\$10\$aRfh9IbImR8PIf/FWlLvkeW6wiyp47BjY0KqW/FD/F14QloYuV00a}
@@ -1184,6 +1187,7 @@ dns:
     - https://dns10.quad9.net/dns-query
     - https://dns.cloudflare.com/dns-query
     - https://dns.google/dns-query
+$adguard_upstream
   bootstrap_dns:
     - 1.0.0.1
     - 2620:fe::9
