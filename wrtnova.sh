@@ -1113,17 +1113,24 @@ setup_dnsmasq_upstream() {
 while uci -q del dhcp.@dnsmasq[0]; do :; done
 while uci -q del dhcp.@dhcp[0]; do :; done
 
-[ "$GUEST_ENABLE" = 1 ] && dhcp-instance-add guest 1h "" "" 0 "$GUEST_DHCP_START"
+[ "$GUEST_ENABLE" = 1 ] && {
+	dhcp-instance-add guest 1h "" "" 0 "$GUEST_DHCP_START"
+	_uci dhcp "" guest +dhcp_option=6,"${guest_net_pfx}.1"
+}
 
-[ "$IOT_ENABLE" = 1 ] && dhcp-instance-add iot "" "" "" 0
+[ "$IOT_ENABLE" = 1 ] && {
+	dhcp-instance-add iot "" "" "" 0
+	_uci dhcp "" iot +dhcp_option=6,"${iot_net_pfx}.1"
+}
 
 [ "$WG_ENABLE" = 1 ] && {
 	dhcp-instance-add "lan_${wg_iface}" 24h "${wg_iface}.lan"
-	_uci dhcp "" "lan_${wg_iface}" ra_default=1
+	_uci dhcp "" "lan_${wg_iface}" ra_default=1 +dhcp_option=6,"${wg_net_pfx}.1"
 	_uci dhcp dnsmasq "lan_${wg_iface}_dns" +rebind_domain=lan +server=/lan/127.0.0.1
 }
 
 dhcp-instance-add lan 24h lan lan 1 "$LAN_DHCP_START"
+_uci dhcp "" lan +dhcp_option=6,"${lan_net_pfx}.1"
 uci del dhcp.lan_dns.notinterface
 
 [ "$WG_ENABLE" = 1 ] && \
