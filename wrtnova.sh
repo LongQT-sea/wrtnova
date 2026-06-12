@@ -154,6 +154,7 @@ DENY_GUEST_NIGHT=
 
 # AdGuardHome admin passwd in bcrypt hash (default 12345678)
 ADGUARD_PASSWD=''
+ADGUARD_MAIN_DNS=	# 1 = set AdGuardHome as primary DNS resolver
 
 # 1 = log to /root/99-asu-defaults.log
 LOG=
@@ -1105,7 +1106,7 @@ setup_dnsmasq_upstream() {
 	for iface in lan ${WG_ENABLE:+lan_${wg_iface}} ${GUEST_ENABLE:+guest} ${IOT_ENABLE:+iot}; do
 		[ -z "$iface" ] && continue
 		_uci dhcp dnsmasq "${iface}_dns" \
-			noresolv=1 cachesize=0 +server=127.0.0.1#5354 +server=::1#5354
+			noresolv=1 cachesize=0 +server=127.0.0.1#5354 +server=::1#5354 ${adguard_main:+port=54}
 	done
 }
 
@@ -1156,6 +1157,13 @@ EOF
 	else
 		/etc/init.d/adguardhome disable
 	fi
+
+	[ -n "$ADGUARD_MAIN_DNS" ] && {
+		adguard_main=true
+		adguard_bind_host=0.0.0.0
+		adguard_dns_port=53
+		dnsmasq_dns_port=54
+	}
 }
 
 ADGUARD_PASSWD=${ADGUARD_PASSWD:-\$2y\$10\$aRfh9IbImR8PIf/FWlLvkeW6wiyp47BjY0KqW/FD/F14QloYuV00a}
@@ -1169,8 +1177,8 @@ users:
 dns:
   bind_hosts:
     - 127.0.0.1
-    - ::1
-  port: 5354
+    - ${adguard_bind_host:-::1}
+  port: ${adguard_dns_port:-5354}
   ratelimit: 500
   upstream_dns:
     - https://dns10.quad9.net/dns-query
@@ -1184,14 +1192,23 @@ dns:
     - 2620:fe::9
   cache_size: 4194304
   cache_optimistic: true
-  use_private_ptr_resolvers: false
+  use_private_ptr_resolvers: ${adguard_main:-false}
+  local_ptr_upstreams:
+    - 127.0.0.1:${dnsmasq_dns_port:-53}
   use_http3_upstreams: true
 querylog:
   interval: 24h
   size_memory: 500
+  ignored_enabled: true
+  ignored:
+    - '*.arpa'
+statistics:
+  ignored_enabled: true
+  ignored:
+    - '*.arpa'
 clients:
   runtime_sources:
-    rdns: false
+    rdns: ${adguard_main:-false}
 log:
   enabled: false
 schema_version: 28
