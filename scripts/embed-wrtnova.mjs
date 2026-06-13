@@ -9,7 +9,7 @@ import { dirname, resolve } from 'node:path';
 const here = dirname(fileURLToPath(import.meta.url));
 const root = resolve(here, '..');
 
-const REMOTE_URL = 'https://raw.githubusercontent.com/LongQT-sea/wrtnova/main/wrtnova.sh';
+const REMOTE_URL = 'https://raw.githubusercontent.com/LongQT-sea/wrtnova.sh/main/wrtnova.sh';
 const localPath  = resolve(root, 'wrtnova.sh');
 
 let sh;
