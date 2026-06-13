@@ -214,58 +214,6 @@
   .dark .btn-primary:hover { background-color: #e3731a; }
   .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
 
-  /* Landing page — white/zinc CTAs so they don't mimic the orange mock "Build firmware" button */
-  /* blue-600 (#2563eb) on white = 4.79:1 — passes WCAG AA */
-  .page-home .btn-primary,
-  .dark .page-home .btn-primary {
-    background-color: #2563eb;
-    border-color: #2563eb;
-    color: #ffffff;
-    transition: background-color 0.15s, border-color 0.15s, box-shadow 0.15s, transform 0.15s;
-  }
-  .page-home .btn-primary:hover,
-  .dark .page-home .btn-primary:hover {
-    background-color: #1d4ed8;
-    border-color: #1d4ed8;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 14px rgba(29, 78, 216, 0.4);
-  }
-  /* blue-700 on #fafafa = 5.86:1; blue-500 on #09090b = 5.74:1 — both pass WCAG AA */
-  .page-home .text-accent { color: #1d4ed8; }
-  .dark .page-home .text-accent { color: #3b82f6; }
-  /* Ghost button: transparent bg/border in light mode makes it invisible as a button —
-     restore a visible border so it reads as interactive */
-  .page-home .btn-ghost { border-color: #d4d4d8; }
-  .dark .page-home .btn-ghost { border-color: #3f3f46; }
-
-  /* Large CTA buttons (landing page hero/CTA sections) */
-  .btn-lg {
-    min-height: 44px;
-    padding: 0.625rem 1.5rem;
-    font-size: 0.9375rem;
-  }
-
-  /* Outline CTA variant for landing page secondary action */
-  .page-home .btn-outline {
-    background-color: transparent;
-    border-color: #2563eb;
-    color: #2563eb;
-    transition: background-color 0.15s, border-color 0.15s, box-shadow 0.15s, transform 0.15s;
-  }
-  .dark .page-home .btn-outline {
-    border-color: #3b82f6;
-    color: #3b82f6;
-    background-color: transparent;
-  }
-  .page-home .btn-outline:hover {
-    background-color: rgba(37,99,235,0.08);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 14px rgba(37,99,235,0.15);
-  }
-  .dark .page-home .btn-outline:hover {
-    background-color: rgba(59,130,246,0.08);
-  }
-
   .btn-icon {
     padding: 0.375rem;
     min-height: 32px;
@@ -1068,4 +1016,201 @@ body.editor-fs-open {
   #modal-device-picker::backdrop {
     background: rgba(9, 9, 11, 0.6);
   }
+}
+
+/* === Landing page (.page-home) ===================================== */
+/* Engineering-datasheet aesthetic: hairline rules, numbered sections,
+   dotted blueprint grid, one accent (OpenWrt orange). All classes are
+   lp-prefixed and used only by public/index.html. The accent TEXT color
+   darkens in light mode for WCAG AA; accent FILLS stay #f6821f with
+   dark ink on top (7.12:1). */
+
+.page-home {
+  /* orange-700 on #fafafa = 4.84:1 */
+  --lp-accent: #c2410c;
+  --lp-fill: #f6821f;
+  --lp-ink: #18181b;
+  --lp-line: #e4e4e7;
+  --lp-dim: #71717a;
+  --lp-panel: #ffffff;
+  background-image: radial-gradient(circle, rgba(63, 63, 70, 0.13) 1px, transparent 1px);
+  background-size: 26px 26px;
+}
+.dark .page-home {
+  /* #f6821f on zinc-950 = 7.4:1 */
+  --lp-accent: #f6821f;
+  --lp-line: #27272a;
+  --lp-dim: #a1a1aa;
+  --lp-panel: #0c0c0e;
+  background-image: radial-gradient(circle, rgba(244, 244, 245, 0.055) 1px, transparent 1px);
+}
+
+.page-home ::selection { background: var(--lp-fill); color: var(--lp-ink); }
+
+.lp-accent { color: var(--lp-accent); }
+.lp-dim { color: var(--lp-dim); }
+.lp-hairline { border-color: var(--lp-line); }
+
+/* Microlabels: the datasheet voice */
+.lp-label {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--lp-dim);
+}
+
+/* CTA buttons (44px+ touch targets, 2px radius = print-like) */
+.lp-btn,
+.lp-btn-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 48px;
+  padding: 0 1.5rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  border-radius: 2px;
+  text-decoration: none;
+  transition: background-color 0.15s, border-color 0.15s, box-shadow 0.15s, transform 0.15s;
+}
+.lp-btn {
+  background: var(--lp-fill);
+  border: 1px solid var(--lp-fill);
+  color: var(--lp-ink);
+}
+.lp-btn:hover {
+  background: #e3731a;
+  border-color: #e3731a;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(246, 130, 31, 0.35);
+}
+.lp-btn-outline {
+  background: transparent;
+  border: 1px solid var(--lp-accent);
+  color: var(--lp-accent);
+}
+.lp-btn-outline:hover {
+  background: rgba(246, 130, 31, 0.1);
+  transform: translateY(-1px);
+}
+.lp-btn:focus-visible,
+.lp-btn-outline:focus-visible {
+  outline: 2px solid var(--lp-fill);
+  outline-offset: 3px;
+}
+
+/* Registration-mark corners on framed panels */
+.lp-ticks { position: relative; }
+.lp-ticks::before,
+.lp-ticks::after {
+  content: '';
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  pointer-events: none;
+}
+.lp-ticks::before {
+  top: -1px;
+  left: -1px;
+  border-top: 2px solid var(--lp-fill);
+  border-left: 2px solid var(--lp-fill);
+}
+.lp-ticks::after {
+  bottom: -1px;
+  right: -1px;
+  border-bottom: 2px solid var(--lp-fill);
+  border-right: 2px solid var(--lp-fill);
+}
+
+/* First-boot console */
+.lp-console-wrap { position: relative; }
+.lp-console-wrap::before {
+  content: '';
+  position: absolute;
+  inset: -2.5rem;
+  background: radial-gradient(closest-side, rgba(246, 130, 31, 0.1), transparent);
+  pointer-events: none;
+}
+.lp-console {
+  position: relative;
+  border: 1px solid var(--lp-line);
+  border-radius: 4px;
+  background: var(--lp-panel);
+  box-shadow: 0 1px 2px rgba(9, 9, 11, 0.06), 0 12px 40px rgba(9, 9, 11, 0.08);
+}
+.dark .lp-console {
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 12px 40px rgba(0, 0, 0, 0.5);
+}
+.lp-console-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.5rem 0.875rem;
+  border-bottom: 1px solid var(--lp-line);
+  font-size: 0.6875rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--lp-dim);
+}
+.lp-console-body {
+  padding: 1rem 0.875rem 1.125rem;
+  font-size: 0.75rem;
+  line-height: 1.85;
+  overflow-x: auto;
+}
+.lp-line {
+  display: block;
+  white-space: pre;
+  opacity: 0;
+  /* steps(1, start) jumps to opacity 1 at the start of the active interval
+     (instant terminal pop). The non-trivial duration matters: Chromium fails
+     to commit the forwards-fill of a composited ~10ms steps(1) animation
+     whose delay ends after the main thread goes idle. */
+  animation: lp-reveal 0.4s steps(1, start) forwards;
+  animation-delay: var(--d, 0s);
+}
+@keyframes lp-reveal { to { opacity: 1; } }
+
+.lp-cursor {
+  display: inline-block;
+  width: 0.6em;
+  height: 1.15em;
+  margin-left: 0.1em;
+  background: var(--lp-fill);
+  vertical-align: text-bottom;
+  animation: lp-blink 1.1s steps(1) infinite;
+}
+@keyframes lp-blink { 50% { opacity: 0; } }
+
+/* Config-snippet blocks in the feature rows */
+.lp-code {
+  border: 1px solid var(--lp-line);
+  border-left: 2px solid var(--lp-fill);
+  border-radius: 2px;
+  background: var(--lp-panel);
+  padding: 1rem 1.125rem;
+  font-size: 0.75rem;
+  line-height: 1.9;
+  overflow-x: auto;
+}
+.lp-code .ln { display: block; white-space: pre; }
+
+/* Giant stat numerals */
+.lp-stat {
+  font-size: 3.25rem;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+@media (min-width: 768px) {
+  .lp-stat { font-size: 4.25rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lp-line { animation: none; opacity: 1; }
+  .lp-cursor { animation: none; }
+  .lp-btn, .lp-btn-outline { transition: none; }
 }

@@ -16,18 +16,24 @@
     })();
   </script>
   <link rel="preload" as="font" type="font/woff2" crossorigin href="/fonts/ibm-plex-mono-v20-latin-regular.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="/fonts/ibm-plex-mono-v20-latin-600.woff2">
   <link rel="stylesheet" href="/style.css">
 </head>
 
 <body class="page-home bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 font-mono text-sm min-h-screen">
 
-  <header class="sticky top-0 z-40 bg-zinc-50/90 dark:bg-zinc-950/90 backdrop-blur-sm border-b border-zinc-200 dark:border-zinc-800">
-    <div class="max-w-[68rem] mx-auto px-4 py-3 flex items-center justify-between gap-4">
-      <a href="/" class="text-base font-semibold tracking-tight leading-tight hover:underline">WrtNova</a>
-      <div class="flex items-center gap-1">
-        <a href="/networks" class="btn btn-ghost text-xs py-1 px-2 hidden sm:inline-flex" data-i18n="fleetBuilderLink">Fleet builder →</a>
+  <div class="h-[3px] bg-[#f6821f]" aria-hidden="true"></div>
+
+  <header class="sticky top-0 z-40 bg-zinc-50/90 dark:bg-zinc-950/90 backdrop-blur-sm border-b lp-hairline">
+    <div class="max-w-[72rem] mx-auto px-4 md:px-6 py-3 flex items-center justify-between gap-4">
+      <a href="/" class="flex items-center gap-2.5 hover:opacity-80 transition-opacity">
+        <span class="w-2 h-2 bg-[#f6821f]" aria-hidden="true"></span>
+        <span class="text-base font-semibold tracking-tight">WrtNova</span>
+      </a>
+      <div class="flex items-center gap-3">
+        <a href="/networks" class="hidden sm:inline text-xs lp-dim hover:text-zinc-900 dark:hover:text-zinc-100 hover:underline underline-offset-4 transition-colors" data-i18n="fleetBuilderLink">Fleet builder →</a>
         <button id="theme-toggle" type="button"
-                class="p-2 rounded-md text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors focus:outline-none focus:ring-2 focus:ring-accent"
+                class="p-2 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors focus:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#f6821f]"
                 aria-label="Toggle color theme">
           <svg class="icon-sun w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
           <svg class="icon-moon w-5 h-5 hidden" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
@@ -38,158 +44,282 @@
 
   <main>
 
-  <section class="max-w-[68rem] mx-auto px-4 py-14 md:py-20">
-    <div class="flex flex-col md:flex-row md:items-center gap-12 md:gap-12 lg:gap-20">
+  <!-- ===== Hero: headline + first-boot console ===== -->
+  <!-- overflow-hidden: the console glow (lp-console-wrap::before) extends past the
+       section box and would otherwise widen the page at 375px -->
+  <section class="max-w-[72rem] mx-auto px-4 md:px-6 pt-14 pb-16 md:pt-24 md:pb-24 overflow-hidden">
+    <div class="grid gap-14 md:grid-cols-2 lg:grid-cols-12 md:items-center">
 
-
-      <div class="flex-1 min-w-0">
-        <p class="text-xs tracking-wide uppercase mb-5 text-accent font-semibold whitespace-nowrap" data-i18n="heroTagline">OpenWrt · Browser-built · Zero SSH</p>
-        <!-- NOTE: h1 contains <br> for layout; data-i18n not applicable (textContent would strip tags) -->
-        <h1 class="text-3xl md:text-4xl font-semibold leading-tight tracking-tight mb-5">
-          Flash once.<br>Everything's<br>already set up.
+      <div class="lg:col-span-7 min-w-0">
+        <p class="lp-label mb-6 text-[#c2410c] dark:text-[#f6821f]" data-i18n="heroTagline">OpenWrt · Browser-built · Zero SSH</p>
+        <!-- NOTE: h1 contains markup for layout; data-i18n not applicable (textContent would strip tags) -->
+        <h1 class="text-[2.6rem] md:text-5xl lg:text-[4rem] font-semibold leading-[1.06] tracking-tight mb-7">
+          Flash once<span class="lp-accent">.</span><br>
+          <span class="text-zinc-400 dark:text-zinc-500">Everything's<br>already set up.</span>
         </h1>
-        <p class="text-zinc-500 dark:text-zinc-400 leading-relaxed mb-8 max-w-xs" data-i18n="heroSubtitle">
+        <p class="text-zinc-500 dark:text-zinc-400 leading-relaxed mb-10 max-w-sm" data-i18n="heroSubtitle">
           Build a fully-configured OpenWrt image — VLANs, WiFi, VPN, ad-blocking — in your browser.
         </p>
-        <div class="flex flex-col gap-3 items-start">
-          <a href="/builder" class="btn btn-primary btn-lg" data-i18n="singleNodeBuilder">Single-node builder →</a>
-          <a href="/networks" class="btn btn-outline btn-lg" data-i18n="multiNodeFleetBuilder">Multi-node fleet builder →</a>
+        <div class="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
+          <a href="/builder" class="lp-btn" data-i18n="singleNodeBuilder">Single-node builder →</a>
+          <a href="/networks" class="lp-btn-outline" data-i18n="multiNodeFleetBuilder">Multi-node fleet builder →</a>
         </div>
-        <div class="mt-3">
+        <div class="mt-5">
           <a href="https://github.com/LongQT-sea/wrtnova" target="_blank" rel="noopener"
-             class="text-xs text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:underline transition-colors"
+             class="text-xs lp-dim hover:text-zinc-900 dark:hover:text-zinc-100 hover:underline underline-offset-4 transition-colors"
              data-i18n="viewSourceGithub">
             View wrtnova.sh on GitHub ↗
           </a>
         </div>
       </div>
 
-      <div class="flex-shrink-0 w-full md:w-[420px] lg:w-[500px]"
-           style="filter:drop-shadow(0 10px 44px rgba(246,130,31,0.12))">
-        <svg viewBox="0 0 400 290" fill="none" xmlns="http://www.w3.org/2000/svg"
-             role="img" aria-label="WrtNova firmware builder interface preview"
-             style="width:100%;height:auto;display:block;margin:0 auto;filter:blur(0.3px) saturate(1.06);-webkit-mask-image:radial-gradient(ellipse 100% 100% at center,#000 85%,transparent);mask-image:radial-gradient(ellipse 100% 100% at center,#000 85%,transparent)">
-
-          <rect width="400" height="290" rx="9" fill="#18181b" stroke="#27272a"/>
-
-          <rect width="400" height="44" rx="9" fill="#18181b"/>
-          <rect y="43" width="400" height="1" fill="#27272a"/>
-          <circle cx="19" cy="22" r="4.5" fill="#3f3f46"/>
-          <circle cx="34" cy="22" r="4.5" fill="#3f3f46"/>
-          <circle cx="49" cy="22" r="4.5" fill="#3f3f46"/>
-          <text x="66" y="26.5" font-size="9.5" font-family="'IBM Plex Mono',ui-monospace,monospace" fill="#3f3f46">WrtNova</text>
-          <text x="115" y="26.5" font-size="9.5" font-family="'IBM Plex Mono',ui-monospace,monospace" fill="#52525b"> firmware builder</text>
-
-          <rect x="12" y="56" width="376" height="36" rx="6" fill="#111113" stroke="#27272a"/>
-          <circle cx="27" cy="74" r="3.5" stroke="#71717a" stroke-width="1.5"/>
-          <text x="41" y="78.5" font-size="9" font-family="'IBM Plex Mono',ui-monospace,monospace" fill="#f4f4f5" font-weight="600">Firmware target</text>
-          <text x="268" y="78.5" font-size="8.5" font-family="'IBM Plex Mono',ui-monospace,monospace" fill="#52525b">Archer C7 v5  ▾</text>
-
-          <rect x="12" y="100" width="376" height="104" rx="6" fill="#111113" stroke="#27272a"/>
-          <circle cx="27" cy="116" r="3.5" fill="#f6821f"/>
-          <text x="41" y="120.5" font-size="9" font-family="'IBM Plex Mono',ui-monospace,monospace" fill="#f4f4f5" font-weight="600">Network</text>
-          <line x1="12" y1="129" x2="388" y2="129" stroke="#27272a"/>
-          <text x="28" y="142" font-size="6.5" font-family="'IBM Plex Mono',ui-monospace,monospace" fill="#52525b" letter-spacing="0.07em">NETWORK</text>
-          <text x="116" y="142" font-size="6.5" font-family="'IBM Plex Mono',ui-monospace,monospace" fill="#52525b" letter-spacing="0.07em">PREFIX</text>
-          <text x="195" y="142" font-size="6.5" font-family="'IBM Plex Mono',ui-monospace,monospace" fill="#52525b" letter-spacing="0.07em">VLAN</text>
-          <text x="256" y="142" font-size="6.5" font-family="'IBM Plex Mono',ui-monospace,monospace" fill="#52525b" letter-spacing="0.07em">SUBNET</text>
-          <text x="28" y="158" font-size="8.5" font-family="'IBM Plex Mono',ui-monospace,monospace" fill="#a1a1aa">LAN</text>
-          <text x="116" y="158" font-size="8.5" font-family="'IBM Plex Mono',ui-monospace,monospace" fill="#d4d4d8">192.168</text>
-          <text x="200" y="158" font-size="8.5" font-family="'IBM Plex Mono',ui-monospace,monospace" fill="#d4d4d8">1</text>
-          <text x="256" y="158" font-size="8.5" font-family="'IBM Plex Mono',ui-monospace,monospace" fill="#d4d4d8">/24</text>
-          <text x="28" y="173" font-size="8.5" font-family="'IBM Plex Mono',ui-monospace,monospace" fill="#a1a1aa">Guest</text>
-          <text x="116" y="173" font-size="8.5" font-family="'IBM Plex Mono',ui-monospace,monospace" fill="#d4d4d8">192.168</text>
-          <text x="200" y="173" font-size="8.5" font-family="'IBM Plex Mono',ui-monospace,monospace" fill="#d4d4d8">5</text>
-          <text x="256" y="173" font-size="8.5" font-family="'IBM Plex Mono',ui-monospace,monospace" fill="#d4d4d8">/24</text>
-          <text x="28" y="188" font-size="8.5" font-family="'IBM Plex Mono',ui-monospace,monospace" fill="#a1a1aa">IoT</text>
-          <text x="116" y="188" font-size="8.5" font-family="'IBM Plex Mono',ui-monospace,monospace" fill="#d4d4d8">192.168</text>
-          <text x="200" y="188" font-size="8.5" font-family="'IBM Plex Mono',ui-monospace,monospace" fill="#d4d4d8">10</text>
-          <text x="256" y="188" font-size="8.5" font-family="'IBM Plex Mono',ui-monospace,monospace" fill="#d4d4d8">/24</text>
-
-          <rect x="12" y="212" width="376" height="36" rx="6" fill="#111113" stroke="#27272a"/>
-          <circle cx="27" cy="230" r="3.5" fill="#f6821f"/>
-          <text x="41" y="234.5" font-size="9" font-family="'IBM Plex Mono',ui-monospace,monospace" fill="#f4f4f5" font-weight="600">WireGuard VPN</text>
-          <text x="276" y="234.5" font-size="8.5" font-family="'IBM Plex Mono',ui-monospace,monospace" fill="#52525b">WARP  ▾</text>
-
-          <rect x="12" y="256" width="376" height="24" rx="5" fill="#f6821f"/>
-          <text x="200" y="272" font-size="9.5" font-family="'IBM Plex Mono',ui-monospace,monospace" fill="#18181b" font-weight="600" text-anchor="middle">Build firmware</text>
-
-          <text x="326" y="272" font-size="9.5" font-family="'IBM Plex Mono',ui-monospace,monospace" fill="rgba(24,24,27,0.55)" font-weight="400">↓</text>
-        </svg>
+      <div class="lg:col-span-5 min-w-0 lp-console-wrap" aria-hidden="true">
+        <div class="lp-console lp-ticks">
+          <div class="lp-console-bar">
+            <span>wrtnova -- first boot</span>
+            <span>ttyS0 115200</span>
+          </div>
+          <div class="lp-console-body">
+<span class="lp-line" style="--d:.2s"><span class="lp-accent">root@OpenWrt:~#</span> firstboot &amp;&amp; reboot</span>
+<span class="lp-line lp-dim" style="--d:.9s">[  8.42] uci-defaults: running 99-wrtnova</span>
+<span class="lp-line" style="--d:1.2s"><span class="lp-dim">[  8.61]</span> <span class="lp-accent">vlan</span> : lan1 guest5 iot10 vpn15</span>
+<span class="lp-line" style="--d:1.5s"><span class="lp-dim">[  9.04]</span> <span class="lp-accent">wifi</span> : Nova Nova_Guest Nova_IoT</span>
+<span class="lp-line" style="--d:1.8s"><span class="lp-dim">[  9.37]</span> <span class="lp-accent">wifi</span> : 802.11k/v/r roaming on</span>
+<span class="lp-line" style="--d:2.1s"><span class="lp-dim">[  9.80]</span> <span class="lp-accent">fw4 </span> : guest/iot isolated from lan</span>
+<span class="lp-line" style="--d:2.4s"><span class="lp-dim">[ 10.25]</span> <span class="lp-accent">wg  </span> : vpn tunnel up</span>
+<span class="lp-line" style="--d:2.7s"><span class="lp-dim">[ 11.02]</span> <span class="lp-accent">dns </span> : adguardhome on :53</span>
+<span class="lp-line" style="--d:3.0s"><span class="lp-dim">[ 11.48]</span> <span class="lp-accent">ddns</span> : cloudflare A/AAAA set</span>
+<span class="lp-line" style="--d:3.4s"><span class="lp-dim">[ 11.90]</span> done : 0 LuCI clicks, 0 ssh</span>
+<span class="lp-line" style="--d:3.9s"><span class="lp-accent">root@Nova:~#</span> <span class="lp-cursor"></span></span>
+          </div>
+        </div>
       </div>
 
     </div>
   </section>
 
-  <section class="max-w-[68rem] mx-auto px-4 pb-14 md:pb-20">
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+  <!-- ===== Stat band: 0 / 0 / 0 / 1 ===== -->
+  <section class="border-y lp-hairline bg-white/60 dark:bg-zinc-900/40">
+    <div class="max-w-[72rem] mx-auto grid grid-cols-2 md:grid-cols-4">
+      <div class="p-6 md:p-8 border-b md:border-b-0 lp-hairline">
+        <div class="lp-stat">0</div>
+        <div class="lp-label mt-2">Frameworks</div>
+      </div>
+      <div class="p-6 md:p-8 border-b md:border-b-0 border-l lp-hairline">
+        <div class="lp-stat">0</div>
+        <div class="lp-label mt-2">SSH sessions</div>
+      </div>
+      <div class="p-6 md:p-8 md:border-l lp-hairline">
+        <div class="lp-stat">0</div>
+        <div class="lp-label mt-2">LuCI clicks</div>
+      </div>
+      <div class="p-6 md:p-8 border-l lp-hairline">
+        <div class="lp-stat lp-accent">1</div>
+        <div class="lp-label mt-2">Flash</div>
+      </div>
+    </div>
+  </section>
 
-<div class="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-lg p-5 md:p-6">
-        <div class="flex items-center justify-center w-8 h-8 rounded-md bg-zinc-100 dark:bg-zinc-800 mb-4 flex-shrink-0">
-          <svg class="w-4 h-4 text-zinc-500 dark:text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <rect x="2" y="2" width="6" height="6" rx="1"/><rect x="16" y="2" width="6" height="6" rx="1"/>
-            <rect x="9" y="16" width="6" height="6" rx="1"/>
-            <line x1="5" y1="8" x2="5" y2="12"/><line x1="19" y1="8" x2="19" y2="12"/>
-            <line x1="5" y1="12" x2="12" y2="16"/><line x1="19" y1="12" x2="12" y2="16"/>
-          </svg>
-        </div>
-        <h2 class="font-semibold text-sm mb-2 leading-snug" data-i18n="featureVlansTitle">VLANs without learning VLANs</h2>
-        <p class="text-zinc-500 dark:text-zinc-400 text-xs leading-relaxed" data-i18n="featureVlansDesc">
+  <!-- ===== Features: numbered datasheet rows, each backed by the real config vars ===== -->
+  <section class="max-w-[72rem] mx-auto px-4 md:px-6 py-16 md:py-24">
+
+    <div class="flex items-center gap-2.5 pb-8">
+      <span class="w-2 h-2 bg-[#f6821f]" aria-hidden="true"></span>
+      <p class="lp-label" data-i18n="featuresHeading">What first boot configures</p>
+    </div>
+
+    <div class="grid gap-x-10 gap-y-4 md:grid-cols-12 py-10 border-t lp-hairline">
+      <div class="md:col-span-1 lp-accent text-xs font-semibold pt-1">01</div>
+      <div class="md:col-span-5">
+        <h2 class="font-semibold text-base mb-3 leading-snug" data-i18n="featureVlansTitle">VLANs without learning VLANs</h2>
+        <p class="text-zinc-500 dark:text-zinc-400 text-xs leading-relaxed max-w-sm" data-i18n="featureVlansDesc">
           Segment into LAN, Guest, and IoT zones. WrtNova detects your switch hardware and wires the tagging correctly — no DSA-vs-swconfig rabbit hole.
         </p>
       </div>
-
-      <div class="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-lg p-5 md:p-6">
-        <div class="flex items-center justify-center w-8 h-8 rounded-md bg-zinc-100 dark:bg-zinc-800 mb-4 flex-shrink-0">
-          <svg class="w-4 h-4 text-zinc-500 dark:text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-          </svg>
+      <div class="md:col-span-6 mt-2 md:mt-0 min-w-0" aria-hidden="true">
+        <div class="lp-code">
+<span class="ln">GUEST_ENABLE=<span class="lp-accent">1</span>          <span class="lp-dim"># vlan 5</span></span>
+<span class="ln">IOT_ENABLE=<span class="lp-accent">1</span>            <span class="lp-dim"># vlan 10, lan-only</span></span>
+<span class="ln">ADDITIONAL_VLAN_LIST=<span class="lp-accent">"30-50"</span></span>
+<span class="ln"><span class="lp-dim"># dsa or swconfig - detected on device</span></span>
         </div>
-        <h2 class="font-semibold text-sm mb-2 leading-snug" data-i18n="featureVpnTitle">VPN built in — or one click to WARP</h2>
-        <p class="text-zinc-500 dark:text-zinc-400 text-xs leading-relaxed" data-i18n="featureVpnDesc">
+      </div>
+    </div>
+
+    <div class="grid gap-x-10 gap-y-4 md:grid-cols-12 py-10 border-t lp-hairline">
+      <div class="md:col-span-1 lp-accent text-xs font-semibold pt-1">02</div>
+      <div class="md:col-span-5">
+        <h2 class="font-semibold text-base mb-3 leading-snug" data-i18n="featureRoamTitle">Roaming tuned out of the box</h2>
+        <p class="text-zinc-500 dark:text-zinc-400 text-xs leading-relaxed max-w-sm" data-i18n="featureRoamDesc">
+          Every SSID ships with 802.11k/v/r fast transition and usteer band steering, thresholds pre-tuned. IoT stays on plain 2.4 GHz so older devices never meet 11r/k/v quirks.
+        </p>
+      </div>
+      <div class="md:col-span-6 mt-2 md:mt-0 min-w-0" aria-hidden="true">
+        <div class="lp-code">
+<span class="ln">WIFI_KVR=<span class="lp-accent">1</span>              <span class="lp-dim"># 802.11k/v/r + usteer</span></span>
+<span class="ln">DENSE_ENV=<span class="lp-accent">1</span>             <span class="lp-dim"># high-interference tuning</span></span>
+<span class="ln"><span class="lp-dim"># iot exempt: plain 2.4GHz, no 11r/k/v</span></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid gap-x-10 gap-y-4 md:grid-cols-12 py-10 border-t lp-hairline">
+      <div class="md:col-span-1 lp-accent text-xs font-semibold pt-1">03</div>
+      <div class="md:col-span-5">
+        <h2 class="font-semibold text-base mb-3 leading-snug" data-i18n="featureMeshTitle">Mesh backhaul, VLANs included</h2>
+        <p class="text-zinc-500 dark:text-zinc-400 text-xs leading-relaxed max-w-sm" data-i18n="featureMeshDesc">
+          802.11s mesh with SAE encryption and tuned peering, optional batman-adv on top. All VLANs are trunked over the mesh link, so guest stays guest on every node.
+        </p>
+      </div>
+      <div class="md:col-span-6 mt-2 md:mt-0 min-w-0" aria-hidden="true">
+        <div class="lp-code">
+<span class="ln">WIRELESS_MESH=<span class="lp-accent">1</span>         <span class="lp-dim"># 802.11s + sae backhaul</span></span>
+<span class="ln">BATMAN_ADV=<span class="lp-accent">1</span>            <span class="lp-dim"># optional, on top</span></span>
+<span class="ln"><span class="lp-dim"># vlans trunk over the mesh link</span></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid gap-x-10 gap-y-4 md:grid-cols-12 py-10 border-t lp-hairline">
+      <div class="md:col-span-1 lp-accent text-xs font-semibold pt-1">04</div>
+      <div class="md:col-span-5">
+        <h2 class="font-semibold text-base mb-3 leading-snug" data-i18n="featureVpnTitle">VPN built in — or one click to WARP</h2>
+        <p class="text-zinc-500 dark:text-zinc-400 text-xs leading-relaxed max-w-sm" data-i18n="featureVpnDesc">
           Route through your own WireGuard provider, or prefill a free Cloudflare WARP config in one click. It gets its own network and SSID automatically.
         </p>
       </div>
-
-      <div class="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-lg p-5 md:p-6">
-        <div class="flex items-center justify-center w-8 h-8 rounded-md bg-zinc-100 dark:bg-zinc-800 mb-4 flex-shrink-0">
-          <svg class="w-4 h-4 text-zinc-500 dark:text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <circle cx="12" cy="12" r="10"/>
-            <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
-          </svg>
+      <div class="md:col-span-6 mt-2 md:mt-0 min-w-0" aria-hidden="true">
+        <div class="lp-code">
+<span class="ln">WG_ENABLE=<span class="lp-accent">1</span>             <span class="lp-dim"># own vlan + ssid + watchdog</span></span>
+<span class="ln">IOT_ROUTE_VIA_WG=<span class="lp-accent">1</span>      <span class="lp-dim"># iot egress via tunnel</span></span>
+<span class="ln">ALLOWED_IPS=<span class="lp-accent">""</span>           <span class="lp-dim"># 0.0.0.0/0 ::/0</span></span>
+<span class="ln"><span class="lp-dim"># or one-click Cloudflare WARP prefill</span></span>
         </div>
-        <h2 class="font-semibold text-sm mb-2 leading-snug" data-i18n="featurePrivacyTitle">Private and ad-free out of the box</h2>
-        <p class="text-zinc-500 dark:text-zinc-400 text-xs leading-relaxed" data-i18n="featurePrivacyDesc">
+      </div>
+    </div>
+
+    <div class="grid gap-x-10 gap-y-4 md:grid-cols-12 py-10 border-t lp-hairline">
+      <div class="md:col-span-1 lp-accent text-xs font-semibold pt-1">05</div>
+      <div class="md:col-span-5">
+        <h2 class="font-semibold text-base mb-3 leading-snug" data-i18n="featureMultiwanTitle">Failover that is already wired</h2>
+        <p class="text-zinc-500 dark:text-zinc-400 text-xs leading-relaxed max-w-sm" data-i18n="featureMultiwanDesc">
+          Second WAN, LTE modem, or a phone on USB. mwan3 arrives configured: health-tracked failover, load balancing, sticky HTTPS sessions.
+        </p>
+      </div>
+      <div class="md:col-span-6 mt-2 md:mt-0 min-w-0" aria-hidden="true">
+        <div class="lp-code">
+<span class="ln">WAN_B_ENABLE=<span class="lp-accent">1</span>          <span class="lp-dim"># second wan, vlan 21</span></span>
+<span class="ln">CELLULAR_MODEM=<span class="lp-accent">1</span>        <span class="lp-dim"># mbim modem failover</span></span>
+<span class="ln">USB_TETHERING=<span class="lp-accent">1</span>         <span class="lp-dim"># android / iphone</span></span>
+<span class="ln"><span class="lp-dim"># mwan3: balanced + IP-based PBR for WireGuard</span></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid gap-x-10 gap-y-4 md:grid-cols-12 py-10 border-t lp-hairline">
+      <div class="md:col-span-1 lp-accent text-xs font-semibold pt-1">06</div>
+      <div class="md:col-span-5">
+        <h2 class="font-semibold text-base mb-3 leading-snug" data-i18n="featurePrivacyTitle">Private and ad-free out of the box</h2>
+        <p class="text-zinc-500 dark:text-zinc-400 text-xs leading-relaxed max-w-sm" data-i18n="featurePrivacyDesc">
           Network-wide ad blocking and encrypted DNS. AdGuard Home on capable hardware, a lightweight fallback on smaller routers — chosen automatically.
         </p>
       </div>
-
-      <div class="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-lg p-5 md:p-6">
-        <div class="flex items-center justify-center w-8 h-8 rounded-md bg-zinc-100 dark:bg-zinc-800 mb-4 flex-shrink-0">
-          <svg class="w-4 h-4 text-zinc-500 dark:text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
-          </svg>
+      <div class="md:col-span-6 mt-2 md:mt-0 min-w-0" aria-hidden="true">
+        <div class="lp-code">
+<span class="ln">ADGUARD_MAIN_DNS=<span class="lp-accent">1</span>      <span class="lp-dim"># adguardhome on :53</span></span>
+<span class="ln">BLOCK_DOT_DOQ=<span class="lp-accent">1</span>         <span class="lp-dim"># reject DoT/DoQ on :853</span></span>
+<span class="ln">DENY_GUEST_NIGHT=<span class="lp-accent">1</span>      <span class="lp-dim"># guest off 21:00-07:00</span></span>
+<span class="ln"><span class="lp-dim"># client DNS hard-redirected to router</span></span>
         </div>
-        <h2 class="font-semibold text-sm mb-2 leading-snug" data-i18n="featureFlashTitle">Flash once, fully configured</h2>
-        <p class="text-zinc-500 dark:text-zinc-400 text-xs leading-relaxed" data-i18n="featureFlashDesc">
+      </div>
+    </div>
+
+    <div class="grid gap-x-10 gap-y-4 md:grid-cols-12 py-10 border-t lp-hairline">
+      <div class="md:col-span-1 lp-accent text-xs font-semibold pt-1">07</div>
+      <div class="md:col-span-5">
+        <h2 class="font-semibold text-base mb-3 leading-snug" data-i18n="featureForwardTitle">Port forwards as one-liners</h2>
+        <p class="text-zinc-500 dark:text-zinc-400 text-xs leading-relaxed max-w-sm" data-i18n="featureForwardDesc">
+          One line per host creates the static lease and its WAN port forwards together, named in the firewall. The reservation and the redirect can never drift apart.
+        </p>
+      </div>
+      <div class="md:col-span-6 mt-2 md:mt-0 min-w-0" aria-hidden="true">
+        <div class="lp-code">
+<span class="ln"><span class="lp-dim"># one line = static lease + wan forwards</span></span>
+<span class="ln">PORT_FORWARD_LIST=<span class="lp-accent">"</span></span>
+<span class="ln">  docker-host | 20 | 80 443</span>
+<span class="ln">  rdp-server  | 21 | 3389</span>
+<span class="ln"><span class="lp-accent">"</span></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid gap-x-10 gap-y-4 md:grid-cols-12 py-10 border-t lp-hairline">
+      <div class="md:col-span-1 lp-accent text-xs font-semibold pt-1">08</div>
+      <div class="md:col-span-5">
+        <h2 class="font-semibold text-base mb-3 leading-snug" data-i18n="featureIpv6Title">IPv6 servers, no NAT hacks</h2>
+        <p class="text-zinc-500 dark:text-zinc-400 text-xs leading-relaxed max-w-sm" data-i18n="featureIpv6Desc">
+          Each host gets a stable ::N address that survives prefix changes, its own Cloudflare DDNS subdomain, and a firewall accept scoped to exactly the ports you list.
+        </p>
+      </div>
+      <div class="md:col-span-6 mt-2 md:mt-0 min-w-0" aria-hidden="true">
+        <div class="lp-code">
+<span class="ln"><span class="lp-dim"># per-host AAAA ddns + scoped accept</span></span>
+<span class="ln">IPV6_SERVER_LIST=<span class="lp-accent">"</span></span>
+<span class="ln">  docker-host | 20 | 80 443</span>
+<span class="ln">  vps-host    | 23 |       <span class="lp-dim"># all ports</span></span>
+<span class="ln"><span class="lp-accent">"</span></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid gap-x-10 gap-y-4 md:grid-cols-12 py-10 border-t lp-hairline">
+      <div class="md:col-span-1 lp-accent text-xs font-semibold pt-1">09</div>
+      <div class="md:col-span-5">
+        <h2 class="font-semibold text-base mb-3 leading-snug" data-i18n="featureFleetTitle">One config, a whole fleet</h2>
+        <p class="text-zinc-500 dark:text-zinc-400 text-xs leading-relaxed max-w-sm" data-i18n="featureFleetDesc">
+          Flash the same image with AP_MODE=1 and it becomes an access point and managed switch: same SSIDs, same VLANs, clients roam between nodes. The fleet builder builds router and APs in one session.
+        </p>
+      </div>
+      <div class="md:col-span-6 mt-2 md:mt-0 min-w-0" aria-hidden="true">
+        <div class="lp-code">
+<span class="ln">AP_MODE=<span class="lp-accent">1</span>               <span class="lp-dim"># ap + managed switch</span></span>
+<span class="ln">AP_INDEX=<span class="lp-accent">3</span>              <span class="lp-dim"># mgmt ip 192.168.1.3</span></span>
+<span class="ln"><span class="lp-dim"># same ssids + 802.11r across nodes</span></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid gap-x-10 gap-y-4 md:grid-cols-12 py-10 border-t border-b lp-hairline">
+      <div class="md:col-span-1 lp-accent text-xs font-semibold pt-1">10</div>
+      <div class="md:col-span-5">
+        <h2 class="font-semibold text-base mb-3 leading-snug" data-i18n="featureFlashTitle">Flash once, fully configured</h2>
+        <p class="text-zinc-500 dark:text-zinc-400 text-xs leading-relaxed max-w-sm" data-i18n="featureFlashDesc">
           No LuCI menus, no SSH. WrtNova bakes your whole setup into a first-boot script. Flash the image and the router configures itself.
         </p>
       </div>
-
+      <div class="md:col-span-6 mt-2 md:mt-0 min-w-0" aria-hidden="true">
+        <div class="lp-code">
+<span class="ln"><span class="lp-dim"># ===================</span></span>
+<span class="ln"><span class="lp-dim"># End config section</span></span>
+<span class="ln"><span class="lp-dim"># ===================</span></span>
+<span class="ln">everything below runs itself<span class="lp-accent">.</span></span>
+        </div>
+      </div>
     </div>
 
-    <p class="text-center text-zinc-500 dark:text-zinc-400 text-xs mt-6 leading-relaxed" data-i18n="featureMoreText">
-      Plus mesh networking, multi-WAN failover, Cloudflare DDNS, IPv6, port forwarding, and more.
+    <p class="text-xs lp-dim leading-relaxed mt-8 md:pl-[calc(100%/12+2.5rem)]" data-i18n="featureMoreText">
+      Plus per-network DHCP instances, Cloudflare DDNS, PPPoE, wan-port bridging, NAT offloading, NTP, zram, and more.
     </p>
 
   </section>
 
-  <section class="border-t border-zinc-200 dark:border-zinc-800 py-14 md:py-20">
-    <div class="max-w-[68rem] mx-auto px-4 text-center">
-      <p class="text-zinc-500 dark:text-zinc-400 text-xs mb-6" data-i18n="ctaTagline">Your router, your config — baked in from the first boot.</p>
-      <div class="flex flex-col sm:flex-row gap-3 items-center justify-center">
-        <a href="/builder" class="btn btn-primary btn-lg" data-i18n="singleNodeBuilder">Single-node builder →</a>
-        <a href="/networks" class="btn btn-outline btn-lg" data-i18n="multiNodeFleetBuilder">Multi-node fleet builder →</a>
+  <!-- ===== CTA ===== -->
+  <section class="max-w-[72rem] mx-auto px-4 md:px-6 pb-16 md:pb-24">
+    <div class="lp-ticks border lp-hairline bg-white/60 dark:bg-zinc-900/40 px-6 py-12 md:py-16 text-center">
+      <p class="lp-label mb-8" data-i18n="ctaTagline">Your router, your config — baked in from the first boot.</p>
+      <div class="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-center">
+        <a href="/builder" class="lp-btn" data-i18n="singleNodeBuilder">Single-node builder →</a>
+        <a href="/networks" class="lp-btn-outline" data-i18n="multiNodeFleetBuilder">Multi-node fleet builder →</a>
       </div>
     </div>
   </section>
@@ -206,6 +336,6 @@
   </footer>
 
   <script defer src="/js/theme.js"></script>
-  <script type="module" src="/js/i18n.js"></script>
+  <script type="module" src="/js/i18n-landing.js"></script>
 </body>
 </html>
