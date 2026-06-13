@@ -3,27 +3,61 @@
 [![CI](https://github.com/LongQT-sea/wrtnova/actions/workflows/ci.yml/badge.svg)](https://github.com/LongQT-sea/wrtnova/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-Browser-based OpenWrt firmware builder: pick a device, fill in a config form,
-and get a ready-to-flash image with an opinionated first-boot provisioning
-script (`wrtnova.sh`) baked in. VLANs, guest/IoT isolation, WireGuard client,
-multi-WAN failover, DDNS, AdGuard Home, port forwarding, IPv6 exposure, and
-more - configured from one flash.
+**Flash your router once, and it is already set up.**
+
+Pick your device, fill in one form, and download a ready-to-flash OpenWrt image
+with ad-blocking, a private WireGuard tunnel, guest and IoT isolation, multi-WAN
+failover, dynamic DNS, and port forwarding already baked in. No SSH. No command
+line. No second device or build server. The router boots configured the way you
+want it the first time it powers on.
+
+![The WrtNova builder: type to find your exact device, then configure everything from one form](docs/img/builder.png)
+
+> ### WrtNova backend never sees your secrets
+> Root password, Wi-Fi passphrase, WireGuard keys, API tokens: the entire image is assembled in your browser and sent straight to the OpenWrt build server you choose. They never pass through WrtNova's own backend.
+
+## Why WrtNova
+
+- **One form, a whole router.** Everything OpenWrt usually makes you learn LuCI,
+  UCI, and the shell for is here as plain toggles and fields: VLANs, guest/IoT
+  isolation, a WireGuard client, multi-WAN failover, DDNS, AdGuard Home, port
+  forwarding, IPv6 exposure, and more.
+- **It knows real hardware.** Type "Archer C7" and it resolves the exact OpenWrt
+  target, profile, and package set for that board, straight from
+  `downloads.openwrt.org`.
+- **Opinionated and safe by default.** Sensible choices baked in for people who
+  just want a router that works, with every one of them adjustable.
+- **Build a fleet, not just a box.** Configure a router plus its access points
+  once and build firmware for the whole network in one pass.
+- **Nothing to install, nothing to trust.** It is a static web app. The build
+  runs in your browser; your credentials never touch a backend.
+
+## See it
+
+**Every feature is a toggle, with the tradeoffs spelled out** (and a live config
+preview before you build):
+
+![Encrypted DNS and ad-blocking options with flash/RAM tradeoffs, plus the live config preview and build button](docs/img/features.png)
+
+**Configure a whole network once and build every node together** - one shared
+config, a device and role per node, and a single "Build all nodes" pass for the
+router and every access point:
+
+![The fleet builder showing a home network: a GL-MT6000 main router plus three Linksys MX4200 access points, each with its device, role, and LAN IP, above a Build all nodes button](docs/img/networks.png)
 
 ## What it does
 
 WrtNova is a static web app (plus three thin Cloudflare Pages Functions) that
 turns the OpenWrt firmware selector into a guided experience. Three pages:
 
-- **`/builder`** - single-node guided builder: full config form, live config
-  preview, WARP prefill, build history.
-- **`/builder/advanced`** - a Monaco editor over the raw `wrtnova.sh` plus a
-  free-form package list, for people who want to own the script text.
-- **`/networks`** - fleet builder: one shared config, per-node device and
-  overrides, build-all orchestration for a router + access points.
+- **[/builder](https://wrtnova.com/builder/)** - single-node guided builder: full config form, live *Config preview*, WARP prefill, build history.
+- **[/builder/advanced](https://wrtnova.com/builder/advanced)** - a Monaco editor over the raw wrtnova.sh plus a free-form package list, for people who want to own every line of the generated script.
+- **[/networks](https://wrtnova.com/networks/)** - fleet builder: one shared config (the same fields as /builder), per-node device and overrides, and build-all orchestration for a router + access points.
 
 ## How it works
 
-The build path runs **entirely in the browser** - there is no build server.
+The build path runs **entirely in your browser** - WrtNova runs no build server
+of its own.
 
 1. The browser fetches the OpenWrt version list and per-device profile data
    directly from `downloads.openwrt.org`.
@@ -36,21 +70,6 @@ The build path runs **entirely in the browser** - there is no build server.
 Because everything is assembled client-side, **your secrets (root password,
 WiFi passphrases, WireGuard keys, API tokens) never touch WrtNova's own
 backend.** They go straight from your browser to the ASU server you select.
-
-The backend exists only for the few things the browser cannot do itself: issue
-a session cookie (`/api/session`), expose the configured ASU endpoint list
-(`/api/asu-servers`), and register a Cloudflare WARP device
-(`/api/warp/register`).
-
-For the full architecture, see [SPEC.md](docs/SPEC.md).
-
-## Relationship to `wrtnova.sh`
-
-`wrtnova.sh` is the source of truth for what the firmware actually does. It lives
-at the repo root as a tracked, MIT-licensed file. The build step
-(`scripts/embed-wrtnova.mjs`) copies it verbatim into `public/wrtnova.sh` (which
-is git-ignored) so the browser can fetch it. The whole project is MIT-licensed,
-so it is permissively licensed end to end.
 
 ## Quick start (local dev)
 
@@ -84,8 +103,7 @@ Environment variables (Pages dashboard -> Settings -> Variables):
 
 WARP prefill (`/api/warp/register`) is optional and requires a self-hosted
 proxy backend that you provide; without it the feature is simply unused and the
-rest of the app works normally. Its configuration is intentionally not
-documented here.
+rest of the app works normally.
 
 ## Project layout
 
