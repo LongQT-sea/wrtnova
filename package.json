@@ -2,6 +2,20 @@
   "name": "wrtnova",
   "version": "0.1.0",
   "private": true,
+  "description": "Browser-based OpenWrt firmware builder that bakes in the wrtnova.sh first-boot provisioning script.",
+  "license": "MIT",
+  "author": "LongQT-sea",
+  "homepage": "https://github.com/LongQT-sea/wrtnova#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LongQT-sea/wrtnova.git"
+  },
+  "bugs": {
+    "url": "https://github.com/LongQT-sea/wrtnova/issues"
+  },
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "build:css": "tailwindcss -i src/style.css -o public/style.css --minify",
     "watch:css": "tailwindcss -i src/style.css -o public/style.css --watch",
