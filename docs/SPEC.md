@@ -167,7 +167,7 @@ functions/api/                 Cloudflare Pages Functions
   asu-servers.js               GET /api/asu-servers -> configured ASU endpoints
   warp/register.js             POST /api/warp/register -> WARP device -> WG fields
   _guard.js                    shared origin + session guards
-  _wireguard.js                vendored pure-JS curve25519 keygen (for WARP)
+  _wireguard.js                X25519 keygen via Web Crypto Secure Curves (for WARP)
 scripts/
   embed-wrtnova.mjs            copy wrtnova.sh -> public/wrtnova.sh
   ci/check-no-zero.mjs         gate: no '0' checkbox off-state emitted
@@ -562,11 +562,15 @@ slash would 301-redirect `/reg` POSTs into a GET and break registration.
 
 ## `_wireguard.js`
 
-Vendored pure-JS curve25519 keygen (Jason A. Donenfeld's keygen-html), wrapped as
-an ES module. Runs in the Workers runtime using only `crypto.getRandomValues`.
-Exports `generateKeypair()` and `publicKeyFromPrivateB64()`. The same byte-for-
-byte implementation could run in the browser if keygen is moved client-side
-later, leaving the private key off the server entirely.
+WireGuard (curve25519/X25519) keygen via the runtime's Web Crypto Secure Curves
+API: `crypto.subtle.generateKey({ name: 'X25519' }, ...)`. The runtime generates
+and clamps the scalar; the module only reformats the bytes to the standard base64
+WireGuard key format (the public key is exported `raw`; the 32-byte private
+scalar is read from the JWK `d` field, since raw export of the X25519 private key
+is disallowed). Verified in workerd to be byte-compatible with `wg`. Exports
+`generateKeypair()`. Because it relies on the runtime crypto rather than a
+vendored implementation, the same call could run in the browser if keygen is
+moved client-side later, leaving the private key off the server entirely.
 
 <a id="s9"></a>
 
