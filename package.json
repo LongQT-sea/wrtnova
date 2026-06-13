@@ -26,7 +26,8 @@
     "check:marker": "node scripts/ci/check-marker.mjs",
     "check:no-dupes": "node scripts/ci/check-no-dupes.mjs",
     "check:budget": "node scripts/ci/check-budget.mjs",
-    "ci": "npm run typecheck && npm test && npm run check:no-zero && npm run check:marker && npm run check:no-dupes && npm run check:budget"
+    "check:i18n": "node scripts/ci/check-i18n-html.mjs",
+    "ci": "npm run typecheck && npm test && npm run check:no-zero && npm run check:marker && npm run check:no-dupes && npm run check:budget && npm run check:i18n"
   },
   "devDependencies": {
     "playwright": "^1.60.0",
