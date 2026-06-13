@@ -248,10 +248,19 @@ import { collapsePackages } from './packages.mjs';
     ul.className = 'result-images';
     images.slice().sort(function (a, b) { return (b.type === 'sysupgrade') - (a.type === 'sysupgrade'); }).forEach(function (im) {
       const url = bin_dir ? asu + '/store/' + bin_dir + '/' + im.name : (im === sys ? data.firmware_url : null);
-      const li = document.createElement('li');
+      // Only render an http(s) link: the URL is derived from the ASU response,
+      // so reject any other scheme (e.g. javascript:) before it reaches href.
+      let safeUrl = null;
       if (url) {
+        try {
+          const u = new URL(url, location.origin);
+          if (u.protocol === 'https:' || u.protocol === 'http:') safeUrl = u.href;
+        } catch (_) { /* malformed URL -> render as plain text */ }
+      }
+      const li = document.createElement('li');
+      if (safeUrl) {
         const a = document.createElement('a');
-        a.href = url;
+        a.href = safeUrl;
         a.textContent = im.name;
         li.appendChild(a);
       } else {
