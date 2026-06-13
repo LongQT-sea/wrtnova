@@ -39,9 +39,8 @@ Two artifacts make up the product:
    single source of truth for what the firmware does: VLANs, WiFi, guest/IoT
    isolation, WireGuard client, multi-WAN failover, DDNS, AdGuard Home, port
    forwarding, IPv6 exposure, offloading, and more. It is MIT-licensed and the
-   only file in the tree carrying an SPDX header. The canonical copy always lives
-   in its own repository at https://github.com/LongQT-sea/wrtnova.sh, raw at
-   https://raw.githubusercontent.com/LongQT-sea/wrtnova.sh/main/wrtnova.sh.
+   only file in the tree carrying an SPDX header. The canonical copy is the
+   tracked `wrtnova.sh` at the repo root.
 
 2. **The web builder** - static HTML/CSS/JS served from Cloudflare Pages, plus a
    thin set of Pages Functions. The browser collects config into a typed store,
@@ -413,12 +412,10 @@ npm run watch:css   ->  same, --watch
 npm run embed       ->  node scripts/embed-wrtnova.mjs
 ```
 
-`embed-wrtnova.mjs` resolves the repo root, looks for a local `wrtnova.sh` at the
-root, and copies it verbatim to `public/wrtnova.sh`. If no local file exists it
-fetches the canonical copy from
-`https://raw.githubusercontent.com/LongQT-sea/wrtnova.sh/main/wrtnova.sh`
-(aborting on non-OK status). It writes exactly one file and does not slice on the
-marker - the browser does that itself.
+`embed-wrtnova.mjs` resolves the repo root and copies the tracked `wrtnova.sh` at
+the root verbatim to `public/wrtnova.sh` (aborting if the root file is missing).
+It writes exactly one file and does not slice on the marker - the browser does
+that itself.
 
 Run `npm run embed` after every `wrtnova.sh` edit. `public/wrtnova.sh` is
 git-ignored; CI regenerates it before running the gates.

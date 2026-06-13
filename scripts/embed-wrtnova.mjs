@@ -1,6 +1,11 @@
 #!/usr/bin/env node
 // Regenerate build artifacts from wrtnova.sh:
-//   public/wrtnova.sh  — full script served to the browser
+//   public/wrtnova.sh  -- full script served to the browser
+//
+// wrtnova.sh is the canonical, tracked source at the repo root (CLAUDE.md
+// invariant). This step copies it verbatim into public/ (git-ignored) so the
+// browser can fetch it. It writes exactly one file and does not slice on the
+// marker - the browser does that itself.
 
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
@@ -9,19 +14,11 @@ import { dirname, resolve } from 'node:path';
 const here = dirname(fileURLToPath(import.meta.url));
 const root = resolve(here, '..');
 
-const REMOTE_URL = 'https://raw.githubusercontent.com/LongQT-sea/wrtnova.sh/main/wrtnova.sh';
-const localPath  = resolve(root, 'wrtnova.sh');
-
-let sh;
-if (existsSync(localPath)) {
-  sh = readFileSync(localPath, 'utf8');
-  console.log('Using local wrtnova.sh');
-} else {
-  console.log('Fetching wrtnova.sh from ' + REMOTE_URL + ' ...');
-  const res = await fetch(REMOTE_URL);
-  if (!res.ok) { console.error('Fetch failed: ' + res.status); process.exit(1); }
-  sh = await res.text();
-  console.log('Fetched ' + sh.length + ' bytes');
+const localPath = resolve(root, 'wrtnova.sh');
+if (!existsSync(localPath)) {
+  console.error('Missing canonical wrtnova.sh at repo root: ' + localPath);
+  process.exit(1);
 }
+const sh = readFileSync(localPath, 'utf8');
 writeFileSync(resolve(root, 'public/wrtnova.sh'), sh);
 console.log('Wrote public/wrtnova.sh  (' + sh.length + ' bytes)');

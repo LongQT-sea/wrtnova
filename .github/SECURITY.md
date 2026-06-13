@@ -38,7 +38,7 @@ boundary helps when assessing a report.
 
 In scope: the builder web app and the Pages Functions in this repository.
 
-Out of scope: the OpenWrt ASU build servers (report to OpenWrt), the
-`wrtnova.sh` provisioning script (separate repo:
-https://github.com/LongQT-sea/wrtnova.sh), and any self-hosted WARP proxy
-backend operated by a deployer.
+Out of scope: the OpenWrt ASU build servers (report to OpenWrt), the behavior of
+the `wrtnova.sh` provisioning script itself (as opposed to how the builder
+assembles or serves it), and any self-hosted WARP proxy backend operated by a
+deployer.

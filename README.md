@@ -46,14 +46,11 @@ For the full architecture, see [SPEC.md](docs/SPEC.md).
 
 ## Relationship to `wrtnova.sh`
 
-`wrtnova.sh` is the source of truth for what the firmware actually does. It is a
-separate, MIT-licensed project that lives in its own repository:
-https://github.com/LongQT-sea/wrtnova.sh
-
-This repo (the builder) fetches/embeds that script at build time via
-`scripts/embed-wrtnova.mjs`; the generated `public/wrtnova.sh` is git-ignored.
-The builder repo is MIT-licensed too, so the whole project is permissively
-licensed end to end.
+`wrtnova.sh` is the source of truth for what the firmware actually does. It lives
+at the repo root as a tracked, MIT-licensed file. The build step
+(`scripts/embed-wrtnova.mjs`) copies it verbatim into `public/wrtnova.sh` (which
+is git-ignored) so the browser can fetch it. The whole project is MIT-licensed,
+so it is permissively licensed end to end.
 
 ## Quick start (local dev)
 
@@ -62,7 +59,7 @@ Requires Node 22+.
 ```sh
 npm install
 npm run build:css     # Tailwind -> public/style.css
-npm run embed         # fetch/copy wrtnova.sh -> public/wrtnova.sh
+npm run embed         # copy wrtnova.sh -> public/wrtnova.sh
 npx wrangler pages dev public
 ```
 
