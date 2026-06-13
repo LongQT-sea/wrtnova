@@ -9,6 +9,10 @@ on:
     branches: [main]
   pull_request:
 
+# Least privilege: the gates only read the repo, build, and run tests.
+permissions:
+  contents: read
+
 jobs:
   ci:
     runs-on: ubuntu-latest

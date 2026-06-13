@@ -239,16 +239,35 @@ import { collapsePackages } from './packages.mjs';
 
     const wrap = document.getElementById('result');
     wrap.classList.remove('hidden');
-    let html = '<div class="result-wrap"><ul class="result-images">';
+    // Build the DOM with textContent/element nodes rather than innerHTML: the
+    // image names, hashes, and URLs come from the ASU server response.
+    wrap.textContent = '';
+    const outer = document.createElement('div');
+    outer.className = 'result-wrap';
+    const ul = document.createElement('ul');
+    ul.className = 'result-images';
     images.slice().sort(function (a, b) { return (b.type === 'sysupgrade') - (a.type === 'sysupgrade'); }).forEach(function (im) {
       const url = bin_dir ? asu + '/store/' + bin_dir + '/' + im.name : (im === sys ? data.firmware_url : null);
-      html += '<li>'
-            + (url ? '<a href="' + url + '">' + im.name + '</a>' : im.name)
-            + (im.sha256 ? '<br><span class="result-hash">sha256: ' + im.sha256 + '</span>' : '')
-            + '</li>';
+      const li = document.createElement('li');
+      if (url) {
+        const a = document.createElement('a');
+        a.href = url;
+        a.textContent = im.name;
+        li.appendChild(a);
+      } else {
+        li.textContent = im.name;
+      }
+      if (im.sha256) {
+        li.appendChild(document.createElement('br'));
+        const span = document.createElement('span');
+        span.className = 'result-hash';
+        span.textContent = 'sha256: ' + im.sha256;
+        li.appendChild(span);
+      }
+      ul.appendChild(li);
     });
-    html += '</ul></div>';
-    wrap.innerHTML = html;
+    outer.appendChild(ul);
+    wrap.appendChild(outer);
   }
 
   const PRESETS = [

@@ -62,7 +62,13 @@ function decodeEntities(s) {
     .replace(/&lt;/g, '<').replace(/&gt;/g, '>')
     .replace(/&amp;/g, '&');
 }
-const stripTags = (s) => s.replace(/<[^>]*>/g, '');
+// Strip tags repeatedly until stable: a single pass can leave a tag behind
+// when removal of one re-forms another (e.g. "<<a>script>" -> "<script>").
+const stripTags = (s) => {
+  let prev;
+  do { prev = s; s = s.replace(/<[^>]*>/g, ''); } while (s !== prev);
+  return s;
+};
 const norm = (s) => decodeEntities(s).replace(/\s+/g, ' ').trim();
 
 // index of the '>' that closes the opening tag starting at `from` (quote-aware)
