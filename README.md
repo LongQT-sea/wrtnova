@@ -67,10 +67,6 @@ of its own.
    the assembled script as the `defaults` field to the OpenWrt ASU build
    server, then polls ASU for the image link.
 
-Because everything is assembled client-side, **your secrets (root password,
-WiFi passphrases, WireGuard keys, API tokens) never touch WrtNova's own
-backend.** They go straight from your browser to the ASU server you select.
-
 ## Quick start (local dev)
 
 Requires Node 22+.
