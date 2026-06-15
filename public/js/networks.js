@@ -11,6 +11,7 @@ import './i18n.js';
 import './tzdata.js';
 import { BASE_SCHEMA, readForm, writeForm } from './config-form.mjs';
 import { mergeNodeConfig } from './config-merge.mjs';
+import { detectVlanConflict } from './visibility.mjs';
 import { renderConfigBlock } from './render-config.mjs';
 import { parseList } from './list-grammar.mjs';
 import { createStore } from './store.mjs';
@@ -1047,6 +1048,15 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'], ...BASE_SCHE
 
     const actEl = panel.querySelector('.node-actions');
     if (!actEl) return;
+
+    // Block on a genuine VLAN conflict in the shared config (anchor clash or trunk
+    // overlap). Computed fresh here - ui.hasVlanConflict is only refreshed while the
+    // config form is open and is stale in this node-list view.
+    if (detectVlanConflict(net.shared_config)) {
+      showPanelError(actEl, S.fixVlanConflict, () => buildNode(net, node));
+      return;
+    }
+
     showPanelProgress(actEl, 2, S.preparing);
 
     const tgt = node.device_target;
@@ -1220,6 +1230,21 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'], ...BASE_SCHE
   }
 
   function buildAll(net) {
+    // Block the whole fleet build on a genuine VLAN conflict in the shared config.
+    if (detectVlanConflict(net.shared_config)) {
+      const progressEl = document.getElementById('build-all-progress');
+      if (progressEl) {
+        progressEl.classList.remove('hidden');
+        progressEl.innerHTML =
+          '<div class="card p-3 mt-4 flex items-center gap-2 text-sm text-amber-600 dark:text-amber-400 border-amber-300/40 dark:border-amber-700/40">' +
+          '<svg class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>' +
+          '<span>' + S.fixVlanConflict + '</span>' +
+          '</div>';
+        setTimeout(() => { progressEl.classList.add('hidden'); progressEl.innerHTML = ''; }, 3000);
+      }
+      return;
+    }
+
     const ready = net.nodes.filter(n => n.device_target.profile);
     if (!ready.length) {
       const progressEl = document.getElementById('build-all-progress');

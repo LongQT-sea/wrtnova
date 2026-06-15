@@ -22,6 +22,25 @@ const NETS = [
 
 const on = (cfg, k) => cfg[k] === '1';
 
+// Full VLAN table in resolve priority order, mirroring wrtnova.sh resolve_vlans
+// (lan, guest, iot, wg, wan, wanb) with each field's natural default and max.
+// The four LAN-side rows overlap NETS above; wan/wanb live in the advanced WAN
+// section. `flag` = the enable key (absent => always on, except wan which is
+// router-only). This is the single source of truth for VLAN assignment - the
+// frontend owns it so the backend resolve_vlans is a no-op on our output.
+//
+// NOTE: targets DSA / bridge-vlan and swconfig-with-vid hardware. The
+// swconfig-without-vid path (wrtnova.sh: lan=1,guest=2,...) force-renumbers VLANs
+// on-device and cannot be predicted at config time - best-effort only there.
+const VLAN_TABLE = [
+  { key: 'lan',   field: 'LAN_VLAN_ID',    def: 1,  max: 255  },
+  { key: 'guest', field: 'GUEST_VLAN_ID',  def: 5,  max: 255,  flag: 'GUEST_ENABLE' },
+  { key: 'iot',   field: 'IOT_VLAN_ID',    def: 10, max: 255,  flag: 'IOT_ENABLE'   },
+  { key: 'wg',    field: 'LAN_WG_VLAN_ID', def: 15, max: 255,  flag: 'WG_ENABLE'    },
+  { key: 'wan',   field: 'WAN_VLAN_ID',    def: 20, max: 4094, wan: true },
+  { key: 'wanb',  field: 'WAN_B_VLAN_ID',  def: 21, max: 4094, wan: true, flag: 'WAN_B_ENABLE' },
+];
+
 /**
  * Map of CSS class -> whether elements with that class should be hidden.
  * The view toggles `.hidden` on `.<class>` elements accordingly.
@@ -65,11 +84,17 @@ export function deriveNetRows(cfg) {
   const ap = on(cfg, 'AP_MODE');
   const basePfx = String(cfg.BASE_NET_PREFIX || '') || '192.168';
   const defSub = String(cfg.DEFAULT_SUBNET || '') || '/24';
+  const byKey = resolveVlanAssignment(cfg).byKey;
   return NETS.map((n) => {
     const isLan = n.key === 'lan';
     const rowOn = isLan || on(cfg, n.on);
     const effPfx = String(cfg[n.pfx] || '').trim() || basePfx;
-    const effVid = String(cfg[n.vid] || '').trim() || n.defVid;
+    // Resolved vid for enabled rows; disabled (greyed) rows show their
+    // typed-or-default vid cosmetically (they participate in nothing, emit '').
+    const a = byKey[n.key];
+    const effVid = a.participates && a.vid != null
+      ? String(a.vid)
+      : (String(cfg[n.vid] || '').trim() || n.defVid);
     const effSub = String(cfg[n.sub] || '') || defSub;
     const hasIp = !!(rowOn && effVid && (!ap || isLan));
     const lastOct = (ap && isLan) ? (String(cfg.AP_INDEX || '') || '2') : '1';
@@ -93,30 +118,107 @@ function trunkVids(list) {
 }
 
 /**
- * True when two enabled networks (or trunk/WAN VLANs) collide on a VLAN id.
- * Mirrors the order the view counted them: WAN/WAN_B (router only) first, then
- * lan/guest/iot/wg.
+ * Whether a VLAN-table row participates in (contributes a VLAN to) this config:
+ * lan always; guest/iot/wg on their enable flag; wan router-only; wanb router +
+ * WAN_B_ENABLE. Non-participating rows reserve nothing and emit ''.
+ * @param {Config} cfg
+ * @param {(typeof VLAN_TABLE)[number]} row
+ * @returns {boolean}
+ */
+function vlanParticipates(cfg, row) {
+  if (row.key === 'lan') return true;
+  if (row.wan && on(cfg, 'AP_MODE')) return false;   // WAN/WAN-B excluded in AP mode
+  if (row.flag) return on(cfg, row.flag);
+  return true;                                        // wan in router mode
+}
+
+/**
+ * Frontend-owned VLAN allocator. Typed values are fixed anchors; every untouched
+ * (default) field is auto-assigned to the lowest free id at/above its natural
+ * default, skipping anchors, already-assigned ids, and trunk VLANs. This mirrors
+ * the INTENT of wrtnova.sh resolve_vlans but does it up front so the emitted
+ * config is already conflict-free (the backend function becomes a no-op).
+ *
+ * conflict flags are the ONLY cases that block a build:
+ *  - anchorCollision: two participating user-typed ids are equal (ambiguous)
+ *  - trunkCollision:  a participating anchor lands on a trunk VLAN (autos bump
+ *                     away, so only an explicit anchor can collide with trunk)
+ *  - exhausted:       an auto field found no free id in 1..max
+ *
+ * @param {Config} cfg
+ * @returns {{ byKey: Record<string, { vid: number|null, userSet: boolean,
+ *   participates: boolean, def: number, exhausted: boolean }>,
+ *   conflict: { anchorCollision: boolean, trunkCollision: boolean, exhausted: boolean } }}
+ */
+export function resolveVlanAssignment(cfg) {
+  const trunk = trunkVids(cfg.ADDITIONAL_VLAN_LIST || '');
+  const conflict = { anchorCollision: false, trunkCollision: false, exhausted: false };
+
+  // Pass 1: classify each field as anchor (valid typed value) or auto.
+  const entries = VLAN_TABLE.map((row) => {
+    const raw = String(cfg[row.field] || '').trim();
+    const num = /^\d+$/.test(raw) ? +raw : NaN;
+    const valid = Number.isFinite(num) && num >= 1 && num <= row.max;
+    return { row, part: vlanParticipates(cfg, row), userSet: valid, anchor: valid ? num : null };
+  });
+
+  // Reserve participating anchors + trunk; flag anchor/trunk collisions.
+  const reserved = new Set(trunk);
+  const anchorSeen = new Set();
+  for (const e of entries) {
+    if (!e.part || !e.userSet) continue;
+    if (anchorSeen.has(e.anchor)) conflict.anchorCollision = true;
+    anchorSeen.add(e.anchor);
+    if (trunk.has(e.anchor)) conflict.trunkCollision = true;
+    reserved.add(e.anchor);
+  }
+
+  // Pass 2: allocate the auto (untouched) fields around the reserved set.
+  /** @type {Record<string, { vid: number|null, userSet: boolean, participates: boolean, def: number, exhausted: boolean }>} */
+  const byKey = {};
+  for (const e of entries) {
+    const { key, def, max } = e.row;
+    if (!e.part) { byKey[key] = { vid: null, userSet: e.userSet, participates: false, def, exhausted: false }; continue; }
+    if (e.userSet) { byKey[key] = { vid: e.anchor, userSet: true, participates: true, def, exhausted: false }; continue; }
+    let pick = null;
+    for (let v = def; v <= max && pick === null; v++) if (!reserved.has(v)) pick = v;
+    for (let v = 1; v < def && pick === null; v++) if (!reserved.has(v)) pick = v;
+    const exhausted = pick === null;
+    if (exhausted) { conflict.exhausted = true; pick = def; }
+    else reserved.add(pick);
+    byKey[key] = { vid: pick, userSet: false, participates: true, def, exhausted };
+  }
+
+  return { byKey, conflict };
+}
+
+/**
+ * The VLAN id strings to emit for each of the six fields: the resolved value when
+ * it participates and differs from the field's natural default, else '' (so we
+ * never write a redundant default - Section 1 invariant). Consumed by the two
+ * emit paths (builder-config.mjs deriveConfig, config-merge.mjs mergeNodeConfig).
+ * @param {Config} cfg
+ * @returns {Record<string, string>}
+ */
+export function resolveVlanEmit(cfg) {
+  const { byKey } = resolveVlanAssignment(cfg);
+  /** @type {Record<string, string>} */
+  const out = {};
+  for (const row of VLAN_TABLE) {
+    const a = byKey[row.key];
+    out[row.field] = (a.participates && a.vid != null && a.vid !== a.def) ? String(a.vid) : '';
+  }
+  return out;
+}
+
+/**
+ * True only for genuine, unresolvable VLAN conflicts (anchor-vs-anchor,
+ * anchor-vs-trunk, or allocation exhaustion). A default field colliding with an
+ * anchor/trunk is auto-allocated, not a conflict.
  * @param {Config} cfg
  * @returns {boolean}
  */
 export function detectVlanConflict(cfg) {
-  const ap = on(cfg, 'AP_MODE');
-  const trunk = trunkVids(cfg.ADDITIONAL_VLAN_LIST || '');
-  const seen = new Set();
-  let dup = false;
-  const count = (vid) => {
-    if (seen.has(vid) || trunk.has(vid)) dup = true;
-    seen.add(vid);
-  };
-
-  if (!ap) {
-    count(+(cfg.WAN_VLAN_ID || '') || 20);
-    if (on(cfg, 'WAN_B_ENABLE')) count(+(cfg.WAN_B_VLAN_ID || '') || 21);
-  }
-  for (const n of NETS) {
-    const rowOn = n.key === 'lan' || on(cfg, n.on);
-    const effVid = String(cfg[n.vid] || '').trim() || n.defVid;
-    if (rowOn && effVid) count(+effVid);
-  }
-  return dup;
+  const { conflict } = resolveVlanAssignment(cfg);
+  return conflict.anchorCollision || conflict.trunkCollision || conflict.exhausted;
 }

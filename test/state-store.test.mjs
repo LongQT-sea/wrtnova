@@ -68,7 +68,7 @@ function rawAllOn() {
     AP_INDEX: '5',
     HOST_NAME: 'r1', ROOT_PASSWD: 'pw', SSH_PUBLIC_KEY: 'ssh-rsa k',
     PPPOE_USERNAME: 'u', PPPOE_PASSWD: 'p',
-    WAN_MAC_ADDR: '00:11:22:33:44:55', WAN_VLAN_ID: '20', WAN_B_VLAN_ID: '21',
+    WAN_MAC_ADDR: '00:11:22:33:44:55', WAN_VLAN_ID: '20', WAN_B_VLAN_ID: '25',
     WAN_IS_TAGGED: '1', WAN_B_ENABLE: '1', BRIDGE_WAN_PORT: '1',
     BASE_NET_PREFIX: '10.0', DEFAULT_SUBNET: '/24',
     GUEST_ENABLE: '1', IOT_ENABLE: '1', IOT_INTERNET: '1', IOT_ROUTE_VIA_WG: '1', WG_ENABLE: '1',
@@ -100,7 +100,7 @@ test('deriveConfig: router mode passes through, gates by parent flags', () => {
   assert.equal(out.AP_MODE, '');
   assert.equal(out.AP_INDEX, '');           // blanked in router mode
   assert.equal(out.PPPOE_USERNAME, 'u');    // wan_type pppoe
-  assert.equal(out.WAN_B_VLAN_ID, '21');    // WAN_B_ENABLE on
+  assert.equal(out.WAN_B_VLAN_ID, '25');    // WAN_B on, non-default id flows through the allocator
   assert.equal(out.GUEST_ISOLATE, '1');     // guest on
   assert.equal(out.IOT_ROUTE_VIA_WG, '1');  // iot + wg on
   assert.equal(out.MESH_ID, 'm');           // mesh on
@@ -123,12 +123,13 @@ test('deriveConfig: AP mode blanks WAN-B/forward/DDNS/failover, keeps AP_INDEX',
   }
 });
 
-test('deriveConfig: AP-leak preserved (WAN_MAC/IS_TAGGED/VLAN still emitted in AP mode)', () => {
-  // Locks the current (gap #4) behavior so this refactor does not change it.
+test('deriveConfig: WAN_MAC/IS_TAGGED still leak in AP mode, but WAN_VLAN_ID is cleared', () => {
+  // WAN_MAC_ADDR / WAN_IS_TAGGED remain the documented gap #4 leak; the VLAN
+  // allocator now owns WAN_VLAN_ID and excludes WAN in AP mode, so it no longer leaks.
   const out = deriveConfig(Object.assign(rawAllOn(), { AP_MODE: '1' }));
   assert.equal(out.WAN_MAC_ADDR, '00:11:22:33:44:55');
   assert.equal(out.WAN_IS_TAGGED, '1');
-  assert.equal(out.WAN_VLAN_ID, '20');
+  assert.equal(out.WAN_VLAN_ID, '');
 });
 
 test('deriveConfig: parent-off blanks all children', () => {

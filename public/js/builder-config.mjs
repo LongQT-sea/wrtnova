@@ -9,11 +9,14 @@
 // the store, the build payload, the preview and the package chips all consume.
 //
 // Behavior is a verbatim port of the previous collectConfig() gating; the known
-// AP-leak (WAN_MAC_ADDR/WAN_IS_TAGGED/WAN_VLAN_ID emitted in AP mode) and the
-// vestigial WWAN_ENABLE are preserved here, not changed.
+// AP-leak (WAN_MAC_ADDR/WAN_IS_TAGGED emitted in AP mode) and the vestigial
+// WWAN_ENABLE are preserved here. WAN_VLAN_ID is now owned by the VLAN allocator
+// (resolveVlanEmit), which excludes WAN in AP mode, so it no longer leaks there.
 //
 // raw carries a few gating-only helpers (wan_type) that are NOT emitted, exactly
 // as the old collectConfig output omitted them.
+
+import { resolveVlanEmit } from './visibility.mjs';
 
 /**
  * @param {import('./types.mjs').Config} raw
@@ -22,6 +25,9 @@
 export function deriveConfig(raw) {
   const r = raw || {};
   const v = k => r[k] || '';                 // textVal semantics: '' default, '0' kept
+  // Frontend-owned VLAN ids: resolved value when it differs from the field's
+  // natural default, else '' (participation/AP gating handled by the allocator).
+  const vlan = resolveVlanEmit(r);
 
   const apMode   = v('AP_MODE');             // '1' (AP) or ''
   const wanType  = v('wan_type') || 'dhcp';
@@ -46,9 +52,9 @@ export function deriveConfig(raw) {
     PPPOE_PASSWD:   wanType === 'pppoe' ? v('PPPOE_PASSWD')   : '',
     WAN_MAC_ADDR:   v('WAN_MAC_ADDR'),
     WAN_IS_TAGGED:  v('WAN_IS_TAGGED'),
-    WAN_VLAN_ID:    v('WAN_VLAN_ID'),
+    WAN_VLAN_ID:    vlan.WAN_VLAN_ID,
     WAN_B_ENABLE:   isRouter ? v('WAN_B_ENABLE') : '',
-    WAN_B_VLAN_ID:  (isRouter && r.WAN_B_ENABLE === '1') ? v('WAN_B_VLAN_ID') : '',
+    WAN_B_VLAN_ID:  vlan.WAN_B_VLAN_ID,
     BRIDGE_WAN_PORT: isRouter ? v('BRIDGE_WAN_PORT') : '',
 
     BASE_NET_PREFIX: v('BASE_NET_PREFIX'),
@@ -60,16 +66,16 @@ export function deriveConfig(raw) {
     WG_ENABLE:       wgOn ? '1' : '',
 
     LAN_BASE_PREFIX:    v('LAN_BASE_PREFIX'),
-    LAN_VLAN_ID:        v('LAN_VLAN_ID'),
+    LAN_VLAN_ID:        vlan.LAN_VLAN_ID,
     LAN_SUBNET:         v('LAN_SUBNET'),
     GUEST_BASE_PREFIX:  guestOn ? v('GUEST_BASE_PREFIX') : '',
-    GUEST_VLAN_ID:      guestOn ? v('GUEST_VLAN_ID')     : '',
+    GUEST_VLAN_ID:      vlan.GUEST_VLAN_ID,
     GUEST_SUBNET:       guestOn ? v('GUEST_SUBNET')      : '',
     IOT_BASE_PREFIX:    iotOn   ? v('IOT_BASE_PREFIX')   : '',
-    IOT_VLAN_ID:        iotOn   ? v('IOT_VLAN_ID')       : '',
+    IOT_VLAN_ID:        vlan.IOT_VLAN_ID,
     IOT_SUBNET:         iotOn   ? v('IOT_SUBNET')        : '',
     LAN_WG_BASE_PREFIX: wgOn ? v('LAN_WG_BASE_PREFIX') : '',
-    LAN_WG_VLAN_ID:     wgOn ? v('LAN_WG_VLAN_ID')     : '',
+    LAN_WG_VLAN_ID:     vlan.LAN_WG_VLAN_ID,
     LAN_WG_SUBNET:      wgOn ? v('LAN_WG_SUBNET')      : '',
     ADDITIONAL_VLAN_LIST: v('ADDITIONAL_VLAN_LIST'),
 

@@ -8,6 +8,8 @@
 // Boolean flags use flag(v) so '0' never leaks through (Section 1 invariant:
 // off-state is '' never '0').
 
+import { resolveVlanEmit } from './visibility.mjs';
+
 /**
  * @param {import('./types.mjs').Config} sharedConfig
  * @param {import('./types.mjs').Config} nodeOverrides
@@ -21,6 +23,9 @@ export function mergeNodeConfig(sharedConfig, nodeOverrides) {
   const guestOn = c.GUEST_ENABLE  === '1';
   const iotOn   = c.IOT_ENABLE    === '1';
   const flag = v => v === '1' ? '1' : '';
+  // Frontend-owned VLAN ids: resolved value when it differs from the natural
+  // default, else '' (participation/AP gating handled by the allocator).
+  const vlan = resolveVlanEmit(c);
   return {
     AP_MODE: isAp ? '1' : '', AP_INDEX: isAp ? (c.AP_INDEX || '2') : '',
     HOST_NAME: c.HOST_NAME || '', ROOT_PASSWD: c.ROOT_PASSWD || '',
@@ -30,17 +35,17 @@ export function mergeNodeConfig(sharedConfig, nodeOverrides) {
     PPPOE_PASSWD:   !isAp && c.wan_type === 'pppoe' ? (c.PPPOE_PASSWD   || '') : '',
     WAN_MAC_ADDR:   !isAp ? (c.WAN_MAC_ADDR  || '') : '',
     WAN_IS_TAGGED:  !isAp ? flag(c.WAN_IS_TAGGED) : '',
-    WAN_VLAN_ID:    !isAp ? (c.WAN_VLAN_ID || '') : '',
+    WAN_VLAN_ID:    vlan.WAN_VLAN_ID,
     WAN_B_ENABLE:   !isAp ? flag(c.WAN_B_ENABLE) : '',
-    WAN_B_VLAN_ID:  !isAp && c.WAN_B_ENABLE  === '1' ? (c.WAN_B_VLAN_ID || '') : '',
+    WAN_B_VLAN_ID:  vlan.WAN_B_VLAN_ID,
     BRIDGE_WAN_PORT: !isAp ? flag(c.BRIDGE_WAN_PORT) : '',
     BASE_NET_PREFIX: c.BASE_NET_PREFIX || '', DEFAULT_SUBNET: c.DEFAULT_SUBNET || '',
     GUEST_ENABLE: guestOn ? '1' : '', IOT_ENABLE: iotOn ? '1' : '',
     IOT_INTERNET: iotOn ? flag(c.IOT_INTERNET) : '', IOT_ROUTE_VIA_WG: (iotOn && wgOn) ? flag(c.IOT_ROUTE_VIA_WG) : '', WG_ENABLE: wgOn ? '1' : '',
-    LAN_BASE_PREFIX: c.LAN_BASE_PREFIX || '', LAN_VLAN_ID: c.LAN_VLAN_ID || '', LAN_SUBNET: c.LAN_SUBNET || '',
-    GUEST_BASE_PREFIX: guestOn ? (c.GUEST_BASE_PREFIX || '') : '', GUEST_VLAN_ID: guestOn ? (c.GUEST_VLAN_ID || '') : '', GUEST_SUBNET: guestOn ? (c.GUEST_SUBNET || '') : '',
-    IOT_BASE_PREFIX:   iotOn   ? (c.IOT_BASE_PREFIX   || '') : '', IOT_VLAN_ID:   iotOn   ? (c.IOT_VLAN_ID   || '') : '', IOT_SUBNET:   iotOn   ? (c.IOT_SUBNET   || '') : '',
-    LAN_WG_BASE_PREFIX: wgOn  ? (c.LAN_WG_BASE_PREFIX || '') : '', LAN_WG_VLAN_ID: wgOn  ? (c.LAN_WG_VLAN_ID || '') : '', LAN_WG_SUBNET: wgOn  ? (c.LAN_WG_SUBNET || '') : '',
+    LAN_BASE_PREFIX: c.LAN_BASE_PREFIX || '', LAN_VLAN_ID: vlan.LAN_VLAN_ID, LAN_SUBNET: c.LAN_SUBNET || '',
+    GUEST_BASE_PREFIX: guestOn ? (c.GUEST_BASE_PREFIX || '') : '', GUEST_VLAN_ID: vlan.GUEST_VLAN_ID, GUEST_SUBNET: guestOn ? (c.GUEST_SUBNET || '') : '',
+    IOT_BASE_PREFIX:   iotOn   ? (c.IOT_BASE_PREFIX   || '') : '', IOT_VLAN_ID:   vlan.IOT_VLAN_ID, IOT_SUBNET:   iotOn   ? (c.IOT_SUBNET   || '') : '',
+    LAN_WG_BASE_PREFIX: wgOn  ? (c.LAN_WG_BASE_PREFIX || '') : '', LAN_WG_VLAN_ID: vlan.LAN_WG_VLAN_ID, LAN_WG_SUBNET: wgOn  ? (c.LAN_WG_SUBNET || '') : '',
     ADDITIONAL_VLAN_LIST: c.ADDITIONAL_VLAN_LIST || '',
     COUNTRY_CODE: c.COUNTRY_CODE || '', DENSE_ENV: flag(c.DENSE_ENV), WIRELESS_MESH: flag(c.WIRELESS_MESH), WIFI_KVR: flag(c.WIFI_KVR), GUEST_ISOLATE: guestOn ? flag(c.GUEST_ISOLATE) : '',
     MESH_ID: meshOn ? (c.MESH_ID || '') : '', MESH_PASSWD: meshOn ? (c.MESH_PASSWD || '') : '',

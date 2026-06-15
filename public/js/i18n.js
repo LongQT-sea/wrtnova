@@ -126,7 +126,7 @@ import { ui } from './ui-ns.mjs';
 
       // -- builder/index.html (build.js) --------------------------------
       pickDeviceFirst:  'Pick a device first.',
-      fixVlanConflict:  'Fix duplicate VLAN IDs before building.',
+      fixVlanConflict:  'Resolve the VLAN ID conflict before building.',
       wifiPassTooShort: 'WiFi password must be at least 8 characters ({field}).',
       preparingBuild:   'Preparing build…',
       pickDeviceHint:   'Pick a device to enable build.',
@@ -168,7 +168,7 @@ import { ui } from './ui-ns.mjs';
       defaultSubnetDynamic: 'Default ({sub})',
       enableIotInternet:  'Enable internet access for IoT devices',
       iotRouteViaWg:      'Route IoT internet traffic through WireGuard tunnel',
-      vlanDupWarn:        '⚠ Two or more enabled networks share a VLAN ID — fix the conflict before building.',
+      vlanDupWarn:        '⚠ Two networks are set to the same VLAN ID, or a VLAN ID overlaps a trunk VLAN - fix it before building.',
       wgNetworkDesc:      'WireGuard VPN network is a dedicated network with its own WiFi SSID; all its traffic is routed through the WireGuard VPN client.',
       apModeNetworkNote:  'In AP mode, only L2 networks are created (VLAN and WiFi SSID) for Guest, IoT, and WireGuard VPN — L3 traffic is routed back to the main router.',
       additionalTrunkVlans: 'Additional trunk VLANs',
@@ -419,7 +419,7 @@ import { ui } from './ui-ns.mjs';
 
       // -- builder/index.html (build.js) --------------------------------
       pickDeviceFirst:  '请先选择设备。',
-      fixVlanConflict:  '构建前请修复重复的 VLAN ID。',
+      fixVlanConflict:  '构建前请解决 VLAN ID 冲突。',
       wifiPassTooShort: 'WiFi 密码至少需要 8 个字符（{field}）。',
       preparingBuild:   '准备构建…',
       pickDeviceHint:   '选择设备以启用构建。',
@@ -461,7 +461,7 @@ import { ui } from './ui-ns.mjs';
       defaultSubnetDynamic: '默认 ({sub})',
       enableIotInternet:  '启用物联网设备的互联网访问',
       iotRouteViaWg:      '通过 WireGuard 隧道路由物联网互联网流量',
-      vlanDupWarn:        '⚠ 两个或更多启用的网络共享同一个 VLAN ID——构建前请解决冲突。',
+      vlanDupWarn:        '⚠ 两个网络设置了相同的 VLAN ID，或某个 VLAN ID 与中继 VLAN 重叠 - 构建前请修复。',
       wgNetworkDesc:      'WireGuard VPN 网络是一个拥有独立 WiFi SSID 的专用网络；其所有流量均通过 WireGuard VPN 客户端路由。',
       apModeNetworkNote:  '在 AP 模式下，仅为访客、物联网和 WireGuard VPN 创建 L2 网络（VLAN 和 WiFi SSID）——L3 流量回路到主路由器。',
       additionalTrunkVlans: '额外干道 VLAN',
@@ -713,7 +713,7 @@ import { ui } from './ui-ns.mjs';
 
       // -- builder/index.html (build.js) --------------------------------
       pickDeviceFirst:  'Zuerst ein Gerät auswählen.',
-      fixVlanConflict:  'Doppelte VLAN-IDs beheben, bevor Sie erstellen.',
+      fixVlanConflict:  'Beheben Sie den VLAN-ID-Konflikt vor dem Erstellen.',
       wifiPassTooShort: 'WLAN-Passwort muss mindestens 8 Zeichen haben ({field}).',
       preparingBuild:   'Build wird vorbereitet…',
       pickDeviceHint:   'Gerät auswählen, um Build zu aktivieren.',
@@ -755,7 +755,7 @@ import { ui } from './ui-ns.mjs';
       defaultSubnetDynamic: 'Standard ({sub})',
       enableIotInternet:  'Internetzugang für IoT-Geräte aktivieren',
       iotRouteViaWg:      'IoT-Internetverkehr durch WireGuard-Tunnel leiten',
-      vlanDupWarn:        '⚠ Zwei oder mehr aktivierte Netzwerke teilen eine VLAN-ID — beheben Sie den Konflikt vor dem Erstellen.',
+      vlanDupWarn:        '⚠ Zwei Netzwerke haben dieselbe VLAN-ID, oder eine VLAN-ID überschneidet sich mit einem Trunk-VLAN - beheben Sie es vor dem Erstellen.',
       wgNetworkDesc:      'Das WireGuard-VPN-Netzwerk ist ein dediziertes Netzwerk mit eigener WiFi-SSID; der gesamte Datenverkehr wird über den WireGuard-VPN-Client geleitet.',
       apModeNetworkNote:  'Im AP-Modus werden nur L2-Netzwerke (VLAN und WiFi-SSID) für Gast, IoT und WireGuard VPN erstellt — L3-Datenverkehr wird zurück zum Hauptrouter geleitet.',
       additionalTrunkVlans: 'Zusätzliche Trunk-VLANs',
@@ -1006,7 +1006,7 @@ import { ui } from './ui-ns.mjs';
 
       // -- builder/index.html (build.js) --------------------------------
       pickDeviceFirst:  'Сначала выберите устройство.',
-      fixVlanConflict:  'Исправьте дублирующиеся VLAN ID перед сборкой.',
+      fixVlanConflict:  'Устраните конфликт VLAN ID перед сборкой.',
       wifiPassTooShort: 'Пароль WiFi должен содержать не менее 8 символов ({field}).',
       preparingBuild:   'Подготовка сборки…',
       pickDeviceHint:   'Выберите устройство, чтобы включить сборку.',
@@ -1048,7 +1048,7 @@ import { ui } from './ui-ns.mjs';
       defaultSubnetDynamic: 'По умолчанию ({sub})',
       enableIotInternet:  'Включить доступ к интернету для устройств IoT',
       iotRouteViaWg:      'Маршрутизировать интернет-трафик IoT через туннель WireGuard',
-      vlanDupWarn:        '⚠ Два или более включённых сети используют один VLAN ID — устраните конфликт перед сборкой.',
+      vlanDupWarn:        '⚠ Двум сетям назначен одинаковый VLAN ID, или VLAN ID пересекается с транковым VLAN - устраните перед сборкой.',
       wgNetworkDesc:      'Сеть WireGuard VPN — это выделенная сеть с собственным WiFi SSID; весь её трафик маршрутизируется через клиент WireGuard VPN.',
       apModeNetworkNote:  'В режиме AP создаются только L2-сети (VLAN и WiFi SSID) для Гость, IoT и WireGuard VPN — L3-трафик маршрутизируется обратно на основной роутер.',
       additionalTrunkVlans: 'Дополнительные транковые VLAN',
@@ -1299,7 +1299,7 @@ import { ui } from './ui-ns.mjs';
 
       // -- builder/index.html (build.js) --------------------------------
       pickDeviceFirst:  'Najpierw wybierz urządzenie.',
-      fixVlanConflict:  'Napraw zduplikowane identyfikatory VLAN przed kompilacją.',
+      fixVlanConflict:  'Rozwiąż konflikt identyfikatorów VLAN przed kompilacją.',
       wifiPassTooShort: 'Hasło WiFi musi mieć co najmniej 8 znaków ({field}).',
       preparingBuild:   'Przygotowywanie kompilacji…',
       pickDeviceHint:   'Wybierz urządzenie, aby włączyć kompilację.',
@@ -1341,7 +1341,7 @@ import { ui } from './ui-ns.mjs';
       defaultSubnetDynamic: 'Domyślna ({sub})',
       enableIotInternet:  'Włącz dostęp do Internetu dla urządzeń IoT',
       iotRouteViaWg:      'Kieruj ruch internetowy IoT przez tunel WireGuard',
-      vlanDupWarn:        '⚠ Dwie lub więcej włączonych sieci współdzieli ID VLAN — napraw konflikt przed kompilacją.',
+      vlanDupWarn:        '⚠ Dwie sieci mają ten sam ID VLAN lub ID VLAN pokrywa się z VLAN trunk - napraw przed kompilacją.',
       wgNetworkDesc:      'Sieć WireGuard VPN jest dedykowaną siecią z własnym SSID WiFi; cały jej ruch jest kierowany przez klienta WireGuard VPN.',
       apModeNetworkNote:  'W trybie AP tworzone są tylko sieci L2 (VLAN i SSID WiFi) dla Gości, IoT i WireGuard VPN — ruch L3 jest kierowany z powrotem do głównego routera.',
       additionalTrunkVlans: 'Dodatkowe trunk VLAN-y',
@@ -1592,7 +1592,7 @@ import { ui } from './ui-ns.mjs';
 
       // -- builder/index.html (build.js) --------------------------------
       pickDeviceFirst:  "Sélectionnez d'abord un appareil.",
-      fixVlanConflict:  'Corrigez les ID VLAN dupliqués avant de compiler.',
+      fixVlanConflict:  'Résolvez le conflit d\'ID VLAN avant de compiler.',
       wifiPassTooShort: 'Le mot de passe WiFi doit contenir au moins 8 caractères ({field}).',
       preparingBuild:   'Préparation de la compilation…',
       pickDeviceHint:   'Sélectionnez un appareil pour activer la compilation.',
@@ -1634,7 +1634,7 @@ import { ui } from './ui-ns.mjs';
       defaultSubnetDynamic: 'Par défaut ({sub})',
       enableIotInternet:  "Activer l'accès Internet pour les appareils IoT",
       iotRouteViaWg:      'Acheminer le trafic Internet IoT via le tunnel WireGuard',
-      vlanDupWarn:        '⚠ Deux réseaux ou plus activés partagent un ID VLAN — corrigez le conflit avant de compiler.',
+      vlanDupWarn:        '⚠ Deux réseaux ont le même ID VLAN, ou un ID VLAN chevauche un VLAN trunk - corrigez avant de compiler.',
       wgNetworkDesc:      'Le réseau WireGuard VPN est un réseau dédié avec son propre SSID WiFi ; tout son trafic est acheminé via le client WireGuard VPN.',
       apModeNetworkNote:  "En mode AP, seuls des réseaux L2 (VLAN et SSID WiFi) sont créés pour Invité, IoT et WireGuard VPN — le trafic L3 est renvoyé au routeur principal.",
       additionalTrunkVlans: 'VLANs trunk supplémentaires',
@@ -1885,7 +1885,7 @@ import { ui } from './ui-ns.mjs';
 
       // -- builder/index.html (build.js) --------------------------------
       pickDeviceFirst:  'Selecciona un dispositivo primero.',
-      fixVlanConflict:  'Corrige los IDs de VLAN duplicados antes de compilar.',
+      fixVlanConflict:  'Resuelve el conflicto de ID de VLAN antes de compilar.',
       wifiPassTooShort: 'La contraseña WiFi debe tener al menos 8 caracteres ({field}).',
       preparingBuild:   'Preparando compilación…',
       pickDeviceHint:   'Selecciona un dispositivo para activar la compilación.',
@@ -1927,7 +1927,7 @@ import { ui } from './ui-ns.mjs';
       defaultSubnetDynamic: 'Predeterminado ({sub})',
       enableIotInternet:  'Activar acceso a Internet para dispositivos IoT',
       iotRouteViaWg:      'Enrutar tráfico de Internet IoT a través del túnel WireGuard',
-      vlanDupWarn:        '⚠ Dos o más redes habilitadas comparten un ID VLAN — corrige el conflicto antes de compilar.',
+      vlanDupWarn:        '⚠ Dos redes tienen el mismo ID de VLAN, o un ID de VLAN se solapa con una VLAN troncal - corrígelo antes de compilar.',
       wgNetworkDesc:      'La red WireGuard VPN es una red dedicada con su propio SSID WiFi; todo su tráfico se enruta a través del cliente WireGuard VPN.',
       apModeNetworkNote:  'En modo AP, solo se crean redes L2 (VLAN y SSID WiFi) para Invitado, IoT y WireGuard VPN — el tráfico L3 se enruta de vuelta al router principal.',
       additionalTrunkVlans: 'VLANs trunk adicionales',
