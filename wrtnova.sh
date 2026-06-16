@@ -368,7 +368,7 @@ setup_radio() {
 
 	_uci wireless wifi-device "$radio" -disabled \
 		${channel:+channel=$channel} \
-		${WIFI_LOG_LVL:+log_level=$WIFI_LOG_LVL} \
+		${WIFI_LOG_LVL:+log_level=${WIFI_LOG_LVL:-4}} \
 		${COUNTRY_CODE:+country=$COUNTRY_CODE}
 }
 
@@ -535,7 +535,7 @@ add_bridge_vlan() {
 		device=br-vlan vlan="$vlan_id" local=0 "${iface:+-local}"
 
 	for p in $ports; do
-		[ "$p" = mesh0:u* ] && p=mesh0:t
+		[ "$p" = "mesh0:u*" ] && p=mesh0:t
 		uci add_list "network.vlan_${vlan_id}.ports=$p"
 	done
 
