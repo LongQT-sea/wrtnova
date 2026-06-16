@@ -535,6 +535,7 @@ add_bridge_vlan() {
 		device=br-vlan vlan="$vlan_id" local=0 "${iface:+-local}"
 
 	for p in $ports; do
+		[ "$p" = mesh0:u* ] && p=mesh0:t
 		uci add_list "network.vlan_${vlan_id}.ports=$p"
 	done
 
@@ -551,7 +552,7 @@ add_bridges() {
 }
 
 add_switch_vlan() {
-	local vlan_id="$1" ports="$2" iface="$3" sfx
+	local vlan_id="$1" ports="$2" iface="$3"
 
 	vlan_idx=$((vlan_idx + 1))
 
@@ -561,10 +562,8 @@ add_switch_vlan() {
 	[ -z "$iface" ] && return
 	uci add_list "network.br_${iface}.ports=${lan_eth}.${vlan_id}"
 
-	[ "$WIRELESS_MESH" = 1 ] && [ "$BATMAN_ADV" != 1 ] && {
-		[ "$vlan_id" = "$lan_vid" ] || sfx=".${vlan_id}"
-		uci add_list "network.br_${iface}.ports=mesh0${sfx}"
-	}
+	[ "$WIRELESS_MESH" = 1 ] && [ "$BATMAN_ADV" != 1 ] && \
+		uci add_list "network.br_${iface}.ports=mesh0.${vlan_id}"
 }
 
 expand_vlan() {
