@@ -259,12 +259,13 @@ default" is what the body substitutes when the variable is blank.
 | WAN_B_VLAN_ID | int | empty | `21` (max 4094) | Clamped 1..4094. |
 | ADDITIONAL_VLAN_LIST | list | `""` | none | Extra trunked VLANs; tokens are ints or `low-high` ranges, expanded and added as tagged trunk VLANs. |
 
-VLAN resolution: `resolve_vlans` clamps each value into its range (substituting
-the default for empty/non-numeric/out-of-range input), then resolves collisions
-in declared order - the first variable wins, later collisions increment by 4
-(wrapping to the default on overflow). On swconfig hardware without `vid`
-support, all VLAN IDs are overridden with sequential indices 1..6 and subnets
-forced to /24.
+VLAN resolution: clamping into range and collision handling are performed by the
+frontend allocator (`public/js/visibility.mjs` `resolveVlanAssignment`), which
+assigns conflict-free ids up front and emits only non-default values; genuinely
+unresolvable conflicts block the build via `detectVlanConflict`. The firmware
+script substitutes the per-lane default for any empty field (lan 1, guest 5, iot
+10, wg 15, wan 20, wanb 21). On swconfig hardware without `vid` support, all VLAN
+IDs are overridden with sequential indices 1..6 and subnets forced to /24.
 
 ### IPv4 Port Forwarding and IPv6 Server Exposure
 

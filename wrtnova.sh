@@ -577,55 +577,12 @@ expand_vlan() {
 	done
 }
 
-# resolve_vlans "VAR:default:max VAR:default:max ..."
-# First var wins; later vars increment by 4 to find a free slot in 1..max,
-# wrapping to default on overflow. Invalid/empty values fall back to default.
-resolve_vlans() {
-	local spec name rest def max val i conflict prior pname pval
-
-	set +x
-	for spec in $1; do
-		name=${spec%%:*}; rest=${spec#*:}; def=${rest%%:*}; max=${rest#*:}
-		val=$(eval echo \$"$name")
-		case "$val" in ''|*[!0-9]*) val=$def ;; esac
-		{ [ "$val" -lt 1 ] || [ "$val" -gt "$max" ]; } && val=$def
-		eval "$name=$val"
-	done
-
-	for spec in $1; do
-		name=${spec%%:*}; rest=${spec#*:}; def=${rest%%:*}; max=${rest#*:}
-		val=$(eval echo \$"$name"); i=0
-		conflict=1
-		while [ "$conflict" -eq 1 ] && [ "$i" -lt $((max+1)) ]; do
-			i=$((i+1)); conflict=0
-			for prior in $1; do
-				pname=${prior%%:*}; [ "$pname" = "$name" ] && break
-				pval=$(eval echo \$"$pname")
-				[ "$val" -eq "$pval" ] && {
-					val=$((val+4))
-					[ "$val" -gt "$max" ] && val=$def
-					conflict=1; break
-				}
-			done
-		done
-		eval "$name=$val"
-	done
-	[ "$LOG" = 1 ] && set -x
-}
-
-lan_vid=$LAN_VLAN_ID
-guest_vid=$GUEST_VLAN_ID
-iot_vid=$IOT_VLAN_ID
-wg_vid=$LAN_WG_VLAN_ID
-wan_vid=$WAN_VLAN_ID
-wanb_vid=$WAN_B_VLAN_ID
-
-resolve_vlans "lan_vid:1:255 \
-		guest_vid:5:255 \
-		iot_vid:10:255 \
-		wg_vid:15:255 \
-		wan_vid:20:4094 \
-		wanb_vid:21:4094"
+lan_vid=${LAN_VLAN_ID:-1}
+guest_vid=${GUEST_VLAN_ID:-5}
+iot_vid=${IOT_VLAN_ID:-10}
+wg_vid=${LAN_WG_VLAN_ID:-15}
+wan_vid=${WAN_VLAN_ID:-20}
+wanb_vid=${WAN_B_VLAN_ID:-21}
 
 hw_type=$(detect_hw)
 [ "$hw_type" = swconfig ] && {
