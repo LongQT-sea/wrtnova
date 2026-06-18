@@ -865,7 +865,7 @@ done >/dev/null
 	_uci network interface bat0 proto=batadv aggregated_ogms=1 bridge_loop_avoidance=1
 	_uci network interface bat0_mesh0 proto=batadv_hardif mtu=2304 master=bat0
 
-	set --	lan $lan_vid \
+	set --	lan "$lan_vid" \
 		${GUEST_ENABLE:+guest $guest_vid} \
 		${IOT_ENABLE:+iot $iot_vid} \
 		${WG_ENABLE:+lan_${wg_iface} $wg_vid}
