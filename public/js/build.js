@@ -10,6 +10,7 @@ import './ui.js';
 import './i18n.js';
 import { BASE_SCHEMA, readForm, keySets, textVal } from './config-form.mjs';
 import { deriveConfig } from './builder-config.mjs';
+import { deriveNetRows } from './visibility.mjs';
 import { createStore } from './store.mjs';
 import { renderConfigBlock } from './render-config.mjs';
 import { collectTarget } from './devices.js';
@@ -249,10 +250,12 @@ const BUILDER_SCHEMA = [...BASE_SCHEMA, ['AP_MODE', 'radio'], ['AP_INDEX', 'text
     const el = $('#ap-index-preview');
     if (!el) return;
     const s = store ? store.get() : readRawForm();
-    const prefix = (s.LAN_BASE_PREFIX || '').trim() || (s.BASE_NET_PREFIX || '').trim() || '192.168';
-    const vlan   = (s.LAN_VLAN_ID || '').trim() || '1';
-    const idx    = (s.AP_INDEX || '').trim() || '2';
-    el.textContent = prefix + '.' + vlan + '.' + idx;
+    // Reuse the LAN row's resolved prefix/VID/octet (same source as the Networks
+    // table's Router IP cell) so an out-of-range or auto-reallocated VLAN renders
+    // identically in both places instead of echoing the raw LAN_VLAN_ID input.
+    const lan = deriveNetRows(s).find(r => r.key === 'lan');
+    if (!lan) return;
+    el.textContent = lan.effPfx + '.' + lan.effVid + '.' + lan.lastOct;
   }
   ui.syncApIndexPreview = syncApIndexPreview;
 
@@ -327,6 +330,53 @@ const BUILDER_SCHEMA = [...BASE_SCHEMA, ['AP_MODE', 'radio'], ['AP_INDEX', 'text
   }
 
   let polling = null;
+  // Numeric fields whose out-of-range values get a friendly, localized validation
+  // message instead of the browser default ("Value must be <= 255"). The bounds
+  // themselves stay declared as min/max on the inputs; this only renames the noun.
+  const RANGE_NOUN = {
+    LAN_VLAN_ID:    'LAN VLAN', GUEST_VLAN_ID: 'Guest VLAN', IOT_VLAN_ID:   'IoT VLAN',
+    LAN_WG_VLAN_ID: 'VLAN', WAN_VLAN_ID:   'VLAN', WAN_B_VLAN_ID: 'VLAN',
+    ENDPOINT_PORT:  'Port',
+  };
+
+  // Refresh one field's custom validity from its native range state. Clearing
+  // first reveals the native rangeOverflow/Underflow flags (a non-empty custom
+  // message would otherwise pin validity to customError).
+  function refreshRangeValidity(el) {
+    const noun = RANGE_NOUN[el.id];
+    if (!noun) return false;
+    el.setCustomValidity('');
+    const v = el.validity;
+    const bad = v.rangeOverflow || v.rangeUnderflow || v.stepMismatch || v.badInput;
+    if (bad) {
+      el.setCustomValidity(ui.t
+        ? ui.t('rangeMsg', { label: noun, min: el.min, max: el.max })
+        : noun + ' must be ' + el.min + '-' + el.max);
+    }
+    return bad;
+  }
+
+  // Validate every range field; return the first *visible* offender so the caller
+  // can pop its bubble. Hidden fields (collapsed card via .hidden or a closed
+  // <details>) have offsetParent === null and are skipped: reportValidity can't
+  // render a bubble on them, and out-of-range VLANs are dropped at emit time.
+  function checkRangeFields() {
+    let first = null;
+    Object.keys(RANGE_NOUN).forEach(id => {
+      const el = $('#' + id);
+      if (!el) return;
+      if (refreshRangeValidity(el) && !first && el.offsetParent !== null) first = el;
+    });
+    return first;
+  }
+
+  // Live feedback: when the user leaves a range field with a bad value, set the
+  // message and show the bubble immediately rather than waiting for Build.
+  document.addEventListener('focusout', e => {
+    const el = e.target;
+    if (el && RANGE_NOUN[el.id] && refreshRangeValidity(el)) el.reportValidity();
+  });
+
   ui.startBuild = async function () {
     if (polling) return;
     ui.clearStatus(); ui.clearProgress();
@@ -336,6 +386,11 @@ const BUILDER_SCHEMA = [...BASE_SCHEMA, ['AP_MODE', 'radio'], ['AP_INDEX', 'text
     const target = collectTarget();
     if (!target) { ui.status(S.pickDeviceFirst, 'error'); return; }
     if (ui.hasVlanConflict) { ui.status(S.fixVlanConflict, 'error'); return; }
+
+    // Out-of-range numeric fields: set a friendly message ("VLAN must be 1-255")
+    // and pop the first visible offender's native validation bubble, then bail.
+    const badRange = checkRangeFields();
+    if (badRange) { badRange.reportValidity(); return; }
 
     const wifiPassFields = [
       { id: 'LAN_WIFI_PASSWD',   active: true },

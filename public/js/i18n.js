@@ -127,6 +127,7 @@ import { ui } from './ui-ns.mjs';
       // -- builder/index.html (build.js) --------------------------------
       pickDeviceFirst:  'Pick a device first.',
       fixVlanConflict:  'Resolve the VLAN ID conflict before building.',
+      rangeMsg:         '{label} must be {min}-{max}',
       wifiPassTooShort: 'WiFi password must be at least 8 characters ({field}).',
       preparingBuild:   'Preparing build…',
       pickDeviceHint:   'Pick a device to enable build.',
@@ -420,6 +421,7 @@ import { ui } from './ui-ns.mjs';
       // -- builder/index.html (build.js) --------------------------------
       pickDeviceFirst:  '请先选择设备。',
       fixVlanConflict:  '构建前请解决 VLAN ID 冲突。',
+      rangeMsg:         '{label} 必须为 {min}-{max}',
       wifiPassTooShort: 'WiFi 密码至少需要 8 个字符（{field}）。',
       preparingBuild:   '准备构建…',
       pickDeviceHint:   '选择设备以启用构建。',
@@ -714,6 +716,7 @@ import { ui } from './ui-ns.mjs';
       // -- builder/index.html (build.js) --------------------------------
       pickDeviceFirst:  'Zuerst ein Gerät auswählen.',
       fixVlanConflict:  'Beheben Sie den VLAN-ID-Konflikt vor dem Erstellen.',
+      rangeMsg:         '{label} muss {min}-{max} sein',
       wifiPassTooShort: 'WLAN-Passwort muss mindestens 8 Zeichen haben ({field}).',
       preparingBuild:   'Build wird vorbereitet…',
       pickDeviceHint:   'Gerät auswählen, um Build zu aktivieren.',
@@ -1007,6 +1010,7 @@ import { ui } from './ui-ns.mjs';
       // -- builder/index.html (build.js) --------------------------------
       pickDeviceFirst:  'Сначала выберите устройство.',
       fixVlanConflict:  'Устраните конфликт VLAN ID перед сборкой.',
+      rangeMsg:         '{label} должен быть {min}-{max}',
       wifiPassTooShort: 'Пароль WiFi должен содержать не менее 8 символов ({field}).',
       preparingBuild:   'Подготовка сборки…',
       pickDeviceHint:   'Выберите устройство, чтобы включить сборку.',
@@ -1300,6 +1304,7 @@ import { ui } from './ui-ns.mjs';
       // -- builder/index.html (build.js) --------------------------------
       pickDeviceFirst:  'Najpierw wybierz urządzenie.',
       fixVlanConflict:  'Rozwiąż konflikt identyfikatorów VLAN przed kompilacją.',
+      rangeMsg:         '{label} musi być w zakresie {min}-{max}',
       wifiPassTooShort: 'Hasło WiFi musi mieć co najmniej 8 znaków ({field}).',
       preparingBuild:   'Przygotowywanie kompilacji…',
       pickDeviceHint:   'Wybierz urządzenie, aby włączyć kompilację.',
@@ -1593,6 +1598,7 @@ import { ui } from './ui-ns.mjs';
       // -- builder/index.html (build.js) --------------------------------
       pickDeviceFirst:  "Sélectionnez d'abord un appareil.",
       fixVlanConflict:  'Résolvez le conflit d\'ID VLAN avant de compiler.',
+      rangeMsg:         '{label} doit être entre {min} et {max}',
       wifiPassTooShort: 'Le mot de passe WiFi doit contenir au moins 8 caractères ({field}).',
       preparingBuild:   'Préparation de la compilation…',
       pickDeviceHint:   'Sélectionnez un appareil pour activer la compilation.',
@@ -1886,6 +1892,7 @@ import { ui } from './ui-ns.mjs';
       // -- builder/index.html (build.js) --------------------------------
       pickDeviceFirst:  'Selecciona un dispositivo primero.',
       fixVlanConflict:  'Resuelve el conflicto de ID de VLAN antes de compilar.',
+      rangeMsg:         '{label} debe ser {min}-{max}',
       wifiPassTooShort: 'La contraseña WiFi debe tener al menos 8 caracteres ({field}).',
       preparingBuild:   'Preparando compilación…',
       pickDeviceHint:   'Selecciona un dispositivo para activar la compilación.',
