@@ -377,7 +377,7 @@ add_wifi_iface() {
 
 	set -- device="$dev" mode="$mode" ssid="$ssid" key="$key" network="$net" encryption="$enc"
 
-	[ "$mode" = ap ] && [ "$net" = guest ] && [ -n "$GUEST_ISOLATE" ] && set -- "$@" isolate=1
+	[ "$net" = guest ] && [ -n "$GUEST_ISOLATE" ] && set -- "$@" isolate=1 bridge_isolate=1
 
 	[ "$mode" = mesh ] && set -- "$@" -ssid mesh_id="$ssid" ifname="$net" ${BATMAN_ADV:+mesh_fwding=0}
 
