@@ -99,6 +99,8 @@ export const SENSITIVE_KEYS = new Set([
  * @property {string} [PRESHARED_KEY]      sensitive
  * @property {string} [WG_IPV4]            sensitive
  * @property {string} [WG_IPV6]            sensitive
+ * @property {string} [WG_DNS_V4]
+ * @property {string} [WG_DNS_V6]
  * @property {string} [ALLOWED_IPS]        sensitive
  * @property {string} [PORT_FORWARD_LIST]
  * @property {string} [IPV6_SERVER_LIST]
