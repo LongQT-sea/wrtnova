@@ -118,6 +118,8 @@ WG_IFACE=		# e.g. vpn, wg0, ...
 WG_PRIVATE_KEY=
 WG_IPV4=
 WG_IPV6=
+WG_DNS_V4=
+WG_DNS_V6=
 PEER_PUBLIC_KEY=
 PRESHARED_KEY=
 ENDPOINT=
@@ -661,8 +663,6 @@ has_pkg modemmanager || CELLULAR_MODEM=
 [ "$WG_ENABLE" = 1 ] && {
 	_uci network interface "lan_${wg_iface}" proto=static \
 		+ipaddr="${wg_net_pfx}.1${wg_subnet}" ip6assign=60 +ip6class=local ip6hint=10
-
-	_uci firewall zone @zone[0] +network="lan_${wg_iface}" ~lan
 
 	[ "$AP_MODE" != 1 ] && {
 		_uci network interface "${wg_iface}" proto=wireguard \
@@ -1253,8 +1253,10 @@ fw_port_forwarding() {
 }
 
 fw_redirect_dns() {
+	local name="$1"
+	shift 1
 	_uci firewall redirect "" \
-		name="$1 Intercept-DNS" src="$1" src_dport=53 family=any
+		name="$name Intercept-DNS" src="$name" src_dport=53 family=any "$@"
 }
 
 fw_redirect_ntp() {
@@ -1262,6 +1264,7 @@ fw_redirect_ntp() {
 		name="$1 Redirect-NTP" src="$1" src_dport=123 family=any proto=udp
 }
 
+_uci firewall zone @zone[0] ~lan
 fw_redirect_dns lan
 
 [ "$GUEST_ENABLE" = 1 ] && {
@@ -1287,9 +1290,20 @@ fw_redirect_dns lan
 	[ "$iot_via_wg" = 1 ] && fw_add_forwarding iot wan_nat6
 }
 
-[ "$AP_MODE" != 1 ] && [ "$WG_ENABLE" = 1 ] && {
-	fw_add_zone wan_nat6 "$wg_iface" 1 1 1
-	fw_add_forwarding lan wan_nat6
+[ "$WG_ENABLE" = 1 ] && {
+	_uci firewall zone "" \
+		name="lan_${wg_iface}" +network="lan_${wg_iface}" \
+		input=ACCEPT output=ACCEPT forward=REJECT
+
+	[ -n "$WG_DNS_V4" ] && fw_redirect_dns "lan_${wg_iface}" -family dest_ip="$WG_DNS_V4"
+	[ -n "$WG_DNS_V6" ] && fw_redirect_dns "lan_${wg_iface}" -family dest_ip="$WG_DNS_V6"
+
+	[ "$AP_MODE" != 1 ] && {
+		fw_add_forwarding "lan_${wg_iface}" lan
+		fw_add_forwarding lan "lan_${wg_iface}"
+		fw_add_zone wan_nat6 "$wg_iface" 1 1 1
+		fw_add_forwarding "lan_${wg_iface}" wan_nat6
+	}
 }
 
 _uci firewall zone @zone[1] ~wan ^network=wan6
