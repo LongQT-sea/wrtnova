@@ -1081,7 +1081,7 @@ while uci -q del dhcp.@dhcp[0]; do :; done
 
 [ "$WG_ENABLE" = 1 ] && {
 	dhcp-instance-add "lan_${wg_iface}" 24h "${wg_iface}.lan"
-	_uci dhcp "" "lan_${wg_iface}" ra_default=1 +dhcp_option=6,"${wg_net_pfx}.1"
+	_uci dhcp "" "lan_${wg_iface}" ra_default=1 +dhcp_option=6,"${WG_DNS_V4:-${wg_net_pfx}.1}" ${WG_DNS_V6:+dns=$WG_DNS_V6}
 	_uci dhcp dnsmasq "lan_${wg_iface}_dns" +rebind_domain=lan +server=/lan/127.0.0.1
 }
 
@@ -1294,9 +1294,6 @@ fw_redirect_dns lan
 	_uci firewall zone "" \
 		name="lan_${wg_iface}" +network="lan_${wg_iface}" \
 		input=ACCEPT output=ACCEPT forward=REJECT
-
-	[ -n "$WG_DNS_V4" ] && fw_redirect_dns "lan_${wg_iface}" -family dest_ip="$WG_DNS_V4"
-	[ -n "$WG_DNS_V6" ] && fw_redirect_dns "lan_${wg_iface}" -family dest_ip="$WG_DNS_V6"
 
 	[ "$AP_MODE" != 1 ] && {
 		fw_add_forwarding "lan_${wg_iface}" lan
