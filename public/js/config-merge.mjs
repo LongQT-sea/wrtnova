@@ -62,6 +62,8 @@ export function mergeNodeConfig(sharedConfig, nodeOverrides) {
     PRESHARED_KEY:   wgOn && !isAp ? (c.PRESHARED_KEY    || '') : '',
     WG_IPV4:         wgOn && !isAp ? (c.WG_IPV4          || '') : '',
     WG_IPV6:         wgOn && !isAp ? (c.WG_IPV6          || '') : '',
+    WG_DNS_V4:       wgOn && !isAp ? (c.WG_DNS_V4        || '') : '',
+    WG_DNS_V6:       wgOn && !isAp ? (c.WG_DNS_V6        || '') : '',
     ALLOWED_IPS:     wgOn && !isAp ? (c.ALLOWED_IPS      || '') : '',
     PORT_FORWARD_LIST: !isAp ? (c.PORT_FORWARD_LIST || '') : '',
     IPV6_SERVER_LIST:  !isAp ? (c.IPV6_SERVER_LIST  || '') : '',

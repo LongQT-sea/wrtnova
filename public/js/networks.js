@@ -87,7 +87,7 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'], ...BASE_SCHE
       ADDITIONAL_VLAN_LIST: '',
       WG_PRIVATE_KEY: '', PEER_PUBLIC_KEY: '', ENDPOINT: '',
       ENDPOINT_PORT: '', PRESHARED_KEY: '', WG_IPV4: '', WG_IPV6: '',
-      ALLOWED_IPS: '',
+      WG_DNS_V4: '', WG_DNS_V6: '', ALLOWED_IPS: '',
       wan_type: 'dhcp', PPPOE_USERNAME: '', PPPOE_PASSWD: '',
       WAN_MAC_ADDR: '', WAN_IS_TAGGED: '', WAN_VLAN_ID: '',
       WAN_B_ENABLE: '', WAN_B_VLAN_ID: '', BRIDGE_WAN_PORT: '',

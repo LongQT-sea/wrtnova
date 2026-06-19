@@ -107,6 +107,8 @@ export function deriveConfig(raw) {
     PRESHARED_KEY:   wgOn ? v('PRESHARED_KEY')   : '',
     WG_IPV4:         wgOn ? v('WG_IPV4')         : '',
     WG_IPV6:         wgOn ? v('WG_IPV6')         : '',
+    WG_DNS_V4:       wgOn ? v('WG_DNS_V4')       : '',
+    WG_DNS_V6:       wgOn ? v('WG_DNS_V6')       : '',
     ALLOWED_IPS:     wgOn ? v('ALLOWED_IPS')     : '',
 
     PORT_FORWARD_LIST: isRouter ? v('PORT_FORWARD_LIST') : '',
