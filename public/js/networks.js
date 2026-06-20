@@ -85,6 +85,7 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'], ...BASE_SCHE
       IOT_INTERNET: '', IOT_ROUTE_VIA_WG: '',
       WG_ENABLE: '', LAN_WG_BASE_PREFIX: '', LAN_WG_VLAN_ID: '', LAN_WG_SUBNET: '',
       ADDITIONAL_VLAN_LIST: '',
+      P_STEERING: '', ULA_PREFIX: '',
       WG_PRIVATE_KEY: '', PEER_PUBLIC_KEY: '', ENDPOINT: '',
       ENDPOINT_PORT: '', PRESHARED_KEY: '', WG_IPV4: '', WG_IPV6: '',
       WG_DNS_V4: '', WG_DNS_V6: '', ALLOWED_IPS: '',
@@ -792,7 +793,10 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'], ...BASE_SCHE
     // Boundary listener on the form: normalize DOM -> store on every edit. It is
     // form-level, so it runs (and updates the store) before the body-level
     // visibility handler in ui.js reads the store.
-    const syncStore = () => st.configStore.set(readConfig());
+    const syncStore = () => {
+      updatePacketSteeringOpts(document.getElementById('shared-version')?.value);
+      st.configStore.set(readConfig());
+    };
     const form = document.getElementById('config-form');
     form.addEventListener('input', syncStore, { signal });
     form.addEventListener('change', syncStore, { signal });
@@ -822,6 +826,7 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'], ...BASE_SCHE
     if (verSel) verSel.dataset.desired = cfg.shared_version || '';
 
     writeForm(BASE_SCHEMA, cfg);
+    updatePacketSteeringOpts(cfg.shared_version);
 
     // Timezone - mirrors history.js restore: update state + input via setTimezone
     if (cfg.ZONE_NAME && ui.setTimezone && !ui.setTimezone(cfg.ZONE_NAME)) {
@@ -842,6 +847,22 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'], ...BASE_SCHE
   // live in config-form.mjs (NET_SCHEMA), shared with /builder's readRawForm.
   function readConfig() {
     return readForm(NET_SCHEMA);
+  }
+
+  // Packet steering "Enabled (all CPUs)" (value 2) only exists on OpenWrt 24+.
+  // Hide/disable it on 23.05 and downgrade a stale '2' selection to Default;
+  // callers re-read the form into the store after this, so the gated config
+  // never emits P_STEERING='2' for 23.05. Gated by the shared (fleet) version.
+  function updatePacketSteeringOpts(ver) {
+    const sel = document.getElementById('P_STEERING');
+    if (!sel) return;
+    const opt2 = sel.querySelector('option[value="2"]');
+    if (!opt2) return;
+    const maj = parseInt(String(ver).split('.')[0], 10);
+    const allow = isNaN(maj) || maj >= 24;   // SNAPSHOT/unknown -> newest, show all
+    opt2.hidden = !allow;
+    opt2.disabled = !allow;
+    if (!allow && sel.value === '2') sel.value = '';
   }
 
   function syncSsidPlaceholders() {
@@ -1543,6 +1564,7 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'], ...BASE_SCHE
                  : (data.stable_version && picks.includes(data.stable_version)) ? data.stable_version
                  : picks.filter(v => v !== 'SNAPSHOT').pop() || picks[0] || '';
     if (sharedSel) sharedSel.value = best;
+    updatePacketSteeringOpts(best);
     DP.currentVersion = best;
   }
 

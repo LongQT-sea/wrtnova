@@ -13,7 +13,7 @@ import { deriveConfig } from './builder-config.mjs';
 import { deriveNetRows } from './visibility.mjs';
 import { createStore } from './store.mjs';
 import { renderConfigBlock } from './render-config.mjs';
-import { collectTarget } from './devices.js';
+import { collectTarget, devicesState } from './devices.js';
 
 // Shared-config field schema for /builder: the canonical BASE_SCHEMA plus the
 // single-device fields (AP mode + AP index + non-CT ath10k) that only /builder
@@ -120,6 +120,21 @@ const BUILDER_SCHEMA = [...BASE_SCHEMA, ['AP_MODE', 'radio'], ['AP_INDEX', 'text
     if (store) store.set(readRawForm());
   }
   ui.refreshConfigStore = refreshStore;
+
+  // Packet steering "Enabled (all CPUs)" (value 2) only exists on OpenWrt 24+.
+  // Hide/disable it on 23.05 and downgrade a stale '2' selection to Default,
+  // syncing the store so the gated config never emits P_STEERING='2' for 23.05.
+  function updatePacketSteeringOpts(ver) {
+    const sel = $('#P_STEERING');
+    if (!sel) return;
+    const opt2 = sel.querySelector('option[value="2"]');
+    if (!opt2) return;
+    const maj = parseInt(String(ver).split('.')[0], 10);
+    const allow = isNaN(maj) || maj >= 24;   // SNAPSHOT/unknown -> newest, show all
+    opt2.hidden = !allow;
+    opt2.disabled = !allow;
+    if (!allow && sel.value === '2') { sel.value = ''; refreshStore(); }
+  }
 
   // -- Store-first programmatic writes (single-writer model) -----------------
   // The store is the single source of truth. Programmatic config changes (WARP
@@ -271,6 +286,8 @@ const BUILDER_SCHEMA = [...BASE_SCHEMA, ['AP_MODE', 'radio'], ['AP_INDEX', 'text
     store.subscribe(() => { renderAutoPackages(); syncSsidPlaceholders(); syncApIndexPreview(); renderPreview(); });
     document.body.addEventListener('input',  refreshStore);
     document.body.addEventListener('change', refreshStore);
+    $('#version')?.addEventListener('change', () => updatePacketSteeringOpts($('#version').value));
+    updatePacketSteeringOpts(devicesState.version);
     initPreviewControls();
     renderAutoPackages();
     syncSsidPlaceholders();
@@ -660,6 +677,9 @@ const BUILDER_SCHEMA = [...BASE_SCHEMA, ['AP_MODE', 'radio'], ['AP_INDEX', 'text
     $('#build-btn').disabled = !ok;
     $('#build-hint').textContent = ok ? '' : S.pickDeviceHint;
     if (ok) ui.setDot('target', 'valid');
+    // The selected version may have changed (device pick can switch branches),
+    // so refresh the version-gated packet-steering options.
+    updatePacketSteeringOpts(devicesState.version);
     // Chips depend on the target's base/device packages, which are not part of
     // the config store; re-render on target change.
     renderAutoPackages();

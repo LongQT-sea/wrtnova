@@ -73,6 +73,8 @@ export const SENSITIVE_KEYS = new Set([
  * @property {string} [LAN_WG_VLAN_ID]
  * @property {string} [LAN_WG_SUBNET]
  * @property {string} [ADDITIONAL_VLAN_LIST]
+ * @property {string} [P_STEERING]         packet steering: '' | '1' | '2' (all CPUs, 24+)
+ * @property {string} [ULA_PREFIX]         IPv6 ULA prefix override
  * @property {string} [COUNTRY_CODE]
  * @property {string} [DENSE_ENV]          flag
  * @property {string} [WIFI_KVR]           flag

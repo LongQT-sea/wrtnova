@@ -78,6 +78,8 @@ export function deriveConfig(raw) {
     LAN_WG_VLAN_ID:     vlan.LAN_WG_VLAN_ID,
     LAN_WG_SUBNET:      wgOn ? v('LAN_WG_SUBNET')      : '',
     ADDITIONAL_VLAN_LIST: v('ADDITIONAL_VLAN_LIST'),
+    P_STEERING:     v('P_STEERING'),
+    ULA_PREFIX:     v('ULA_PREFIX'),
 
     COUNTRY_CODE:   v('COUNTRY_CODE'),         // uppercased at the store boundary
     DENSE_ENV:      v('DENSE_ENV'),
