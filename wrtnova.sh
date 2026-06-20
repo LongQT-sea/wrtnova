@@ -158,6 +158,9 @@ DENY_GUEST_NIGHT=
 ADGUARD_PASSWD=''
 ADGUARD_MAIN_DNS=	# 1 = set AdGuardHome as primary DNS resolver
 
+ULA_PREFIX=
+P_STEERING=
+
 # 1 = log to /root/99-asu-defaults.log
 LOG=
 
@@ -859,6 +862,9 @@ done >/dev/null
 		_uci network interface "$i" proto=none -ipaddr -ip6assign
 	done
 }
+
+_uci network globals globals \
+	"${P_STEERING:+packet_steering=$P_STEERING}" "${ULA_PREFIX:+ula_prefix=$ULA_PREFIX}"
 
 # === batman-adv ===
 [ "$WIRELESS_MESH" = 1 ] && [ "$BATMAN_ADV" = 1 ] && {
