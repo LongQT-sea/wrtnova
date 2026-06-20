@@ -108,22 +108,22 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'], ...BASE_SCHE
     };
   }
 
-  function defaultRouterNode() {
+  function defaultRouterNode(meshDefault = '') {
     return {
       id: uid(), name: 'Main Router',
       device_target: emptyTarget(),
-      overrides: { AP_MODE: '', WIRELESS_MESH: '' },
+      overrides: { AP_MODE: '', WIRELESS_MESH: meshDefault === '1' ? '1' : '' },
       last_build: null,
     };
   }
 
   const AP_ROOM_NAMES = ['Living Room', 'Kitchen', 'Bedroom', 'Office', 'Garage', 'Dining Room'];
 
-  function defaultApNode(idx) {
+  function defaultApNode(idx, meshDefault = '') {
     return {
       id: uid(), name: AP_ROOM_NAMES[idx - 2] ?? 'AP-' + idx,
       device_target: emptyTarget(),
-      overrides: { AP_MODE: '1', AP_INDEX: String(idx), WIRELESS_MESH: '' },
+      overrides: { AP_MODE: '1', AP_INDEX: String(idx), WIRELESS_MESH: meshDefault === '1' ? '1' : '' },
       last_build: null,
     };
   }
@@ -561,9 +561,7 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'], ...BASE_SCHE
   function panelHTML(net, node) {
     const isAp = node.overrides.AP_MODE === '1';
     const cfg = net.shared_config;
-    const meshChecked = node.overrides.WIRELESS_MESH !== ''
-      ? node.overrides.WIRELESS_MESH === '1'
-      : cfg.WIRELESS_MESH === '1';
+    const meshChecked = node.overrides.WIRELESS_MESH === '1';
     const id = esc(node.id);
     const devTitle = esc(node.device_target.title || '');
     const verOverride = node.overrides.version || '';
@@ -774,6 +772,14 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'], ...BASE_SCHE
     let saveTimer;
     const flushSave = () => {
       net.shared_config = st.configStore.get();
+      // New-network setup only: the auto-created router predates the shared
+      // config edits, so keep its mesh in sync with the shared toggle live
+      // (300ms debounce). Scoped to isNew, so per-node independence resumes
+      // once setup is done and never clobbers a manually-edited node.
+      if (isNew) {
+        const router = net.nodes.find(n => n.overrides.AP_MODE !== '1');
+        if (router) router.overrides.WIRELESS_MESH = net.shared_config.WIRELESS_MESH === '1' ? '1' : '';
+      }
       net.updated_at = Date.now();
       saveNetworks();
     };
@@ -892,10 +898,11 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'], ...BASE_SCHE
   }
 
   function createAndOpenNetwork(name, autoRename) {
+    const shared = defaultConfig();
     const net = {
       id: 'net_' + uid(), name,
-      shared_config: defaultConfig(),
-      nodes: [defaultRouterNode()],
+      shared_config: shared,
+      nodes: [defaultRouterNode(shared.WIRELESS_MESH)],
       created_at: Date.now(), updated_at: Date.now(),
     };
     st.networks.push(net);
@@ -980,7 +987,7 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'], ...BASE_SCHE
     const net = getNet(networkId);
     if (!net) return;
     const idx = nextApIdx(net);
-    const node = defaultApNode(idx);
+    const node = defaultApNode(idx, net.shared_config.WIRELESS_MESH);
     net.nodes.push(node);
     net.updated_at = Date.now();
     saveNetworks();
