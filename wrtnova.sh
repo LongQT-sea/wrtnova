@@ -57,8 +57,8 @@ GUEST_ENABLE=1
 
 # 1 = enable IoT network
 IOT_ENABLE=
-IOT_INTERNET=		# 1 = let's IoT subnet access the internet
-IOT_ROUTE_VIA_WG=	# 1 = let's IoT subnet access the internet over WireGuard Client
+IOT_INTERNET=		# 1 = lets IoT subnet access the internet
+IOT_ROUTE_VIA_WG=	# 1 = lets IoT subnet access the internet over WireGuard Client
 
 # Default: BASE_NET_PREFIX
 LAN_BASE_PREFIX=
@@ -126,7 +126,7 @@ ENDPOINT=
 ENDPOINT_PORT=		# Default: 51820
 ALLOWED_IPS=""		# Default: "0.0.0.0/0 ::/0"
 
-# 1 = enable MBIM modem failover (prefill path is MT7621-specific), this can change later in LuCI)
+# 1 = enable MBIM modem failover (prefill path is MT7621-specific, this can change later in LuCI)
 CELLULAR_MODEM=
 MODEM_PATH="/sys/devices/platform/1e1c0000.xhci/usb2/2-1"
 MODEM_APN="internet"
@@ -151,8 +151,12 @@ SOFTWARE_OFFLOAD=
 # 1 = block DNS over TLS/QUIC
 BLOCK_DOT_DOQ=
 
-# 1 = Block guest internet access at night 
+# 1 = Block guest internet access at night
 DENY_GUEST_NIGHT=
+
+# Separate multiple entries with spaces or newlines
+DOH_UPSTREAMS=
+BOOTSTRAP_DNS=
 
 # AdGuardHome admin passwd in bcrypt hash (default 12345678)
 ADGUARD_PASSWD=''
@@ -187,7 +191,11 @@ cat > /usr/share/wrtnova/functions.sh <<'EOF'
 _uci() {
 	local config="$1"
 	local type="${2:-$1}"
-	local name="${3//-/_}" arg
+	local name arg
+	case "$3" in
+		@*) name="$3" ;;
+		*)  name="${3//-/_}" ;;
+	esac
 	shift 3
 
 	if [ -z "$name" ]; then
@@ -550,7 +558,7 @@ add_bridge_vlan() {
 add_bridges() {
 	local iface
 
-	for iface; do
+	for iface in $1; do
 		_uci network device "br_${iface}" type=bridge name="br-${iface}"
 		uci set "network.${iface}.device=br-${iface}"
 	done
@@ -730,6 +738,8 @@ elif [ "$hw_type" = "swconfig" ]; then
 	wan_eth="$wan_port"
 fi
 
+lan_ifaces="lan ${GUEST_ENABLE:+guest} ${IOT_ENABLE:+iot} ${WG_ENABLE:+lan_${wg_iface}}"
+
 # LAN ports are untagged members of the LAN VLAN.
 # WAN port are untagged members of the WAN VLAN unless WAN_IS_TAGGED=1.
 # All ports carry tagged guest/iot/wanb/lan_wg VLANs as trunk ports.
@@ -773,7 +783,7 @@ if [ "$use_bridge_vlan" = 1 ]; then
 	add_vlan() { add_bridge_vlan "$@"; }
 
 else
-	add_bridges lan ${GUEST_ENABLE:+guest} ${IOT_ENABLE:+iot} ${WG_ENABLE:+lan_${wg_iface}}
+	add_bridges "$lan_ifaces"
 
 	# switch_vlan[0] is LAN, and switch_vlan[1] is WAN (see config_generate and uci-defaults.sh)
 	for port in $(uci -q get network.@switch_vlan[0].ports); do
@@ -858,7 +868,8 @@ done >/dev/null
 		+ipaddr="${lan_net_pfx}.${AP_INDEX}${lan_subnet}" \
 		gateway="${lan_net_pfx}.1" dns="${lan_net_pfx}.1" metric=5
 
-	for i in ${GUEST_ENABLE:+guest} ${IOT_ENABLE:+iot} ${WG_ENABLE:+lan_${wg_iface}}; do
+	for i in $lan_ifaces; do
+		[ "$i" = lan ] && continue
 		_uci network interface "$i" proto=none -ipaddr -ip6assign
 	done
 }
@@ -1065,8 +1076,7 @@ EOF
 chmod +x /sbin/dhcp-instance-add
 
 setup_dnsmasq_upstream() {
-	for iface in lan ${WG_ENABLE:+lan_${wg_iface}} ${GUEST_ENABLE:+guest} ${IOT_ENABLE:+iot}; do
-		[ -z "$iface" ] && continue
+	for iface in $lan_ifaces; do
 		_uci dhcp dnsmasq "${iface}_dns" \
 			noresolv=1 cachesize=0 +server=127.0.0.1#5354 +server=::1#5354 ${adguard_main:+port=54}
 	done
@@ -1114,8 +1124,20 @@ ${ula_prefix%%/*}1	${HOST_NAME}${AP_MODE:+-$AP_INDEX}
 2606:4700:f1::1		time.cloudflare.com
 EOF
 
+doh_upstreams="${DOH_UPSTREAMS:-
+https://dns10.quad9.net/dns-query
+https://dns.cloudflare.com/dns-query
+https://dns.google/dns-query
+}"
+
+bootstrap_dns="${BOOTSTRAP_DNS:-
+1.0.0.1
+9.9.9.9
+2620:fe::9
+}"
+
 # Skip setup Adguard Home if less than 230MB RAM
-[ -x "/usr/bin/AdGuardHome" ] && {
+[ -x /usr/bin/AdGuardHome ] && {
 	read -r _ TOTAL_RAM_KB _ < /proc/meminfo
 	if [ "$TOTAL_RAM_KB" -ge 235520 ]; then
 		[ -n "$ADGUARD_MAIN_DNS" ] && {
@@ -1123,20 +1145,22 @@ EOF
 			adguard_bind_host=0.0.0.0
 			adguard_dns_port=53
 			dnsmasq_dns_port=54
-			adguard_upstream="    - '[/lan/]127.0.0.1:54'"
-			[ "$WG_ENABLE" = 1 ] && adguard_upstream="$adguard_upstream
-    - '[/${wg_iface}.lan/]${wg_net_pfx}.1:54'"
+			adguard_upstream="'[/lan/]127.0.0.1:54'"
+			[ "$WG_ENABLE" = 1 ] && adguard_upstream="$adguard_upstream '[/${wg_iface}.lan/]${wg_net_pfx}.1:54'"
 		}
 
 		setup_dnsmasq_upstream
 		echo "0 3 */3 * * /etc/init.d/adguardhome restart" >> /etc/crontabs/root
-		echo "sleep 30; /etc/init.d/adguardhome restart &" >> "$hplug_ifup_wan"
+		echo "sleep 20; /etc/init.d/adguardhome restart &" >> "$hplug_ifup_wan"
 
-		[ -x "/usr/bin/dnsproxy" ] && /etc/init.d/dnsproxy disable
+		[ -x /usr/bin/dnsproxy ] && /etc/init.d/dnsproxy disable
 	else
 		/etc/init.d/adguardhome disable
 	fi
 }
+
+adguard_upstream="$(for u in $doh_upstreams $adguard_upstream; do printf "    - %s\n" "$u"; done)"
+adguard_bootstrap="$(for u in $bootstrap_dns; do printf "    - %s\n" "$u"; done)"
 
 ADGUARD_PASSWD=${ADGUARD_PASSWD:-\$2y\$10\$aRfh9IbImR8PIf/FWlLvkeW6wiyp47BjY0KqW/FD/F14QloYuV00a}
 [ "$os_version" = "25" ] && { mkdir -p /etc/adguardhome; adguard_dir=/etc/adguardhome; }
@@ -1153,16 +1177,11 @@ dns:
   port: ${adguard_dns_port:-5354}
   ratelimit: 500
   upstream_dns:
-    - https://dns10.quad9.net/dns-query
-    - https://dns.cloudflare.com/dns-query
-    - https://dns.google/dns-query
 $adguard_upstream
   bootstrap_dns:
-    - 1.0.0.1
-    - 2620:fe::9
+$adguard_bootstrap
   fallback_dns:
-    - 1.1.1.1
-    - 2620:fe::9
+$adguard_bootstrap
   cache_size: 4194304
   cache_optimistic: true
   use_private_ptr_resolvers: ${adguard_main:-false}
@@ -1187,8 +1206,10 @@ log:
 schema_version: 28
 EOF
 
+doh_upstreams="${DOH_UPSTREAMS:-https://dns.adguard-dns.com/dns-query}"
+
 # Mini AdguardHome
-[ -x "/usr/bin/dnsproxy" ] && {
+[ -x /usr/bin/dnsproxy ] && {
 	setup_dnsmasq_upstream
 	_uci dnsproxy global global -listen_port \
 		+listen_port=5354 enabled=1 log_file=/dev/null rate_limit=500
@@ -1198,12 +1219,33 @@ EOF
 
 	_uci dnsproxy edns edns enabled=1
 
-	_uci dnsproxy servers servers \
-		-upstream -bootstrap -fallback \
-		+upstream=https://dns.adguard-dns.com/dns-query \
-		+upstream=quic://dns.adguard-dns.com \
-		+bootstrap=9.9.9.9 +bootstrap=2606:4700:4700::1111 \
-		+fallback=1.1.1.1 +fallback=2620:fe::9
+	_uci dnsproxy servers servers -upstream -bootstrap -fallback
+
+	for u in $doh_upstreams; do
+		_uci dnsproxy servers servers +upstream="$u"
+	done
+
+	for u in $bootstrap_dns; do
+		_uci dnsproxy servers servers +bootstrap="$u" +fallback="$u"
+	done
+
+	echo "sleep 5; /etc/init.d/dnsproxy restart &" >> "$hplug_ifup_wan"
+}
+
+[ -x /usr/sbin/https-dns-proxy ] && {
+	while uci -q del https-dns-proxy.@https-dns-proxy[0]; do :; done
+	uci set https-dns-proxy.config.force_dns=0
+	bootstrap_csv="$(echo $bootstrap_dns | tr ' ' ',')"
+
+	for u in $doh_upstreams; do
+		_uci https-dns-proxy "" "" resolver_url="$u" bootstrap_dns="$bootstrap_csv"
+	done
+
+	for i in $lan_ifaces; do
+		_uci dhcp dnsmasq "${i}_dns" noresolv=1
+	done
+
+	echo "sleep 5; /etc/init.d/https-dns-proxy restart &" >> "$hplug_ifup_wan"
 }
 
 # === Firewall ===
@@ -1259,10 +1301,8 @@ fw_port_forwarding() {
 }
 
 fw_redirect_dns() {
-	local name="$1"
-	shift 1
 	_uci firewall redirect "" \
-		name="$name Intercept-DNS" src="$name" src_dport=53 family=any "$@"
+		name="$1 Intercept-DNS" src="$1" src_dport=53 family=any
 }
 
 fw_redirect_ntp() {
