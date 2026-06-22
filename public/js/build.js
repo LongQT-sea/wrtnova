@@ -34,8 +34,10 @@ const BUILDER_SCHEMA = [...BASE_SCHEMA, ['AP_MODE', 'radio'], ['AP_INDEX', 'text
     if (!/exceed.*storage|storage.*exceed/i.test(errMsg)) return false;
     const dnsRadio = $('input[name="DNS_MODE"]:checked');
     const dnsVal = dnsRadio ? dnsRadio.value : '';
-    if (dnsVal !== 'adguardhome' && dnsVal !== 'dnsproxy') return false;
-    const nextVal = dnsVal === 'adguardhome' ? 'dnsproxy' : 'none';
+    if (dnsVal !== 'adguardhome' && dnsVal !== 'dnsproxy' && dnsVal !== 'https-dns-proxy') return false;
+    const nextVal = dnsVal === 'adguardhome' ? 'dnsproxy'
+                  : dnsVal === 'dnsproxy'    ? 'https-dns-proxy'
+                  : 'none';
     // Store-first: downgrade DNS_MODE in the store (single source of truth) and
     // reflect it into the radio, so the auto-retry rebuild uses the new value.
     // The downgrade always leaves AdGuard Home mode, so clear ADGUARD_MAIN_DNS too.
@@ -50,7 +52,9 @@ const BUILDER_SCHEMA = [...BASE_SCHEMA, ['AP_MODE', 'radio'], ['AP_INDEX', 'text
       rn.appendChild(errLine);
       const tip = document.createElement('p');
       tip.className = 'text-xs text-zinc-500 dark:text-zinc-400 mt-1';
-      tip.textContent = t(dnsVal === 'adguardhome' ? 'autoSwitchedDnsproxy' : 'autoSwitchedDnsmasq');
+      tip.textContent = t(nextVal === 'dnsproxy' ? 'autoSwitchedDnsproxy'
+                        : nextVal === 'https-dns-proxy' ? 'autoSwitchedHttpsDnsProxy'
+                        : 'autoSwitchedDnsmasq');
       rn.appendChild(tip);
     }
     $('#build-btn').disabled = true;

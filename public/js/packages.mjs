@@ -24,6 +24,7 @@ export function computeAdds({ base = [], device = [], config = {} }) {
     const dnsMode = config.DNS_MODE || 'adguardhome';
     if (dnsMode === 'adguardhome') adds.push('adguardhome');
     else if (dnsMode === 'dnsproxy') adds.push('dnsproxy');
+    else if (dnsMode === 'https-dns-proxy') adds.push('https-dns-proxy');
   }
   adds.push('zram-swap', 'luci-app-commands', 'ip-bridge');
 

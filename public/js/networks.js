@@ -103,6 +103,7 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'], ...BASE_SCHE
       DDNS_ENABLE: '', LOOKUP_HOSTNAME: '', CLOUDFLARE_API_KEY: '',
       USB_TETHERING: '', CELLULAR_MODEM: '',
       DNS_MODE: 'adguardhome', ADGUARD_MAIN_DNS: '', BLOCK_DOT_DOQ: '',
+      DOH_UPSTREAMS: '', BOOTSTRAP_DNS: '',
       DENY_GUEST_NIGHT: '', QUARTERLY_REBOOT: '', LOG: '',
       SOFTWARE_OFFLOAD: '1', HARDWARE_OFFLOAD: '',
       additional_packages: '',
@@ -170,7 +171,9 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'], ...BASE_SCHE
     const lanMask = c.LAN_SUBNET || c.DEFAULT_SUBNET || '/24';  // LAN override, else network default
     if (lanPrefix) p.push(lanPrefix + '.' + (c.LAN_VLAN_ID || '1') + '.0' + lanMask);
     if (c.DNS_MODE && c.DNS_MODE !== 'none')
-      p.push(c.DNS_MODE === 'adguardhome' ? S.adguardHome : S.dnsproxy);
+      p.push(c.DNS_MODE === 'adguardhome' ? S.adguardHome
+           : c.DNS_MODE === 'https-dns-proxy' ? 'https-dns-proxy'
+           : S.dnsproxy);
     if (c.WG_ENABLE === '1') p.push(S.wireGuardVpn);
     return p.join(' · ') || S.notYetConfigured;
   }
@@ -1034,7 +1037,8 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'], ...BASE_SCHE
 
   // Auto-downgrade DNS for a router node whose firmware does not fit (ASU
   // "storage exceeded"), mirroring /builder's tryAutoRetry: adguardhome ->
-  // dnsproxy -> dnsmasq (none). DNS_MODE lives in the shared network config, so
+  // dnsproxy -> https-dns-proxy -> dnsmasq (none). DNS_MODE lives in the shared
+  // network config, so
   // the change is network-wide - which is fine, because AP nodes install no DNS
   // package and are unaffected (hence the router-only guard). builtDns is the
   // DNS_MODE the failed build actually used; comparing it against the current
@@ -1046,8 +1050,10 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'], ...BASE_SCHE
     if (node.overrides.AP_MODE === '1') return '';            // router-only
     const cur = net.shared_config.DNS_MODE || 'adguardhome';
     if (cur !== builtDns) return cur;                         // a sibling already downgraded - rebuild at current mode
-    if (cur !== 'adguardhome' && cur !== 'dnsproxy') return ''; // already dnsmasq - nothing left to try
-    const next = cur === 'adguardhome' ? 'dnsproxy' : 'none';
+    if (cur !== 'adguardhome' && cur !== 'dnsproxy' && cur !== 'https-dns-proxy') return ''; // already dnsmasq - nothing left to try
+    const next = cur === 'adguardhome' ? 'dnsproxy'
+               : cur === 'dnsproxy'    ? 'https-dns-proxy'
+               : 'none';
     net.shared_config.DNS_MODE = next;
     if (st.configStore && st.networkId === net.id) st.configStore.set({ DNS_MODE: next });
     net.updated_at = Date.now();

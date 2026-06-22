@@ -126,6 +126,9 @@ export function deriveConfig(raw) {
     DNS_MODE:         v('DNS_MODE') || 'adguardhome',
     // Only meaningful with AdGuard Home; never emit it for dnsproxy/none.
     ADGUARD_MAIN_DNS: (v('DNS_MODE') || 'adguardhome') === 'adguardhome' ? v('ADGUARD_MAIN_DNS') : '',
+    // Encrypted-DNS upstreams apply to every engine except 'none'.
+    DOH_UPSTREAMS:    (v('DNS_MODE') || 'adguardhome') !== 'none' ? v('DOH_UPSTREAMS') : '',
+    BOOTSTRAP_DNS:    (v('DNS_MODE') || 'adguardhome') !== 'none' ? v('BOOTSTRAP_DNS') : '',
     SOFTWARE_OFFLOAD: v('SOFTWARE_OFFLOAD'),
     HARDWARE_OFFLOAD: v('HARDWARE_OFFLOAD'),
     BLOCK_DOT_DOQ:    v('BLOCK_DOT_DOQ'),

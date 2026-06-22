@@ -212,6 +212,50 @@ import { SENSITIVE_KEYS } from './types.mjs';
     document.body.addEventListener('change', refresh);
     document.body.addEventListener('input', refresh);
     refresh();
+    ui.initDohPreset();
+  };
+
+  ui.DOH_PROVIDERS = [
+    { name: 'Cloudflare',          url: 'https://cloudflare-dns.com/dns-query' },
+    { name: 'Cloudflare Security', url: 'https://security.cloudflare-dns.com/dns-query' },
+    { name: 'Google',              url: 'https://dns.google/dns-query' },
+    { name: 'Quad9',               url: 'https://dns.quad9.net/dns-query' },
+    { name: 'AdGuard',             url: 'https://dns.adguard-dns.com/dns-query' },
+    { name: 'AdGuard Family',      url: 'https://family.adguard-dns.com/dns-query' },
+    { name: 'Mullvad',             url: 'https://dns.mullvad.net/dns-query' },
+    { name: 'Mullvad Adblock',     url: 'https://adblock.dns.mullvad.net/dns-query' },
+    { name: 'DNS4EU',              url: 'https://protective.joindns4.eu/dns-query' },
+    { name: 'OpenDNS',             url: 'https://doh.opendns.com/dns-query' },
+    { name: 'Wikimedia',           url: 'https://wikimedia-dns.org/dns-query' },
+  ];
+
+  // The Advanced DNS "Add DoH preset" <select> is a UI helper, not a config
+  // field: picking a provider appends its URL to the DOH_UPSTREAMS textarea
+  // (newline-separated, deduped). The textarea is written programmatically, so
+  // we dispatch a bubbling 'input' event for each page's store to re-sync
+  // (store-DOM sync hazard) and reset the select back to its placeholder.
+  ui.initDohPreset = function () {
+    const sel = ui.$('#doh-preset');
+    const ta = ui.$('#DOH_UPSTREAMS');
+    if (!sel || !ta) return;                       // page without the control
+    if (sel.childElementCount <= 1) {              // only the placeholder: build options
+      ui.DOH_PROVIDERS.forEach(function (p) {
+        const opt = document.createElement('option');
+        opt.value = p.url;
+        opt.textContent = p.name;
+        sel.appendChild(opt);
+      });
+    }
+    sel.addEventListener('change', function () {
+      const url = sel.value;
+      sel.value = '';                              // reset to placeholder
+      if (!url) return;
+      const list = ta.value.split(/\s+/).filter(Boolean);
+      if (list.includes(url)) return;              // already present
+      list.push(url);
+      ta.value = list.join('\n');
+      ta.dispatchEvent(new Event('input', { bubbles: true }));
+    });
   };
 
 

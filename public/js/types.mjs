@@ -112,8 +112,10 @@ export const SENSITIVE_KEYS = new Set([
  * @property {string} [CELLULAR_MODEM]     flag
  * @property {string} [USB_TETHERING]      flag
  * @property {string} [WWAN_ENABLE]        flag (vestigial; affects multi-WAN package only)
- * @property {string} [DNS_MODE]           BUILD-ONLY: 'adguardhome' | 'dnsproxy' | ...
+ * @property {string} [DNS_MODE]           BUILD-ONLY: 'adguardhome' | 'dnsproxy' | 'https-dns-proxy' | 'none'
  * @property {string} [ADGUARD_MAIN_DNS]   flag
+ * @property {string} [DOH_UPSTREAMS]      DoH upstream URLs (space/newline list)
+ * @property {string} [BOOTSTRAP_DNS]      bootstrap/fallback IPs (space/newline list)
  * @property {string} [SOFTWARE_OFFLOAD]   flag
  * @property {string} [HARDWARE_OFFLOAD]   flag
  * @property {string} [BLOCK_DOT_DOQ]      flag

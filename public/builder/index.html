@@ -861,7 +861,7 @@
     <div class="group card card-anim router-only" id="card-dns" data-section="dns">
       <div class="card-header">
         <span class="dot" aria-label="Not started"></span>
-        <h2 class="flex-1 text-sm font-semibold" data-i18n="encryptedDns">Encrypted DNS &amp; ad blocking</h2>
+        <h2 class="flex-1 text-sm font-semibold" data-i18n="encryptedDns">DNS &amp; Ad blocking</h2>
         <svg class="w-4 h-4 text-zinc-400 card-chev transition-transform duration-200 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
       </div>
       <div class="card-body-wrap">
@@ -883,10 +883,17 @@
               </div>
             </label>
             <label class="toggle-label items-start">
+              <input type="radio" name="DNS_MODE" value="https-dns-proxy" class="mt-0.5 flex-shrink-0">
+              <div>
+                <span class="toggle-text">https-dns-proxy</span>
+                <p class="form-help mt-0" data-i18n="httpsDnsProxyHelp">Lightweight ad blocking + DoH upstream. For ≥8 MB flash / ≥64 MB RAM.</p>
+              </div>
+            </label>
+            <label class="toggle-label items-start">
               <input type="radio" name="DNS_MODE" value="none" class="mt-0.5 flex-shrink-0">
               <div>
                 <span class="toggle-text" data-i18n="dnsNone">None</span>
-                <p class="form-help mt-0" data-i18n="dnsNoneHelp">Plain dnsmasq only. For severely constrained devices (8 MB flash).</p>
+                <p class="form-help mt-0" data-i18n="dnsNoneHelp">Plain dnsmasq only. No encrypted DNS, smallest footprint.</p>
               </div>
             </label>
           </div>
@@ -917,6 +924,35 @@
             </label>
           </div>
         </div>
+        <details class="mt-4 dns-advanced">
+          <summary class="text-xs text-zinc-500 dark:text-zinc-400 cursor-pointer hover:text-zinc-700 dark:hover:text-zinc-200 select-none flex items-center gap-1">
+            <svg class="w-3 h-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+            <span data-i18n="advancedDns">Advanced DNS options</span>
+          </summary>
+          <div class="mt-2 pl-4 border-l-2 border-zinc-200 dark:border-zinc-700">
+            <div class="form-row">
+              <label for="doh-preset" class="form-label" data-i18n="dohPreset">Add DoH preset</label>
+              <select id="doh-preset" class="input-base">
+                <!-- provider options are populated from ui.DOH_PROVIDERS (single source of truth) -->
+                <option value="" data-i18n="dohPresetPh">Pick a provider...</option>
+              </select>
+            </div>
+            <div class="form-row form-row--full">
+              <label for="DOH_UPSTREAMS" class="form-label" data-i18n="dohUpstreams">DoH upstreams</label>
+              <div>
+                <textarea id="DOH_UPSTREAMS" name="DOH_UPSTREAMS" class="input-base" rows="3" data-i18n-placeholder="dohUpstreamsPh" placeholder="one URL per line; blank = built-in defaults"></textarea>
+                <p class="form-help" data-i18n="dohUpstreamsHelp">DoH resolver URLs, one per line. Blank uses Quad9 / Cloudflare / Google.</p>
+              </div>
+            </div>
+            <div class="form-row form-row--full">
+              <label for="BOOTSTRAP_DNS" class="form-label" data-i18n="bootstrapDns">Bootstrap DNS</label>
+              <div>
+                <textarea id="BOOTSTRAP_DNS" name="BOOTSTRAP_DNS" class="input-base" rows="2" data-i18n-placeholder="bootstrapDnsPh" placeholder="plain IPs, one per line; blank = defaults"></textarea>
+                <p class="form-help" data-i18n="bootstrapDnsHelp">Plain IPs to resolve upstream hostnames + fallback. Blank uses 1.0.0.1 / 9.9.9.9.</p>
+              </div>
+            </div>
+          </div>
+        </details>
       </div>
       </div>
     </div>
