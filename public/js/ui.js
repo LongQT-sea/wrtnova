@@ -225,6 +225,28 @@ import { SENSITIVE_KEYS } from './types.mjs';
 
     refresh();
     ui.initDohPreset();
+    ui.initChannelSelects();
+  };
+
+  ui.WIFI_CHANNELS = {
+    CHANNEL_2G: Array.from({ length: 13 }, (_, i) => i + 1),
+    CHANNEL_5G: [36, 40, 44, 48, 52, 56, 60, 64, 100, 104, 108, 112, 116, 120,
+                 124, 128, 132, 136, 140, 144, 149, 153, 157, 161, 165],
+    CHANNEL_6G: Array.from({ length: 59 }, (_, i) => 1 + i * 4),
+  };
+
+  ui.initChannelSelects = function () {
+    Object.keys(ui.WIFI_CHANNELS).forEach(function (id) {
+      const sel = ui.$('#' + id);
+      if (!sel || sel.childElementCount > 1) return;   // missing, or already built
+      const add = function (v, label) {
+        const o = document.createElement('option');
+        o.value = v; o.textContent = label;
+        sel.appendChild(o);
+      };
+      add('auto', 'Auto');
+      ui.WIFI_CHANNELS[id].forEach(function (n) { add(String(n), String(n)); });
+    });
   };
 
   ui.DOH_PROVIDERS = [

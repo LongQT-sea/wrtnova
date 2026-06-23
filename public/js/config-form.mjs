@@ -61,7 +61,7 @@ export const BASE_SCHEMA = /** @type {[string,string,(string|undefined)?,(string
   ['GUEST_WIFI_SSID', 'text'], ['GUEST_WIFI_PASSWD', 'text'], ['GUEST_ISOLATE', 'checkbox'],
   ['IOT_WIFI_SSID', 'text'], ['IOT_WIFI_PASSWD', 'text'],
   ['LAN_WG_WIFI_SSID', 'text'], ['LAN_WG_WIFI_PASSWD', 'text'],
-  ['CHANNEL_2G', 'text'], ['CHANNEL_5G', 'text'], ['CHANNEL_6G', 'text'], ['WIFI_LOG_LVL', 'text'],
+  ['CHANNEL_2G', 'select'], ['CHANNEL_5G', 'select'], ['CHANNEL_6G', 'select'], ['WIFI_LOG_LVL', 'select'],
   ['WIFI_KVR', 'checkbox'],
   ['PORT_FORWARD_LIST', 'table', 'portfwd'], ['IPV6_SERVER_LIST', 'table', 'ipv6'],
   ['DDNS_ENABLE', 'checkbox'], ['LOOKUP_HOSTNAME', 'text'], ['CLOUDFLARE_API_KEY', 'text'],
