@@ -1242,7 +1242,7 @@ doh_upstreams="${DOH_UPSTREAMS:-https://dns.adguard-dns.com/dns-query}"
 	done
 
 	for i in $lan_ifaces; do
-		_uci dhcp dnsmasq "${i}_dns" noresolv=1
+		_uci dhcp dnsmasq "${i}_dns" noresolv=1 cachesize=500
 	done
 
 	echo "sleep 5; /etc/init.d/https-dns-proxy restart &" >> "$hplug_ifup_wan"
