@@ -25,6 +25,7 @@ import { resolveVlanEmit } from './visibility.mjs';
 export function deriveConfig(raw) {
   const r = raw || {};
   const v = k => r[k] || '';                 // textVal semantics: '' default, '0' kept
+  const ipList = k => (r[k] || '').trim().replace(/[\s,]+/g, ' ');
   // Frontend-owned VLAN ids: resolved value when it differs from the field's
   // natural default, else '' (participation/AP gating handled by the allocator).
   const vlan = resolveVlanEmit(r);
@@ -111,7 +112,7 @@ export function deriveConfig(raw) {
     WG_IPV6:         wgOn ? v('WG_IPV6')         : '',
     WG_DNS_V4:       wgOn ? v('WG_DNS_V4')       : '',
     WG_DNS_V6:       wgOn ? v('WG_DNS_V6')       : '',
-    ALLOWED_IPS:     wgOn ? v('ALLOWED_IPS')     : '',
+    ALLOWED_IPS:     wgOn ? ipList('ALLOWED_IPS') : '',
 
     PORT_FORWARD_LIST: isRouter ? v('PORT_FORWARD_LIST') : '',
     IPV6_SERVER_LIST:  isRouter ? v('IPV6_SERVER_LIST')  : '',

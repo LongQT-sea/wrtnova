@@ -23,6 +23,7 @@ export function mergeNodeConfig(sharedConfig, nodeOverrides) {
   const guestOn = c.GUEST_ENABLE  === '1';
   const iotOn   = c.IOT_ENABLE    === '1';
   const flag = v => v === '1' ? '1' : '';
+  const ipList = s => String(s || '').trim().replace(/[\s,]+/g, ' ');
   // Frontend-owned VLAN ids: resolved value when it differs from the natural
   // default, else '' (participation/AP gating handled by the allocator).
   const vlan = resolveVlanEmit(c);
@@ -65,7 +66,7 @@ export function mergeNodeConfig(sharedConfig, nodeOverrides) {
     WG_IPV6:         wgOn && !isAp ? (c.WG_IPV6          || '') : '',
     WG_DNS_V4:       wgOn && !isAp ? (c.WG_DNS_V4        || '') : '',
     WG_DNS_V6:       wgOn && !isAp ? (c.WG_DNS_V6        || '') : '',
-    ALLOWED_IPS:     wgOn && !isAp ? (c.ALLOWED_IPS      || '') : '',
+    ALLOWED_IPS:     wgOn && !isAp ? ipList(c.ALLOWED_IPS)       : '',
     PORT_FORWARD_LIST: !isAp ? (c.PORT_FORWARD_LIST || '') : '',
     IPV6_SERVER_LIST:  !isAp ? (c.IPV6_SERVER_LIST  || '') : '',
     DDNS_ENABLE:        !isAp ? flag(c.DDNS_ENABLE)        : '',
