@@ -726,7 +726,14 @@
               </div>
               <div class="form-row">
                 <label for="PPPOE_PASSWD" class="form-label">PPPoE password</label>
-                <input type="password" id="PPPOE_PASSWD" name="PPPOE_PASSWD" class="input-base" autocomplete="current-password">
+                <div class="relative">
+                  <input type="password" id="PPPOE_PASSWD" name="PPPOE_PASSWD" class="input-base" style="padding-right:2.5rem" autocomplete="current-password">
+                  <button type="button" id="toggle-pppoe-pw"
+                          class="btn btn-ghost btn-icon absolute right-1.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
+                          aria-label="Show password">
+                    <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                  </button>
+                </div>
               </div>
             </div>
             <div class="form-row">

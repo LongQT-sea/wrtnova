@@ -305,6 +305,7 @@ import { SENSITIVE_KEYS } from './types.mjs';
   ui.initPasswordToggles = function () {
     [
       ['toggle-rootpw',       'ROOT_PASSWD'],
+      ['toggle-pppoe-pw',     'PPPOE_PASSWD'],
       ['toggle-wg-privkey',   'WG_PRIVATE_KEY'],
       ['toggle-wg-psk',       'PRESHARED_KEY'],
       ['toggle-cfkey',        'CLOUDFLARE_API_KEY'],
