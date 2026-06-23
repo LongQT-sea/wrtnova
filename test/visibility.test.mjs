@@ -19,11 +19,10 @@ test('deriveVisibility: router mode (AP_MODE absent) shows router, hides ap', ()
   assert.equal(v['wg-help-router'], false);  // router help shown
 });
 
-test('deriveVisibility: AP mode hides router/wg-client, shows ap', () => {
+test('deriveVisibility: AP mode hides router (incl wg-client), shows ap', () => {
   const v = deriveVisibility({ AP_MODE: '1', WG_ENABLE: '1' });
-  assert.equal(v['router-only'], true);
+  assert.equal(v['router-only'], true);      // wg client card is router-only, hidden on AP
   assert.equal(v['ap-only'], false);
-  assert.equal(v['wg-only'], true);          // wg client card hidden on AP
   assert.equal(v['wifi-wg'], false);         // WG SSID still shown on AP
   assert.equal(v['wg-help-router'], true);   // router help hidden on AP
 });
@@ -35,9 +34,18 @@ test('deriveVisibility: pppoe / iot / guest / wg gating', () => {
   assert.equal(iotWg['iot-only'], false);
   assert.equal(iotWg['wifi-iot'], false);
   assert.equal(iotWg['iot-wg-only'], false);
-  assert.equal(iotWg['wg-only'], false);     // wg client shown (router + wg)
   assert.equal(deriveVisibility({ IOT_ENABLE: '1' })['iot-wg-only'], true);  // needs wg too
   assert.equal(deriveVisibility({ GUEST_ENABLE: '1' })['wifi-guest'], false);
+});
+
+test('deriveVisibility: wg-off-notice (config entered but VPN off)', () => {
+  // false = shown: router mode, WG off, at least one client field filled.
+  assert.equal(deriveVisibility({ WG_ENABLE: '', ENDPOINT: 'vpn.example.com' })['wg-off-notice'], false);
+  assert.equal(deriveVisibility({ WG_ENABLE: '', WG_PRIVATE_KEY: 'abc' })['wg-off-notice'], false);
+  // true = hidden: WG already on, nothing entered, or AP mode (card itself hidden).
+  assert.equal(deriveVisibility({ WG_ENABLE: '1', ENDPOINT: 'vpn.example.com' })['wg-off-notice'], true);
+  assert.equal(deriveVisibility({ WG_ENABLE: '' })['wg-off-notice'], true);
+  assert.equal(deriveVisibility({ AP_MODE: '1', WG_ENABLE: '', ENDPOINT: 'vpn.example.com' })['wg-off-notice'], true);
 });
 
 test('deriveVisibility: ssh-pw-row, mesh, wan-tagged, wan-b flags', () => {

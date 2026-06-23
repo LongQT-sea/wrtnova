@@ -1749,6 +1749,10 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'], ...BASE_SCHE
       f('WG_IPV4',         data.WG_IPV4);
       f('WG_IPV6',         data.WG_IPV6);
       f('ALLOWED_IPS',     data.ALLOWED_IPS);
+      // Prefill implies WG on: enable it and fire a bubbling change so syncStore,
+      // visibility refresh and card auto-expand run as for a manual toggle.
+      const wgEn = document.getElementById('WG_ENABLE');
+      if (wgEn) { wgEn.checked = true; wgEn.dispatchEvent(new Event('change', { bubbles: true })); }
       if (data.warp_refresh_token) {
         _warpSessionToken = data.warp_refresh_token;
         const net = getNet(st.networkId);

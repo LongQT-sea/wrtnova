@@ -22,6 +22,12 @@ const NETS = [
 
 const on = (cfg, k) => cfg[k] === '1';
 
+// WG client config fields (Interface + Peer); drive the "config entered but VPN off" notice.
+const WG_CLIENT_FIELDS = [
+  'WG_PRIVATE_KEY', 'WG_IPV4', 'WG_IPV6', 'WG_DNS_V4', 'WG_DNS_V6',
+  'PEER_PUBLIC_KEY', 'PRESHARED_KEY', 'ENDPOINT', 'ENDPOINT_PORT', 'ALLOWED_IPS',
+];
+
 // Full VLAN table in resolve priority order, mirroring wrtnova.sh resolve_vlans
 // (lan, guest, iot, wg, wan, wanb) with each field's natural default and max.
 // The four LAN-side rows overlap NETS above; wan/wanb live in the advanced WAN
@@ -52,8 +58,9 @@ export function deriveVisibility(cfg) {
   const iot = on(cfg, 'IOT_ENABLE');
   const guest = on(cfg, 'GUEST_ENABLE');
   const wg = on(cfg, 'WG_ENABLE');
-  const wgRouter = wg && !ap;
   const hasKeys = String(cfg.SSH_PUBLIC_KEY || '').trim().length > 0;
+  // WG client config present but the VPN is off (config would be dropped at build).
+  const wgConfigEntered = WG_CLIENT_FIELDS.some(k => String(cfg[k] || '').trim() !== '');
   return {
     'router-only': ap,
     'ap-only': !ap,
@@ -63,7 +70,7 @@ export function deriveVisibility(cfg) {
     'wifi-guest': !guest,
     'iot-wg-only': !(iot && wg),
     'wifi-wg': !wg,
-    'wg-only': !wgRouter,
+    'wg-off-notice': wg || ap || !wgConfigEntered,
     'wg-help-router': ap,
     'ssh-pw-row': !hasKeys,
     'mesh-only': !on(cfg, 'WIRELESS_MESH'),

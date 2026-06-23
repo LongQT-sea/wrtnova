@@ -634,8 +634,11 @@ const BUILDER_SCHEMA = [...BASE_SCHEMA, ['AP_MODE', 'radio'], ['AP_INDEX', 'text
         }
 
         // Store-first: write the WARP-derived WG fields into the store (single
-        // source of truth) and reflect them into the form. No separate sync.
+        // source of truth) and reflect them into the form. Prefilling a config
+        // implies the user wants the VPN on, so enable WG_ENABLE too (otherwise
+        // every field is silently dropped at build time). No separate sync.
         ui.applyStorePatch({
+          WG_ENABLE:       '1',
           WG_PRIVATE_KEY:  data.WG_PRIVATE_KEY  || '',
           PEER_PUBLIC_KEY: data.PEER_PUBLIC_KEY || '',
           ENDPOINT:        data.ENDPOINT        || '',
@@ -644,6 +647,9 @@ const BUILDER_SCHEMA = [...BASE_SCHEMA, ['AP_MODE', 'radio'], ['AP_INDEX', 'text
           WG_IPV6:         data.WG_IPV6         || '',
           ALLOWED_IPS:     data.ALLOWED_IPS     || '',
         });
+        // store.subscribe re-renders packages/preview but not conditional
+        // visibility; refresh so the WG network rows show and the off-notice clears.
+        if (ui.refreshConditionalVisibility) ui.refreshConditionalVisibility();
 
         if (data.warp_refresh_token) {
           _warpSessionToken = data.warp_refresh_token;

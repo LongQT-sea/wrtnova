@@ -211,6 +211,18 @@ import { SENSITIVE_KEYS } from './types.mjs';
     ui.refreshConditionalVisibility = refresh;
     document.body.addEventListener('change', refresh);
     document.body.addEventListener('input', refresh);
+
+    // WG off-notice "Enable": flip WG_ENABLE via a simulated user toggle so both
+    // pages' store-sync, visibility refresh and card auto-expand run as normal.
+    document.body.addEventListener('click', function (e) {
+      if (!e.target.closest || !e.target.closest('#wg-enable-now')) return;
+      const cb = ui.$('#WG_ENABLE');
+      if (cb && !cb.checked) {
+        cb.checked = true;
+        cb.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+    });
+
     refresh();
     ui.initDohPreset();
   };

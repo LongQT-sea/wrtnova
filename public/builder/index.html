@@ -362,7 +362,7 @@
       </div>
     </div>
 
-    <div class="group card card-anim router-only wg-only hidden" id="card-wg" data-section="wg">
+    <div class="group card card-anim router-only" id="card-wg" data-section="wg">
       <div class="card-header">
         <span class="dot" aria-label="Not started"></span>
         <h2 class="flex-1 text-sm font-semibold" data-i18n="wgVpnClient">WireGuard VPN client</h2>
@@ -374,6 +374,10 @@
         <div class="mt-1.5">
           <button id="warp-prefill-btn" type="button" class="btn" style="font-size:0.8125rem;padding:0.3rem 0.625rem;min-height:unset" data-i18n="prefillWithWarp">Prefill with Cloudflare WARP</button>
           <p id="warp-prefill-msg" class="form-help mt-1 hidden"></p>
+        </div>
+        <div class="warn-note wg-off-notice hidden" role="alert">
+          <span data-i18n="wgOffNotice">WireGuard config entered but the VPN network is off.</span>
+          <button type="button" id="wg-enable-now" class="btn" style="margin-left:0.5rem;font-size:0.75rem;padding:0.2rem 0.55rem;min-height:unset" data-i18n="wgEnableNow">Enable</button>
         </div>
         <div class="sub-section">
           <p class="sub-section-title" data-i18n="wgInterfaceSection">Interface</p>
