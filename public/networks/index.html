@@ -439,61 +439,67 @@
               <button id="warp-prefill-btn" type="button" class="btn" style="font-size:0.8125rem;padding:0.3rem 0.625rem;min-height:unset" data-i18n="prefillWithWarp">Prefill with Cloudflare WARP</button>
               <p id="warp-prefill-msg" class="form-help mt-1 hidden"></p>
             </div>
-            <div class="form-row">
-              <label for="WG_PRIVATE_KEY" class="form-label" data-i18n="privateKey">Private key</label>
-              <div>
+            <div class="sub-section">
+              <p class="sub-section-title" data-i18n="wgInterfaceSection">Interface</p>
+              <div class="form-row mt-2">
+                <label for="WG_PRIVATE_KEY" class="form-label" data-i18n="privateKey">Private key</label>
+                <div>
+                  <div class="relative">
+                    <input type="password" id="WG_PRIVATE_KEY" name="WG_PRIVATE_KEY" class="input-base" style="padding-right:2.5rem" autocomplete="off">
+                    <button type="button" id="toggle-wg-privkey"
+                            class="btn btn-ghost btn-icon absolute right-1.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
+                            aria-label="Show private key">
+                      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div class="form-row">
+                <label for="WG_IPV4" class="form-label" data-i18n="clientIpv4">Client IPv4</label>
+                <input type="text" id="WG_IPV4" name="WG_IPV4" class="input-base" placeholder="e.g. 172.16.0.2/32">
+              </div>
+              <div class="form-row">
+                <label for="WG_IPV6" class="form-label" data-i18n="clientIpv6">Client IPv6</label>
+                <input type="text" id="WG_IPV6" name="WG_IPV6" class="input-base" placeholder="e.g. fd88::/128">
+              </div>
+              <div class="form-row">
+                <label for="WG_DNS_V4" class="form-label" data-i18n="dnsV4">DNS IPv4</label>
+                <input type="text" id="WG_DNS_V4" name="WG_DNS_V4" class="input-base" placeholder="e.g. 1.1.1.1 (optional)">
+              </div>
+              <div class="form-row">
+                <label for="WG_DNS_V6" class="form-label" data-i18n="dnsV6">DNS IPv6</label>
+                <input type="text" id="WG_DNS_V6" name="WG_DNS_V6" class="input-base" placeholder="e.g. 2606:4700:4700::1111 (optional)">
+              </div>
+            </div>
+            <div class="sub-section">
+              <p class="sub-section-title" data-i18n="wgPeerSection">Peer</p>
+              <div class="form-row mt-2">
+                <label for="PEER_PUBLIC_KEY" class="form-label" data-i18n="peerPublicKey">Peer public key</label>
+                <input type="text" id="PEER_PUBLIC_KEY" name="PEER_PUBLIC_KEY" class="input-base" autocomplete="off">
+              </div>
+              <div class="form-row">
+                <label for="PRESHARED_KEY" class="form-label" data-i18n="presharedKey">Preshared key</label>
                 <div class="relative">
-                  <input type="password" id="WG_PRIVATE_KEY" name="WG_PRIVATE_KEY" class="input-base" style="padding-right:2.5rem" autocomplete="off">
-                  <button type="button" id="toggle-wg-privkey"
+                  <input type="password" id="PRESHARED_KEY" name="PRESHARED_KEY" class="input-base" style="padding-right:2.5rem" autocomplete="off" placeholder="optional">
+                  <button type="button" id="toggle-wg-psk"
                           class="btn btn-ghost btn-icon absolute right-1.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
-                          aria-label="Show private key">
+                          aria-label="Show preshared key">
                     <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
                   </button>
                 </div>
               </div>
-            </div>
-            <div class="form-row">
-              <label for="PEER_PUBLIC_KEY" class="form-label" data-i18n="peerPublicKey">Peer public key</label>
-              <input type="text" id="PEER_PUBLIC_KEY" name="PEER_PUBLIC_KEY" class="input-base" autocomplete="off">
-            </div>
-            <div class="form-row">
-              <label for="ENDPOINT" class="form-label" data-i18n="endpoint">Endpoint</label>
-              <input type="text" id="ENDPOINT" name="ENDPOINT" class="input-base" placeholder="engage.cloudflareclient.com" autocomplete="off">
-            </div>
-            <div class="form-row">
-              <label for="ENDPOINT_PORT" class="form-label" data-i18n="endpointPort">Endpoint port</label>
-              <input type="number" id="ENDPOINT_PORT" name="ENDPOINT_PORT" class="input-base" placeholder="51820" min="1" max="65535" style="max-width:160px">
-            </div>
-            <div class="form-row">
-              <label for="PRESHARED_KEY" class="form-label" data-i18n="presharedKey">Preshared key</label>
-              <div class="relative">
-                <input type="password" id="PRESHARED_KEY" name="PRESHARED_KEY" class="input-base" style="padding-right:2.5rem" autocomplete="off" placeholder="optional">
-                <button type="button" id="toggle-wg-psk"
-                        class="btn btn-ghost btn-icon absolute right-1.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
-                        aria-label="Show preshared key">
-                  <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
-                </button>
+              <div class="form-row">
+                <label for="ENDPOINT" class="form-label" data-i18n="endpoint">Endpoint</label>
+                <div style="display:flex;gap:0.5rem;align-items:center">
+                  <input type="text" id="ENDPOINT" name="ENDPOINT" class="input-base" style="flex:1 1 auto;min-width:0" placeholder="engage.cloudflareclient.com" autocomplete="off">
+                  <span aria-hidden="true" style="color:#a1a1aa">:</span>
+                  <input type="number" id="ENDPOINT_PORT" name="ENDPOINT_PORT" class="input-base" style="flex:0 0 6rem;max-width:6rem" placeholder="51820" min="1" max="65535" aria-label="Endpoint port">
+                </div>
               </div>
-            </div>
-            <div class="form-row">
-              <label for="WG_IPV4" class="form-label" data-i18n="clientIpv4">Client IPv4</label>
-              <input type="text" id="WG_IPV4" name="WG_IPV4" class="input-base" placeholder="e.g. 172.16.0.2/32">
-            </div>
-            <div class="form-row">
-              <label for="WG_IPV6" class="form-label" data-i18n="clientIpv6">Client IPv6</label>
-              <input type="text" id="WG_IPV6" name="WG_IPV6" class="input-base" placeholder="e.g. fd88::/128">
-            </div>
-            <div class="form-row">
-              <label for="WG_DNS_V4" class="form-label" data-i18n="dnsV4">DNS IPv4</label>
-              <input type="text" id="WG_DNS_V4" name="WG_DNS_V4" class="input-base" placeholder="e.g. 1.1.1.1 (optional)">
-            </div>
-            <div class="form-row">
-              <label for="WG_DNS_V6" class="form-label" data-i18n="dnsV6">DNS IPv6</label>
-              <input type="text" id="WG_DNS_V6" name="WG_DNS_V6" class="input-base" placeholder="e.g. 2606:4700:4700::1111 (optional)">
-            </div>
-            <div class="form-row">
-              <label for="ALLOWED_IPS" class="form-label" data-i18n="allowedIps">Allowed IPs</label>
-              <input type="text" id="ALLOWED_IPS" name="ALLOWED_IPS" class="input-base" placeholder="0.0.0.0/0 ::/0">
+              <div class="form-row">
+                <label for="ALLOWED_IPS" class="form-label" data-i18n="allowedIps">Allowed IPs</label>
+                <input type="text" id="ALLOWED_IPS" name="ALLOWED_IPS" class="input-base" placeholder="0.0.0.0/0 ::/0">
+              </div>
             </div>
             <div class="info-note mt-2" role="note" data-i18n-html="wgConfigNote">
               You can change to a different WireGuard config later via
