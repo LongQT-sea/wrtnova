@@ -1,0 +1,12 @@
+# Cloudflare Pages cache policy.
+
+/wrtnova.sh
+  Cache-Control: no-cache
+
+/js/*
+  Cache-Control: no-cache
+/style.css
+  Cache-Control: no-cache
+
+/*.html
+  Cache-Control: no-cache

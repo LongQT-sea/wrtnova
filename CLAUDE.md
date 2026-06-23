@@ -44,6 +44,14 @@ This repo implements the WrtNova firmware builder per docs/SPEC.md.
   never force `open = true` on form load.
 
 ## What to check before declaring a task done
+- `npm run ci` passes. This is the gate — run it before every commit (and re-run
+  before `--amend`). It chains: typecheck, tests, check:no-zero, check:marker,
+  check:no-dupes, check:budget, check:i18n.
+- Any new config key added to a build path (builder-config.mjs / config-merge.mjs)
+  must also be declared on the `Config` typedef in public/js/types.mjs, or
+  typecheck fails (TS2353/TS2339).
+- New user-facing strings exist in all locales in i18n.js (check:i18n compares every
+  page's data-i18n defaults against `en`).
 - The Tailwind output (public/style.css) is regenerated
 - public/wrtnova.sh is regenerated if wrtnova.sh changed (via scripts/embed-wrtnova.mjs)
 - No new console errors in browser

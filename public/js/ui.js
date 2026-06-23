@@ -360,7 +360,7 @@ import { SENSITIVE_KEYS } from './types.mjs';
   ui.fetchWrtnovaBody = function () {
     if (_wrtnovaBodyCache !== null) return Promise.resolve(_wrtnovaBodyCache);
     if (!_wrtnovaBodyPromise) {
-      _wrtnovaBodyPromise = fetch('/wrtnova.sh', { cache: 'force-cache' })
+      _wrtnovaBodyPromise = fetch('/wrtnova.sh')
         .then(r => {
           if (!r.ok) throw new Error('Failed to fetch /wrtnova.sh');
           return r.text();
