@@ -8,17 +8,12 @@
 import { ui } from './ui-ns.mjs';
 import './ui.js';
 import './i18n.js';
-import { BASE_SCHEMA, readForm, keySets, textVal } from './config-form.mjs';
+import { BUILDER_SCHEMA, readForm, keySets, textVal } from './config-form.mjs';
 import { deriveConfig } from './builder-config.mjs';
 import { deriveNetRows } from './visibility.mjs';
 import { createStore } from './store.mjs';
 import { renderConfigBlock } from './render-config.mjs';
 import { collectTarget, devicesState } from './devices.js';
-
-// Shared-config field schema for /builder: the canonical BASE_SCHEMA plus the
-// single-device fields (AP mode + AP index + non-CT ath10k) that only /builder
-// edits inline; /networks carries those as per-node overrides instead.
-const BUILDER_SCHEMA = [...BASE_SCHEMA, ['AP_MODE', 'radio'], ['AP_INDEX', 'text'], ['NON_CT_ATH10K', 'checkbox']];
 
   const $  = ui.$, $$ = ui.$$;
   const S = ui.S, t = ui.t;

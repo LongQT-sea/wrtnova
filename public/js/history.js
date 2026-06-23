@@ -2,6 +2,7 @@
 // publishes ui.loadHistory/restoreFromHistory onto the shared namespace.
 import { ui } from './ui-ns.mjs';
 import { parseList } from './list-grammar.mjs';
+import { BUILDER_SCHEMA, writeForm } from './config-form.mjs';
 import { selectDevice, loadOverview, devicesState } from './devices.js';
 
   function timeAgo(ts) {
@@ -105,7 +106,7 @@ import { selectDevice, loadOverview, devicesState } from './devices.js';
     if (ui.refreshConfigStore) ui.refreshConfigStore();
     if (ui.refreshConditionalVisibility) ui.refreshConditionalVisibility();
 
-    ui.status('Config restored from ' + timeAgo(entry.ts) + '.', 'info');
+    ui.status('Restored the config saved ' + timeAgo(entry.ts) + '.', 'info');
   };
 
   function findBestVersion(stored, sel) {
@@ -119,29 +120,7 @@ import { selectDevice, loadOverview, devicesState } from './devices.js';
   }
 
   function restoreConfig(cfg) {
-    function set(id, val) {
-      const el = document.getElementById(id);
-      if (el && val != null) el.value = val;
-    }
-    function check(id, val) {
-      const el = document.getElementById(id);
-      if (el) el.checked = val === '1';
-    }
-    function radio(name, val) {
-      const el = document.querySelector('input[name="' + name + '"][value="' + (val || '') + '"]');
-      if (el) el.checked = true;
-    }
-
-    radio('AP_MODE',  cfg.AP_MODE);
-    radio('DNS_MODE', cfg.DNS_MODE || 'adguardhome');
-    set('AP_INDEX', cfg.AP_INDEX);
-
-    set('HOST_NAME',       cfg.HOST_NAME);
-    set('ROOT_PASSWD',     cfg.ROOT_PASSWD);
-    set('SSH_PUBLIC_KEY',  cfg.SSH_PUBLIC_KEY);
-    radio('SSH_PASSWD_AUTH', cfg.SSH_PASSWD_AUTH);
-
-    // Timezone: use setTimezone so state.zoneName/tzString are updated, not just the input text
+    writeForm(BUILDER_SCHEMA, { ...cfg, wan_type: cfg.PPPOE_USERNAME ? 'pppoe' : 'dhcp' });
     if (cfg.ZONE_NAME) {
       if (!ui.setTimezone(cfg.ZONE_NAME)) {
         const tzEl = document.getElementById('timezone');
@@ -149,79 +128,8 @@ import { selectDevice, loadOverview, devicesState } from './devices.js';
       }
     }
 
-    set('BASE_NET_PREFIX', cfg.BASE_NET_PREFIX);
-    set('DEFAULT_SUBNET',  cfg.DEFAULT_SUBNET);
-    check('GUEST_ENABLE',  cfg.GUEST_ENABLE);
-    check('IOT_ENABLE',    cfg.IOT_ENABLE);
-    check('IOT_INTERNET',  cfg.IOT_INTERNET);
-    check('WG_ENABLE',     cfg.WG_ENABLE);
-
-    set('LAN_BASE_PREFIX',    cfg.LAN_BASE_PREFIX);
-    set('LAN_VLAN_ID',        cfg.LAN_VLAN_ID);
-    set('LAN_SUBNET',         cfg.LAN_SUBNET);
-    set('GUEST_BASE_PREFIX',  cfg.GUEST_BASE_PREFIX);
-    set('GUEST_VLAN_ID',      cfg.GUEST_VLAN_ID);
-    set('GUEST_SUBNET',       cfg.GUEST_SUBNET);
-    set('IOT_BASE_PREFIX',    cfg.IOT_BASE_PREFIX);
-    set('IOT_VLAN_ID',        cfg.IOT_VLAN_ID);
-    set('IOT_SUBNET',         cfg.IOT_SUBNET);
-    set('LAN_WG_BASE_PREFIX', cfg.LAN_WG_BASE_PREFIX);
-    set('LAN_WG_VLAN_ID',     cfg.LAN_WG_VLAN_ID);
-    set('LAN_WG_SUBNET',      cfg.LAN_WG_SUBNET);
-    set('ADDITIONAL_VLAN_LIST', cfg.ADDITIONAL_VLAN_LIST);
-
-    radio('wan_type', cfg.PPPOE_USERNAME ? 'pppoe' : 'dhcp');
-    set('PPPOE_USERNAME', cfg.PPPOE_USERNAME);
-    set('PPPOE_PASSWD',   cfg.PPPOE_PASSWD);
-    set('WAN_MAC_ADDR',   cfg.WAN_MAC_ADDR);
-    check('WAN_IS_TAGGED', cfg.WAN_IS_TAGGED);
-    check('BRIDGE_WAN_PORT', cfg.BRIDGE_WAN_PORT);
-    set('WAN_VLAN_ID',    cfg.WAN_VLAN_ID);
-    check('WAN_B_ENABLE',  cfg.WAN_B_ENABLE);
-    set('WAN_B_VLAN_ID',  cfg.WAN_B_VLAN_ID);
-
-    set('COUNTRY_CODE',  cfg.COUNTRY_CODE);
-    check('DENSE_ENV',   cfg.DENSE_ENV);
-    check('WIRELESS_MESH', cfg.WIRELESS_MESH);
-    set('MESH_ID',       cfg.MESH_ID);
-    set('MESH_PASSWD',   cfg.MESH_PASSWD);
-    set('LAN_WIFI_SSID',     cfg.LAN_WIFI_SSID);
-    set('LAN_WIFI_PASSWD',   cfg.LAN_WIFI_PASSWD);
-    set('GUEST_WIFI_SSID',   cfg.GUEST_WIFI_SSID);
-    set('GUEST_WIFI_PASSWD', cfg.GUEST_WIFI_PASSWD);
-    set('IOT_WIFI_SSID',     cfg.IOT_WIFI_SSID);
-    set('IOT_WIFI_PASSWD',   cfg.IOT_WIFI_PASSWD);
-    set('LAN_WG_WIFI_SSID',   cfg.LAN_WG_WIFI_SSID);
-    set('LAN_WG_WIFI_PASSWD', cfg.LAN_WG_WIFI_PASSWD);
-    set('CHANNEL_2G',  cfg.CHANNEL_2G);
-    set('CHANNEL_5G',  cfg.CHANNEL_5G);
-    set('CHANNEL_6G',  cfg.CHANNEL_6G);
-    set('WIFI_LOG_LVL', cfg.WIFI_LOG_LVL);
-
-    set('WG_PRIVATE_KEY',  cfg.WG_PRIVATE_KEY);
-    set('PEER_PUBLIC_KEY', cfg.PEER_PUBLIC_KEY);
-    set('ENDPOINT',        cfg.ENDPOINT);
-    set('ENDPOINT_PORT',   cfg.ENDPOINT_PORT);
-    set('PRESHARED_KEY',   cfg.PRESHARED_KEY);
-    set('WG_IPV4',         cfg.WG_IPV4);
-    set('WG_IPV6',         cfg.WG_IPV6);
-    set('ALLOWED_IPS',     cfg.ALLOWED_IPS);
-
     if (cfg.PORT_FORWARD_LIST) restoreTable('portfwd', cfg.PORT_FORWARD_LIST);
     if (cfg.IPV6_SERVER_LIST)  restoreTable('ipv6',    cfg.IPV6_SERVER_LIST);
-
-    check('DDNS_ENABLE',    cfg.DDNS_ENABLE);
-    set('LOOKUP_HOSTNAME',  cfg.LOOKUP_HOSTNAME);
-    set('CLOUDFLARE_API_KEY', cfg.CLOUDFLARE_API_KEY);
-
-    check('CELLULAR_MODEM', cfg.CELLULAR_MODEM);
-    check('USB_TETHERING',  cfg.USB_TETHERING);
-
-    check('SOFTWARE_OFFLOAD', cfg.SOFTWARE_OFFLOAD);
-    check('HARDWARE_OFFLOAD', cfg.HARDWARE_OFFLOAD);
-    check('ADGUARD_MAIN_DNS', cfg.ADGUARD_MAIN_DNS);
-    check('BLOCK_DOT_DOQ',    cfg.BLOCK_DOT_DOQ);
-    check('NON_CT_ATH10K',    cfg.NON_CT_ATH10K);
   }
 
   function restoreTable(kind, list) {
