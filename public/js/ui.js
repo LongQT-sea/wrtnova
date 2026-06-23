@@ -60,10 +60,8 @@ import { SENSITIVE_KEYS } from './types.mjs';
     ui.$$('.card').forEach(card => {
       const id = (card.dataset.section || card.id.replace(/^card-/, ''));
       const onAny = () => ui.setDot(id, 'touched');
-      ui.$$('input, select, textarea', card).forEach(inp => {
-        inp.addEventListener('input', onAny);
-        inp.addEventListener('change', onAny);
-      });
+      card.addEventListener('input', onAny);
+      card.addEventListener('change', onAny);
     });
   };
 
