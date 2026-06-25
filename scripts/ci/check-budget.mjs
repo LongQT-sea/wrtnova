@@ -19,8 +19,8 @@ const root = resolve(here, '..', '..');
 
 const CSS_NFR_KB = 15;       // hard NFR - enforced
 const JS_TARGET_KB = 30;     // SPEC NFR target - documented, not yet met
-const JS_CEILING_KB = 81;    // ratchet: current worst page ~80.4 KB (/networks, after the
-                             // WG Interface/Peer sections + off-notice i18n); no growth past this
+const JS_CEILING_KB = 82;    // ratchet: current worst page ~81.9 KB (/networks, after the
+                             // Firewall card + banIP geo-block/DoH i18n); no growth past this
 
 const PAGES = {
   builder: 'public/builder/index.html',

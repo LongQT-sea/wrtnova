@@ -951,6 +951,17 @@
                 <p class="form-help mt-0" data-i18n="blockDotDoqHelp">Enforce ad blocking on stubborn client devices.</p>
               </div>
             </label>
+            <label class="toggle-label">
+              <span class="toggle-wrap">
+                <input type="checkbox" id="BLOCK_DOH" name="BLOCK_DOH" value="1" class="toggle-input">
+                <span class="toggle-track"></span>
+                <span class="toggle-thumb"></span>
+              </span>
+              <div>
+                <span class="toggle-text" data-i18n="blockDoh">Block public DoH servers</span>
+                <p class="form-help mt-0" data-i18n="blockDohHelp">Block known DoH resolvers via banIP so clients cannot bypass filtering.</p>
+              </div>
+            </label>
           </div>
         </div>
         <details class="mt-4 dns-advanced">
@@ -982,6 +993,25 @@
             </div>
           </div>
         </details>
+      </div>
+      </div>
+    </div>
+
+    <div class="group card card-anim router-only" id="card-firewall" data-section="firewall">
+      <div class="card-header">
+        <span class="dot" aria-label="Not started"></span>
+        <h2 class="flex-1 text-sm font-semibold" data-i18n="firewall">Firewall</h2>
+        <svg class="w-4 h-4 text-zinc-400 card-chev transition-transform duration-200 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="card-body-wrap">
+      <div class="card-body">
+        <div class="form-row form-row--full">
+          <label for="BANIP_COUNTRY_LIST" class="form-label" data-i18n="banipCountry">Block countries</label>
+          <div>
+            <input type="text" id="BANIP_COUNTRY_LIST" name="BANIP_COUNTRY_LIST" class="input-base" data-i18n-placeholder="banipCountryPh" placeholder="e.g. lk in cn">
+            <p class="form-help" data-i18n="banipCountryHelp">Drop WAN traffic from these countries via banIP. Lowercase ISO codes, space-separated.</p>
+          </div>
+        </div>
       </div>
       </div>
     </div>

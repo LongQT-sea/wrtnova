@@ -35,6 +35,10 @@ export function computeAdds({ base = [], device = [], config = {} }) {
                    config.USB_TETHERING   === '1';
   if (multiWan) adds.push('luci-app-mwan3');
 
+  const banip = config.BLOCK_DOH === '1' ||
+                String(config.BANIP_COUNTRY_LIST || '').trim() !== '';
+  if (banip && config.AP_MODE !== '1') adds.push('luci-app-banip');
+
   // Heuristic: WiFi-capable if any wifi-related toggle is set or any wifi pkg
   // shows up in base/device pkgs. Cheap and good enough.
   const names = [...base, ...device].join(' ');

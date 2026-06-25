@@ -141,6 +141,16 @@ test('resolvePackages: multi-WAN, wifi, usteer, wireguard, modem, tether', () =>
   }
 });
 
+test('resolvePackages: banIP added by DoH block or country list, router-only', () => {
+  assert.ok(resolvePackages({ config: { BLOCK_DOH: '1' } }).includes('luci-app-banip'));
+  assert.ok(resolvePackages({ config: { BANIP_COUNTRY_LIST: 'lk in' } }).includes('luci-app-banip'));
+  // whitespace-only country list does not trigger it
+  assert.ok(!resolvePackages({ config: { BANIP_COUNTRY_LIST: '   ' } }).includes('luci-app-banip'));
+  assert.ok(!resolvePackages({ config: {} }).includes('luci-app-banip'));
+  // banIP operates on the WAN; AP mode has none
+  assert.ok(!resolvePackages({ config: { AP_MODE: '1', BLOCK_DOH: '1' } }).includes('luci-app-banip'));
+});
+
 test('resolvePackages: ath10k-ct swap', () => {
   const out = resolvePackages({
     base: ['ath10k-firmware-qca988x-ct', 'kmod-ath10k-ct'],

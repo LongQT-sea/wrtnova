@@ -103,6 +103,7 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'], ...BASE_SCHE
       DDNS_ENABLE: '', LOOKUP_HOSTNAME: '', CLOUDFLARE_API_KEY: '',
       USB_TETHERING: '', CELLULAR_MODEM: '',
       DNS_MODE: 'adguardhome', ADGUARD_MAIN_DNS: '', BLOCK_DOT_DOQ: '',
+      BLOCK_DOH: '', BANIP_COUNTRY_LIST: '',
       DOH_UPSTREAMS: '', BOOTSTRAP_DNS: '',
       DENY_GUEST_NIGHT: '', QUARTERLY_REBOOT: '', LOG: '',
       SOFTWARE_OFFLOAD: '1', HARDWARE_OFFLOAD: '',
