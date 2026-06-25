@@ -151,6 +151,12 @@ SOFTWARE_OFFLOAD=
 # 1 = block DNS over TLS/QUIC
 BLOCK_DOT_DOQ=
 
+# 1 = block public DoH servers with banip
+BLOCK_DOH=
+
+# List of country codes (lower case) to block with banip
+BANIP_COUNTRY_LIST=''	# e.g. Sri Lanka, India: 'lk in'
+
 # 1 = Block guest internet access at night
 DENY_GUEST_NIGHT=
 
@@ -739,6 +745,7 @@ elif [ "$hw_type" = "swconfig" ]; then
 fi
 
 lan_ifaces="lan ${GUEST_ENABLE:+guest} ${IOT_ENABLE:+iot} ${WG_ENABLE:+lan_${wg_iface}}"
+wan_ifaces="wan wan_6 ${WAN_B_ENABLE:+wanb wanb_6} ${CELLULAR_MODEM:+cellular} ${USB_TETHERING:+usb0}"
 
 # LAN ports are untagged members of the LAN VLAN.
 # WAN port are untagged members of the WAN VLAN unless WAN_IS_TAGGED=1.
@@ -860,7 +867,7 @@ done >/dev/null
 	/etc/init.d/dnsmasq disable
 	/etc/init.d/odhcpd disable
 
-	for i in wan ${WAN_B_ENABLE:+wanb} ${CELLULAR_MODEM:+cellular} ${USB_TETHERING:+usb0}; do
+	for i in $wan_ifaces; do
 		uci set network."${i}".disabled=1
 	done
 
@@ -895,6 +902,25 @@ _uci network globals globals \
 			uci add_list "network.br_${1}.ports=bat0.$2"
 		fi
 		shift 2
+	done
+}
+
+# === banIP ===
+[ -x /etc/init.d/banip ] && {
+	_uci banip "" global \
+		ban_enabled=1 ban_trigger=wan ban_autodetect=0 ban_protov4=1 ban_protov6=1 \
+		+ban_feed=country ${BLOCK_DOH:++ban_feed=doh} ${PPPOE_USERNAME:++ban_dev=pppoe-wan}
+
+	for i in $wan_ifaces; do
+		dev=$(uci -q get network."${i}".device)
+		case $i in
+			*_6) _uci banip "" global +ban_ifv6="$i" ${dev:++ban_dev="$dev"} ;;
+			*)   _uci banip "" global +ban_ifv4="$i" ${dev:++ban_dev="$dev"} ;;
+		esac
+	done
+
+	for c in $BANIP_COUNTRY_LIST; do
+		_uci banip "" global +ban_country="$c"
 	done
 }
 
@@ -1150,7 +1176,7 @@ bootstrap_dns="${BOOTSTRAP_DNS:-
 		}
 
 		setup_dnsmasq_upstream
-		echo "0 3 */3 * * /etc/init.d/adguardhome restart" >> /etc/crontabs/root
+		echo "0 3 1 * * /etc/init.d/adguardhome restart" >> /etc/crontabs/root
 		echo "sleep 20; /etc/init.d/adguardhome restart &" >> "$hplug_ifup_wan"
 
 		[ -x /usr/bin/dnsproxy ] && /etc/init.d/dnsproxy disable
@@ -1349,8 +1375,8 @@ fw_redirect_dns lan
 	}
 }
 
-_uci firewall zone @zone[1] ~wan ^network=wan6
-for i in wan_6 ${WAN_B_ENABLE:+wanb wanb_6} ${CELLULAR_MODEM:+cellular} ${USB_TETHERING:+usb0}; do
+_uci firewall zone @zone[1] ~wan -network
+for i in $wan_ifaces; do
 	_uci firewall zone wan +network="$i"
 done
 
