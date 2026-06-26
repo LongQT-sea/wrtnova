@@ -14,6 +14,7 @@ import { mergeNodeConfig } from './config-merge.mjs';
 import { detectVlanConflict } from './visibility.mjs';
 import { renderConfigBlock } from './render-config.mjs';
 import { parseList } from './list-grammar.mjs';
+import { parseAdditionalPackages } from './packages.mjs';
 import { createStore } from './store.mjs';
 
 // Shared-config field schema for /networks: the canonical BASE_SCHEMA with the
@@ -523,7 +524,7 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'], ...BASE_SCHE
     const pkgsEl = document.getElementById('np-pkgs-' + node.id);
     if (!pkgsEl) return;   // device not selected / extras not rendered
     const cfg = mergeNodeConfig(net.shared_config, node.overrides);
-    const extra = (net.shared_config.additional_packages || '').split(/[\s,]+/).filter(Boolean);
+    const extra = parseAdditionalPackages(net.shared_config.additional_packages);
     const pkgs = ui.computeFinalPackages ? ui.computeFinalPackages(node.device_target, cfg, extra) : [];
     ui.renderPackageChips(pkgsEl, pkgs);
     renderNodePreview(net, node);
@@ -1070,6 +1071,41 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'], ...BASE_SCHE
     return mode === 'none' ? S.autoSwitchedDnsmasq : S.autoSwitchedDnsproxy;
   }
 
+  // Shared by buildNode and startBuildAllNode. A per-node version override means a
+  // different OpenWrt version than the cached device_target, so its profiles.json
+  // must be refetched. Throws on fetch failure - each caller handles it its own way.
+  async function resolveVersionedTarget(net, node) {
+    const tgt = node.device_target;
+    const effectiveVersion = node.overrides.version || tgt.version || net.shared_config.shared_version;
+    if (!node.overrides.version || node.overrides.version === tgt.version)
+      return { version_code: tgt.version_code, default_packages: tgt.default_packages, device_packages: tgt.device_packages };
+    const cacheKey = 'wrtnova_profiles_' + effectiveVersion + '_' + tgt.target;
+    let data = dpCacheGet(cacheKey);
+    if (!data) {
+      const res = await fetch(dpUrl(effectiveVersion) + '/targets/' + tgt.target + '/profiles.json', { cache: 'no-cache' });
+      if (!res.ok) throw new Error('Failed to fetch profiles for ' + effectiveVersion);
+      data = await res.json();
+      dpCacheSet(cacheKey, data);
+    }
+    const dev = (data.profiles || {})[tgt.profile] || {};
+    return {
+      version_code: data.version_code || '',
+      default_packages: data.default_packages || tgt.default_packages,
+      device_packages: dev.device_packages || tgt.device_packages,
+    };
+  }
+
+  // Shared so the single-node and build-all paths send an identical payload shape.
+  function buildAsuBody({ tgt, version, version_code, packages, fullCfg, wrtnovaBody }) {
+    return {
+      profile: tgt.profile, target: tgt.target,
+      version, version_code,
+      packages,
+      defaults: ui.assembleScript(fullCfg, wrtnovaBody),
+      diff_packages: true, client: 'wrtnova/1.0',
+    };
+  }
+
   function buildNode(net, node) {
     if (!node.device_target.profile) return;
     if (nodeBuilds.has(node.id)) return;
@@ -1095,38 +1131,19 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'], ...BASE_SCHE
     showPanelProgress(actEl, 2, S.preparing);
 
     const tgt = node.device_target;
-    const extraPkgs = (net.shared_config.additional_packages || '').split(/[\s,]+/).filter(Boolean);
+    const extraPkgs = parseAdditionalPackages(net.shared_config.additional_packages);
     const rootPasswd = node.overrides.ROOT_PASSWD || net.shared_config.ROOT_PASSWD || '';
     const effectiveVersion = node.overrides.version || tgt.version || net.shared_config.shared_version;
     // DNS mode this build uses - captured up front so an auto-retry compares
     // against it rather than a value a concurrent sibling build may have moved.
     const builtDns = net.shared_config.DNS_MODE || 'adguardhome';
 
-    const getVersionedTarget = async () => {
-      if (!node.overrides.version || node.overrides.version === tgt.version)
-        return { version_code: tgt.version_code, default_packages: tgt.default_packages, device_packages: tgt.device_packages };
-      const cacheKey = 'wrtnova_profiles_' + effectiveVersion + '_' + tgt.target;
-      let data = dpCacheGet(cacheKey);
-      if (!data) {
-        const res = await fetch(dpUrl(effectiveVersion) + '/targets/' + tgt.target + '/profiles.json', { cache: 'no-cache' });
-        if (!res.ok) throw new Error('Failed to fetch profiles for ' + effectiveVersion);
-        data = await res.json();
-        dpCacheSet(cacheKey, data);
-      }
-      const dev = (data.profiles || {})[tgt.profile] || {};
-      return {
-        version_code: data.version_code || '',
-        default_packages: data.default_packages || tgt.default_packages,
-        device_packages: dev.device_packages || tgt.device_packages,
-      };
-    };
-
-    Promise.all([bcryptHash(rootPasswd), getVersionedTarget()])
+    Promise.all([bcryptHash(rootPasswd), resolveVersionedTarget(net, node)])
       .then(async ([adguardHash, vt]) => {
       showPanelProgress(actEl, 5, S.preparingBuild);
 
-      const packages = ui.computeFinalPackages(
-        vt, mergeNodeConfig(net.shared_config, node.overrides), extraPkgs);
+      const fullCfg = mergeNodeConfig(net.shared_config, node.overrides);
+      const packages = ui.computeFinalPackages(vt, fullCfg, extraPkgs);
       const asuUrl = activeAsu.replace(/\/+$/, '') + '/api/v1/build';
 
       let wrtnovaBody;
@@ -1137,15 +1154,11 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'], ...BASE_SCHE
         return;
       }
 
-      const fullCfg = mergeNodeConfig(net.shared_config, node.overrides);
       if (adguardHash) fullCfg.ADGUARD_PASSWD = adguardHash;
-      const asuBody = {
-        profile: tgt.profile, target: tgt.target,
-        version: effectiveVersion, version_code: vt.version_code,
-        packages: packages,
-        defaults: ui.assembleScript(fullCfg, wrtnovaBody),
-        diff_packages: true, client: 'wrtnova/1.0',
-      };
+      const asuBody = buildAsuBody({
+        tgt, version: effectiveVersion, version_code: vt.version_code,
+        packages, fullCfg, wrtnovaBody,
+      });
 
       showPanelProgress(panelActEl(node.id) || actEl, 8, S.submittingToServer);
       let asuR, asuData;
@@ -1357,7 +1370,7 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'], ...BASE_SCHE
 
   async function startBuildAllNode(net, node, onComplete) {
     const tgt = node.device_target;
-    const extraPkgs = (net.shared_config.additional_packages || '').split(/[\s,]+/).filter(Boolean);
+    const extraPkgs = parseAdditionalPackages(net.shared_config.additional_packages);
     const rootPasswd = node.overrides.ROOT_PASSWD || net.shared_config.ROOT_PASSWD || '';
     const adguardHash = await bcryptHash(rootPasswd);
     // DNS mode this build uses - captured before any concurrent sibling build
@@ -1365,33 +1378,17 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'], ...BASE_SCHE
     const builtDns = net.shared_config.DNS_MODE || 'adguardhome';
 
     const effectiveVersion = node.overrides.version || tgt.version || net.shared_config.shared_version;
-    let version_code = tgt.version_code;
-    let default_packages = tgt.default_packages;
-    let device_packages = tgt.device_packages;
-    if (node.overrides.version && node.overrides.version !== tgt.version) {
-      try {
-        const cacheKey = 'wrtnova_profiles_' + effectiveVersion + '_' + tgt.target;
-        let data = dpCacheGet(cacheKey);
-        if (!data) {
-          const res = await fetch(dpUrl(effectiveVersion) + '/targets/' + tgt.target + '/profiles.json', { cache: 'no-cache' });
-          if (!res.ok) throw new Error('Failed to fetch profiles for ' + effectiveVersion);
-          data = await res.json();
-          dpCacheSet(cacheKey, data);
-        }
-        version_code = data.version_code || '';
-        default_packages = data.default_packages || tgt.default_packages;
-        device_packages = (data.profiles?.[tgt.profile]?.device_packages) || tgt.device_packages;
-      } catch (e) {
-        updateBuildAllRow(node.id, null, e.message);
-        onComplete();
-        return;
-      }
+    let vt;
+    try {
+      vt = await resolveVersionedTarget(net, node);
+    } catch (e) {
+      updateBuildAllRow(node.id, null, e.message);
+      onComplete();
+      return;
     }
 
-    const packages = ui.computeFinalPackages(
-      { default_packages, device_packages },
-      mergeNodeConfig(net.shared_config, node.overrides),
-      extraPkgs);
+    const fullCfg = mergeNodeConfig(net.shared_config, node.overrides);
+    const packages = ui.computeFinalPackages(vt, fullCfg, extraPkgs);
     const asuUrl = activeAsu.replace(/\/+$/, '') + '/api/v1/build';
 
     let wrtnovaBody;
@@ -1403,15 +1400,11 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'], ...BASE_SCHE
       return;
     }
 
-    const fullCfg = mergeNodeConfig(net.shared_config, node.overrides);
     if (adguardHash) fullCfg.ADGUARD_PASSWD = adguardHash;
-    const asuBody = {
-      profile: tgt.profile, target: tgt.target,
-      version: effectiveVersion, version_code,
-      packages: packages,
-      defaults: ui.assembleScript(fullCfg, wrtnovaBody),
-      diff_packages: true, client: 'wrtnova/1.0',
-    };
+    const asuBody = buildAsuBody({
+      tgt, version: effectiveVersion, version_code: vt.version_code,
+      packages, fullCfg, wrtnovaBody,
+    });
 
     let asuR, asuData;
     try {

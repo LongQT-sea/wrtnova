@@ -18,6 +18,7 @@ const CANONICAL = {
   mergeNodeConfig: 'config-merge.mjs',
   computeAdds: 'packages.mjs',
   resolvePackages: 'packages.mjs',
+  parseAdditionalPackages: 'packages.mjs',
   renderConfigBlock: 'render-config.mjs',
   shQuote: 'render-config.mjs',
   parseList: 'list-grammar.mjs',

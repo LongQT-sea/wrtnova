@@ -13,6 +13,16 @@
 // "foo" and "-foo" appear anywhere, the removal wins.
 
 /**
+ * Shared so the builder and every /networks build path parse the extras field
+ * the same way (and a stray space in a comma-list never leaks a malformed token).
+ * @param {string} [str]
+ * @returns {string[]}
+ */
+export function parseAdditionalPackages(str) {
+  return (str || '').split(/[\s,]+/).map(s => s.trim()).filter(Boolean);
+}
+
+/**
  * @param {{ base?: string[], device?: string[], config?: import('./types.mjs').Config }} args
  * @returns {string[]}
  */

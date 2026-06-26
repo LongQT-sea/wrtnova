@@ -13,6 +13,7 @@ import { deriveConfig } from './builder-config.mjs';
 import { deriveNetRows } from './visibility.mjs';
 import { createStore } from './store.mjs';
 import { renderConfigBlock } from './render-config.mjs';
+import { parseAdditionalPackages } from './packages.mjs';
 import { collectTarget, devicesState } from './devices.js';
 
   const $  = ui.$, $$ = ui.$$;
@@ -176,20 +177,13 @@ import { collectTarget, devicesState } from './devices.js';
   ui.applyStorePatch  = applyStorePatch;
   ui.renderConfigToDom = renderConfigToDom;
 
-  function parseAdditionalPackages() {
-    return ($('#additional_packages').value || '')
-      .split(/[\s,]+/)
-      .map(s => s.trim())
-      .filter(Boolean);
-  }
-
   // The exact, ordered package set sent to ASU - the full resolved list (base +
   // device + WrtNova additions + user extras, removals collapsed/sorted), via the
   // shared resolvePackages. Byte-identical to what the worker returns.
   function computeFinalPackages() {
     if (!ui.computeFinalPackages) return [];
     const target = collectTarget();
-    return ui.computeFinalPackages(target, collectConfig(), parseAdditionalPackages());
+    return ui.computeFinalPackages(target, collectConfig(), parseAdditionalPackages($('#additional_packages').value));
   }
 
   function renderAutoPackages() {
@@ -451,7 +445,7 @@ import { collectTarget, devicesState } from './devices.js';
       device_packages:  target.device_packages,
       device_title:        ($('#device') || {}).value || '',
       wrtnova_config:      ui.stripSensitive(cfg),
-      additional_packages: parseAdditionalPackages(),
+      additional_packages: parseAdditionalPackages($('#additional_packages').value),
       asu_url: activeAsu,
     };
 
