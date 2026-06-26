@@ -72,6 +72,11 @@ GUEST_SUBNET=
 IOT_SUBNET=
 LAN_WG_SUBNET=
 
+LAN_IFACE=		# e.g. lan, vlan1, ...; Default: lan
+GUEST_IFACE=		# e.g. guest, vlan5, ...; Default: guest
+IOT_IFACE=		# e.g. iot, vlan10, ...; Default: iot
+LAN_WG_IFACE=		# e.g. lan_vpn, vlan15, ...; Default: lan_vpn
+
 LAN_VLAN_ID=		# Default: 1
 GUEST_VLAN_ID=		# Default: 5
 IOT_VLAN_ID=		# Default: 10
@@ -346,7 +351,7 @@ wg_iface=${WG_IFACE:-vpn}
 	echo "*/10 * * * * wg-check $wg_iface" >> /etc/crontabs/root
 	_uci system "" "@system[0]" cronloglevel=9
 
-	cat > /etc/hotplug.d/iface/98-wg-"${wg_iface}" <<-EOF
+	cat > /etc/hotplug.d/iface/98-wg-"$wg_iface" <<-EOF
 	[ ifup = "\$ACTION" ] || exit 0
 	[ $wg_iface = "\$INTERFACE" ] || exit 0
 
@@ -396,11 +401,11 @@ add_wifi_iface() {
 
 	set -- device="$dev" mode="$mode" ssid="$ssid" key="$key" network="$net" encryption="$enc"
 
-	[ "$net" = guest ] && [ -n "$GUEST_ISOLATE" ] && set -- "$@" isolate=1 bridge_isolate=1
+	[ "$net" = "$guest_if" ] && [ -n "$GUEST_ISOLATE" ] && set -- "$@" isolate=1 bridge_isolate=1
 
 	[ "$mode" = mesh ] && set -- "$@" -ssid mesh_id="$ssid" ifname="$net" ${BATMAN_ADV:+mesh_fwding=0}
 
-	[ "$WIFI_KVR" = 1 ] && [ "$mode" = ap ] && [ "$net" != iot ] && has_pkg wpad-mb wpad-op wpad-wo && {
+	[ "$WIFI_KVR" = 1 ] && [ "$mode" = ap ] && [ "$net" != "$iot_if" ] && has_pkg wpad-mb wpad-op wpad-wo && {
 		[ "$enc" = psk2 ] && set -- "$@" ft_psk_generate_local=1
 		set -- "$@" ieee80211r=1 ft_over_ds=0 ieee80211k=1 bss_transition=1
 	}
@@ -455,12 +460,17 @@ mesh_iface=${BATMAN_ADV:+bat0_}mesh0
 	}
 }
 
+lan_if=${LAN_IFACE:-lan}
+guest_if=${GUEST_IFACE:-guest}
+iot_if=${IOT_IFACE:-iot}
+lan_wg_if=${LAN_WG_IFACE:-lan_vpn}
+
 # Fields: mode|ssid|key|network|bands|enabled|enc_override (empty = band default)
 wifi_networks="
-ap|$lan_ssid|$lan_pass|lan|2g 5g 6g|1|
-ap|$guest_ssid|$guest_pass|guest|2g 5g 6g|$GUEST_ENABLE|
-ap|$iot_ssid|$iot_pass|iot|2g|$IOT_ENABLE|
-ap|$lan_wg_ssid|$lan_wg_pass|lan_${wg_iface}|2g 5g 6g|$WG_ENABLE|
+ap|$lan_ssid|$lan_pass|$lan_if|2g 5g 6g|1|
+ap|$guest_ssid|$guest_pass|$guest_if|2g 5g 6g|$GUEST_ENABLE|
+ap|$iot_ssid|$iot_pass|$iot_if|2g|$IOT_ENABLE|
+ap|$lan_wg_ssid|$lan_wg_pass|$lan_wg_if|2g 5g 6g|$WG_ENABLE|
 mesh|$mesh_id|$mesh_pass|$mesh_iface|5g|$WIRELESS_MESH|sae
 "
 
@@ -520,6 +530,7 @@ done
 # Dense mode tightens all thresholds for high-interference environments
 [ -x /sbin/usteerd ] && {
 	_uci usteer "" @usteer[0] \
+		network="$lan_if" \
 		roam_scan_snr='-68' \
 		signal_diff_threshold='8' \
 		roam_trigger_snr='-72'
@@ -643,14 +654,14 @@ iot_subnet=${IOT_SUBNET:-$def_subnet}
 wg_subnet=${LAN_WG_SUBNET:-$def_subnet}
 
 [ "$GUEST_ENABLE" = 1 ] && \
-	_uci network interface guest proto=static +ipaddr="${guest_net_pfx}.1${guest_subnet}"
+	_uci network interface "$guest_if" proto=static +ipaddr="${guest_net_pfx}.1${guest_subnet}"
 
 [ "$IOT_ENABLE" = 1 ] && {
-	_uci network interface iot proto=static +ipaddr="${iot_net_pfx}.1${iot_subnet}"
+	_uci network interface "$iot_if" proto=static +ipaddr="${iot_net_pfx}.1${iot_subnet}"
 	[ "$IOT_ROUTE_VIA_WG" = 1 ] && iot_via_wg=1
 }
 
-_uci network interface lan -netmask -ipaddr +ipaddr="${lan_net_pfx}.1${lan_subnet}"
+_uci network interface lan -netmask -ipaddr +ipaddr="${lan_net_pfx}.1${lan_subnet}" "~$lan_if"
 
 uci -q get network.wan || {
 	_uci network interface wan proto=dhcp
@@ -678,11 +689,11 @@ has_pkg modemmanager || CELLULAR_MODEM=
 	_uci network interface usb0 proto=dhcp device=usb0 ${no_mwan3:+metric=4}
 
 [ "$WG_ENABLE" = 1 ] && {
-	_uci network interface "lan_${wg_iface}" proto=static \
+	_uci network interface "$lan_wg_if" proto=static \
 		+ipaddr="${wg_net_pfx}.1${wg_subnet}" ip6assign=60 +ip6class=local ip6hint=10
 
 	[ "$AP_MODE" != 1 ] && {
-		_uci network interface "${wg_iface}" proto=wireguard \
+		_uci network interface "$wg_iface" proto=wireguard \
 			disabled=1 ${PEER_PUBLIC_KEY:+-disabled} \
 			private_key="${WG_PRIVATE_KEY:-$(wg genkey)}" \
 			+addresses="${WG_IPV4:-172.16.0.2/32}" \
@@ -691,8 +702,8 @@ has_pkg modemmanager || CELLULAR_MODEM=
 
 		if [ "$no_mwan3" = 1 ]; then
 			for f in '' 6; do
-				_uci network rule$f "" in="lan_${wg_iface}" lookup=20 priority=990
-				_uci network rule$f "" in="lan_${wg_iface}" action=prohibit priority=991
+				_uci network rule$f "" in="$lan_wg_if" lookup=20 priority=990
+				_uci network rule$f "" in="$lan_wg_if" action=prohibit priority=991
 			done
 
 			[ "$iot_via_wg" = 1 ] && {
@@ -702,10 +713,10 @@ has_pkg modemmanager || CELLULAR_MODEM=
 			}
 		else
 			# mwan3 already handles PBR and kill switch
-			_uci network interface "${wg_iface}" -ip4table -ip6table
+			_uci network interface "$wg_iface" -ip4table -ip6table
 
 			# WG IPv6 anchor for mwan3
-			_uci network interface "${wg_iface}_6" proto=none device="@${wg_iface}"
+			_uci network interface "${wg_iface}_6" proto=none device="@$wg_iface"
 
 			# Fix router IPv6 internet access
 			_uci network rule6 "" in=loopback lookup=2 priority=999
@@ -744,8 +755,8 @@ elif [ "$hw_type" = "swconfig" ]; then
 	wan_eth="$wan_port"
 fi
 
-lan_ifaces="lan ${GUEST_ENABLE:+guest} ${IOT_ENABLE:+iot} ${WG_ENABLE:+lan_${wg_iface}}"
-wan_ifaces="wan wan_6 ${WAN_B_ENABLE:+wanb wanb_6} ${CELLULAR_MODEM:+cellular} ${USB_TETHERING:+usb0}"
+ifaces_lan="$lan_if ${GUEST_ENABLE:+$guest_if} ${IOT_ENABLE:+$iot_if} ${WG_ENABLE:+$lan_wg_if}"
+ifaces_wan="wan wan_6 ${WAN_B_ENABLE:+wanb wanb_6} ${CELLULAR_MODEM:+cellular} ${USB_TETHERING:+usb0}"
 
 # LAN ports are untagged members of the LAN VLAN.
 # WAN port are untagged members of the WAN VLAN unless WAN_IS_TAGGED=1.
@@ -790,7 +801,7 @@ if [ "$use_bridge_vlan" = 1 ]; then
 	add_vlan() { add_bridge_vlan "$@"; }
 
 else
-	add_bridges "$lan_ifaces"
+	add_bridges "$ifaces_lan"
 
 	# switch_vlan[0] is LAN, and switch_vlan[1] is WAN (see config_generate and uci-defaults.sh)
 	for port in $(uci -q get network.@switch_vlan[0].ports); do
@@ -841,10 +852,10 @@ else
 	add_vlan() { add_switch_vlan "$@"; }
 fi
 
-add_vlan "$lan_vid" "$lan_vlan_ports" lan
-[ "$GUEST_ENABLE" = 1 ] && add_vlan "$guest_vid" "$trunk_ports" guest
-[ "$IOT_ENABLE" = 1 ] && add_vlan "$iot_vid" "$trunk_ports" iot
-[ "$WG_ENABLE" = 1 ] && add_vlan "$wg_vid" "$trunk_ports" lan_"${wg_iface}"
+add_vlan "$lan_vid" "$lan_vlan_ports" "$lan_if"
+[ "$GUEST_ENABLE" = 1 ] && add_vlan "$guest_vid" "$trunk_ports" "$guest_if"
+[ "$IOT_ENABLE" = 1 ] && add_vlan "$iot_vid" "$trunk_ports" "$iot_if"
+[ "$WG_ENABLE" = 1 ] && add_vlan "$wg_vid" "$trunk_ports" "$lan_wg_if"
 [ "$bridge_wan_port" = 1 ] && add_vlan "$wan_vid" "$wan_vlan_ports" ${src_ports:+wan}
 [ "$WAN_B_ENABLE" = 1 ] && add_vlan "$wanb_vid" "$trunk_ports" ${src_ports:+wanb}
 
@@ -867,16 +878,16 @@ done >/dev/null
 	/etc/init.d/dnsmasq disable
 	/etc/init.d/odhcpd disable
 
-	for i in $wan_ifaces; do
+	for i in $ifaces_wan; do
 		uci set network."${i}".disabled=1
 	done
 
-	_uci network interface lan -ipaddr -ip6assign \
+	_uci network interface "$lan_if" -ipaddr -ip6assign \
 		+ipaddr="${lan_net_pfx}.${AP_INDEX}${lan_subnet}" \
 		gateway="${lan_net_pfx}.1" dns="${lan_net_pfx}.1" metric=5
 
-	for i in $lan_ifaces; do
-		[ "$i" = lan ] && continue
+	for i in $ifaces_lan; do
+		[ "$i" = "$lan_if" ] && continue
 		_uci network interface "$i" proto=none -ipaddr -ip6assign
 	done
 }
@@ -889,10 +900,10 @@ _uci network globals globals \
 	_uci network interface bat0 proto=batadv aggregated_ogms=1 bridge_loop_avoidance=1
 	_uci network interface bat0_mesh0 proto=batadv_hardif mtu=2304 master=bat0
 
-	set --	lan "$lan_vid" \
-		${GUEST_ENABLE:+guest $guest_vid} \
-		${IOT_ENABLE:+iot $iot_vid} \
-		${WG_ENABLE:+lan_${wg_iface} $wg_vid}
+	set --	"$lan_if" "$lan_vid" \
+		${GUEST_ENABLE:+$guest_if $guest_vid} \
+		${IOT_ENABLE:+$iot_if $iot_vid} \
+		${WG_ENABLE:+$lan_wg_if $wg_vid}
 
 	while [ $# -ge 2 ]; do
 		if [ "$use_bridge_vlan" = 1 ]; then
@@ -911,7 +922,7 @@ _uci network globals globals \
 		ban_enabled=1 ban_trigger=wan ban_autodetect=0 ban_protov4=1 ban_protov6=1 \
 		+ban_feed=country ${BLOCK_DOH:++ban_feed=doh} ${PPPOE_USERNAME:++ban_dev=pppoe-wan}
 
-	for i in $wan_ifaces; do
+	for i in $ifaces_wan; do
 		dev=$(uci -q get network."${i}".device)
 		case $i in
 			*_6) _uci banip "" global +ban_ifv6="$i" ${dev:++ban_dev="$dev"} ;;
@@ -1023,17 +1034,17 @@ ula_prefix="$(uci -q get network.globals.ula_prefix)"
 	[ "$USB_TETHERING" = 1 ] && mwan3-iface-add usb0 "" 2 2
 
 	[ "$WG_ENABLE" = 1 ] && [ "$AP_MODE" != 1 ] && {
-		mwan3-iface-add "${wg_iface}" "" 1 1 0
+		mwan3-iface-add "$wg_iface" "" 1 1 0
 		mwan3-iface-add "${wg_iface}_6" ipv6 1 1 0
 
-		_uci mwan3 rule "lan_${wg_iface:0:5}_ipv4" \
+		_uci mwan3 rule "${lan_wg_if:0:9}_ipv4" \
 			src_ip="${wg_net_pfx}.0${wg_subnet}" use_policy="${wg_iface}_only" @2
 
-		_uci mwan3 rule "lan_${wg_iface:0:5}_ipv6" \
+		_uci mwan3 rule "${lan_wg_if:0:9}_ipv6" \
 			src_ip="${ula_prefix%::*}:10::/60" use_policy="${wg_iface}_only" @3
 
 		[ "$iot_via_wg" = 1 ] && {
-			_uci mwan3 rule "iot_ipv4" \
+			_uci mwan3 rule "${iot_if}_ipv4" \
 				src_ip="${iot_net_pfx}.0${iot_subnet}" use_policy="${wg_iface}_only" @4
 		}
 	}
@@ -1102,7 +1113,7 @@ EOF
 chmod +x /sbin/dhcp-instance-add
 
 setup_dnsmasq_upstream() {
-	for iface in $lan_ifaces; do
+	for iface in $ifaces_lan; do
 		_uci dhcp dnsmasq "${iface}_dns" \
 			noresolv=1 cachesize=0 +server=127.0.0.1#5354 +server=::1#5354 ${adguard_main:+port=54}
 	done
@@ -1112,27 +1123,27 @@ while uci -q del dhcp.@dnsmasq[0]; do :; done
 while uci -q del dhcp.@dhcp[0]; do :; done
 
 [ "$GUEST_ENABLE" = 1 ] && {
-	dhcp-instance-add guest 1h "" "" 0 "$GUEST_DHCP_START"
-	_uci dhcp "" guest +dhcp_option=6,"${guest_net_pfx}.1"
+	dhcp-instance-add "$guest_if" 1h guest.lan "" 0 "$GUEST_DHCP_START"
+	_uci dhcp "" "$guest_if" +dhcp_option=6,"${guest_net_pfx}.1"
 }
 
 [ "$IOT_ENABLE" = 1 ] && {
-	dhcp-instance-add iot "" "" "" 0
-	_uci dhcp "" iot +dhcp_option=6,"${iot_net_pfx}.1"
+	dhcp-instance-add "$iot_if" "" iot.lan "" 0
+	_uci dhcp "" "$iot_if" +dhcp_option=6,"${iot_net_pfx}.1"
 }
 
 [ "$WG_ENABLE" = 1 ] && {
-	dhcp-instance-add "lan_${wg_iface}" 24h "${wg_iface}.lan"
-	_uci dhcp "" "lan_${wg_iface}" ra_default=1 +dhcp_option=6,"${WG_DNS_V4:-${wg_net_pfx}.1}" ${WG_DNS_V6:+dns=$WG_DNS_V6}
-	_uci dhcp dnsmasq "lan_${wg_iface}_dns" +rebind_domain=lan +server=/lan/127.0.0.1
+	dhcp-instance-add "$lan_wg_if" 24h "vpn.lan"
+	_uci dhcp "" "$lan_wg_if" ra_default=1 +dhcp_option=6,"${WG_DNS_V4:-${wg_net_pfx}.1}" ${WG_DNS_V6:+dns=$WG_DNS_V6}
+	_uci dhcp dnsmasq "${lan_wg_if}_dns" +rebind_domain=lan +server=/lan/127.0.0.1
 }
 
-dhcp-instance-add lan 24h lan lan 1 "$LAN_DHCP_START"
-_uci dhcp "" lan +dhcp_option=6,"${lan_net_pfx}.1"
-uci del dhcp.lan_dns.notinterface
+dhcp-instance-add "$lan_if" 24h lan lan 1 "$LAN_DHCP_START"
+_uci dhcp "" "$lan_if" +dhcp_option=6,"${lan_net_pfx}.1"
+uci del dhcp."$lan_if"_dns.notinterface
 
 [ "$WG_ENABLE" = 1 ] && \
-	_uci dhcp dnsmasq lan_dns +rebind_domain=lan +server="/${wg_iface}.lan/${wg_net_pfx}.1"
+	_uci dhcp dnsmasq "$lan_if"_dns +rebind_domain=lan +server="/vpn.lan/${wg_net_pfx}.1"
 
 _uci system timeserver ntp -server \
 	enable_server=1 +server=time1.google.com +server=time2.google.com +server=time.cloudflare.com
@@ -1172,7 +1183,7 @@ bootstrap_dns="${BOOTSTRAP_DNS:-
 			adguard_dns_port=53
 			dnsmasq_dns_port=54
 			adguard_upstream="'[/lan/]127.0.0.1:54'"
-			[ "$WG_ENABLE" = 1 ] && adguard_upstream="$adguard_upstream '[/${wg_iface}.lan/]${wg_net_pfx}.1:54'"
+			[ "$WG_ENABLE" = 1 ] && adguard_upstream="$adguard_upstream '[/vpn.lan/]${wg_net_pfx}.1:54'"
 		}
 
 		setup_dnsmasq_upstream
@@ -1267,7 +1278,7 @@ doh_upstreams="${DOH_UPSTREAMS:-https://dns.adguard-dns.com/dns-query}"
 		_uci https-dns-proxy "" "" resolver_url="$u" bootstrap_dns="$bootstrap_csv"
 	done
 
-	for i in $lan_ifaces; do
+	for i in $ifaces_lan; do
 		_uci dhcp dnsmasq "${i}_dns" noresolv=1 cachesize=500
 	done
 
@@ -1336,11 +1347,11 @@ fw_redirect_ntp() {
 		name="$1 Redirect-NTP" src="$1" src_dport=123 family=any proto=udp
 }
 
-_uci firewall zone @zone[0] ~lan
+_uci firewall zone @zone[0] ^network=lan +network="$lan_if" ~lan
 fw_redirect_dns lan
 
 [ "$GUEST_ENABLE" = 1 ] && {
-	fw_add_zone guest
+	fw_add_zone guest "$guest_if"
 	fw_add_base_rules guest
 	fw_redirect_dns guest
 	fw_add_forwarding guest wan
@@ -1352,7 +1363,7 @@ fw_redirect_dns lan
 }
 
 [ "$IOT_ENABLE" = 1 ] && {
-	fw_add_zone iot
+	fw_add_zone iot "$iot_if"
 	fw_add_base_rules iot
 	fw_redirect_dns iot
 	fw_redirect_ntp iot
@@ -1364,19 +1375,19 @@ fw_redirect_dns lan
 
 [ "$WG_ENABLE" = 1 ] && {
 	_uci firewall zone "" \
-		name="lan_${wg_iface}" +network="lan_${wg_iface}" \
+		name=lan_vpn +network="$lan_wg_if" \
 		input=ACCEPT output=ACCEPT forward=REJECT
 
 	[ "$AP_MODE" != 1 ] && {
-		fw_add_forwarding "lan_${wg_iface}" lan
-		fw_add_forwarding lan "lan_${wg_iface}"
+		fw_add_forwarding lan_vpn lan
+		fw_add_forwarding lan lan_vpn
 		fw_add_zone wan_nat6 "$wg_iface" 1 1 1
-		fw_add_forwarding "lan_${wg_iface}" wan_nat6
+		fw_add_forwarding lan_vpn wan_nat6
 	}
 }
 
-_uci firewall zone @zone[1] ~wan -network
-for i in $wan_ifaces; do
+_uci firewall zone @zone[1] -network ~wan
+for i in $ifaces_wan; do
 	_uci firewall zone wan +network="$i"
 done
 
@@ -1397,7 +1408,7 @@ add_cf_ddns() {
 	[ "$ip_source" = script ] && {
 		ip_key=ip_script
 		name="${network_or_hostname//-/_}_ipv6"
-		network_or_hostname="ip6host $network_or_hostname"
+		network_or_hostname="ip6host $network_or_hostname $lan_if"
 	}
 
 	_uci ddns service "$name" \
