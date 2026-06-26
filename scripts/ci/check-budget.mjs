@@ -2,12 +2,11 @@
 // CI gate: initial byte budget (SPEC Section 0 NFR "Byte budget").
 //
 // CSS is enforced at the NFR ceiling (15 KB gzipped) - it passes comfortably
-// today. JS is RATCHETED: the SPEC target is 30 KB gzipped initial JS, but the
-// shipping app is ~2x over that, dominated by i18n.js (7 locales) and
-// networks.js. Cutting it in half is a perf refactor out of scope for the
-// typing/tests/CI branch, so this gate instead locks JS at a ceiling just above
-// today's measured size to prevent further growth. Tighten JS_CEILING_KB toward
-// 30 as i18n/networks are slimmed in a future perf branch.
+// today. JS is RATCHETED: the SPEC target is 30 KB gzipped initial JS. The i18n
+// locales are now lazy-loaded (only the active non-English locale is fetched via
+// dynamic import(), which this gate does not count), so only en + core ship in
+// the initial graph - that roughly halved the worst page. The remaining gap to 30
+// is dominated by networks.js; tighten JS_CEILING_KB further as it is slimmed.
 
 import { readFileSync, existsSync, globSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
@@ -19,9 +18,8 @@ const root = resolve(here, '..', '..');
 
 const CSS_NFR_KB = 15;       // hard NFR - enforced
 const JS_TARGET_KB = 30;     // SPEC NFR target - documented, not yet met
-const JS_CEILING_KB = 83;    // ratchet: current worst page ~82.5 KB (/networks, after the
-                             // per-network interface-name column + anchored subnet selects);
-                             // no growth past this
+const JS_CEILING_KB = 55;    // ratchet: current worst page ~53.1 KB (/networks, after i18n
+                             // locales were moved to lazy dynamic import()); no growth past this
 
 const PAGES = {
   builder: 'public/builder/index.html',

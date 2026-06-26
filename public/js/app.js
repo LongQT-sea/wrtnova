@@ -3,7 +3,7 @@
 // toggle is handled by theme.js (a standalone classic script).
 import { ui } from './ui-ns.mjs';
 import './ui.js';
-import './i18n.js';
+import './i18n/core.mjs';
 import './tzdata.js';
 import { initDeviceCombo, loadVersions } from './devices.js';
 import './build.js';

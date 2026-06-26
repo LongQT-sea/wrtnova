@@ -1,13 +1,13 @@
 // /networks fleet builder: per-network shared-config editor, multi-node build
 // orchestration, device picker, WARP prefill. ES module. Imports ui.js (DOM
-// helpers) and i18n.js (ui.S/ui.t) for their side effects so the values captured
+// helpers) and i18n/core.mjs (ui.S/ui.t) for their side effects so the values captured
 // at module-eval time below exist; tzdata.js is pulled for the timezone combo
 // used at runtime. Pure logic (mergeNodeConfig, createStore, renderConfigBlock,
 // parseList, config-form) is imported directly from the typed .mjs; the UI-method
 // wrappers (computeFinalPackages, renderConfigBlockMasked, ...) come off ui.
 import { ui } from './ui-ns.mjs';
 import './ui.js';
-import './i18n.js';
+import './i18n/core.mjs';
 import './tzdata.js';
 import { BASE_SCHEMA, readForm, writeForm } from './config-form.mjs';
 import { mergeNodeConfig } from './config-merge.mjs';

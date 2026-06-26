@@ -13,12 +13,25 @@
 //                            text-comparable without a real DOM)
 
 import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
 
 const PAGES = [
   { html: 'public/index.html',          table: 'public/js/i18n-landing.js' },
-  { html: 'public/builder/index.html',  table: 'public/js/i18n.js' },
-  { html: 'public/networks/index.html', table: 'public/js/i18n.js' },
+  { html: 'public/builder/index.html',  table: 'public/js/i18n/en.mjs' },
+  { html: 'public/networks/index.html', table: 'public/js/i18n/en.mjs' },
 ];
+
+// Two paths because i18n-landing.js still inlines `const locales = {...}` (needs
+// brace-matching) while the split locale files just export the table as a default.
+async function loadEn(file) {
+  if (file.endsWith('.mjs')) {
+    const mod = await import(pathToFileURL(resolve(file)).href);
+    if (!mod.default) throw new Error(`${file}: no default export`);
+    return mod.default;
+  }
+  return extractEn(readFileSync(file, 'utf8'), file);
+}
 
 // ---- pull the `en` object out of a module source (no browser eval) ----
 function extractEn(src, file) {
@@ -101,7 +114,7 @@ let checked = 0;
 
 for (const { html: htmlPath, table } of PAGES) {
   const html = readFileSync(htmlPath, 'utf8');
-  const en = extractEn(readFileSync(table, 'utf8'), table);
+  const en = await loadEn(table);
   let m;
   while ((m = ATTR_RE.exec(html))) {
     const kind = m[1] || '';          // '', '-placeholder', '-html'

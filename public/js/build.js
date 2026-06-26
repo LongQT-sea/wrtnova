@@ -1,5 +1,5 @@
 // /builder build flow, config store, live preview, WARP prefill. ES module.
-// Imports ui.js (DOM helpers) and i18n.js (ui.t/ui.S) for their side effects so
+// Imports ui.js (DOM helpers) and i18n/core.mjs (ui.t/ui.S) for their side effects so
 // the values captured below exist at module-eval time; pure logic (deriveConfig,
 // createStore, renderConfigBlock, config-form) is imported directly from the
 // typed .mjs. Still publishes its own callbacks (renderAutoPackages,
@@ -7,7 +7,7 @@
 // until those import it directly.
 import { ui } from './ui-ns.mjs';
 import './ui.js';
-import './i18n.js';
+import './i18n/core.mjs';
 import { BUILDER_SCHEMA, readForm, keySets, textVal, SUBNET_KEYS, writeSubnet } from './config-form.mjs';
 import { deriveConfig } from './builder-config.mjs';
 import { deriveNetRows } from './visibility.mjs';

@@ -27,7 +27,8 @@
     "check:no-dupes": "node scripts/ci/check-no-dupes.mjs",
     "check:budget": "node scripts/ci/check-budget.mjs",
     "check:i18n": "node scripts/ci/check-i18n-html.mjs",
-    "ci": "npm run typecheck && npm test && npm run check:no-zero && npm run check:marker && npm run check:no-dupes && npm run check:budget && npm run check:i18n"
+    "check:i18n-locales": "node scripts/ci/check-i18n-locales.mjs",
+    "ci": "npm run typecheck && npm test && npm run check:no-zero && npm run check:marker && npm run check:no-dupes && npm run check:budget && npm run check:i18n && npm run check:i18n-locales"
   },
   "devDependencies": {
     "playwright": "^1.60.0",
