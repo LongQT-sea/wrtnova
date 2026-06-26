@@ -648,10 +648,11 @@
   }
   .dark .net-table td { border-bottom-color: #1f1f23; }
   .net-table tr:last-child td { border-bottom: none; }
-  .net-table .col-pfx { width: 18%; }
-  .net-table .col-vid { width: 11%; }
-  .net-table .col-sub { width: 24%; }
-  .net-table .col-ip  { width: 22%; }
+  .net-table .col-if  { width: 19%; }
+  .net-table .col-pfx { width: 15%; }
+  .net-table .col-vid { width: 10%; }
+  .net-table .col-sub { width: 12%; }
+  .net-table .col-ip  { width: 20%; }
   .net-table .input-base {
     font-size: 0.8125rem;
     padding: 0.35rem 0.5rem;
@@ -771,6 +772,7 @@
       flex-shrink: 0;
     }
     .net-table td.col-en::before { content: none; }
+    .net-table .col-if,
     .net-table .col-pfx,
     .net-table .col-vid,
     .net-table .col-sub,

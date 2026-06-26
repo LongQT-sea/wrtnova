@@ -8,7 +8,7 @@
 import { ui } from './ui-ns.mjs';
 import './ui.js';
 import './i18n.js';
-import { BUILDER_SCHEMA, readForm, keySets, textVal } from './config-form.mjs';
+import { BUILDER_SCHEMA, readForm, keySets, textVal, SUBNET_KEYS, writeSubnet } from './config-form.mjs';
 import { deriveConfig } from './builder-config.mjs';
 import { deriveNetRows } from './visibility.mjs';
 import { createStore } from './store.mjs';
@@ -159,6 +159,11 @@ import { collectTarget, devicesState } from './devices.js';
         if (el) el.checked = val === '1';
         continue;
       }
+      if (SUBNET_KEYS.has(k)) {                          // anchored subnet select
+        const el = $('#' + k);
+        if (el) writeSubnet(el, val || '');
+        continue;
+      }
       const el = $('#' + k);                            // text / select / textarea
       if (el && 'value' in el) el.value = val == null ? '' : val;
     }
@@ -285,6 +290,7 @@ import { collectTarget, devicesState } from './devices.js';
     store.subscribe(() => { renderAutoPackages(); syncSsidPlaceholders(); syncApIndexPreview(); renderPreview(); });
     document.body.addEventListener('input',  refreshStore);
     document.body.addEventListener('change', refreshStore);
+    if (ui.wireSubnetAnchors) ui.wireSubnetAnchors();
     $('#version')?.addEventListener('change', () => updatePacketSteeringOpts($('#version').value));
     updatePacketSteeringOpts(devicesState.version);
     initPreviewControls();

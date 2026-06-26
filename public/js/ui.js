@@ -65,6 +65,15 @@ import { SENSITIVE_KEYS } from './types.mjs';
     });
   };
 
+  ui.wireSubnetAnchors = function () {
+    const mark = function (e) {
+      const t = e.target;
+      if (t && t.classList && t.classList.contains('net-sub')) t.dataset.explicit = '1';
+    };
+    document.addEventListener('input', mark, true);
+    document.addEventListener('change', mark, true);
+  };
+
   ui.status = function (msg, kind /* 'info' | 'error' | 'success' */) {
     const el = ui.$('#status');
     el.textContent = msg;
@@ -128,10 +137,12 @@ import { SENSITIVE_KEYS } from './types.mjs';
       if (!r) return;
       const pfxEl = row.querySelector('[id$="_BASE_PREFIX"]');
       const ipEl  = ui.$('.net-derived', row);
-      const defEl = row.querySelector('.net-sub-def');
+      const subEl = row.querySelector('[id$="_SUBNET"]');
 
       if (pfxEl) pfxEl.placeholder = r.basePfx;
-      if (defEl) defEl.textContent  = ui.t ? ui.t('defaultSubnetDynamic', { sub: r.defSub }) : 'Default (' + r.defSub + ')';
+      // Anchored subnet selects (no explicit user pick) cosmetically track the
+      // global Default subnet; the store value stays '' (see config-form.mjs).
+      if (subEl && !subEl.dataset.explicit) subEl.value = r.defSub;
       if (ipEl) {
         ipEl.innerHTML = r.hasIp
           ? r.effPfx + '.' + r.effVid + '.' + r.lastOct + '<span class="net-derived-sfx">' + r.effSub + '</span>'

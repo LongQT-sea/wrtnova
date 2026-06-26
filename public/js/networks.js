@@ -79,11 +79,11 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'], ...BASE_SCHE
       HOST_NAME: '', ROOT_PASSWD: '', SSH_PUBLIC_KEY: '',
       SSH_PASSWD_AUTH: '', ZONE_NAME: '', TIME_ZONE: '',
       BASE_NET_PREFIX: '', DEFAULT_SUBNET: '',
-      LAN_BASE_PREFIX: '', LAN_VLAN_ID: '', LAN_SUBNET: '',
-      GUEST_ENABLE: '1', GUEST_BASE_PREFIX: '', GUEST_VLAN_ID: '', GUEST_SUBNET: '',
-      IOT_ENABLE: '', IOT_BASE_PREFIX: '', IOT_VLAN_ID: '', IOT_SUBNET: '',
+      LAN_BASE_PREFIX: '', LAN_IFACE: '', LAN_VLAN_ID: '', LAN_SUBNET: '',
+      GUEST_ENABLE: '1', GUEST_BASE_PREFIX: '', GUEST_IFACE: '', GUEST_VLAN_ID: '', GUEST_SUBNET: '',
+      IOT_ENABLE: '', IOT_BASE_PREFIX: '', IOT_IFACE: '', IOT_VLAN_ID: '', IOT_SUBNET: '',
       IOT_INTERNET: '', IOT_ROUTE_VIA_WG: '',
-      WG_ENABLE: '', LAN_WG_BASE_PREFIX: '', LAN_WG_VLAN_ID: '', LAN_WG_SUBNET: '',
+      WG_ENABLE: '', LAN_WG_BASE_PREFIX: '', LAN_WG_IFACE: '', LAN_WG_VLAN_ID: '', LAN_WG_SUBNET: '',
       ADDITIONAL_VLAN_LIST: '',
       P_STEERING: '', ULA_PREFIX: '',
       WG_PRIVATE_KEY: '', PEER_PUBLIC_KEY: '', ENDPOINT: '',
@@ -1784,6 +1784,7 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'], ...BASE_SCHE
     if (ui.initConditionalVisibility) ui.initConditionalVisibility();
     if (ui.initPasswordToggles) ui.initPasswordToggles();
     if (ui.wireDotTouches) ui.wireDotTouches();
+    if (ui.wireSubnetAnchors) ui.wireSubnetAnchors();
 
     // Hostname -> SSID placeholder sync
     document.getElementById('HOST_NAME')?.addEventListener('input', syncSsidPlaceholders);

@@ -202,6 +202,7 @@
               <tr>
                 <th data-i18n="tableOn">On</th>
                 <th data-i18n="tableNetwork">Network</th>
+                <th class="col-if" data-i18n="tableIface">Interface name</th>
                 <th class="col-pfx" data-i18n="tableIpPrefix">IP prefix</th>
                 <th class="col-vid" data-i18n="tableVlanId">VLAN ID</th>
                 <th class="col-sub" data-i18n="tableSubnet">Subnet</th>
@@ -218,11 +219,11 @@
                   </span>
                 </td>
                 <td data-label="Network"><span class="net-name">LAN</span></td>
+                <td class="col-if" data-label="Interface name"><input type="text" id="LAN_IFACE" name="LAN_IFACE" class="input-base" placeholder="lan"></td>
                 <td class="col-pfx" data-label="Prefix"><input type="text" id="LAN_BASE_PREFIX" name="LAN_BASE_PREFIX" class="input-base" placeholder="192.168" list="prefix-options"></td>
                 <td class="col-vid" data-label="VLAN"><input type="number" id="LAN_VLAN_ID" name="LAN_VLAN_ID" class="input-base" min="1" max="255" placeholder="1"></td>
                 <td class="col-sub" data-label="Subnet">
-                  <select id="LAN_SUBNET" name="LAN_SUBNET" class="input-base" aria-label="LAN subnet">
-                    <option value="" class="net-sub-def" data-i18n="defaultSubnetShort">Default (/24)</option>
+                  <select id="LAN_SUBNET" name="LAN_SUBNET" class="input-base net-sub" aria-label="LAN subnet">
                     <option value="/24">/24</option>
                     <option value="/23">/23</option>
                     <option value="/22">/22</option>
@@ -239,11 +240,11 @@
                   </span>
                 </td>
                 <td data-label="Network"><span class="net-name">Guest</span></td>
+                <td class="col-if" data-label="Interface name"><input type="text" id="GUEST_IFACE" name="GUEST_IFACE" class="input-base" placeholder="guest"></td>
                 <td class="col-pfx" data-label="Prefix"><input type="text" id="GUEST_BASE_PREFIX" name="GUEST_BASE_PREFIX" class="input-base" placeholder="192.168" list="prefix-options"></td>
                 <td class="col-vid" data-label="VLAN"><input type="number" id="GUEST_VLAN_ID" name="GUEST_VLAN_ID" class="input-base" min="1" max="255" placeholder="5"></td>
                 <td class="col-sub" data-label="Subnet">
-                  <select id="GUEST_SUBNET" name="GUEST_SUBNET" class="input-base" aria-label="Guest subnet">
-                    <option value="" class="net-sub-def" data-i18n="defaultSubnetShort">Default (/24)</option>
+                  <select id="GUEST_SUBNET" name="GUEST_SUBNET" class="input-base net-sub" aria-label="Guest subnet">
                     <option value="/24">/24</option>
                     <option value="/23">/23</option>
                     <option value="/22">/22</option>
@@ -260,11 +261,11 @@
                   </span>
                 </td>
                 <td data-label="Network"><span class="net-name">IoT</span></td>
+                <td class="col-if" data-label="Interface name"><input type="text" id="IOT_IFACE" name="IOT_IFACE" class="input-base" placeholder="iot"></td>
                 <td class="col-pfx" data-label="Prefix"><input type="text" id="IOT_BASE_PREFIX" name="IOT_BASE_PREFIX" class="input-base" placeholder="192.168" list="prefix-options"></td>
                 <td class="col-vid" data-label="VLAN"><input type="number" id="IOT_VLAN_ID" name="IOT_VLAN_ID" class="input-base" min="1" max="255" placeholder="10"></td>
                 <td class="col-sub" data-label="Subnet">
-                  <select id="IOT_SUBNET" name="IOT_SUBNET" class="input-base" aria-label="IoT subnet">
-                    <option value="" class="net-sub-def" data-i18n="defaultSubnetShort">Default (/24)</option>
+                  <select id="IOT_SUBNET" name="IOT_SUBNET" class="input-base net-sub" aria-label="IoT subnet">
                     <option value="/24">/24</option>
                     <option value="/23">/23</option>
                     <option value="/22">/22</option>
@@ -280,12 +281,12 @@
                     <span class="toggle-thumb"></span>
                   </span>
                 </td>
-                <td data-label="Network"><span class="net-name">WireGuard VPN</span></td>
+                <td data-label="Network"><span class="net-name">VPN</span></td>
+                <td class="col-if" data-label="Interface name"><input type="text" id="LAN_WG_IFACE" name="LAN_WG_IFACE" class="input-base" placeholder="lan_vpn"></td>
                 <td class="col-pfx" data-label="Prefix"><input type="text" id="LAN_WG_BASE_PREFIX" name="LAN_WG_BASE_PREFIX" class="input-base" placeholder="192.168" list="prefix-options"></td>
                 <td class="col-vid" data-label="VLAN"><input type="number" id="LAN_WG_VLAN_ID" name="LAN_WG_VLAN_ID" class="input-base" min="1" max="255" placeholder="15"></td>
                 <td class="col-sub" data-label="Subnet">
-                  <select id="LAN_WG_SUBNET" name="LAN_WG_SUBNET" class="input-base" aria-label="WireGuard VPN subnet">
-                    <option value="" class="net-sub-def" data-i18n="defaultSubnetShort">Default (/24)</option>
+                  <select id="LAN_WG_SUBNET" name="LAN_WG_SUBNET" class="input-base net-sub" aria-label="VPN subnet">
                     <option value="/24">/24</option>
                     <option value="/23">/23</option>
                     <option value="/22">/22</option>
@@ -320,11 +321,11 @@
 
           <p class="form-help mt-1 net-dup-warn hidden" id="net-dup-warn" data-i18n="vlanDupWarn">⚠ Two networks are set to the same VLAN ID, or a VLAN ID overlaps a trunk VLAN - fix it before building.</p>
 
-          <p class="form-help mt-2 wg-help-router" data-i18n="wgNetworkDesc">WireGuard VPN network is a dedicated network with its own WiFi SSID; all its traffic is routed through the WireGuard VPN client.</p>
+          <p class="form-help mt-2 wg-help-router" data-i18n="wgNetworkDesc">VPN network is a dedicated network with its own WiFi SSID; all its traffic is routed through the WireGuard VPN client.</p>
           <p class="form-help mt-2 ap-only hidden" data-i18n="apModeNetworkNote">In AP mode, only L2 networks are created (VLAN and WiFi SSID) for Guest, IoT, and WireGuard VPN — L3 traffic is routed back to the main router.</p>
 
           <div class="form-row" style="margin-top:1.25rem">
-            <label for="ADDITIONAL_VLAN_LIST" class="form-label" data-i18n="additionalTrunkVlans">Additional trunk VLANs</label>
+            <label for="ADDITIONAL_VLAN_LIST" class="form-label" data-i18n="additionalTrunkVlans">Additional VLANs</label>
             <div>
               <input type="text" id="ADDITIONAL_VLAN_LIST" name="ADDITIONAL_VLAN_LIST" class="input-base" placeholder="e.g. 25 30 40  or  30-50">
               <p class="form-help" data-i18n="additionalTrunkHelp">Extra VLAN IDs to trunk (tagged) through every port on this device. Space-separated; ranges as low-high.</p>

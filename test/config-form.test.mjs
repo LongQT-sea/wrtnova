@@ -12,7 +12,7 @@ import assert from 'node:assert/strict';
 
 import { BASE_SCHEMA, keySets } from '../public/js/config-form.mjs';
 
-const KINDS = new Set(['text', 'checkbox', 'radio', 'select', 'country', 'tz', 'table']);
+const KINDS = new Set(['text', 'checkbox', 'radio', 'select', 'subnet', 'country', 'tz', 'table']);
 
 test('BASE_SCHEMA: every descriptor has a known kind', () => {
   for (const [key, kind] of BASE_SCHEMA) {

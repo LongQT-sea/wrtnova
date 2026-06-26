@@ -22,12 +22,19 @@ export const checkboxVal = (id)   => { const el = $('#' + id); return el && el.c
 export const textVal     = (id)   => ($('#' + id) || {}).value || '';
 export const radioVal    = (name) => ($('input[name="' + name + '"]:checked') || {}).value || '';
 export const selectVal   = (id)   => ($('#' + id) || {}).value || '';
+export const SUBNET_KEYS = new Set(['LAN_SUBNET', 'GUEST_SUBNET', 'IOT_SUBNET', 'LAN_WG_SUBNET']);
+export const subnetVal   = (id)   => { const el = $('#' + id); return el && el.dataset.explicit ? (el.value || '') : ''; };
+export function writeSubnet(el, val) {
+  if (val) { el.value = val; el.dataset.explicit = '1'; }  // explicit override
+  else delete el.dataset.explicit;                         // re-anchor
+}
 
 // -- Field schema ------------------------------------------------------------
 // Each descriptor is [key, kind, opt?, radioDefault?]:
 //   text|checkbox  : key === control id
 //   radio          : key === input name; radioDefault is the write-side fallback
 //   select         : opt === control id (when it differs from the config key)
+//   subnet         : per-network subnet select; '' when anchored (see subnetVal)
 //   country        : text + .toUpperCase()
 //   tz             : emits ZONE_NAME + TIME_ZONE via ui.collectTimezone()
 //   table          : opt === table kind for ui.serializeRows (write: page loads it)
@@ -41,11 +48,11 @@ export const BASE_SCHEMA = /** @type {[string,string,(string|undefined)?,(string
   ['SSH_PASSWD_AUTH', 'radio', undefined, ''],
   ['__tz__', 'tz'],
   ['BASE_NET_PREFIX', 'text'], ['DEFAULT_SUBNET', 'text'],
-  ['LAN_BASE_PREFIX', 'text'], ['LAN_VLAN_ID', 'text'], ['LAN_SUBNET', 'text'],
-  ['GUEST_ENABLE', 'checkbox'], ['GUEST_BASE_PREFIX', 'text'], ['GUEST_VLAN_ID', 'text'], ['GUEST_SUBNET', 'text'],
-  ['IOT_ENABLE', 'checkbox'], ['IOT_BASE_PREFIX', 'text'], ['IOT_VLAN_ID', 'text'], ['IOT_SUBNET', 'text'],
+  ['LAN_BASE_PREFIX', 'text'], ['LAN_IFACE', 'text'], ['LAN_VLAN_ID', 'text'], ['LAN_SUBNET', 'subnet'],
+  ['GUEST_ENABLE', 'checkbox'], ['GUEST_BASE_PREFIX', 'text'], ['GUEST_IFACE', 'text'], ['GUEST_VLAN_ID', 'text'], ['GUEST_SUBNET', 'subnet'],
+  ['IOT_ENABLE', 'checkbox'], ['IOT_BASE_PREFIX', 'text'], ['IOT_IFACE', 'text'], ['IOT_VLAN_ID', 'text'], ['IOT_SUBNET', 'subnet'],
   ['IOT_INTERNET', 'checkbox'], ['IOT_ROUTE_VIA_WG', 'checkbox'],
-  ['WG_ENABLE', 'checkbox'], ['LAN_WG_BASE_PREFIX', 'text'], ['LAN_WG_VLAN_ID', 'text'], ['LAN_WG_SUBNET', 'text'],
+  ['WG_ENABLE', 'checkbox'], ['LAN_WG_BASE_PREFIX', 'text'], ['LAN_WG_IFACE', 'text'], ['LAN_WG_VLAN_ID', 'text'], ['LAN_WG_SUBNET', 'subnet'],
   ['ADDITIONAL_VLAN_LIST', 'text'],
   ['P_STEERING', 'select'], ['ULA_PREFIX', 'text'],
   ['WG_PRIVATE_KEY', 'text'], ['PEER_PUBLIC_KEY', 'text'], ['ENDPOINT', 'text'], ['ENDPOINT_PORT', 'text'],
@@ -92,6 +99,7 @@ export function readForm(schema) {
       case 'checkbox': out[key] = checkboxVal(key); break;
       case 'radio':    out[key] = radioVal(key); break;
       case 'select':   out[key] = selectVal(opt || key); break;
+      case 'subnet':   out[key] = subnetVal(key); break;
       case 'country':  out[key] = textVal(key).toUpperCase(); break;
       case 'tz':       Object.assign(out, ui.collectTimezone()); break;
       case 'table':    out[key] = ui.serializeRows(opt); break;
@@ -125,6 +133,7 @@ export function writeForm(schema, cfg) {
     const el = document.getElementById(id);
     if (!el) continue;
     if (kind === 'checkbox') el.checked = cfg[key] === '1' || cfg[key] === true;
+    else if (kind === 'subnet') writeSubnet(el, cfg[key] || '');
     else el.value = cfg[key] || '';
   }
 }
