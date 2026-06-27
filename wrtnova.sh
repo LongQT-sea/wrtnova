@@ -23,17 +23,17 @@ COUNTRY_CODE=
 WIFI_KVR=1		# 1 = Enable fast roaming & band-steering 802.11k/v/r
 DENSE_ENV=		# 1 = optimize roaming and steering for high-interference areas
 
-LAN_WIFI_SSID=""	# Default: HOST_NAME
+LAN_WIFI_SSID=""	# Default: WrtNova
 LAN_WIFI_PASSWD=""
 
-GUEST_WIFI_SSID=""	# Default: HOST_NAME_Guest
+GUEST_WIFI_SSID=""	# Default: WrtNova_Guest
 GUEST_WIFI_PASSWD=""
 GUEST_ISOLATE=		# 1 = Isolates guest wifi clients from each other
 
-IOT_WIFI_SSID=""	# Default: HOST_NAME_IoT
+IOT_WIFI_SSID=""	# Default: WrtNova_IoT
 IOT_WIFI_PASSWD=""
 
-LAN_WG_WIFI_SSID=""	# Default: HOST_NAME_VPN
+LAN_WG_WIFI_SSID=""	# Default: WrtNova_VPN
 LAN_WG_WIFI_PASSWD=""
 
 # NOTE: Wired backhaul is always better when feasible
@@ -314,11 +314,10 @@ board_info=$(ubus call system board)
 os_version=$(echo "$board_info" | jsonfilter -e '@.release.version' | cut -d. -f1)
 [ "$os_version" = 25 ] && ZONE_NAME="${ZONE_NAME// /_}"
 
-HOST_NAME="${HOST_NAME:-WrtNova}"
+host_name="${HOST_NAME:-WrtNova${AP_MODE:+-${AP_INDEX:=2}}}"
 
 _uci system "" "@system[0]" \
-	hostname="${HOST_NAME}${AP_MODE:+-${AP_INDEX:=2}}" \
-	"${ZONE_NAME:+zonename=$ZONE_NAME}" "${TIME_ZONE:+timezone=$TIME_ZONE}"
+	hostname="$host_name" "${ZONE_NAME:+zonename=$ZONE_NAME}" "${TIME_ZONE:+timezone=$TIME_ZONE}"
 
 uci set uhttpd.main.redirect_https=1
 
@@ -431,13 +430,13 @@ has_pkg wpad-mbed wpad-open wpad-wolf wpad-mesh || WIRELESS_MESH=
 has_pkg luci-proto-batman || BATMAN_ADV=
 
 def_pass="${DEFAULT_WIFI_PASSWD:-12345678}"
-lan_ssid="${LAN_WIFI_SSID:-$HOST_NAME}"
+lan_ssid="${LAN_WIFI_SSID:-WrtNova}"
 lan_pass="${LAN_WIFI_PASSWD:-$def_pass}"
-guest_ssid="${GUEST_WIFI_SSID:-${HOST_NAME}_Guest}"
+guest_ssid="${GUEST_WIFI_SSID:-WrtNova_Guest}"
 guest_pass="${GUEST_WIFI_PASSWD:-$def_pass}"
-iot_ssid="${IOT_WIFI_SSID:-${HOST_NAME}_IoT}"
+iot_ssid="${IOT_WIFI_SSID:-WrtNova_IoT}"
 iot_pass="${IOT_WIFI_PASSWD:-$def_pass}"
-lan_wg_ssid="${LAN_WG_WIFI_SSID:-${HOST_NAME}_VPN}"
+lan_wg_ssid="${LAN_WG_WIFI_SSID:-WrtNova_VPN}"
 lan_wg_pass="${LAN_WG_WIFI_PASSWD:-$def_pass}"
 mesh_id="${MESH_ID:-mesh0_5ghz}"
 mesh_pass="${MESH_PASSWD:-$def_pass}"
@@ -1150,7 +1149,7 @@ _uci system timeserver ntp -server \
 
 cat >> /etc/hosts << EOF
 
-${ula_prefix%%/*}1	${HOST_NAME}${AP_MODE:+-$AP_INDEX}
+${ula_prefix%%/*}1	$host_name
 
 216.239.35.0		time1.google.com
 216.239.35.4		time2.google.com
@@ -1347,7 +1346,7 @@ fw_redirect_ntp() {
 		name="$1 Redirect-NTP" src="$1" src_dport=123 family=any proto=udp
 }
 
-_uci firewall zone @zone[0] ^network=lan +network="$lan_if" ~lan
+_uci firewall zone @zone[0] -network +network="$lan_if" ~lan
 fw_redirect_dns lan
 
 [ "$GUEST_ENABLE" = 1 ] && {
