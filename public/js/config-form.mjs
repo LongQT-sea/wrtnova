@@ -62,7 +62,7 @@ export const BASE_SCHEMA = /** @type {[string,string,(string|undefined)?,(string
   ['WAN_MAC_ADDR', 'text'], ['WAN_IS_TAGGED', 'checkbox'], ['WAN_VLAN_ID', 'text'],
   ['WAN_B_ENABLE', 'checkbox'], ['WAN_B_VLAN_ID', 'text'], ['BRIDGE_WAN_PORT', 'checkbox'],
   ['COUNTRY_CODE', 'country'],
-  ['DENSE_ENV', 'checkbox'], ['WIRELESS_MESH', 'checkbox'],
+  ['DENSE_ENV', 'checkbox'], ['WIRELESS_MESH', 'checkbox'], ['BRIDGE_STP', 'checkbox'],
   ['MESH_ID', 'text'], ['MESH_PASSWD', 'text'],
   ['LAN_WIFI_SSID', 'text'], ['LAN_WIFI_PASSWD', 'text'],
   ['GUEST_WIFI_SSID', 'text'], ['GUEST_WIFI_PASSWD', 'text'], ['GUEST_ISOLATE', 'checkbox'],

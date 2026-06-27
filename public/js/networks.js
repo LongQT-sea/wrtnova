@@ -103,7 +103,7 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
       wan_type: 'dhcp', PPPOE_USERNAME: '', PPPOE_PASSWD: '',
       WAN_MAC_ADDR: '', WAN_IS_TAGGED: '', WAN_VLAN_ID: '',
       WAN_B_ENABLE: '', WAN_B_VLAN_ID: '', BRIDGE_WAN_PORT: '',
-      COUNTRY_CODE: '', DENSE_ENV: '', WIRELESS_MESH: '',
+      COUNTRY_CODE: '', DENSE_ENV: '', WIRELESS_MESH: '', BRIDGE_STP: '',
       MESH_ID: '', MESH_PASSWD: '',
       LAN_WIFI_SSID: '', LAN_WIFI_PASSWD: '',
       GUEST_WIFI_SSID: '', GUEST_WIFI_PASSWD: '',
@@ -485,7 +485,7 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
 
   function versionRow(id, currentOverride, sharedVersion) {
     return '<div class="form-row"><label class="form-label" for="np-ver-' + id + '">' + S.openWrtVersion + '</label>' +
-      '<select class="input-base" id="np-ver-' + id + '" style="max-width:200px">' +
+      '<select class="input-base" id="np-ver-' + id + '" style="max-width:220px">' +
       versionOpts(currentOverride, sharedVersion) +
       '</select></div>';
   }

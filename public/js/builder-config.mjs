@@ -90,6 +90,7 @@ export function deriveConfig(raw) {
     DENSE_ENV:      v('DENSE_ENV'),
     WIFI_KVR:       v('WIFI_KVR'),
     WIRELESS_MESH:  v('WIRELESS_MESH'),
+    BRIDGE_STP:     meshOn ? v('BRIDGE_STP')  : '',
     MESH_ID:        meshOn ? v('MESH_ID')     : '',
     MESH_PASSWD:    meshOn ? v('MESH_PASSWD') : '',
 

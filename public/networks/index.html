@@ -551,6 +551,21 @@
               </div>
             </div>
 
+            <div class="form-row mesh-only hidden">
+              <label class="form-label" data-i18n="bridgeStp">Enable STP</label>
+              <div>
+                <label class="toggle-label">
+                  <span class="toggle-wrap">
+                    <input type="checkbox" id="BRIDGE_STP" name="BRIDGE_STP" value="1" class="toggle-input">
+                    <span class="toggle-track"></span>
+                    <span class="toggle-thumb"></span>
+                  </span>
+                  <span class="toggle-text" data-i18n="enableStp">Enable Spanning Tree Protocol for br-vlan</span>
+                </label>
+                <p class="form-help" data-i18n="stpNote">To prevent bridge loops when mixing wired and wireless backhaul.</p>
+              </div>
+            </div>
+
             <div class="mesh-only hidden">
               <div class="form-row">
                 <label for="MESH_ID" class="form-label" data-i18n="meshId">Mesh ID</label>
