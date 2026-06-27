@@ -87,6 +87,8 @@ WAN_B_VLAN_ID=		# Default: 21
 # Additional VLANs to trunk through this device (e.g. "25 30 40" or "30-50"), ranges must be low-high
 ADDITIONAL_VLAN_LIST=""
 
+BRIDGE_STP=		# 1 = enable Spanning Tree Protocol on br-vlan
+
 # === IPv4 Port Forwarding and IPv6 Server Exposure ===
 # Format: hostname | last_octet (20-99) | ports (empty = expose all for IPv6)
 # PORT_FORWARD_LIST: creates a static DHCPv4 lease and NAT port forward from WAN. Ports must be unique.
@@ -789,7 +791,7 @@ if [ "$use_bridge_vlan" = 1 ]; then
 		fi
 	}
 
-	_uci network device @device[0] name=br-vlan -ports
+	_uci network device @device[0] name=br-vlan -ports ${BRIDGE_STP:+stp=1}
 	for p in $lan_ports ${bridge_wan_port:+$wan_port}; do
 		_uci network device @device[0] +ports="$p"
 	done
