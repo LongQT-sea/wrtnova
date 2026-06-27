@@ -905,7 +905,7 @@
     padding-top: 0.5rem;
     padding-bottom: 0.5rem;
   }
-  .config-actions .btn-primary { font-size: 1.0rem; }
+  .config-actions .btn-primary { font-size: 1.0rem; flex: 1; justify-content: center; }
   @media (max-width: 767px) {
     .config-actions {
       position: sticky;
@@ -924,7 +924,7 @@
       background-color: rgba(9,9,11,0.95);
       border-top-color: #27272a;
     }
-    .config-actions .btn-primary { flex: 1; justify-content: center; min-height: 44px; }
+    .config-actions .btn-primary { min-height: 44px; }
   }
 }
 

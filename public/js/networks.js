@@ -17,10 +17,11 @@ import { parseList } from './list-grammar.mjs';
 import { parseAdditionalPackages } from './packages.mjs';
 import { createStore } from './store.mjs';
 
-// Shared-config field schema for /networks: the canonical BASE_SCHEMA with the
-// per-network OpenWrt version select prepended (the only /networks-specific
-// field; AP_MODE/AP_INDEX/NON_CT_ATH10K live on the per-node panel, not here).
-const NET_SCHEMA = [['shared_version', 'select', 'shared-version'], ...BASE_SCHEMA];
+// Shared-config schema for /networks: BASE_SCHEMA plus the per-network version
+// select. HOST_NAME is dropped because hostname is per-node here (as are
+// AP_MODE/AP_INDEX/NON_CT_ATH10K).
+const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
+  ...BASE_SCHEMA.filter(([k]) => k !== 'HOST_NAME')];
 
   // -- Constants ----------------------------------------------------
   const STORE_KEY = 'wrtnova_networks';
@@ -47,6 +48,15 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'], ...BASE_SCHE
         if (node.overrides && node.overrides.AP_MODE !== '1' && 'WAN_MAC_ADDR' in node.overrides) {
           delete node.overrides.WAN_MAC_ADDR;
         }
+      }
+      // Migration: HOST_NAME moved from shared config to per-node overrides. Seed it on
+      // the main router only (APs default to WrtNova-<idx>) so a fleet doesn't end up
+      // with the same hostname on every node.
+      if (net.shared_config && 'HOST_NAME' in net.shared_config) {
+        const h = net.shared_config.HOST_NAME;
+        delete net.shared_config.HOST_NAME;
+        const router = (net.nodes || []).find(n => n.overrides && n.overrides.AP_MODE !== '1');
+        if (h && router && !router.overrides.HOST_NAME) router.overrides.HOST_NAME = h;
       }
     }
     return nets;
@@ -77,7 +87,7 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'], ...BASE_SCHE
   function defaultConfig() {
     return {
       shared_version: '',
-      HOST_NAME: '', ROOT_PASSWD: '', SSH_PUBLIC_KEY: '',
+      ROOT_PASSWD: '', SSH_PUBLIC_KEY: '',
       SSH_PASSWD_AUTH: '', ZONE_NAME: '', TIME_ZONE: '',
       BASE_NET_PREFIX: '', DEFAULT_SUBNET: '',
       LAN_BASE_PREFIX: '', LAN_IFACE: '', LAN_VLAN_ID: '', LAN_SUBNET: '',
@@ -603,6 +613,9 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'], ...BASE_SCHE
         '<div class="form-row"><label class="form-label" for="np-name-' + id + '">' + S.nodeName + '</label>' +
         '<input class="input-base" id="np-name-' + id + '" value="' + esc(node.name) + '" style="max-width:220px"></div>' +
 
+        '<div class="form-row"><label class="form-label" for="np-host-' + id + '">' + S.hostname + '</label>' +
+        '<input class="input-base" id="np-host-' + id + '" value="' + esc(node.overrides.HOST_NAME || '') + '" placeholder="WrtNova" style="max-width:220px"></div>' +
+
         (hasWifi ? '<div class="form-row"><span class="form-label">' + S.wirelessMesh + '</span>' +
         '<label class="toggle-label"><span class="toggle-wrap">' +
         '<input type="checkbox" class="toggle-input" id="np-mesh-' + id + '"' + (meshChecked ? ' checked' : '') + '>' +
@@ -615,6 +628,9 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'], ...BASE_SCHE
 
         '<div class="form-row"><label class="form-label" for="np-name-' + id + '">' + S.nodeName + '</label>' +
         '<input class="input-base" id="np-name-' + id + '" value="' + esc(node.name) + '" style="max-width:220px"></div>' +
+
+        '<div class="form-row"><label class="form-label" for="np-host-' + id + '">' + S.hostname + '</label>' +
+        '<input class="input-base" id="np-host-' + id + '" value="' + esc(node.overrides.HOST_NAME || '') + '" placeholder="WrtNova-' + esc(node.overrides.AP_INDEX || '2') + '" style="max-width:220px"></div>' +
 
         '<div class="form-row"><label class="form-label" for="np-apidx-' + id + '">' + S.apIndex + '</label>' +
         '<div><input type="number" class="input-base" id="np-apidx-' + id + '" min="2" max="19" value="' + esc(node.overrides.AP_INDEX || '2') + '" style="max-width:90px">' +
@@ -676,6 +692,7 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'], ...BASE_SCHE
             .map(n => parseInt(n.overrides.AP_INDEX) || 2);
           while (used.includes(val)) val++;
           idxInp.value = String(val);
+          panel.querySelector('#np-host-' + node.id)?.setAttribute('placeholder', 'WrtNova-' + val);
         });
       }
     }
@@ -701,6 +718,9 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'], ...BASE_SCHE
 
     const nameInp = panel.querySelector('#np-name-' + node.id);
     if (nameInp?.value.trim()) node.name = nameInp.value.trim();
+
+    const hostInp = panel.querySelector('#np-host-' + node.id);
+    if (hostInp) node.overrides.HOST_NAME = hostInp.value.trim();
 
     const verInp = panel.querySelector('#np-ver-' + node.id);
     if (verInp) node.overrides.version = verInp.value;
@@ -844,8 +864,7 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'], ...BASE_SCHE
 
     // Let ui.js refresh conditional visibility
     document.body.dispatchEvent(new Event('change', { bubbles: true }));
-    // Sync hostname -> SSID placeholders
-    if (ui.$ && ui.$('#HOST_NAME')) syncSsidPlaceholders();
+    if (ui.$ && ui.$('#LAN_WIFI_SSID')) syncSsidPlaceholders();
   }
 
   // DOM -> shared config, normalized at the boundary. The field list + ordering
@@ -870,13 +889,14 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'], ...BASE_SCHE
     if (!allow && sel.value === '2') sel.value = '';
   }
 
+  // Static: wrtnova.sh SSID defaults are decoupled from HOST_NAME
+  // (lan_ssid="${LAN_WIFI_SSID:-WrtNova}", etc.).
   function syncSsidPlaceholders() {
-    const name = (document.getElementById('HOST_NAME')?.value || '').trim() || 'WrtNova';
     [
-      ['LAN_WIFI_SSID', name],
-      ['GUEST_WIFI_SSID', name + '_Guest'],
-      ['IOT_WIFI_SSID', name + '_IoT'],
-      ['LAN_WG_WIFI_SSID', name + '_VPN'],
+      ['LAN_WIFI_SSID', 'WrtNova'],
+      ['GUEST_WIFI_SSID', 'WrtNova_Guest'],
+      ['IOT_WIFI_SSID', 'WrtNova_IoT'],
+      ['LAN_WG_WIFI_SSID', 'WrtNova_VPN'],
     ].forEach(([id, ph]) => {
       const el = document.getElementById(id);
       if (el) el.placeholder = ph;
@@ -1778,9 +1798,6 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'], ...BASE_SCHE
     if (ui.initPasswordToggles) ui.initPasswordToggles();
     if (ui.wireDotTouches) ui.wireDotTouches();
     if (ui.wireSubnetAnchors) ui.wireSubnetAnchors();
-
-    // Hostname -> SSID placeholder sync
-    document.getElementById('HOST_NAME')?.addEventListener('input', syncSsidPlaceholders);
 
     // Timezone combo (tzdata.js exposes ui.initTzCombo + ui.loadTzdata)
     if (ui.loadTzdata) ui.loadTzdata().then(() => { if (ui.initTzCombo) ui.initTzCombo(); }).catch(() => {});

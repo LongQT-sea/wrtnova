@@ -244,14 +244,14 @@ import { collectTarget, devicesState } from './devices.js';
     });
   }
 
-  // SSID placeholders track the hostname - a pure selector of the store.
+  // Static: wrtnova.sh SSID defaults are decoupled from HOST_NAME
+  // (lan_ssid="${LAN_WIFI_SSID:-WrtNova}", etc.).
   function syncSsidPlaceholders() {
-    const name = ((store ? store.get().HOST_NAME : textVal('HOST_NAME')) || '').trim() || 'WrtNova';
     [
-      ['LAN_WIFI_SSID',    name],
-      ['GUEST_WIFI_SSID',  name + '_Guest'],
-      ['IOT_WIFI_SSID',    name + '_IoT'],
-      ['LAN_WG_WIFI_SSID', name + '_VPN'],
+      ['LAN_WIFI_SSID',    'WrtNova'],
+      ['GUEST_WIFI_SSID',  'WrtNova_Guest'],
+      ['IOT_WIFI_SSID',    'WrtNova_IoT'],
+      ['LAN_WG_WIFI_SSID', 'WrtNova_VPN'],
     ].forEach(([id, ph]) => { const el = $('#' + id); if (el) el.placeholder = ph; });
   }
   ui.syncSsidPlaceholders = syncSsidPlaceholders;
@@ -281,7 +281,7 @@ import { collectTarget, devicesState } from './devices.js';
     ui.configStore = store;
     // Source of truth for the shared conditional-visibility selectors (ui.js).
     ui.configState = () => store.get();
-    store.subscribe(() => { renderAutoPackages(); syncSsidPlaceholders(); syncApIndexPreview(); renderPreview(); });
+    store.subscribe(() => { renderAutoPackages(); syncApIndexPreview(); renderPreview(); });
     document.body.addEventListener('input',  refreshStore);
     document.body.addEventListener('change', refreshStore);
     if (ui.wireSubnetAnchors) ui.wireSubnetAnchors();
