@@ -923,10 +923,11 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
     const tr = document.createElement('tr');
     tr.innerHTML =
       '<td data-label="Hostname"><input type="text" data-col="host" class="input-base" placeholder="hostname" value="' + esc(host || '') + '"></td>' +
-      '<td data-label="Last octet"><input type="number" data-col="octet" class="input-base" min="2" max="254" placeholder="20" value="' + esc(octet || '') + '"></td>' +
+      '<td data-label="Last octet"><input type="number" data-col="octet" class="input-base" min="10" max="99" placeholder="20" value="' + esc(octet || '') + '"></td>' +
       '<td data-label="Ports"><input type="text" data-col="ports" class="input-base" placeholder="80 443" value="' + esc(ports || '') + '"></td>' +
       '<td><button class="btn btn-icon" type="button" aria-label="Remove row">×</button></td>';
     tr.querySelector('button').addEventListener('click', () => tr.remove());
+    ui.bindOctetClamp(tr.querySelector('[data-col="octet"]'));
     tbody.appendChild(tr);
   }
 

@@ -5,7 +5,7 @@
 import { ui } from './ui-ns.mjs';
 import { renderConfigBlock } from './render-config.mjs';
 import { resolvePackages } from './packages.mjs';
-import { serializeList } from './list-grammar.mjs';
+import { serializeList, clampOctet } from './list-grammar.mjs';
 import { deriveVisibility, deriveNetRows, detectVlanConflict, resolveVlanAssignment } from './visibility.mjs';
 import { SENSITIVE_KEYS } from './types.mjs';
 
@@ -93,13 +93,24 @@ import { SENSITIVE_KEYS } from './types.mjs';
     const tr = document.createElement('tr');
     tr.innerHTML =
       '<td data-label="Hostname"><input type="text" data-col="host" class="input-base" placeholder="docker-host"></td>' +
-      '<td data-label="Last octet"><input type="number" data-col="octet" class="input-base" min="2" max="254" placeholder="20"></td>' +
+      '<td data-label="Last octet"><input type="number" data-col="octet" class="input-base" min="10" max="99" placeholder="20"></td>' +
       '<td data-label="Ports"><input type="text" data-col="ports" class="input-base" placeholder="80 443"></td>' +
       '<td><button class="btn btn-icon" type="button" data-remove="1" aria-label="Remove row">×</button></td>';
     tbody.appendChild(tr);
     tr.querySelector('[data-remove]').addEventListener('click', () => tr.remove());
+    bindOctetClamp(tr.querySelector('[data-col="octet"]'));
     return tr;
   }
+
+  // Clamp on blur so the visible value matches what serializeList writes.
+  function bindOctetClamp(el) {
+    if (!el) return;
+    el.addEventListener('change', () => {
+      const v = el.value.trim();
+      if (v !== '') el.value = clampOctet(v);
+    });
+  }
+  ui.bindOctetClamp = bindOctetClamp;
   ui.addRow = addRow;
   ui.initDynamicRows = function () {
     addRow('portfwd');

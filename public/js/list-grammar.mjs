@@ -15,6 +15,25 @@
 
 /** @typedef {{ host: string, octet: string, ports: string }} ListRow */
 
+// Hosts live at .10-.99: leaves the low end for router/infra and the high end
+// for DHCP.
+const OCTET_MIN = 10;
+const OCTET_MAX = 99;
+
+/**
+ * Clamp a last-octet string to [OCTET_MIN, OCTET_MAX]. Empty or non-numeric
+ * input passes through unchanged (the grammar stays lenient; the DOM keeps the
+ * raw text). Numeric input is clamped and re-stringified.
+ * @param {string} octet
+ * @returns {string}
+ */
+export function clampOctet(octet) {
+  const s = String(octet == null ? '' : octet).trim();
+  if (!/^-?\d+$/.test(s)) return s;
+  const n = parseInt(s, 10);
+  return String(Math.max(OCTET_MIN, Math.min(OCTET_MAX, n)));
+}
+
 /**
  * Parse a stored list block into rows. Blank lines and lines without a '|'
  * separator are skipped (matches the historical filter). Each field is
@@ -45,7 +64,7 @@ export function serializeList(rows) {
   const lines = [];
   for (const r of rows || []) {
     const host = String((r && r.host) || '').trim();
-    const octet = String((r && r.octet) || '').trim();
+    const octet = clampOctet(String((r && r.octet) || '').trim());
     const ports = String((r && r.ports) || '').trim();
     if (!host && !octet) continue;
     lines.push('\t' + host + ' | ' + octet + ' | ' + ports);

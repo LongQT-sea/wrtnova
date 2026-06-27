@@ -6,7 +6,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { parseList, serializeList } from '../public/js/list-grammar.mjs';
+import { parseList, serializeList, clampOctet } from '../public/js/list-grammar.mjs';
 
 // ---------------------------------------------------------------------------
 // parseList
@@ -46,20 +46,48 @@ test('serializeList: empty rows -> empty string (no leading/trailing newline)', 
 });
 
 test('serializeList: wraps non-empty output with leading and trailing newline', () => {
-  const out = serializeList([{ host: 'h', octet: '2', ports: '80' }]);
-  assert.equal(out, '\n\th | 2 | 80\n');
+  const out = serializeList([{ host: 'h', octet: '20', ports: '80' }]);
+  assert.equal(out, '\n\th | 20 | 80\n');
 });
 
 test('serializeList: drops a row with neither host nor octet, keeps octet-only', () => {
   const out = serializeList([
     { host: '', octet: '', ports: '80' },     // dropped (blank row)
-    { host: '', octet: '9', ports: '' },       // kept (octet present)
+    { host: '', octet: '90', ports: '' },      // kept (octet present)
   ]);
-  assert.equal(out, '\n\t | 9 | \n');
+  assert.equal(out, '\n\t | 90 | \n');
 });
 
 test('serializeList: trims fields before emitting', () => {
-  assert.equal(serializeList([{ host: ' h ', octet: ' 2 ', ports: ' 80 ' }]), '\n\th | 2 | 80\n');
+  assert.equal(serializeList([{ host: ' h ', octet: ' 20 ', ports: ' 80 ' }]), '\n\th | 20 | 80\n');
+});
+
+test('serializeList: clamps the last octet to 10-99', () => {
+  assert.equal(serializeList([{ host: 'lo', octet: '2', ports: '80' }]), '\n\tlo | 10 | 80\n');
+  assert.equal(serializeList([{ host: 'hi', octet: '254', ports: '80' }]), '\n\thi | 99 | 80\n');
+  assert.equal(serializeList([{ host: 'ok', octet: '42', ports: '80' }]), '\n\tok | 42 | 80\n');
+});
+
+// ---------------------------------------------------------------------------
+// clampOctet
+// ---------------------------------------------------------------------------
+
+test('clampOctet: clamps numeric input into [10, 99]', () => {
+  assert.equal(clampOctet('2'), '10');
+  assert.equal(clampOctet('9'), '10');
+  assert.equal(clampOctet('10'), '10');
+  assert.equal(clampOctet('99'), '99');
+  assert.equal(clampOctet('100'), '99');
+  assert.equal(clampOctet('254'), '99');
+  assert.equal(clampOctet('-5'), '10');
+});
+
+test('clampOctet: leaves empty / non-numeric input untouched', () => {
+  assert.equal(clampOctet(''), '');
+  assert.equal(clampOctet('  '), '');
+  assert.equal(clampOctet('abc'), 'abc');
+  assert.equal(clampOctet(null), '');
+  assert.equal(clampOctet(undefined), '');
 });
 
 // ---------------------------------------------------------------------------
