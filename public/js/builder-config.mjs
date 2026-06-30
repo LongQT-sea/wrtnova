@@ -135,6 +135,9 @@ export function deriveConfig(raw) {
     // Encrypted-DNS upstreams apply to every engine except 'none'.
     DOH_UPSTREAMS:    (v('DNS_MODE') || 'adguardhome') !== 'none' ? v('DOH_UPSTREAMS') : '',
     BOOTSTRAP_DNS:    (v('DNS_MODE') || 'adguardhome') !== 'none' ? v('BOOTSTRAP_DNS') : '',
+    // UI toggle "Multiple instances" defaults on; emit the opt-out flag only when
+    // the user turns it off (applies in AP mode too).
+    DNSMASQ_SINGLE_INSTANCE: v('DNSMASQ_MULTI_INSTANCE') !== '1' ? '1' : '',
     SOFTWARE_OFFLOAD: v('SOFTWARE_OFFLOAD'),
     HARDWARE_OFFLOAD: v('HARDWARE_OFFLOAD'),
     BLOCK_DOT_DOQ:    v('BLOCK_DOT_DOQ'),

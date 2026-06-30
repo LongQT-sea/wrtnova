@@ -120,7 +120,13 @@ import { selectDevice, loadOverview, devicesState } from './devices.js';
   }
 
   function restoreConfig(cfg) {
-    writeForm(BUILDER_SCHEMA, { ...cfg, wan_type: cfg.PPPOE_USERNAME ? 'pppoe' : 'dhcp' });
+    // wan_type and DNSMASQ_MULTI_INSTANCE are UI-only keys: saved configs carry
+    // the emitted shape (PPPOE_*, DNSMASQ_SINGLE_INSTANCE), so reconstruct them.
+    writeForm(BUILDER_SCHEMA, {
+      ...cfg,
+      wan_type: cfg.PPPOE_USERNAME ? 'pppoe' : 'dhcp',
+      DNSMASQ_MULTI_INSTANCE: cfg.DNSMASQ_SINGLE_INSTANCE === '1' ? '' : '1',
+    });
     if (cfg.ZONE_NAME) {
       if (!ui.setTimezone(cfg.ZONE_NAME)) {
         const tzEl = document.getElementById('timezone');

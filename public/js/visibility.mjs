@@ -74,6 +74,7 @@ export function deriveVisibility(cfg) {
     'wg-help-router': ap,
     'ssh-pw-row': !hasKeys,
     'mesh-only': !on(cfg, 'WIRELESS_MESH'),
+    'dnsmasq-multi-only': !on(cfg, 'DNSMASQ_MULTI_INSTANCE'),
     'wan-tagged-only': !on(cfg, 'WAN_IS_TAGGED'),
     'wan-b-only': !on(cfg, 'WAN_B_ENABLE'),
   };

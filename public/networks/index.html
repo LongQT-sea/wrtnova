@@ -415,6 +415,20 @@
                       <p class="form-help" data-i18n="ulaPrefixHelp">Leave empty to auto-generate a random prefix on first boot.</p>
                     </div>
                   </div>
+                  <div class="form-row">
+                    <label class="form-label" data-i18n="dnsmasqMulti">Per-Network Dnsmasq</label>
+                    <div>
+                      <label class="toggle-label">
+                        <span class="toggle-wrap">
+                          <input type="checkbox" id="DNSMASQ_MULTI_INSTANCE" name="DNSMASQ_MULTI_INSTANCE" value="1" class="toggle-input" checked>
+                          <span class="toggle-track"></span>
+                          <span class="toggle-thumb"></span>
+                        </span>
+                        <span class="toggle-text" data-i18n="dnsmasqMultiHelp">Enable Dnsmasq multi-instance mode</span>
+                      </label>
+                      <p class="form-help dnsmasq-multi-only" data-i18n="dnsmasqMultiNote">To add DHCP on a new interface, use the built-in dhcp-instance-add command.</p>
+                    </div>
+                  </div>
                 </div>
               </details>
             </div>

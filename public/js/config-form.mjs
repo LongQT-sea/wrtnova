@@ -75,7 +75,7 @@ export const BASE_SCHEMA = /** @type {[string,string,(string|undefined)?,(string
   ['USB_TETHERING', 'checkbox'], ['CELLULAR_MODEM', 'checkbox'],
   ['DNS_MODE', 'radio', undefined, 'adguardhome'], ['ADGUARD_MAIN_DNS', 'checkbox'], ['BLOCK_DOT_DOQ', 'checkbox'],
   ['BLOCK_DOH', 'checkbox'], ['BANIP_COUNTRY_LIST', 'text'],
-  ['DOH_UPSTREAMS', 'text'], ['BOOTSTRAP_DNS', 'text'],
+  ['DOH_UPSTREAMS', 'text'], ['BOOTSTRAP_DNS', 'text'], ['DNSMASQ_MULTI_INSTANCE', 'checkbox'],
   ['DENY_GUEST_NIGHT', 'checkbox'], ['QUARTERLY_REBOOT', 'checkbox'], ['LOG', 'checkbox'],
   ['SOFTWARE_OFFLOAD', 'checkbox'], ['HARDWARE_OFFLOAD', 'checkbox'],
   // Not a config key (deriveConfig never emits it); carried in the store as a raw
