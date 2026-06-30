@@ -129,6 +129,7 @@ export default {
   fixVlanConflict:  'Resuelve el conflicto de ID de VLAN antes de compilar.',
   rangeMsg:         '{label} debe ser {min}-{max}',
   wifiPassTooShort: 'La contraseña WiFi debe tener al menos 8 caracteres ({field}).',
+  ifaceInvalid:     'El nombre de interfaz "{field}" solo puede contener a-z, A-Z, 0-9, _ y tener como máximo 15 caracteres.',
   preparingBuild:   'Preparando compilación…',
   pickDeviceHint:   'Selecciona un dispositivo para activar la compilación.',
 

@@ -129,6 +129,7 @@ export default {
   fixVlanConflict:  'Rozwiąż konflikt identyfikatorów VLAN przed kompilacją.',
   rangeMsg:         '{label} musi być w zakresie {min}-{max}',
   wifiPassTooShort: 'Hasło WiFi musi mieć co najmniej 8 znaków ({field}).',
+  ifaceInvalid:     'Nazwa interfejsu "{field}" może zawierać tylko a-z, A-Z, 0-9, _ i mieć maksymalnie 15 znaków.',
   preparingBuild:   'Przygotowywanie kompilacji…',
   pickDeviceHint:   'Wybierz urządzenie, aby włączyć kompilację.',
 

@@ -11,6 +11,7 @@ import './i18n/core.mjs';
 import './tzdata.js';
 import { BASE_SCHEMA, readForm, writeForm } from './config-form.mjs';
 import { mergeNodeConfig } from './config-merge.mjs';
+import { IFACE_FIELDS, ifaceValid } from './config-form.mjs';
 import { detectVlanConflict } from './visibility.mjs';
 import { renderConfigBlock } from './render-config.mjs';
 import { parseList } from './list-grammar.mjs';
@@ -1146,6 +1147,15 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
     // config form is open and is stale in this node-list view.
     if (detectVlanConflict(net.shared_config)) {
       showPanelError(actEl, S.fixVlanConflict, () => buildNode(net, node));
+      return;
+    }
+
+    // Interface names: empty (use default) or a valid UCI section name. mergeNodeConfig
+    // already blanks disabled networks' iface fields, so only active ones are checked.
+    const mergedForCheck = mergeNodeConfig(net.shared_config, node.overrides);
+    const badIface = IFACE_FIELDS.find(k => !ifaceValid(mergedForCheck[k]));
+    if (badIface) {
+      showPanelError(actEl, t('ifaceInvalid', { field: mergedForCheck[badIface] }), () => buildNode(net, node));
       return;
     }
 

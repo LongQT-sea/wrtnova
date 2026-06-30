@@ -8,7 +8,7 @@
 import { ui } from './ui-ns.mjs';
 import './ui.js';
 import './i18n/core.mjs';
-import { BUILDER_SCHEMA, readForm, keySets, textVal, SUBNET_KEYS, writeSubnet } from './config-form.mjs';
+import { BUILDER_SCHEMA, readForm, keySets, textVal, SUBNET_KEYS, writeSubnet, IFACE_FIELDS, ifaceValid } from './config-form.mjs';
 import { deriveConfig } from './builder-config.mjs';
 import { deriveNetRows } from './visibility.mjs';
 import { createStore } from './store.mjs';
@@ -386,11 +386,30 @@ import { collectTarget, devicesState } from './devices.js';
     return first;
   }
 
-  // Live feedback: when the user leaves a range field with a bad value, set the
-  // message and show the bubble immediately rather than waiting for Build.
+  const IFACE_SET = new Set(IFACE_FIELDS);
+  function refreshIfaceValidity(el) {
+    el.setCustomValidity('');
+    if (ifaceValid(el.value)) return false;
+    el.setCustomValidity(t('ifaceInvalid', { field: el.value }));
+    return true;
+  }
+  function checkIfaceFields() {
+    let first = null;
+    for (const id of IFACE_FIELDS) {
+      const el = $('#' + id);
+      if (!el) continue;
+      if (refreshIfaceValidity(el) && !first && el.offsetParent !== null) first = el;
+    }
+    return first;
+  }
+
+  // Live feedback: when the user leaves a range/iface field with a bad value, set
+  // the message and show the bubble immediately rather than waiting for Build.
   document.addEventListener('focusout', e => {
     const el = e.target;
-    if (el && RANGE_NOUN[el.id] && refreshRangeValidity(el)) el.reportValidity();
+    if (!el) return;
+    if (RANGE_NOUN[el.id] && refreshRangeValidity(el)) el.reportValidity();
+    else if (IFACE_SET.has(el.id) && refreshIfaceValidity(el)) el.reportValidity();
   });
 
   ui.startBuild = async function () {
@@ -424,6 +443,11 @@ import { collectTarget, devicesState } from './devices.js';
         return;
       }
     }
+
+    // Interface names: empty (use default) or a valid UCI section name. Pop the
+    // first visible offender's native bubble (hidden fields are blanked at emit).
+    const badIface = checkIfaceFields();
+    if (badIface) { badIface.reportValidity(); return; }
 
     await import('/js/history.js');       // ES module - dynamic import
 

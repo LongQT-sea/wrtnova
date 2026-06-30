@@ -129,6 +129,7 @@ export default {
   fixVlanConflict:  'Resolve the VLAN ID conflict before building.',
   rangeMsg:         '{label} must be {min}-{max}',
   wifiPassTooShort: 'WiFi password must be at least 8 characters ({field}).',
+  ifaceInvalid:     'Interface name "{field}" may only contain a-z, A-Z, 0-9, _ and be at most 15 characters.',
   preparingBuild:   'Preparing build…',
   pickDeviceHint:   'Pick a device to enable build.',
 

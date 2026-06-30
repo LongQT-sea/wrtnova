@@ -129,6 +129,7 @@ export default {
   fixVlanConflict:  'Устраните конфликт VLAN ID перед сборкой.',
   rangeMsg:         '{label} должен быть {min}-{max}',
   wifiPassTooShort: 'Пароль WiFi должен содержать не менее 8 символов ({field}).',
+  ifaceInvalid:     'Имя интерфейса "{field}" может содержать только a-z, A-Z, 0-9, _ и быть не длиннее 15 символов.',
   preparingBuild:   'Подготовка сборки…',
   pickDeviceHint:   'Выберите устройство, чтобы включить сборку.',
 
