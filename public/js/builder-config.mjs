@@ -9,8 +9,8 @@
 // the store, the build payload, the preview and the package chips all consume.
 //
 // Behavior is a verbatim port of the previous collectConfig() gating; the known
-// AP-leak (WAN_MAC_ADDR/WAN_IS_TAGGED emitted in AP mode) and the vestigial
-// WWAN_ENABLE are preserved here. WAN_VLAN_ID is now owned by the VLAN allocator
+// AP-leak (WAN_MAC_ADDR/WAN_IS_TAGGED emitted in AP mode) is preserved here.
+// WAN_VLAN_ID is now owned by the VLAN allocator
 // (resolveVlanEmit), which excludes WAN in AP mode, so it no longer leaks there.
 //
 // raw carries a few gating-only helpers (wan_type) that are NOT emitted, exactly

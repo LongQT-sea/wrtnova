@@ -133,12 +133,13 @@ test('resolvePackages: multi-WAN, wifi, usteer, wireguard, modem, tether', () =>
 
   const modem = resolvePackages({ config: { CELLULAR_MODEM: '1' } });
   assert.ok(modem.includes('luci-proto-modemmanager') && modem.includes('kmod-usb-net-cdc-mbim'));
-  assert.ok(modem.includes('luci-app-mwan3'), 'cellular modem implies multi-WAN');
+  assert.ok(!modem.includes('luci-app-mwan3'), 'cellular modem uses metric failover, not mwan3');
 
   const tether = resolvePackages({ config: { USB_TETHERING: '1' } });
   for (const p of ['kmod-usb-net-rndis', 'kmod-usb-net-cdc-ncm', 'kmod-usb-net-ipheth']) {
     assert.ok(tether.includes(p), `missing ${p}`);
   }
+  assert.ok(!tether.includes('luci-app-mwan3'), 'usb tether uses metric failover, not mwan3');
 });
 
 test('resolvePackages: banIP added by DoH block or country list, router-only', () => {

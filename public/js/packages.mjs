@@ -38,12 +38,9 @@ export function computeAdds({ base = [], device = [], config = {} }) {
   }
   adds.push('zram-swap', 'luci-app-commands', 'ip-bridge');
 
-  // Multi-WAN: secondary ethernet WAN, embedded WWAN modem, cellular modem, or USB tether.
-  const multiWan = config.WAN_B_ENABLE    === '1' ||
-                   config.WWAN_ENABLE     === '1' ||
-                   config.CELLULAR_MODEM  === '1' ||
-                   config.USB_TETHERING   === '1';
-  if (multiWan) adds.push('luci-app-mwan3');
+  // Only a secondary ethernet WAN pulls in mwan3. Cellular modem / USB tether are
+  // metric-based failover (wrtnova.sh no_mwan3 path).
+  if (config.WAN_B_ENABLE === '1') adds.push('luci-app-mwan3');
 
   const banip = config.BLOCK_DOH === '1' ||
                 String(config.BANIP_COUNTRY_LIST || '').trim() !== '';
