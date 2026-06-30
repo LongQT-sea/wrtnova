@@ -141,10 +141,19 @@ MODEM_APN="internet"
 # 1 = enable USB tethering failover (Android/iPhone)
 USB_TETHERING=
 
-# === DHCP ===
+# === DHCP/DNS ===
 # Default range: START=100, LIMIT=auto (192.168.1.100 - 192.168.1.199)
 LAN_DHCP_START=
 GUEST_DHCP_START=
+DNSMASQ_SINGLE_INSTANCE=	# 1 = use a single dnsmasq instance instead of multiple
+
+# AdGuardHome admin passwd in bcrypt hash (default 12345678)
+ADGUARD_PASSWD=''
+ADGUARD_MAIN_DNS=	# 1 = set AdGuardHome as primary DNS resolver
+
+# Separate multiple entries with spaces or newlines
+DOH_UPSTREAMS=
+BOOTSTRAP_DNS=
 
 # === Misc ===
 # NOTE: AP nodes flash the same config as the main router, only changing:
@@ -166,14 +175,6 @@ BANIP_COUNTRY_LIST=''	# e.g. Sri Lanka, India: 'lk in'
 
 # 1 = Block guest internet access at night
 DENY_GUEST_NIGHT=
-
-# Separate multiple entries with spaces or newlines
-DOH_UPSTREAMS=
-BOOTSTRAP_DNS=
-
-# AdGuardHome admin passwd in bcrypt hash (default 12345678)
-ADGUARD_PASSWD=''
-ADGUARD_MAIN_DNS=	# 1 = set AdGuardHome as primary DNS resolver
 
 ULA_PREFIX=
 P_STEERING=
@@ -1094,8 +1095,8 @@ _uci dhcp dnsmasq "${IFACE}_dns" \
 	domainneeded=1 localise_queries=1 \
 	rebind_protection=1 rebind_localhost=1 \
 	local="/${LOCAL}/" domain="$DOMAIN" \
-	expandhosts=1 authoritative=1 readethers=1 \
-	leasefile="/tmp/dhcp.leases.${IFACE}" \
+	expandhosts=1 cachesize=1000 authoritative=1 \
+	readethers=1 leasefile="/tmp/dhcp.leases.${IFACE}" \
 	localservice=1 dnsforwardmax=500 \
 	dhcpleasemax=$(( LIMIT + 50 )) \
 	-interface +interface="$IFACE" \
@@ -1145,6 +1146,21 @@ uci del dhcp."$lan_if"_dns.notinterface
 
 [ "$WG_ENABLE" = 1 ] && \
 	_uci dhcp dnsmasq "$lan_if"_dns +rebind_domain=lan +server="/vpn.lan/${wg_net_pfx}.1"
+
+[ "$DNSMASQ_SINGLE_INSTANCE" = 1 ] && {
+	for i in $ifaces_lan; do
+		[ "$i" = "$lan_if" ] && continue
+		uci del dhcp."$i"_dns
+		uci del "dhcp.${i}.instance"
+	done
+
+	ifaces_lan=$lan_if
+	uci del dhcp."$lan_if"_dns.interface
+	uci del dhcp."$lan_if".instance
+	_uci dhcp dnsmasq "$lan_if"_dns \
+		leasefile=/tmp/dhcp.leases -dhcpleasemax \
+		^server="/vpn.lan/${wg_net_pfx}.1"
+}
 
 _uci system timeserver ntp -server \
 	enable_server=1 +server=time1.google.com +server=time2.google.com +server=time.cloudflare.com
@@ -1280,7 +1296,7 @@ doh_upstreams="${DOH_UPSTREAMS:-https://dns.adguard-dns.com/dns-query}"
 	done
 
 	for i in $ifaces_lan; do
-		_uci dhcp dnsmasq "${i}_dns" noresolv=1 cachesize=500
+		_uci dhcp dnsmasq "${i}_dns" noresolv=1
 	done
 
 	echo "sleep 5; /etc/init.d/https-dns-proxy restart &" >> "$hplug_ifup_wan"
