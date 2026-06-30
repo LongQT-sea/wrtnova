@@ -115,6 +115,11 @@ import './ui.js';
     const VERSIONS_KEY = 'wrtnova_versions';
     const cachedVersions = cacheGet(VERSIONS_KEY);
 
+    $('#version').addEventListener('change', () => {
+      state.version = $('#version').value;
+      loadOverview().catch(err => ui.status('Failed to load device list: ' + err.message, 'error'));
+    });
+
     if (cachedVersions) {
       applyVersionsData(cachedVersions);
       // Background refresh so cache stays current
@@ -122,21 +127,37 @@ import './ui.js';
         .then(r => r.ok ? r.json() : Promise.reject())
         .then(d => cacheSet(VERSIONS_KEY, d))
         .catch(() => {});
-      await loadOverview();
     } else {
       const res = await fetch(DL + '/.versions.json', { cache: 'no-cache' });
       if (!res.ok) throw new Error('versions fetch failed: ' + res.status);
       const data = await res.json();
       cacheSet(VERSIONS_KEY, data);
       applyVersionsData(data);
-      await loadOverview();
     }
 
-    $('#version').addEventListener('change', () => {
-      state.version = $('#version').value;
-      loadOverview().catch(err => ui.status('Failed to load device list: ' + err.message, 'error'));
-    });
+    await loadOverviewWithFallback();
   };
+
+  // Initial load only: the default version is whatever OpenWrt advertises as
+  // stable, which may 404 during a release rollout (its .overview.json is not
+  // published yet), automatic try the next older stable version one time.
+  async function loadOverviewWithFallback() {
+    try {
+      await loadOverview();
+      return;
+    } catch (err) {
+      const sel = $('#version');
+      const opts = Array.from(sel.options).map(o => o.value);
+      const idx = opts.indexOf(state.version);
+      const fb = opts.slice(0, idx).reverse().find(v => !v.includes('SNAPSHOT'));
+      if (!fb) throw err;
+      const failed = state.version;
+      state.version = fb;
+      sel.value = fb;
+      await loadOverview();
+      ui.status('Version ' + failed + ' is not available yet; using ' + fb + '.', 'info');
+    }
+  }
 
   export const loadOverview = async function () {
     const v = state.version;
