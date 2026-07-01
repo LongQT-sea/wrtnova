@@ -120,8 +120,8 @@ export const SENSITIVE_KEYS = new Set([
  * @property {string} [ADGUARD_MAIN_DNS]   flag
  * @property {string} [DOH_UPSTREAMS]      DoH upstream URLs (space/newline list)
  * @property {string} [BOOTSTRAP_DNS]      bootstrap/fallback IPs (space/newline list)
- * @property {string} [DNSMASQ_MULTI_INSTANCE]  flag (UI-only, default on; inverse drives DNSMASQ_SINGLE_INSTANCE)
- * @property {string} [DNSMASQ_SINGLE_INSTANCE] flag (emitted; set when the user turns multi off)
+ * @property {string} [DNSMASQ_MULTI_INSTANCE]  flag (UI-only, default off; inverse drives DNSMASQ_SINGLE_INSTANCE)
+ * @property {string} [DNSMASQ_SINGLE_INSTANCE] flag (emitted; default on, cleared when the user turns multi on)
  * @property {string} [SOFTWARE_OFFLOAD]   flag
  * @property {string} [HARDWARE_OFFLOAD]   flag
  * @property {string} [BLOCK_DOT_DOQ]      flag
