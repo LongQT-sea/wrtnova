@@ -253,6 +253,22 @@ add_luci_command() {
 EOF
 . /usr/share/wrtnova/functions.sh
 
+# === Probe ===
+[ "$WG_ENABLE" = 1 ] && [ "$AP_MODE" != 1 ] && {
+	[ -x /usr/bin/wg ] || WG_ENABLE=
+}
+
+[ -x /usr/sbin/mwan3 ] || no_mwan3=1
+has_pkg modemmanager || CELLULAR_MODEM=
+has_pkg wpad-mbed wpad-open wpad-wolf wpad-mesh || WIRELESS_MESH=
+has_pkg luci-proto-batman || BATMAN_ADV=
+
+uci -q get wireless || {
+	no_wifi=1
+	WIRELESS_MESH=
+	BATMAN_ADV=
+}
+
 # === System ===
 cat > /bin/run-cmd <<'EOF'
 #!/bin/sh
@@ -343,10 +359,6 @@ network_find_wan6 WAN6_IF
 
 ntpd -q -p pool.ntp.org &
 EOF
-
-[ "$WG_ENABLE" = 1 ] && [ "$AP_MODE" != 1 ] && {
-	[ -x /usr/bin/wg ] || WG_ENABLE=
-}
 
 wg_iface=${WG_IFACE:-vpn}
 [ "$WG_ENABLE" = 1 ] && [ "$AP_MODE" != 1 ] && {
@@ -516,14 +528,11 @@ _uci network interface wan6 device=@wan ~wan_6
 [ -n "$PPPOE_USERNAME" ] && \
 	_uci network interface wan proto=pppoe ipv6=0 username="$PPPOE_USERNAME" password="$PPPOE_PASSWD"
 
-[ -x /usr/sbin/mwan3 ] || no_mwan3=1
-
 [ "$WAN_B_ENABLE" = 1 ] && {
 	_uci network interface wanb proto=dhcp ${no_mwan3:+metric=2}
 	_uci network interface wanb_6 proto=dhcpv6 device=@wanb ${no_mwan3:+metric=2}
 }
 
-has_pkg modemmanager || CELLULAR_MODEM=
 [ "$CELLULAR_MODEM" = 1 ] && \
 	_uci network interface cellular proto=modemmanager \
 		iptype=ipv4v6 device="$MODEM_PATH" apn="${MODEM_APN:-internet}" ${no_mwan3:+metric=3}
@@ -798,15 +807,6 @@ get_band() {
 get_channel() {
 	uci -q get wireless."$1".channel
 }
-
-uci -q get wireless || {
-	no_wifi=1
-	WIRELESS_MESH=
-	BATMAN_ADV=
-}
-
-has_pkg wpad-mbed wpad-open wpad-wolf wpad-mesh || WIRELESS_MESH=
-has_pkg luci-proto-batman || BATMAN_ADV=
 
 def_pass="${DEFAULT_WIFI_PASSWD:-12345678}"
 lan_ssid="${LAN_WIFI_SSID:-WrtNova}"
