@@ -332,7 +332,7 @@ EOF
 
 board_info=$(ubus call system board)
 os_version=$(echo "$board_info" | jsonfilter -e '@.release.version' | cut -d. -f1)
-[ "$os_version" = 25 ] && ZONE_NAME="${ZONE_NAME// /_}"
+[ "$os_version" -ge 25 ] && ZONE_NAME="${ZONE_NAME// /_}"
 
 host_name="${HOST_NAME:-WrtNova${AP_MODE:+-${AP_INDEX:=2}}}"
 
@@ -1135,7 +1135,7 @@ _uci dhcp "" "$IFACE" \
 [ "$IPV6" = 1 ] && \
 	_uci dhcp "" "$IFACE" \
 		ra=server dhcpv6=server \
-		ra_flags="managed-config other-config" \
+		+ra_flags=managed-config +ra_flags=other-config \
 		-dns "${DEV:++dns=$(ip -6 a s dev "$DEV" | grep -o 'fe80[^/]*')}"
 EOF
 chmod +x /sbin/dhcp-instance-add
@@ -1183,7 +1183,8 @@ uci del dhcp."$lan_if"_dns.notinterface
 	ifaces_lan=$lan_if
 	uci del dhcp."$lan_if"_dns.interface
 	uci del dhcp."$lan_if".instance
-	_uci dhcp dnsmasq "$lan_if"_dns \
+	_uci dhcp "" "$lan_if" @1
+	_uci dhcp dnsmasq "$lan_if"_dns @1 \
 		leasefile=/tmp/dhcp.leases -dhcpleasemax \
 		^server="/vpn.lan/${wg_net_pfx}.1"
 }
@@ -1243,7 +1244,7 @@ adguard_upstream="$(for u in $doh_upstreams $adguard_upstream; do printf "    - 
 adguard_bootstrap="$(for u in $bootstrap_dns; do printf "    - %s\n" "$u"; done)"
 
 ADGUARD_PASSWD=${ADGUARD_PASSWD:-\$2y\$10\$aRfh9IbImR8PIf/FWlLvkeW6wiyp47BjY0KqW/FD/F14QloYuV00a}
-[ "$os_version" = "25" ] && { mkdir -p /etc/adguardhome; adguard_dir=/etc/adguardhome; }
+[ "$os_version" -ge "25" ] && { mkdir -p /etc/adguardhome; adguard_dir=/etc/adguardhome; }
 cat > "${adguard_dir:-/etc}"/adguardhome.yaml << EOF
 http:
   address: 0.0.0.0:3000
@@ -1288,7 +1289,6 @@ EOF
 
 doh_upstreams="${DOH_UPSTREAMS:-https://dns.adguard-dns.com/dns-query}"
 
-# Mini AdguardHome
 [ -x /usr/bin/dnsproxy ] && {
 	setup_dnsmasq_upstream
 	_uci dnsproxy global global -listen_port \
@@ -1315,7 +1315,7 @@ doh_upstreams="${DOH_UPSTREAMS:-https://dns.adguard-dns.com/dns-query}"
 [ -x /usr/sbin/https-dns-proxy ] && {
 	while uci -q del https-dns-proxy.@https-dns-proxy[0]; do :; done
 	uci set https-dns-proxy.config.force_dns=0
-	bootstrap_csv="$(echo $bootstrap_dns | tr ' ' ',')"
+	bootstrap_csv="$(echo "$bootstrap_dns" | tr -s ' \t\n' ',')"
 
 	for u in $doh_upstreams; do
 		_uci https-dns-proxy "" "" resolver_url="$u" bootstrap_dns="$bootstrap_csv"
