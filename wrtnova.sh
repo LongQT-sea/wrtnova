@@ -22,6 +22,7 @@ DEFAULT_WIFI_PASSWD=""	# Default: 12345678
 COUNTRY_CODE=
 WIFI_KVR=1		# 1 = Enable fast roaming & band-steering 802.11k/v/r
 DENSE_ENV=		# 1 = optimize roaming and steering for high-interference areas
+PSK_VLAN=		# 1 = Guest and LAN VPN share the LAN SSID (each still uses its own passphrase)
 
 LAN_WIFI_SSID=""	# Default: WrtNova
 LAN_WIFI_PASSWD=""
@@ -388,171 +389,6 @@ ping6 -c2 -W2 -I "$IFACE" "$PING_IP6" || {
 EOF
 chmod +x /sbin/wg-check
 
-# === WiFi ===
-setup_radio() {
-	local radio="$1" channel="$2"
-
-	_uci wireless wifi-device "$radio" -disabled \
-		${channel:+channel=$channel} \
-		${WIFI_LOG_LVL:+log_level=${WIFI_LOG_LVL:-4}} \
-		${COUNTRY_CODE:+country=$COUNTRY_CODE}
-}
-
-add_wifi_iface() {
-	local dev="$1" mode="$2" ssid="$3" key="$4" net="$5" enc="$6"
-
-	set -- device="$dev" mode="$mode" ssid="$ssid" key="$key" network="$net" encryption="$enc"
-
-	[ "$net" = "$guest_if" ] && [ -n "$GUEST_ISOLATE" ] && set -- "$@" isolate=1 bridge_isolate=1
-
-	[ "$mode" = mesh ] && set -- "$@" -ssid mesh_id="$ssid" ifname="$net" ${BATMAN_ADV:+mesh_fwding=0}
-
-	[ "$WIFI_KVR" = 1 ] && [ "$mode" = ap ] && [ "$net" != "$iot_if" ] && has_pkg wpad-mb wpad-op wpad-wo && {
-		[ "$enc" = psk2 ] && set -- "$@" ft_psk_generate_local=1
-		set -- "$@" ieee80211r=1 ft_over_ds=0 ieee80211k=1 bss_transition=1
-	}
-
-	_uci wireless wifi-iface "${dev}_${net}" "$@"
-}
-
-get_band() {
-	uci -q get wireless."$1".band
-}
-
-get_channel() {
-	uci -q get wireless."$1".channel
-}
-
-uci -q get wireless || {
-	no_wifi=1
-	WIRELESS_MESH=
-	BATMAN_ADV=
-}
-
-has_pkg wpad-mbed wpad-open wpad-wolf wpad-mesh || WIRELESS_MESH=
-has_pkg luci-proto-batman || BATMAN_ADV=
-
-def_pass="${DEFAULT_WIFI_PASSWD:-12345678}"
-lan_ssid="${LAN_WIFI_SSID:-WrtNova}"
-lan_pass="${LAN_WIFI_PASSWD:-$def_pass}"
-guest_ssid="${GUEST_WIFI_SSID:-WrtNova_Guest}"
-guest_pass="${GUEST_WIFI_PASSWD:-$def_pass}"
-iot_ssid="${IOT_WIFI_SSID:-WrtNova_IoT}"
-iot_pass="${IOT_WIFI_PASSWD:-$def_pass}"
-lan_wg_ssid="${LAN_WG_WIFI_SSID:-WrtNova_VPN}"
-lan_wg_pass="${LAN_WG_WIFI_PASSWD:-$def_pass}"
-mesh_id="${MESH_ID:-mesh0_5ghz}"
-mesh_pass="${MESH_PASSWD:-$def_pass}"
-mesh_iface=${BATMAN_ADV:+bat0_}mesh0
-
-[ "$WIRELESS_MESH" = 1 ] && {
-	hplug_mesh=/etc/hotplug.d/net/94-ifup-$mesh_iface
-	set_mesh_param="iw dev $mesh_iface set mesh_param"
-	cat > "$hplug_mesh" <<-EOF
-	[ add = "\$ACTION" ] || exit 0
-	[ $mesh_iface = "\$DEVICENAME" ] || exit 0
-	sleep 4
-	$set_mesh_param mesh_rssi_threshold -78
-	$set_mesh_param mesh_max_peer_links 6
-	EOF
-
-	[ "$AP_MODE" != 1 ] && {
-		echo "$set_mesh_param mesh_hwmp_rootmode 2" >> "$hplug_mesh"
-		echo "$set_mesh_param mesh_gate_announcements 1" >> "$hplug_mesh"
-	}
-}
-
-lan_if=${LAN_IFACE:-lan}
-guest_if=${GUEST_IFACE:-guest}
-iot_if=${IOT_IFACE:-iot}
-lan_wg_if=${LAN_WG_IFACE:-lan_vpn}
-
-# Fields: mode|ssid|key|network|bands|enabled|enc_override (empty = band default)
-wifi_networks="
-ap|$lan_ssid|$lan_pass|$lan_if|2g 5g 6g|1|
-ap|$guest_ssid|$guest_pass|$guest_if|2g 5g 6g|$GUEST_ENABLE|
-ap|$iot_ssid|$iot_pass|$iot_if|2g|$IOT_ENABLE|
-ap|$lan_wg_ssid|$lan_wg_pass|$lan_wg_if|2g 5g 6g|$WG_ENABLE|
-mesh|$mesh_id|$mesh_pass|$mesh_iface|5g|$WIRELESS_MESH|sae
-"
-
-while uci -q del wireless.@wifi-iface[0]; do :; done
-
-radios="radio0 radio1 radio2 radio3"
-
-for r in $radios; do
-	[ "$(get_band "$r")" = 6g ] && has_6g=1
-done
-
-for radio in $radios; do
-	band=$(get_band "$radio")
-	[ -z "$band" ] && continue
-	chan=$(get_channel "$radio")
-
-	case "$band" in
-		2g) ch=$CHANNEL_2G; enc=psk2 ;;
-		5g) ch=$CHANNEL_5G; enc=sae-mixed ;;
-		6g) ch=$CHANNEL_6G; enc=sae ;;
-	esac
-
-	role=solo; min=$chan
-	for r in $radios; do
-		[ "$r" = "$radio" ] && continue
-		[ "$(get_band "$r")" = "$band" ] && {
-			role=tbd
-			other=$(get_channel "$r")
-			[ "$other" -lt "$min" ] && min=$other
-		}
-	done
-
-	[ "$role" = tbd ] && {
-		[ "$chan" = "$min" ] && role=mesh || role=ap
-	}
-
-	[ "$WIRELESS_MESH" = 1 ] && [ "$band" = 5g ] && [ "$role" = solo ] && [ -n "$has_6g" ] && role=mesh
-
-	setup_radio "$radio" "$([ "$role" != ap ] && echo "$ch")"
-
-	while IFS='|' read -r mode ssid key network bands enabled enc_over; do
-		[ -n "$mode" ] && [ "$enabled" = 1 ] || continue
-		case " $bands " in *" $band "*) ;; *) continue ;; esac
-
-		case "$role" in
-			mesh) [ "$mode" = mesh ] || continue ;;
-			ap) [ "$mode" = ap ] || continue ;;
-		esac
-
-		add_wifi_iface "$radio" "$mode" "$ssid" "$key" "$network" "${enc_over:-$enc}"
-	done <<-EOF
-	$wifi_networks
-	EOF
-done
-
-# https://openwrt.org/docs/guide-user/network/wifi/usteer
-# Dense mode tightens all thresholds for high-interference environments
-[ -x /sbin/usteerd ] && {
-	_uci usteer "" @usteer[0] \
-		network="$lan_if" \
-		roam_scan_snr='-68' \
-		signal_diff_threshold='8' \
-		roam_trigger_snr='-72'
-
-	[ "$DENSE_ENV" = 1 ] && {
-		_uci usteer "" @usteer[0] \
-			roam_scan_snr='-60' \
-			signal_diff_threshold='6' \
-			band_steering_interval='30000' \
-			band_steering_min_snr='-50' \
-			roam_trigger_snr='-65' \
-			roam_kick_delay='3000' \
-			min_snr='-80'
-	}
-
-	if [ "$WIFI_KVR" != 1 ] || [ "$no_wifi" = 1 ]; then
-		/etc/init.d/usteer disable
-	fi
-}
-
 # === Network ===
 detect_hw() {
 	grep -sq DEVTYPE=dsa /sys/class/net/*/uevent && { echo dsa; return; }
@@ -654,6 +490,11 @@ lan_subnet=${LAN_SUBNET:-$def_subnet}
 guest_subnet=${GUEST_SUBNET:-$def_subnet}
 iot_subnet=${IOT_SUBNET:-$def_subnet}
 wg_subnet=${LAN_WG_SUBNET:-$def_subnet}
+
+lan_if=${LAN_IFACE:-lan}
+guest_if=${GUEST_IFACE:-guest}
+iot_if=${IOT_IFACE:-iot}
+lan_wg_if=${LAN_WG_IFACE:-lan_vpn}
 
 [ "$GUEST_ENABLE" = 1 ] && \
 	_uci network interface "$guest_if" proto=static +ipaddr="${guest_net_pfx}.1${guest_subnet}"
@@ -762,7 +603,7 @@ ifaces_wan="wan wan_6 ${WAN_B_ENABLE:+wanb wanb_6} ${CELLULAR_MODEM:+cellular} $
 
 # LAN ports are untagged members of the LAN VLAN.
 # WAN port are untagged members of the WAN VLAN unless WAN_IS_TAGGED=1.
-# All ports carry tagged guest/iot/wanb/lan_wg VLANs as trunk ports.
+# All ports carry tagged guest/iot/lan_wg/wanb VLANs as trunk ports.
 # AP mode: all ports are untagged on the LAN VLAN and tagged on all other VLANs.
 if [ "$use_bridge_vlan" = 1 ]; then
 	[ "$AP_MODE" = 1 ] && [ "$wan_port" = br-wan ] && {
@@ -896,6 +737,191 @@ done >/dev/null
 
 _uci network globals globals \
 	"${P_STEERING:+packet_steering=$P_STEERING}" "${ULA_PREFIX:+ula_prefix=$ULA_PREFIX}"
+
+# === WiFi ===
+setup_radio() {
+	local radio="$1" channel="$2"
+
+	_uci wireless wifi-device "$radio" -disabled \
+		${channel:+channel=$channel} \
+		${WIFI_LOG_LVL:+log_level=${WIFI_LOG_LVL:-4}} \
+		${COUNTRY_CODE:+country=$COUNTRY_CODE}
+}
+
+add_wifi_iface() {
+	local dev="$1" mode="$2" ssid="$3" key="$4" net="$5" vid="$6" enc="$7" band="$8"
+
+	set -- device="$dev" mode="$mode" ssid="$ssid" key="$key" network="$net" encryption="$enc"
+
+	[ "$net" = "$guest_if" ] && [ -n "$GUEST_ISOLATE" ] && set -- "$@" isolate=1 bridge_isolate=1
+
+	[ "$mode" = mesh ] && set -- "$@" -ssid mesh_id="$ssid" ifname="$net" ${BATMAN_ADV:+mesh_fwding=0}
+
+	[ "$WIFI_KVR" = 1 ] && [ "$mode" = ap ] && [ "$net" != "$iot_if" ] && has_pkg wpad-mb wpad-op wpad-wo && {
+		[ "$enc" = psk2 ] && set -- "$@" ft_psk_generate_local=1
+		set -- "$@" ieee80211r=1 ft_over_ds=0 ieee80211k=1 bss_transition=1
+	}
+
+	[ "$PSK_VLAN" = 1 ] && [ "$mode" = ap ] && [ "$net" != "$iot_if" ] && {
+		iw phy | grep -q "AP/VLAN" || return
+
+		add_wifi_vlan "$vid" "$key" "$net" "${dev}_${lan_if}"
+
+		[ "$net" = "$lan_if" ] || return
+
+		set -- "$@" -key -network +hostapd_bss_options='vlan_no_bridge=1'
+
+		[ "$os_version" -le 23 ] && set -- "$@" key=_unused_
+
+		[ "$os_version" -le 24 ] && {
+			case "$band" in
+				6g) set -- "$@" -ieee80211r ;;
+				*)  set -- "$@" encryption=psk2 ${WIFI_KVR:+ft_psk_generate_local=1} ;;
+			esac
+		}
+	}
+
+	_uci wireless wifi-iface "${dev}_${net}" "$@"
+}
+
+add_wifi_vlan() {
+	local vid="$1" key="$2" net="$3" if="$4"
+
+	_uci wireless wifi-station "" iface="$if" vid="$vid" key="$key"
+	_uci wireless wifi-vlan "" iface="$if" network="$net" vid="$vid" name="$vid"
+}
+
+get_band() {
+	uci -q get wireless."$1".band
+}
+
+get_channel() {
+	uci -q get wireless."$1".channel
+}
+
+uci -q get wireless || {
+	no_wifi=1
+	WIRELESS_MESH=
+	BATMAN_ADV=
+}
+
+has_pkg wpad-mbed wpad-open wpad-wolf wpad-mesh || WIRELESS_MESH=
+has_pkg luci-proto-batman || BATMAN_ADV=
+
+def_pass="${DEFAULT_WIFI_PASSWD:-12345678}"
+lan_ssid="${LAN_WIFI_SSID:-WrtNova}"
+lan_pass="${LAN_WIFI_PASSWD:-$def_pass}"
+guest_ssid="${GUEST_WIFI_SSID:-WrtNova_Guest}"
+guest_pass="${GUEST_WIFI_PASSWD:-$def_pass}"
+iot_ssid="${IOT_WIFI_SSID:-WrtNova_IoT}"
+iot_pass="${IOT_WIFI_PASSWD:-$def_pass}"
+lan_wg_ssid="${LAN_WG_WIFI_SSID:-WrtNova_VPN}"
+lan_wg_pass="${LAN_WG_WIFI_PASSWD:-$def_pass}"
+mesh_id="${MESH_ID:-mesh0_5ghz}"
+mesh_pass="${MESH_PASSWD:-$def_pass}"
+mesh_iface=${BATMAN_ADV:+bat0_}mesh0
+
+[ "$WIRELESS_MESH" = 1 ] && {
+	hplug_mesh=/etc/hotplug.d/net/94-ifup-$mesh_iface
+	set_mesh_param="iw dev $mesh_iface set mesh_param"
+	cat > "$hplug_mesh" <<-EOF
+	[ add = "\$ACTION" ] || exit 0
+	[ $mesh_iface = "\$DEVICENAME" ] || exit 0
+	sleep 4
+	$set_mesh_param mesh_rssi_threshold -78
+	$set_mesh_param mesh_max_peer_links 6
+	EOF
+
+	[ "$AP_MODE" != 1 ] && {
+		echo "$set_mesh_param mesh_hwmp_rootmode 2" >> "$hplug_mesh"
+		echo "$set_mesh_param mesh_gate_announcements 1" >> "$hplug_mesh"
+	}
+}
+
+# Fields: mode|ssid|key|network|bands|enabled|vlan|enc_override (empty = band default)
+wifi_networks="
+ap|$lan_ssid|$lan_pass|$lan_if|2g 5g 6g|1|$lan_vid|
+ap|$guest_ssid|$guest_pass|$guest_if|2g 5g 6g|$GUEST_ENABLE|$guest_vid|
+ap|$iot_ssid|$iot_pass|$iot_if|2g|$IOT_ENABLE|$iot_vid|
+ap|$lan_wg_ssid|$lan_wg_pass|$lan_wg_if|2g 5g 6g|$WG_ENABLE|$wg_vid|
+mesh|$mesh_id|$mesh_pass|$mesh_iface|5g|$WIRELESS_MESH||sae
+"
+
+while uci -q del wireless.@wifi-iface[0]; do :; done
+
+radios="radio0 radio1 radio2 radio3"
+
+for r in $radios; do
+	[ "$(get_band "$r")" = 6g ] && has_6g=1
+done
+
+for radio in $radios; do
+	band=$(get_band "$radio")
+	[ -z "$band" ] && continue
+	chan=$(get_channel "$radio")
+
+	case "$band" in
+		2g) ch=$CHANNEL_2G; enc=psk2 ;;
+		5g) ch=$CHANNEL_5G; enc=sae-mixed ;;
+		6g) ch=$CHANNEL_6G; enc=sae ;;
+	esac
+
+	role=solo; min=$chan
+	for r in $radios; do
+		[ "$r" = "$radio" ] && continue
+		[ "$(get_band "$r")" = "$band" ] && {
+			role=tbd
+			other=$(get_channel "$r")
+			[ "$other" -lt "$min" ] && min=$other
+		}
+	done
+
+	[ "$role" = tbd ] && {
+		[ "$chan" = "$min" ] && role=mesh || role=ap
+	}
+
+	[ "$WIRELESS_MESH" = 1 ] && [ "$band" = 5g ] && [ "$role" = solo ] && [ -n "$has_6g" ] && role=mesh
+
+	setup_radio "$radio" "$([ "$role" != ap ] && echo "$ch")"
+
+	while IFS='|' read -r mode ssid key network bands enabled vid enc_over; do
+		[ -n "$mode" ] && [ "$enabled" = 1 ] || continue
+		case " $bands " in *" $band "*) ;; *) continue ;; esac
+
+		case "$role" in
+			mesh) [ "$mode" = mesh ] || continue ;;
+			ap) [ "$mode" = ap ] || continue ;;
+		esac
+
+		add_wifi_iface "$radio" "$mode" "$ssid" "$key" "$network" "$vid" "${enc_over:-$enc}" "$band"
+	done <<-EOF
+	$wifi_networks
+	EOF
+done
+
+# https://openwrt.org/docs/guide-user/network/wifi/usteer
+[ -x /sbin/usteerd ] && {
+	_uci usteer "" @usteer[0] \
+		network="$lan_if" \
+		roam_scan_snr='-68' \
+		signal_diff_threshold='8' \
+		roam_trigger_snr='-72'
+
+	[ "$DENSE_ENV" = 1 ] && {
+		_uci usteer "" @usteer[0] \
+			roam_scan_snr='-60' \
+			signal_diff_threshold='6' \
+			band_steering_interval='30000' \
+			band_steering_min_snr='-50' \
+			roam_trigger_snr='-65' \
+			roam_kick_delay='3000' \
+			min_snr='-80'
+	}
+
+	if [ "$WIFI_KVR" != 1 ] || [ "$no_wifi" = 1 ]; then
+		/etc/init.d/usteer disable
+	fi
+}
 
 # === batman-adv ===
 [ "$WIRELESS_MESH" = 1 ] && [ "$BATMAN_ADV" = 1 ] && {
