@@ -110,7 +110,7 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
       GUEST_WIFI_SSID: '', GUEST_WIFI_PASSWD: '',
       IOT_WIFI_SSID: '', IOT_WIFI_PASSWD: '',
       LAN_WG_WIFI_SSID: '', LAN_WG_WIFI_PASSWD: '',
-      CHANNEL_2G: '', CHANNEL_5G: '', CHANNEL_6G: '', WIFI_LOG_LVL: '', WIFI_KVR: '1', GUEST_ISOLATE: '',
+      CHANNEL_2G: '', CHANNEL_5G: '', CHANNEL_6G: '', WIFI_LOG_LVL: '', WIFI_KVR: '1', PSK_VLAN: '', GUEST_ISOLATE: '',
       PORT_FORWARD_LIST: '', IPV6_SERVER_LIST: '',
       DDNS_ENABLE: '', LOOKUP_HOSTNAME: '', CLOUDFLARE_API_KEY: '',
       USB_TETHERING: '', CELLULAR_MODEM: '',
@@ -874,20 +874,23 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
     return readForm(NET_SCHEMA);
   }
 
-  // Packet steering "Enabled (all CPUs)" (value 2) only exists on OpenWrt 24+.
-  // Hide/disable it on 23.05 and downgrade a stale '2' selection to Default;
-  // callers re-read the form into the store after this, so the gated config
-  // never emits P_STEERING='2' for 23.05. Gated by the shared (fleet) version.
+  // Version-gated options. Packet steering "Enabled (all CPUs)" (value 2) needs
+  // OpenWrt 24+; hide the control and clear a stale value on older releases.
+  // Callers re-read the form into the store after this, so the gated config
+  // never emits an unsupported setting. Gated by the shared (fleet) version.
   function updatePacketSteeringOpts(ver) {
+    const parts = String(ver).split('.');
+    const maj = parseInt(parts[0], 10);
+    const unknown = isNaN(maj);              // SNAPSHOT/unknown -> newest, show all
+    const allow24 = unknown || maj >= 24;
+
     const sel = document.getElementById('P_STEERING');
-    if (!sel) return;
-    const opt2 = sel.querySelector('option[value="2"]');
-    if (!opt2) return;
-    const maj = parseInt(String(ver).split('.')[0], 10);
-    const allow = isNaN(maj) || maj >= 24;   // SNAPSHOT/unknown -> newest, show all
-    opt2.hidden = !allow;
-    opt2.disabled = !allow;
-    if (!allow && sel.value === '2') sel.value = '';
+    const opt2 = sel && sel.querySelector('option[value="2"]');
+    if (opt2) {
+      opt2.hidden = !allow24;
+      opt2.disabled = !allow24;
+      if (!allow24 && sel.value === '2') sel.value = '';
+    }
   }
 
   // Static: wrtnova.sh SSID defaults are decoupled from HOST_NAME

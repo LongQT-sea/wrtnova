@@ -235,6 +235,8 @@ export default {
   wifiLogLevel:       'Уровень логирования WiFi',
   fastRoaming:        '802.11k/v/r',
   enableFastRoaming:  'Включить быстрый роуминг и стиринг',
+  pskVlan:            'PSK для каждой VLAN',
+  pskVlanHelp:        'Один SSID с раздельным доступом по паролю',
   guestIsolate:       'Изоляция гостей',
   guestIsolateHelp:   'Запрещает обмен данными между гостевыми клиентами',
   ipv4PortForwarding: 'Переброс портов IPv4',

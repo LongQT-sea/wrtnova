@@ -121,19 +121,22 @@ import { collectTarget, devicesState } from './devices.js';
   }
   ui.refreshConfigStore = refreshStore;
 
-  // Packet steering "Enabled (all CPUs)" (value 2) only exists on OpenWrt 24+.
-  // Hide/disable it on 23.05 and downgrade a stale '2' selection to Default,
-  // syncing the store so the gated config never emits P_STEERING='2' for 23.05.
+  // Version-gated options. Packet steering "Enabled (all CPUs)" (value 2) needs
+  // OpenWrt 24+; hide the control and clear a stale value on older releases,
+  // syncing the store so the gated config never emits an unsupported setting.
   function updatePacketSteeringOpts(ver) {
+    const parts = String(ver).split('.');
+    const maj = parseInt(parts[0], 10);
+    const unknown = isNaN(maj);              // SNAPSHOT/unknown -> newest, show all
+    const allow24 = unknown || maj >= 24;
+
     const sel = $('#P_STEERING');
-    if (!sel) return;
-    const opt2 = sel.querySelector('option[value="2"]');
-    if (!opt2) return;
-    const maj = parseInt(String(ver).split('.')[0], 10);
-    const allow = isNaN(maj) || maj >= 24;   // SNAPSHOT/unknown -> newest, show all
-    opt2.hidden = !allow;
-    opt2.disabled = !allow;
-    if (!allow && sel.value === '2') { sel.value = ''; refreshStore(); }
+    const opt2 = sel && sel.querySelector('option[value="2"]');
+    if (opt2) {
+      opt2.hidden = !allow24;
+      opt2.disabled = !allow24;
+      if (!allow24 && sel.value === '2') { sel.value = ''; refreshStore(); }
+    }
   }
 
   // -- Store-first programmatic writes (single-writer model) -----------------

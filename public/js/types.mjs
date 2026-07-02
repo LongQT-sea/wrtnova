@@ -82,6 +82,7 @@ export const SENSITIVE_KEYS = new Set([
  * @property {string} [COUNTRY_CODE]
  * @property {string} [DENSE_ENV]          flag
  * @property {string} [WIFI_KVR]           flag
+ * @property {string} [PSK_VLAN]           flag (per-VLAN PSK)
  * @property {string} [WIRELESS_MESH]      flag
  * @property {string} [BRIDGE_STP]         flag
  * @property {string} [MESH_ID]

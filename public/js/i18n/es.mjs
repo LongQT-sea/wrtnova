@@ -235,6 +235,8 @@ export default {
   wifiLogLevel:       'Nivel de registro WiFi',
   fastRoaming:        '802.11k/v/r',
   enableFastRoaming:  'Habilitar roaming rápido y band-steering',
+  pskVlan:            'PSK por VLAN',
+  pskVlanHelp:        'Una sola SSID con acceso separado según la contraseña',
   guestIsolate:       'Aislamiento de invitados',
   guestIsolateHelp:   'Impide la comunicación entre clientes invitados',
   ipv4PortForwarding: 'Redirección de puertos IPv4',

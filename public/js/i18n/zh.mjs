@@ -235,6 +235,8 @@ export default {
   wifiLogLevel:       'WiFi 日志级别',
   fastRoaming:        '802.11k/v/r',
   enableFastRoaming:  '启用快速漫游和频段引导',
+  pskVlan:            '按 VLAN 分配 PSK',
+  pskVlanHelp:        '单个 SSID，根据密码区分访问',
   guestIsolate:       '访客隔离',
   guestIsolateHelp:   '防止访客客户端之间相互通信',
   ipv4PortForwarding: 'IPv4 端口转发',

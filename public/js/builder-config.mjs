@@ -89,6 +89,7 @@ export function deriveConfig(raw) {
     COUNTRY_CODE:   v('COUNTRY_CODE'),         // uppercased at the store boundary
     DENSE_ENV:      v('DENSE_ENV'),
     WIFI_KVR:       v('WIFI_KVR'),
+    PSK_VLAN:       v('PSK_VLAN'),
     WIRELESS_MESH:  v('WIRELESS_MESH'),
     BRIDGE_STP:     meshOn ? v('BRIDGE_STP')  : '',
     MESH_ID:        meshOn ? v('MESH_ID')     : '',
