@@ -426,8 +426,8 @@ add_bridges() {
 	local iface
 
 	for iface in $1; do
-		_uci network device "br_${iface}" type=bridge name="br-${iface}"
-		uci set "network.${iface}.device=br-${iface}"
+		_uci network device "br_${iface}" type=bridge name="br-${iface:0:12}"
+		uci set "network.${iface}.device=br-${iface:0:12}"
 	done
 }
 
