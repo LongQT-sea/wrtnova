@@ -20,19 +20,21 @@ TIME_ZONE=""
 # === WiFi ===
 DEFAULT_WIFI_PASSWD=""	# Default: 12345678
 COUNTRY_CODE=
-WIFI_KVR=1		# 1 = Enable fast roaming & band-steering 802.11k/v/r
+DOT11KV=1		# 1 = enable neighbor reports and assisted roaming (802.11k/v)
+DOT11R=1		# 1 = enable fast transition support (802.11r)
 DENSE_ENV=		# 1 = optimize roaming and steering for high-interference areas
-PSK_VLAN=		# 1 = Guest and LAN VPN share the LAN SSID (each still uses its own passphrase)
+PSK_VLAN=		# 1 = Guest and LAN_VPN share the LAN SSID (each still uses its own passphrase)
 
 LAN_WIFI_SSID=""	# Default: WrtNova
 LAN_WIFI_PASSWD=""
 
 GUEST_WIFI_SSID=""	# Default: WrtNova_Guest
 GUEST_WIFI_PASSWD=""
-GUEST_ISOLATE=		# 1 = Isolates guest wifi clients from each other
+GUEST_ISOLATE=		# 1 = isolates guest wifi clients from each other
 
 IOT_WIFI_SSID=""	# Default: WrtNova_IoT
 IOT_WIFI_PASSWD=""
+IOT_NO_DOT11R=		# 1 = disable fast transition support (802.11r) for IoT
 
 LAN_WG_WIFI_SSID=""	# Default: WrtNova_VPN
 LAN_WG_WIFI_PASSWD=""
@@ -259,8 +261,22 @@ EOF
 }
 
 [ -x /usr/sbin/mwan3 ] || no_mwan3=1
+
 has_pkg modemmanager || CELLULAR_MODEM=
-has_pkg wpad-mbed wpad-open wpad-wolf wpad-mesh || WIRELESS_MESH=
+
+has_pkg wpad-mbed wpad-open wpad-wolf && full_wpad=1
+has_pkg wpad-mesh && wpad_mesh=1
+
+[ -z "$full_wpad" ] && {
+	DOT11KV=
+	[ -z "$wpad_mesh" ] && {
+		WIRELESS_MESH=
+		BATMAN_ADV=
+	}
+}
+
+iw phy | grep -q "AP/VLAN" || PSK_VLAN=
+
 has_pkg luci-proto-batman || BATMAN_ADV=
 
 uci -q get wireless || {
@@ -758,7 +774,9 @@ setup_radio() {
 }
 
 add_wifi_iface() {
-	local dev="$1" mode="$2" ssid="$3" key="$4" net="$5" vid="$6" enc="$7" band="$8"
+	local dev="$1" mode="$2" ssid="$3" key="$4" net="$5" vid="$6" enc="$7" band="$8" iot_plain
+
+	[ "$net" = "$iot_if" ] && [ -n "$IOT_NO_DOT11R" ] && iot_plain=1
 
 	set -- device="$dev" mode="$mode" ssid="$ssid" key="$key" network="$net" encryption="$enc"
 
@@ -766,17 +784,17 @@ add_wifi_iface() {
 
 	[ "$mode" = mesh ] && set -- "$@" -ssid mesh_id="$ssid" ifname="$net" ${BATMAN_ADV:+mesh_fwding=0}
 
-	[ "$WIFI_KVR" = 1 ] && [ "$mode" = ap ] && [ "$net" != "$iot_if" ] && has_pkg wpad-mb wpad-op wpad-wo && {
-		set -- "$@" ieee80211k=1 bss_transition=1 ieee80211r=1
-		set -- "$@" mobility_domain="$(printf '%s' "$ssid" | md5sum | cut -c1-4)"
-	}
+	[ "$DOT11KV" = 1 ] && [ "$mode" = ap ] && set -- "$@" ieee80211k=1 bss_transition=1
 
-	[ "$PSK_VLAN" = 1 ] && iw phy | grep -q "AP/VLAN" && [ "$mode" = ap ] && [ "$net" != "$iot_if" ] && {
+	[ "$DOT11R" = 1 ] && [ "$mode" = ap ] && [ -z "$iot_plain" ] && \
+		set -- "$@" ieee80211r=1 mobility_domain="$(printf '%s' "$ssid" | md5sum | cut -c1-4)"
+
+	[ "$PSK_VLAN" = 1 ] && [ "$mode" = ap ] && {
 		if [ "$band" = 6g ]; then
 			set -- "$@" ssid="${ssid}_6G"
-		else
+		elif [ -z "$iot_plain" ]; then
 			add_wifi_vlan "$vid" "$key" "$net" "${dev}_${lan_if}"
-			[ "$net" = "$lan_if" ] || return
+			[ "$net" != "$lan_if" ] && return
 			set -- "$@" encryption=psk2 -key -network
 			[ "$os_version" -le 23 ] && set -- "$@" key=_unused_
 			[ "$os_version" -ge 25 ] && set -- "$@" +hostapd_bss_options='vlan_no_bridge=1'
@@ -835,7 +853,7 @@ mesh_iface=${BATMAN_ADV:+bat0_}mesh0
 wifi_networks="
 ap|$lan_ssid|$lan_pass|$lan_if|2g 5g 6g|1|$lan_vid|
 ap|$guest_ssid|$guest_pass|$guest_if|2g 5g 6g|$GUEST_ENABLE|$guest_vid|
-ap|$iot_ssid|$iot_pass|$iot_if|2g|$IOT_ENABLE|$iot_vid|
+ap|$iot_ssid|$iot_pass|$iot_if|2g 5g|$IOT_ENABLE|$iot_vid|
 ap|$lan_wg_ssid|$lan_wg_pass|$lan_wg_if|2g 5g 6g|$WG_ENABLE|$wg_vid|
 mesh|$mesh_id|$mesh_pass|$mesh_iface|5g|$WIRELESS_MESH||sae
 "
@@ -911,7 +929,7 @@ done
 			min_snr='-80'
 	}
 
-	if [ "$WIFI_KVR" != 1 ] || [ "$no_wifi" = 1 ]; then
+	if [ "$DOT11KV" != 1 ] || [ "$no_wifi" = 1 ]; then
 		/etc/init.d/usteer disable
 	fi
 }
