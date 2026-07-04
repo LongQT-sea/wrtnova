@@ -767,27 +767,20 @@ add_wifi_iface() {
 	[ "$mode" = mesh ] && set -- "$@" -ssid mesh_id="$ssid" ifname="$net" ${BATMAN_ADV:+mesh_fwding=0}
 
 	[ "$WIFI_KVR" = 1 ] && [ "$mode" = ap ] && [ "$net" != "$iot_if" ] && has_pkg wpad-mb wpad-op wpad-wo && {
-		[ "$enc" = psk2 ] && set -- "$@" ft_psk_generate_local=1
-		set -- "$@" ieee80211r=1 ft_over_ds=0 ieee80211k=1 bss_transition=1
+		set -- "$@" ieee80211k=1 bss_transition=1 ieee80211r=1
+		set -- "$@" mobility_domain="$(printf '%s' "$ssid" | md5sum | cut -c1-4)"
 	}
 
-	[ "$PSK_VLAN" = 1 ] && [ "$mode" = ap ] && [ "$net" != "$iot_if" ] && {
-		iw phy | grep -q "AP/VLAN" || return
-
-		add_wifi_vlan "$vid" "$key" "$net" "${dev}_${lan_if}"
-
-		[ "$net" = "$lan_if" ] || return
-
-		set -- "$@" -key -network +hostapd_bss_options='vlan_no_bridge=1'
-
-		[ "$os_version" -le 23 ] && set -- "$@" key=_unused_
-
-		[ "$os_version" -le 24 ] && {
-			case "$band" in
-				6g) set -- "$@" -ieee80211r ;;
-				*)  set -- "$@" encryption=psk2 ${WIFI_KVR:+ft_psk_generate_local=1} ;;
-			esac
-		}
+	[ "$PSK_VLAN" = 1 ] && iw phy | grep -q "AP/VLAN" && [ "$mode" = ap ] && [ "$net" != "$iot_if" ] && {
+		if [ "$band" = 6g ]; then
+			set -- "$@" ssid="${ssid}_6G"
+		else
+			add_wifi_vlan "$vid" "$key" "$net" "${dev}_${lan_if}"
+			[ "$net" = "$lan_if" ] || return
+			set -- "$@" encryption=psk2 -key -network
+			[ "$os_version" -le 23 ] && set -- "$@" key=_unused_
+			[ "$os_version" -ge 25 ] && set -- "$@" +hostapd_bss_options='vlan_no_bridge=1'
+		fi
 	}
 
 	_uci wireless wifi-iface "${dev}_${net}" "$@"
