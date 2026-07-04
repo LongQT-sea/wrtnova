@@ -31,10 +31,15 @@ test('deriveVisibility: pppoe / iot / guest / wg gating', () => {
   assert.equal(deriveVisibility({ wan_type: 'pppoe' })['pppoe-only'], false);
   assert.equal(deriveVisibility({ wan_type: 'dhcp' })['pppoe-only'], true);
   const iotWg = deriveVisibility({ IOT_ENABLE: '1', WG_ENABLE: '1' });
-  assert.equal(iotWg['iot-only'], false);
+  assert.equal(iotWg['iot-internet-only'], false);
   assert.equal(iotWg['wifi-iot'], false);
   assert.equal(iotWg['iot-wg-only'], false);
   assert.equal(deriveVisibility({ IOT_ENABLE: '1' })['iot-wg-only'], true);  // needs wg too
+  // AP mode has no L3, so the IoT internet / route-via-WG toggles hide even when on.
+  const iotWgAp = deriveVisibility({ IOT_ENABLE: '1', WG_ENABLE: '1', AP_MODE: '1' });
+  assert.equal(iotWgAp['iot-internet-only'], true);
+  assert.equal(iotWgAp['iot-wg-only'], true);
+  assert.equal(iotWgAp['wifi-iot'], false);  // IoT WiFi (L2) still shown in AP mode
   assert.equal(deriveVisibility({ GUEST_ENABLE: '1' })['wifi-guest'], false);
 });
 

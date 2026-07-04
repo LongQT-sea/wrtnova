@@ -65,10 +65,13 @@ export function deriveVisibility(cfg) {
     'router-only': ap,
     'ap-only': !ap,
     'pppoe-only': cfg.wan_type !== 'pppoe',
-    'iot-only': !iot,
     'wifi-iot': !iot,
     'wifi-guest': !guest,
-    'iot-wg-only': !(iot && wg),
+    // IoT internet access and route-via-WG are L3 decisions that do not exist in
+    // AP mode (IoT is L2-only there), so hide these two when AP mode is on too.
+    // Each class is used only for its one control block.
+    'iot-internet-only': !iot || ap,
+    'iot-wg-only': !(iot && wg) || ap,
     'wifi-wg': !wg,
     'wg-off-notice': wg || ap || !wgConfigEntered,
     'wg-help-router': ap,

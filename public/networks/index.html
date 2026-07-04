@@ -357,10 +357,10 @@
                 </tbody>
               </table>
 
-              <div class="iot-only hidden mt-2 pl-1">
+              <div class="iot-internet-only hidden mt-2 pl-1">
                 <label class="toggle-label">
                   <span class="toggle-wrap">
-                    <input type="checkbox" id="IOT_INTERNET" name="IOT_INTERNET" value="1" class="toggle-input">
+                    <input type="checkbox" id="IOT_INTERNET" name="IOT_INTERNET" value="1" class="toggle-input" checked>
                     <span class="toggle-track"></span>
                     <span class="toggle-thumb"></span>
                   </span>
@@ -668,14 +668,36 @@
               </summary>
               <div class="mt-2 pl-4 border-l-2 border-zinc-200 dark:border-zinc-700">
                 <div class="form-row">
-                  <label class="form-label" data-i18n="fastRoaming">802.11k/v/r</label>
+                  <label class="form-label" data-i18n="dot11kv">802.11k/v</label>
                   <label class="toggle-label">
                     <span class="toggle-wrap">
-                      <input type="checkbox" id="WIFI_KVR" name="WIFI_KVR" class="toggle-input" checked>
+                      <input type="checkbox" id="DOT11KV" name="DOT11KV" class="toggle-input" checked>
                       <span class="toggle-track"></span>
                       <span class="toggle-thumb"></span>
                     </span>
-                    <span class="toggle-text" data-i18n="enableFastRoaming">Enable fast roaming and band-steering</span>
+                    <span class="toggle-text" data-i18n="dot11kvHelp">Neighbor reports and assisted roaming</span>
+                  </label>
+                </div>
+                <div class="form-row">
+                  <label class="form-label" data-i18n="dot11r">802.11r</label>
+                  <label class="toggle-label">
+                    <span class="toggle-wrap">
+                      <input type="checkbox" id="DOT11R" name="DOT11R" class="toggle-input" checked>
+                      <span class="toggle-track"></span>
+                      <span class="toggle-thumb"></span>
+                    </span>
+                    <span class="toggle-text" data-i18n="dot11rHelp">Fast transition (fast roaming)</span>
+                  </label>
+                </div>
+                <div class="form-row wifi-iot hidden">
+                  <label class="form-label" data-i18n="iotNoDot11r">IoT: 802.11r</label>
+                  <label class="toggle-label">
+                    <span class="toggle-wrap">
+                      <input type="checkbox" id="IOT_NO_DOT11R" name="IOT_NO_DOT11R" class="toggle-input" checked>
+                      <span class="toggle-track"></span>
+                      <span class="toggle-thumb"></span>
+                    </span>
+                    <span class="toggle-text" data-i18n="iotNoDot11rHelp">Fast transition for IoT; off keeps IoT on its own SSID</span>
                   </label>
                 </div>
                 <div class="form-row" id="row-psk-vlan">

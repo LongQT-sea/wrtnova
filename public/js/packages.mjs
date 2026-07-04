@@ -52,7 +52,7 @@ export function computeAdds({ base = [], device = [], config = {} }) {
   const hasWifi = /\bwpad-?|\bhostapd|\bmac80211/.test(names) ||
                   Object.entries(config).some(([k, v]) => /WIFI/.test(k) && v);
   if (hasWifi) adds.push('-wpad-basic-mbedtls', 'wpad-mbedtls');
-  if (hasWifi && config.WIFI_KVR === '1') adds.push('luci-app-usteer');
+  if (hasWifi && config.DOT11KV === '1') adds.push('luci-app-usteer');
 
   const isAth10kCt = p => /^ath10k-firmware-|^kmod-ath10k-ct/.test(p);
   const ctPkgs = [...base, ...device].filter(isAth10kCt);

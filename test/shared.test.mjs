@@ -21,11 +21,14 @@ test('mergeNodeConfig: AP mode suppresses WAN/WG/forward/DDNS/failover fields', 
     PORT_FORWARD_LIST: 'x', IPV6_SERVER_LIST: 'y',
     DDNS_ENABLE: '1', LOOKUP_HOSTNAME: 'h', CLOUDFLARE_API_KEY: 'k',
     CELLULAR_MODEM: '1', USB_TETHERING: '1',
+    IOT_ENABLE: '1', IOT_INTERNET: '1', IOT_ROUTE_VIA_WG: '1',
   }, {});
   for (const k of ['WAN_VLAN_ID', 'WAN_IS_TAGGED', 'WAN_B_ENABLE', 'BRIDGE_WAN_PORT',
     'WAN_MAC_ADDR', 'WG_PRIVATE_KEY', 'PEER_PUBLIC_KEY', 'ENDPOINT',
     'PORT_FORWARD_LIST', 'IPV6_SERVER_LIST', 'DDNS_ENABLE', 'LOOKUP_HOSTNAME',
-    'CLOUDFLARE_API_KEY', 'CELLULAR_MODEM', 'USB_TETHERING']) {
+    'CLOUDFLARE_API_KEY', 'CELLULAR_MODEM', 'USB_TETHERING',
+    // IoT internet / route-via-WG are L3-only; suppressed on an AP (IoT is L2 there).
+    'IOT_INTERNET', 'IOT_ROUTE_VIA_WG']) {
     assert.equal(out[k], '', `${k} should be cleared in AP mode`);
   }
   assert.equal(out.AP_MODE, '1');
@@ -58,7 +61,7 @@ test('mergeNodeConfig: IOT_ROUTE_VIA_WG requires both IoT and WG on', () => {
 
 test('mergeNodeConfig: flag() never emits 0', () => {
   const out = mergeNodeConfig({
-    DENSE_ENV: '0', WIFI_KVR: '0', BLOCK_DOT_DOQ: '0', SOFTWARE_OFFLOAD: '0',
+    DENSE_ENV: '0', DOT11KV: '0', DOT11R: '0', BLOCK_DOT_DOQ: '0', SOFTWARE_OFFLOAD: '0',
     HARDWARE_OFFLOAD: '0', DENY_GUEST_NIGHT: '0', QUARTERLY_REBOOT: '0', LOG: '0',
     NON_CT_ATH10K: '0',
   }, {});
@@ -121,7 +124,7 @@ test('resolvePackages: multi-WAN, wifi, usteer, wireguard, modem, tether', () =>
   const mwan = resolvePackages({ config: { WAN_B_ENABLE: '1' } });
   assert.ok(mwan.includes('luci-app-mwan3'));
 
-  const wifi = resolvePackages({ base: ['wpad-basic-mbedtls'], config: { WIFI_KVR: '1' } });
+  const wifi = resolvePackages({ base: ['wpad-basic-mbedtls'], config: { DOT11KV: '1' } });
   assert.ok(wifi.includes('wpad-mbedtls'));
   assert.ok(wifi.includes('luci-app-usteer'));
   // -wpad-basic-mbedtls removal beat its positive (base had wpad-basic-mbedtls)

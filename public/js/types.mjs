@@ -64,7 +64,8 @@
  * @property {string} [ULA_PREFIX]         IPv6 ULA prefix override
  * @property {string} [COUNTRY_CODE]
  * @property {string} [DENSE_ENV]          flag
- * @property {string} [WIFI_KVR]           flag
+ * @property {string} [DOT11KV]            flag (802.11k/v)
+ * @property {string} [DOT11R]             flag (802.11r)
  * @property {string} [PSK_VLAN]           flag (per-VLAN PSK)
  * @property {string} [WIRELESS_MESH]      flag
  * @property {string} [BRIDGE_STP]         flag
@@ -77,6 +78,7 @@
  * @property {string} [GUEST_ISOLATE]      flag
  * @property {string} [IOT_WIFI_SSID]
  * @property {string} [IOT_WIFI_PASSWD]    sensitive
+ * @property {string} [IOT_NO_DOT11R]      flag (disable 802.11r for IoT)
  * @property {string} [LAN_WG_WIFI_SSID]
  * @property {string} [LAN_WG_WIFI_PASSWD] sensitive
  * @property {string} [CHANNEL_2G]

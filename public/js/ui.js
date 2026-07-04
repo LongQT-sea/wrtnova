@@ -218,6 +218,20 @@ import { deriveVisibility, deriveNetRows, detectVlanConflict, resolveVlanAssignm
           agMain.dispatchEvent(new Event('change', { bubbles: true }));
         }
       }
+
+      // DENSE_ENV only tightens usteer thresholds, and usteer runs only with
+      // 802.11k/v (DOT11KV). When DOT11KV is off the toggle is inert: disable it
+      // and force it off, dispatching a bubbling change so each page's store
+      // re-syncs (same pattern as ADGUARD_MAIN_DNS above).
+      const dense = ui.$('#DENSE_ENV');
+      const kv = ui.$('#DOT11KV');
+      if (dense && kv) {
+        dense.disabled = !kv.checked;
+        if (!kv.checked && dense.checked) {
+          dense.checked = false;
+          dense.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+      }
       const wgRouter = cfg.WG_ENABLE === '1' && cfg.AP_MODE !== '1';
       if (wgRouter && e && e.target && e.target.id === 'WG_ENABLE') {
         const wgCard = ui.$('#card-wg');

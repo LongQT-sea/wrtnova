@@ -62,8 +62,8 @@ export function deriveConfig(raw) {
     DEFAULT_SUBNET:  v('DEFAULT_SUBNET'),
     GUEST_ENABLE:    v('GUEST_ENABLE'),
     IOT_ENABLE:      v('IOT_ENABLE'),
-    IOT_INTERNET:    iotOn ? v('IOT_INTERNET') : '',
-    IOT_ROUTE_VIA_WG: (iotOn && wgOn) ? v('IOT_ROUTE_VIA_WG') : '',
+    IOT_INTERNET:    (iotOn && apMode !== '1') ? v('IOT_INTERNET') : '',
+    IOT_ROUTE_VIA_WG: (iotOn && wgOn && apMode !== '1') ? v('IOT_ROUTE_VIA_WG') : '',
     WG_ENABLE:       wgOn ? '1' : '',
 
     LAN_BASE_PREFIX:    v('LAN_BASE_PREFIX'),
@@ -88,7 +88,8 @@ export function deriveConfig(raw) {
 
     COUNTRY_CODE:   v('COUNTRY_CODE'),         // uppercased at the store boundary
     DENSE_ENV:      v('DENSE_ENV'),
-    WIFI_KVR:       v('WIFI_KVR'),
+    DOT11KV:        v('DOT11KV'),
+    DOT11R:         v('DOT11R'),
     PSK_VLAN:       v('PSK_VLAN'),
     WIRELESS_MESH:  v('WIRELESS_MESH'),
     BRIDGE_STP:     meshOn ? v('BRIDGE_STP')  : '',
@@ -102,6 +103,7 @@ export function deriveConfig(raw) {
     GUEST_ISOLATE:      guestOn ? v('GUEST_ISOLATE')     : '',
     IOT_WIFI_SSID:      iotOn   ? v('IOT_WIFI_SSID')     : '',
     IOT_WIFI_PASSWD:    iotOn   ? v('IOT_WIFI_PASSWD')   : '',
+    IOT_NO_DOT11R:      iotOn   ? v('IOT_NO_DOT11R')     : '',
     LAN_WG_WIFI_SSID:   wgOn ? v('LAN_WG_WIFI_SSID')   : '',
     LAN_WG_WIFI_PASSWD: wgOn ? v('LAN_WG_WIFI_PASSWD') : '',
     CHANNEL_2G:   v('CHANNEL_2G'),

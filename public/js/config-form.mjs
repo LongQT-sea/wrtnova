@@ -66,10 +66,10 @@ export const BASE_SCHEMA = /** @type {[string,string,(string|undefined)?,(string
   ['MESH_ID', 'text'], ['MESH_PASSWD', 'text'],
   ['LAN_WIFI_SSID', 'text'], ['LAN_WIFI_PASSWD', 'text'],
   ['GUEST_WIFI_SSID', 'text'], ['GUEST_WIFI_PASSWD', 'text'], ['GUEST_ISOLATE', 'checkbox'],
-  ['IOT_WIFI_SSID', 'text'], ['IOT_WIFI_PASSWD', 'text'],
+  ['IOT_WIFI_SSID', 'text'], ['IOT_WIFI_PASSWD', 'text'], ['IOT_NO_DOT11R', 'checkbox-inv'],
   ['LAN_WG_WIFI_SSID', 'text'], ['LAN_WG_WIFI_PASSWD', 'text'],
   ['CHANNEL_2G', 'select'], ['CHANNEL_5G', 'select'], ['CHANNEL_6G', 'select'], ['WIFI_LOG_LVL', 'select'],
-  ['WIFI_KVR', 'checkbox'], ['PSK_VLAN', 'checkbox'],
+  ['DOT11KV', 'checkbox'], ['DOT11R', 'checkbox'], ['PSK_VLAN', 'checkbox'],
   ['PORT_FORWARD_LIST', 'table', 'portfwd'], ['IPV6_SERVER_LIST', 'table', 'ipv6'],
   ['DDNS_ENABLE', 'checkbox'], ['LOOKUP_HOSTNAME', 'text'], ['CLOUDFLARE_API_KEY', 'text'],
   ['USB_TETHERING', 'checkbox'], ['CELLULAR_MODEM', 'checkbox'],
@@ -107,19 +107,21 @@ export function prefixValid(v) {
 // Per-VLAN PSK (PSK_VLAN): one shared SSID where the password a client types
 // decides which VLAN it lands on, so the participating networks must have
 // distinct WiFi passwords. Participants are LAN (always), Guest and VPN when
-// enabled; IoT keeps its own SSID and is not part of the steering. A blank
-// field resolves to the shared default (wrtnova.sh def_pass, 12345678), so at
-// most one participant may be blank; two blanks collide. With fewer than two
-// participants there is nothing to steer between, so no check is needed.
-// Returns null when OK, else { networks } listing the enabled participants (for
-// the error message). Reads raw (untrimmed) values to match what the build
-// emits (see textVal).
+// enabled, and IoT when enabled unless IOT_NO_DOT11R keeps it on its own SSID
+// (matches wrtnova.sh add_wifi_iface: IoT joins the LAN SSID VLAN only when
+// IOT_NO_DOT11R is off). A blank field resolves to the shared default
+// (wrtnova.sh def_pass, 12345678), so at most one participant may be blank; two
+// blanks collide. With fewer than two participants there is nothing to steer
+// between, so no check is needed. Returns null when OK, else { networks } listing
+// the enabled participants (for the error message). Reads raw (untrimmed) values
+// to match what the build emits (see textVal).
 export function pskVlanPassIssue(cfg) {
   if (cfg.PSK_VLAN !== '1') return null;
   const parts = [
     { label: 'LAN',   pass: cfg.LAN_WIFI_PASSWD    || '', active: true },
     { label: 'Guest', pass: cfg.GUEST_WIFI_PASSWD  || '', active: cfg.GUEST_ENABLE === '1' },
     { label: 'VPN',   pass: cfg.LAN_WG_WIFI_PASSWD || '', active: cfg.WG_ENABLE === '1' },
+    { label: 'IoT',   pass: cfg.IOT_WIFI_PASSWD    || '', active: cfg.IOT_ENABLE === '1' && cfg.IOT_NO_DOT11R !== '1' },
   ].filter((p) => p.active);
   if (parts.length < 2) return null;
   const def = cfg.DEFAULT_WIFI_PASSWD || '12345678';
@@ -137,6 +139,9 @@ export function readForm(schema) {
     switch (kind) {
       case 'text':     out[key] = textVal(key); break;
       case 'checkbox': out[key] = checkboxVal(key); break;
+      // Inverted checkbox: the control shows the positive ("IoT: 802.11r", default
+      // on) but the config key is the negative (IOT_NO_DOT11R). Unchecked -> '1'.
+      case 'checkbox-inv': out[key] = checkboxVal(key) ? '' : '1'; break;
       case 'radio':    out[key] = radioVal(key); break;
       case 'select':   out[key] = selectVal(opt || key); break;
       case 'subnet':   out[key] = subnetVal(key); break;
@@ -150,12 +155,15 @@ export function readForm(schema) {
 
 // -- Key-kind sets (for the patch-style write inverse on /builder) -----------
 export function keySets(schema) {
-  const radio = new Set(), checkbox = new Set();
+  const radio = new Set(), checkbox = new Set(), invCheckbox = new Set();
   for (const [key, kind] of schema) {
     if (kind === 'radio') radio.add(key);
     else if (kind === 'checkbox') checkbox.add(key);
+    // Inverted checkboxes are still checkbox controls (in `checkbox`), but the
+    // store->DOM patch must invert the checked state, so track them separately.
+    else if (kind === 'checkbox-inv') { checkbox.add(key); invCheckbox.add(key); }
   }
-  return { radio, checkbox };
+  return { radio, checkbox, invCheckbox };
 }
 
 // -- config -> DOM (full render, the /networks loadConfig per-field loop) -----
@@ -173,6 +181,7 @@ export function writeForm(schema, cfg) {
     const el = document.getElementById(id);
     if (!el) continue;
     if (kind === 'checkbox') el.checked = cfg[key] === '1' || cfg[key] === true;
+    else if (kind === 'checkbox-inv') el.checked = !(cfg[key] === '1' || cfg[key] === true);
     else if (kind === 'subnet') writeSubnet(el, cfg[key] || '');
     else el.value = cfg[key] || '';
   }

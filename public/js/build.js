@@ -147,7 +147,7 @@ import { collectTarget, devicesState } from './devices.js';
   // removes the "wrote the DOM but forgot to sync the store" hazard class: there
   // is no separate refreshStore() call to forget. (History restore reconstructs
   // tables / timezone / wan_type and stays DOM-first, then re-syncs explicitly.)
-  const { radio: RADIO_SET, checkbox: CHECKBOX_SET } = keySets(BUILDER_SCHEMA);
+  const { radio: RADIO_SET, checkbox: CHECKBOX_SET, invCheckbox: INV_CHECKBOX_SET } = keySets(BUILDER_SCHEMA);
   function renderConfigToDom(patch) {
     for (const k in patch) {
       const val = patch[k];
@@ -160,7 +160,7 @@ import { collectTarget, devicesState } from './devices.js';
       }
       if (CHECKBOX_SET.has(k)) {
         const el = $('#' + k);
-        if (el) el.checked = val === '1';
+        if (el) el.checked = INV_CHECKBOX_SET.has(k) ? val !== '1' : val === '1';
         continue;
       }
       if (SUBNET_KEYS.has(k)) {                          // anchored subnet select
@@ -474,9 +474,12 @@ import { collectTarget, devicesState } from './devices.js';
       PSK_VLAN:           $('#PSK_VLAN').checked ? '1' : '',
       GUEST_ENABLE:       $('#GUEST_ENABLE').checked ? '1' : '',
       WG_ENABLE:          $('#WG_ENABLE').checked ? '1' : '',
+      IOT_ENABLE:         $('#IOT_ENABLE').checked ? '1' : '',
+      IOT_NO_DOT11R:      $('#IOT_NO_DOT11R').checked ? '' : '1',
       LAN_WIFI_PASSWD:    $('#LAN_WIFI_PASSWD').value,
       GUEST_WIFI_PASSWD:  $('#GUEST_WIFI_PASSWD').value,
       LAN_WG_WIFI_PASSWD: $('#LAN_WG_WIFI_PASSWD').value,
+      IOT_WIFI_PASSWD:    $('#IOT_WIFI_PASSWD').value,
     });
     if (pskIssue) {
       ui.status(t('pskVlanPass', { networks: pskIssue.networks.join(', ') }), 'error');
