@@ -7,27 +7,10 @@
 // routinely pass partial configs (per-node overrides, raw form snapshots); a
 // fully-derived config has them all present.
 //
-// The metadata sets (SENSITIVE_KEYS, BUILD_ONLY_KEYS) encode strip/skip rules
-// as data so they are checkable, not prose. BUILD_ONLY_KEYS lives in
-// render-config.mjs (the renderer is its primary consumer) and is re-exported
-// here so the contract has one import surface.
-
-export { BUILD_ONLY_KEYS } from './render-config.mjs';
-
-/**
- * Keys the masked preview renders as '****' and which are stripped from saved
- * build history so secrets are never persisted in plaintext. Single source for
- * ui.SENSITIVE_FIELDS.
- * @type {ReadonlySet<string>}
- */
-export const SENSITIVE_KEYS = new Set([
-  'ROOT_PASSWD', 'PPPOE_PASSWD',
-  'LAN_WIFI_PASSWD', 'GUEST_WIFI_PASSWD', 'IOT_WIFI_PASSWD', 'LAN_WG_WIFI_PASSWD',
-  'MESH_PASSWD',
-  'WG_PRIVATE_KEY', 'PEER_PUBLIC_KEY', 'PRESHARED_KEY',
-  'ENDPOINT', 'ENDPOINT_PORT', 'WG_IPV4', 'WG_IPV6', 'ALLOWED_IPS',
-  'CLOUDFLARE_API_KEY', 'ADGUARD_PASSWD',
-]);
+// This module is type-only: it carries the Config typedef and no runtime code,
+// so it never ships in the browser payload (referenced solely via JSDoc
+// import('./types.mjs')). The sensitive-field set lives in ui.js (its only
+// consumer, as ui.SENSITIVE_FIELDS); BUILD_ONLY_KEYS lives in render-config.mjs.
 
 /**
  * The WrtNova firmware config. All values are strings; boolean flags are ''

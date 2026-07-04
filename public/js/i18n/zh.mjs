@@ -131,6 +131,7 @@ export default {
   wifiPassTooShort: 'WiFi 密码至少需要 8 个字符（{field}）。',
   ifaceInvalid:     '接口名称 "{field}" 只能包含 a-z、A-Z、0-9、_，且最多 15 个字符。',
   prefixInvalid:    'IP 前缀 "{field}" 必须是两个 0-255 的八位组，例如 192.168',
+  pskVlanPass:      '按 VLAN 分配 PSK 要求每个已启用的网络（{networks}）使用唯一的 Wi-Fi 密码，以便将客户端引导到对应的网络。',
   preparingBuild:   '准备构建…',
   pickDeviceHint:   '选择设备以启用构建。',
 

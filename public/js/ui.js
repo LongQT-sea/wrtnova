@@ -7,7 +7,6 @@ import { renderConfigBlock } from './render-config.mjs';
 import { resolvePackages } from './packages.mjs';
 import { serializeList, clampOctet } from './list-grammar.mjs';
 import { deriveVisibility, deriveNetRows, detectVlanConflict, resolveVlanAssignment } from './visibility.mjs';
-import { SENSITIVE_KEYS } from './types.mjs';
 
   ui.$  = (sel, root) => (root || document).querySelector(sel);
   ui.$$ = (sel, root) => Array.from((root || document).querySelectorAll(sel));
@@ -351,10 +350,18 @@ import { SENSITIVE_KEYS } from './types.mjs';
   // -- Script assembly (shared between /builder and /networks) ------------------
 
   // Sensitive fields: masked as '****' in the config preview and stripped from
-  // saved build history (never persisted in plaintext). Canonical set lives in
-  // types.mjs (SENSITIVE_KEYS, imported above); kept as ui.SENSITIVE_FIELDS for
-  // existing callers.
-  ui.SENSITIVE_FIELDS = SENSITIVE_KEYS;
+  // saved build history (never persisted in plaintext). Defined here (ui.js is
+  // the sole consumer) so the type-only types.mjs stays out of the browser
+  // payload; the Config typedef still references these by name in prose.
+  /** @type {ReadonlySet<string>} */
+  ui.SENSITIVE_FIELDS = new Set([
+    'ROOT_PASSWD', 'PPPOE_PASSWD',
+    'LAN_WIFI_PASSWD', 'GUEST_WIFI_PASSWD', 'IOT_WIFI_PASSWD', 'LAN_WG_WIFI_PASSWD',
+    'MESH_PASSWD',
+    'WG_PRIVATE_KEY', 'PEER_PUBLIC_KEY', 'PRESHARED_KEY',
+    'ENDPOINT', 'ENDPOINT_PORT', 'WG_IPV4', 'WG_IPV6', 'ALLOWED_IPS',
+    'CLOUDFLARE_API_KEY', 'ADGUARD_PASSWD',
+  ]);
 
   ui.stripSensitive = function (cfg) {
     return Object.fromEntries(Object.entries(cfg).filter(([k]) => !ui.SENSITIVE_FIELDS.has(k)));

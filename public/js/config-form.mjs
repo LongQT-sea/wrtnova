@@ -104,6 +104,29 @@ export function prefixValid(v) {
   return !!m && +m[1] <= 255 && +m[2] <= 255;
 }
 
+// Per-VLAN PSK (PSK_VLAN): one shared SSID where the password a client types
+// decides which VLAN it lands on, so the participating networks must have
+// distinct WiFi passwords. Participants are LAN (always), Guest and VPN when
+// enabled; IoT keeps its own SSID and is not part of the steering. A blank
+// field resolves to the shared default (wrtnova.sh def_pass, 12345678), so at
+// most one participant may be blank; two blanks collide. With fewer than two
+// participants there is nothing to steer between, so no check is needed.
+// Returns null when OK, else { networks } listing the enabled participants (for
+// the error message). Reads raw (untrimmed) values to match what the build
+// emits (see textVal).
+export function pskVlanPassIssue(cfg) {
+  if (cfg.PSK_VLAN !== '1') return null;
+  const parts = [
+    { label: 'LAN',   pass: cfg.LAN_WIFI_PASSWD    || '', active: true },
+    { label: 'Guest', pass: cfg.GUEST_WIFI_PASSWD  || '', active: cfg.GUEST_ENABLE === '1' },
+    { label: 'VPN',   pass: cfg.LAN_WG_WIFI_PASSWD || '', active: cfg.WG_ENABLE === '1' },
+  ].filter((p) => p.active);
+  if (parts.length < 2) return null;
+  const def = cfg.DEFAULT_WIFI_PASSWD || '12345678';
+  const eff = parts.map((p) => p.pass || def);
+  return new Set(eff).size === eff.length ? null : { networks: parts.map((p) => p.label) };
+}
+
 // -- DOM -> raw config object ------------------------------------------------
 // Normalized once at the boundary (checkboxes ''/'1', COUNTRY_CODE uppercased,
 // tz + dynamic tables resolved). No cross-field gating. Keys are emitted in

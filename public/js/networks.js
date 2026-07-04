@@ -11,7 +11,7 @@ import './i18n/core.mjs';
 import './tzdata.js';
 import { BASE_SCHEMA, readForm, writeForm } from './config-form.mjs';
 import { mergeNodeConfig } from './config-merge.mjs';
-import { IFACE_FIELDS, ifaceValid, PREFIX_FIELDS, prefixValid } from './config-form.mjs';
+import { IFACE_FIELDS, ifaceValid, PREFIX_FIELDS, prefixValid, pskVlanPassIssue } from './config-form.mjs';
 import { detectVlanConflict } from './visibility.mjs';
 import { renderConfigBlock } from './render-config.mjs';
 import { parseList } from './list-grammar.mjs';
@@ -1175,6 +1175,15 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
     const badPrefix = PREFIX_FIELDS.find(k => !prefixValid(mergedForCheck[k]));
     if (badPrefix) {
       showPanelError(actEl, t('prefixInvalid', { field: mergedForCheck[badPrefix] }), () => buildNode(net, node));
+      return;
+    }
+
+    // Per-VLAN PSK: the enabled networks' WiFi passwords must be distinct (a
+    // blank one uses the shared default), since the password steers a client
+    // onto its VLAN.
+    const pskIssue = pskVlanPassIssue(mergedForCheck);
+    if (pskIssue) {
+      showPanelError(actEl, t('pskVlanPass', { networks: pskIssue.networks.join(', ') }), () => buildNode(net, node));
       return;
     }
 

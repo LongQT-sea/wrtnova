@@ -8,7 +8,7 @@
 import { ui } from './ui-ns.mjs';
 import './ui.js';
 import './i18n/core.mjs';
-import { BUILDER_SCHEMA, readForm, keySets, textVal, SUBNET_KEYS, writeSubnet, IFACE_FIELDS, ifaceValid, PREFIX_FIELDS, prefixValid } from './config-form.mjs';
+import { BUILDER_SCHEMA, readForm, keySets, textVal, SUBNET_KEYS, writeSubnet, IFACE_FIELDS, ifaceValid, PREFIX_FIELDS, prefixValid, pskVlanPassIssue } from './config-form.mjs';
 import { deriveConfig } from './builder-config.mjs';
 import { deriveNetRows } from './visibility.mjs';
 import { createStore } from './store.mjs';
@@ -464,6 +464,23 @@ import { collectTarget, devicesState } from './devices.js';
         $('#' + id).focus();
         return;
       }
+    }
+
+    // Per-VLAN PSK: the enabled networks' WiFi passwords must be distinct (a
+    // blank one uses the shared default), since the password is what steers a
+    // client onto its VLAN. Report via the status banner only - no focus(), so
+    // the page does not scroll the WiFi input into view.
+    const pskIssue = pskVlanPassIssue({
+      PSK_VLAN:           $('#PSK_VLAN').checked ? '1' : '',
+      GUEST_ENABLE:       $('#GUEST_ENABLE').checked ? '1' : '',
+      WG_ENABLE:          $('#WG_ENABLE').checked ? '1' : '',
+      LAN_WIFI_PASSWD:    $('#LAN_WIFI_PASSWD').value,
+      GUEST_WIFI_PASSWD:  $('#GUEST_WIFI_PASSWD').value,
+      LAN_WG_WIFI_PASSWD: $('#LAN_WG_WIFI_PASSWD').value,
+    });
+    if (pskIssue) {
+      ui.status(t('pskVlanPass', { networks: pskIssue.networks.join(', ') }), 'error');
+      return;
     }
 
     // Interface names: empty (use default) or a valid UCI section name. Pop the
