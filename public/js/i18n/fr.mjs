@@ -241,6 +241,8 @@ export default {
   dot11rHelp:         'Transition rapide (roaming rapide)',
   iotNoDot11r:        'IoT : 802.11r',
   iotNoDot11rHelp:    'Transition rapide pour l\'IoT ; désactivée, l\'IoT garde son propre SSID',
+  bandSuffix:         'SSID par bande',
+  bandSuffixHelp:     'Ajouter la bande (2g/5g/6g) au nom de chaque SSID',
   pskVlan:            'PSK par VLAN',
   pskVlanHelp:        'Un seul SSID avec un accès séparé selon le mot de passe',
   guestIsolate:       'Isolation des invités',

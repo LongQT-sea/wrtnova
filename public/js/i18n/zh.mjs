@@ -241,6 +241,8 @@ export default {
   dot11rHelp:         '快速切换（快速漫游）',
   iotNoDot11r:        'IoT：802.11r',
   iotNoDot11rHelp:    '为 IoT 启用快速切换；关闭后 IoT 保留自己的 SSID',
+  bandSuffix:         '按频段命名 SSID',
+  bandSuffixHelp:     '在每个 SSID 名称后追加频段（2g/5g/6g）',
   pskVlan:            '按 VLAN 分配 PSK',
   pskVlanHelp:        '单个 SSID，根据密码区分访问',
   guestIsolate:       '访客隔离',

@@ -241,6 +241,8 @@ export default {
   dot11rHelp:         'Быстрый переход (быстрый роуминг)',
   iotNoDot11r:        'IoT: 802.11r',
   iotNoDot11rHelp:    'Быстрый переход для IoT; при отключении IoT сохраняет свой SSID',
+  bandSuffix:         'SSID по диапазону',
+  bandSuffixHelp:     'Добавлять диапазон (2g/5g/6g) к имени каждого SSID',
   pskVlan:            'PSK для каждой VLAN',
   pskVlanHelp:        'Один SSID с раздельным доступом по паролю',
   guestIsolate:       'Изоляция гостей',

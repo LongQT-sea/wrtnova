@@ -67,6 +67,7 @@
  * @property {string} [DOT11KV]            flag (802.11k/v)
  * @property {string} [DOT11R]             flag (802.11r)
  * @property {string} [PSK_VLAN]           flag (per-VLAN PSK)
+ * @property {string} [BAND_SUFFIX]        flag (append band to SSID)
  * @property {string} [WIRELESS_MESH]      flag
  * @property {string} [BRIDGE_STP]         flag
  * @property {string} [MESH_ID]

@@ -91,6 +91,7 @@ export function deriveConfig(raw) {
     DOT11KV:        v('DOT11KV'),
     DOT11R:         v('DOT11R'),
     PSK_VLAN:       v('PSK_VLAN'),
+    BAND_SUFFIX:    v('BAND_SUFFIX'),
     WIRELESS_MESH:  v('WIRELESS_MESH'),
     BRIDGE_STP:     meshOn ? v('BRIDGE_STP')  : '',
     MESH_ID:        meshOn ? v('MESH_ID')     : '',

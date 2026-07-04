@@ -49,7 +49,7 @@ export function mergeNodeConfig(sharedConfig, nodeOverrides) {
     LAN_WG_BASE_PREFIX: wgOn  ? (c.LAN_WG_BASE_PREFIX || '') : '', LAN_WG_IFACE: wgOn  ? (c.LAN_WG_IFACE || '') : '', LAN_WG_VLAN_ID: vlan.LAN_WG_VLAN_ID, LAN_WG_SUBNET: wgOn  ? (c.LAN_WG_SUBNET || '') : '',
     ADDITIONAL_VLAN_LIST: c.ADDITIONAL_VLAN_LIST || '',
     P_STEERING: c.P_STEERING || '', ULA_PREFIX: c.ULA_PREFIX || '',
-    COUNTRY_CODE: c.COUNTRY_CODE || '', DENSE_ENV: flag(c.DENSE_ENV), WIRELESS_MESH: flag(c.WIRELESS_MESH), DOT11KV: flag(c.DOT11KV), DOT11R: flag(c.DOT11R), PSK_VLAN: flag(c.PSK_VLAN), GUEST_ISOLATE: guestOn ? flag(c.GUEST_ISOLATE) : '',
+    COUNTRY_CODE: c.COUNTRY_CODE || '', DENSE_ENV: flag(c.DENSE_ENV), WIRELESS_MESH: flag(c.WIRELESS_MESH), DOT11KV: flag(c.DOT11KV), DOT11R: flag(c.DOT11R), PSK_VLAN: flag(c.PSK_VLAN), BAND_SUFFIX: flag(c.BAND_SUFFIX), GUEST_ISOLATE: guestOn ? flag(c.GUEST_ISOLATE) : '',
     BRIDGE_STP: meshOn ? flag(c.BRIDGE_STP) : '',
     MESH_ID: meshOn ? (c.MESH_ID || '') : '', MESH_PASSWD: meshOn ? (c.MESH_PASSWD || '') : '',
     LAN_WIFI_SSID: c.LAN_WIFI_SSID || '', LAN_WIFI_PASSWD: c.LAN_WIFI_PASSWD || '',
