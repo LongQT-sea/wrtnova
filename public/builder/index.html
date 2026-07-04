@@ -1075,6 +1075,21 @@
             <p class="form-help" data-i18n="banipCountryHelp">Drop WAN traffic from these countries via banIP. Lowercase ISO codes, space-separated.</p>
           </div>
         </div>
+        <div class="form-row form-row--full">
+          <div class="space-y-3">
+            <label class="toggle-label">
+              <span class="toggle-wrap">
+                <input type="checkbox" id="DENY_GUEST_NIGHT" name="DENY_GUEST_NIGHT" value="1" class="toggle-input">
+                <span class="toggle-track"></span>
+                <span class="toggle-thumb"></span>
+              </span>
+              <div>
+                <span class="toggle-text" data-i18n="denyGuestNight">Block guest at night</span>
+                <p class="form-help mt-0" data-i18n="denyGuestNightHelp">Block guest internet from 9 PM to 7 AM. Requires guest network.</p>
+              </div>
+            </label>
+          </div>
+        </div>
       </div>
       </div>
     </div>
@@ -1131,17 +1146,6 @@
             <div>
               <span class="toggle-text" data-i18n="hardwareOffload">Hardware flow offload</span>
               <p class="form-help mt-0" data-i18n="hardwareOffloadHelp">Higher network throughput where supported. Do not enable if using QoS/SQM.</p>
-            </div>
-          </label>
-          <label class="toggle-label">
-            <span class="toggle-wrap">
-              <input type="checkbox" id="DENY_GUEST_NIGHT" name="DENY_GUEST_NIGHT" value="1" class="toggle-input">
-              <span class="toggle-track"></span>
-              <span class="toggle-thumb"></span>
-            </span>
-            <div>
-              <span class="toggle-text" data-i18n="denyGuestNight">Block guest at night</span>
-              <p class="form-help mt-0" data-i18n="denyGuestNightHelp">Block guest internet from 9 PM to 7 AM. Requires guest network.</p>
             </div>
           </label>
           <label class="toggle-label">
