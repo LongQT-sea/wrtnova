@@ -276,7 +276,7 @@ export default {
   bootstrapDns:       'Bootstrap DNS',
   bootstrapDnsHelp:   'Plain IPs to resolve upstream hostnames + fallback. Blank uses 1.0.0.1 / 9.9.9.9.',
   dnsmasqMulti:       'Per-Network Dnsmasq',
-  dnsmasqMultiHelp:   'Enable Dnsmasq multi-instance mode',
+  dnsmasqMultiHelp:   'Enable multiple DHCP/DNS instances',
   dnsmasqMultiNote:   'To add DHCP on a new interface, use the built-in dhcp-instance-add command.',
   bootstrapDnsPh:     'plain IPs, one per line; blank = defaults',
   additionalPackages: 'Additional packages',

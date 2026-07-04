@@ -276,7 +276,7 @@ export default {
   bootstrapDns:       'Bootstrap-DNS',
   bootstrapDnsHelp:   'Einfache IPs zum Auflösen der Upstream-Hostnamen + Fallback. Leer nutzt 1.0.0.1 / 9.9.9.9.',
   dnsmasqMulti:       'Dnsmasq pro Netzwerk',
-  dnsmasqMultiHelp:   'Dnsmasq-Multi-Instanz-Modus aktivieren',
+  dnsmasqMultiHelp:   'Mehrere DHCP/DNS-Instanzen aktivieren',
   dnsmasqMultiNote:   'Um DHCP auf einer neuen Schnittstelle hinzuzufuegen, den eingebauten Befehl dhcp-instance-add verwenden.',
   bootstrapDnsPh:     'einfache IPs, eine pro Zeile; leer = Standard',
   additionalPackages: 'Zusätzliche Pakete',

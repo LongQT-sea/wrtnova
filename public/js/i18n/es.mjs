@@ -276,7 +276,7 @@ export default {
   bootstrapDns:       'DNS bootstrap',
   bootstrapDnsHelp:   'IPs simples para resolver los nombres de upstreams + reserva. Vacío = 1.0.0.1 / 9.9.9.9.',
   dnsmasqMulti:       'Dnsmasq por red',
-  dnsmasqMultiHelp:   'Activar el modo multi-instancia de Dnsmasq',
+  dnsmasqMultiHelp:   'Activar varias instancias de DHCP/DNS',
   dnsmasqMultiNote:   'Para añadir DHCP en una nueva interfaz, usa el comando integrado dhcp-instance-add.',
   bootstrapDnsPh:     'IPs simples, una por línea; vacío = predeterminado',
   additionalPackages: 'Paquetes adicionales',
