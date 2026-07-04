@@ -11,7 +11,7 @@ import './i18n/core.mjs';
 import './tzdata.js';
 import { BASE_SCHEMA, readForm, writeForm } from './config-form.mjs';
 import { mergeNodeConfig } from './config-merge.mjs';
-import { IFACE_FIELDS, ifaceValid } from './config-form.mjs';
+import { IFACE_FIELDS, ifaceValid, PREFIX_FIELDS, prefixValid } from './config-form.mjs';
 import { detectVlanConflict } from './visibility.mjs';
 import { renderConfigBlock } from './render-config.mjs';
 import { parseList } from './list-grammar.mjs';
@@ -827,6 +827,15 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
     form.addEventListener('input', syncStore, { signal });
     form.addEventListener('change', syncStore, { signal });
 
+    // Live feedback: when the user leaves an IP-prefix field with a bad value
+    // (not empty and not two octets 0-255), pop its native validation bubble.
+    form.addEventListener('focusout', e => {
+      const el = e.target;
+      if (!el || !PREFIX_FIELDS.includes(el.id)) return;
+      el.setCustomValidity(prefixValid(el.value) ? '' : t('prefixInvalid', { field: el.value }));
+      if (!el.validity.valid) el.reportValidity();
+    }, { signal });
+
     document.getElementById('btn-save-config').onclick = () => {
       clearTimeout(saveTimer);
       st.configStore.set(readConfig());
@@ -1159,6 +1168,13 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
     const badIface = IFACE_FIELDS.find(k => !ifaceValid(mergedForCheck[k]));
     if (badIface) {
       showPanelError(actEl, t('ifaceInvalid', { field: mergedForCheck[badIface] }), () => buildNode(net, node));
+      return;
+    }
+
+    // IP prefixes: empty (use default) or two octets 0-255. No RFC1918 gate.
+    const badPrefix = PREFIX_FIELDS.find(k => !prefixValid(mergedForCheck[k]));
+    if (badPrefix) {
+      showPanelError(actEl, t('prefixInvalid', { field: mergedForCheck[badPrefix] }), () => buildNode(net, node));
       return;
     }
 

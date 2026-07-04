@@ -130,6 +130,7 @@ export default {
   rangeMsg:         '{label} debe ser {min}-{max}',
   wifiPassTooShort: 'La contraseña WiFi debe tener al menos 8 caracteres ({field}).',
   ifaceInvalid:     'El nombre de interfaz "{field}" solo puede contener a-z, A-Z, 0-9, _ y tener como máximo 15 caracteres.',
+  prefixInvalid:    'El prefijo IP "{field}" debe ser dos octetos 0-255, p. ej. 192.168',
   preparingBuild:   'Preparando compilación…',
   pickDeviceHint:   'Selecciona un dispositivo para activar la compilación.',
 

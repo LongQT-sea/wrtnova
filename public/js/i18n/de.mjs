@@ -130,6 +130,7 @@ export default {
   rangeMsg:         '{label} muss {min}-{max} sein',
   wifiPassTooShort: 'WLAN-Passwort muss mindestens 8 Zeichen haben ({field}).',
   ifaceInvalid:     'Schnittstellenname "{field}" darf nur a-z, A-Z, 0-9, _ enthalten und maximal 15 Zeichen lang sein.',
+  prefixInvalid:    'IP-Präfix "{field}" muss zwei Oktette 0-255 sein, z. B. 192.168',
   preparingBuild:   'Build wird vorbereitet…',
   pickDeviceHint:   'Gerät auswählen, um Build zu aktivieren.',
 

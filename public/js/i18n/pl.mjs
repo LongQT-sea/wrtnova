@@ -130,6 +130,7 @@ export default {
   rangeMsg:         '{label} musi być w zakresie {min}-{max}',
   wifiPassTooShort: 'Hasło WiFi musi mieć co najmniej 8 znaków ({field}).',
   ifaceInvalid:     'Nazwa interfejsu "{field}" może zawierać tylko a-z, A-Z, 0-9, _ i mieć maksymalnie 15 znaków.',
+  prefixInvalid:    'Prefiks IP "{field}" musi składać się z dwóch oktetów 0-255, np. 192.168',
   preparingBuild:   'Przygotowywanie kompilacji…',
   pickDeviceHint:   'Wybierz urządzenie, aby włączyć kompilację.',
 

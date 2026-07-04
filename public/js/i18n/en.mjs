@@ -130,6 +130,7 @@ export default {
   rangeMsg:         '{label} must be {min}-{max}',
   wifiPassTooShort: 'WiFi password must be at least 8 characters ({field}).',
   ifaceInvalid:     'Interface name "{field}" may only contain a-z, A-Z, 0-9, _ and be at most 15 characters.',
+  prefixInvalid:    'IP prefix "{field}" must be two octets 0-255, e.g. 192.168',
   preparingBuild:   'Preparing build…',
   pickDeviceHint:   'Pick a device to enable build.',
 

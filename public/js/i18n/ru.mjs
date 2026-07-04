@@ -130,6 +130,7 @@ export default {
   rangeMsg:         '{label} должен быть {min}-{max}',
   wifiPassTooShort: 'Пароль WiFi должен содержать не менее 8 символов ({field}).',
   ifaceInvalid:     'Имя интерфейса "{field}" может содержать только a-z, A-Z, 0-9, _ и быть не длиннее 15 символов.',
+  prefixInvalid:    'IP-префикс "{field}" должен состоять из двух октетов 0-255, напр. 192.168',
   preparingBuild:   'Подготовка сборки…',
   pickDeviceHint:   'Выберите устройство, чтобы включить сборку.',
 

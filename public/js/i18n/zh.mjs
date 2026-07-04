@@ -130,6 +130,7 @@ export default {
   rangeMsg:         '{label} 必须为 {min}-{max}',
   wifiPassTooShort: 'WiFi 密码至少需要 8 个字符（{field}）。',
   ifaceInvalid:     '接口名称 "{field}" 只能包含 a-z、A-Z、0-9、_，且最多 15 个字符。',
+  prefixInvalid:    'IP 前缀 "{field}" 必须是两个 0-255 的八位组，例如 192.168',
   preparingBuild:   '准备构建…',
   pickDeviceHint:   '选择设备以启用构建。',
 

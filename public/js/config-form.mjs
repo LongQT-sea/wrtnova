@@ -93,6 +93,17 @@ export const IFACE_FIELDS = ['LAN_IFACE', 'GUEST_IFACE', 'IOT_IFACE', 'LAN_WG_IF
 export const IFACE_RE = /^[A-Za-z0-9_]{1,15}$/;
 export function ifaceValid(v) { return !v || IFACE_RE.test(v); }
 
+// IP-prefix fields (first two octets, e.g. "192.168"). Empty means "use the
+// wrtnova.sh default". Only the two octets' numeric range (0-255) is checked;
+// no RFC1918 restriction, so users with a real (public/ASN) range are allowed.
+export const PREFIX_FIELDS = ['BASE_NET_PREFIX', 'LAN_BASE_PREFIX', 'GUEST_BASE_PREFIX', 'IOT_BASE_PREFIX', 'LAN_WG_BASE_PREFIX'];
+export const PREFIX_RE = /^(\d{1,3})\.(\d{1,3})$/;
+export function prefixValid(v) {
+  if (!v) return true;
+  const m = PREFIX_RE.exec(v);
+  return !!m && +m[1] <= 255 && +m[2] <= 255;
+}
+
 // -- DOM -> raw config object ------------------------------------------------
 // Normalized once at the boundary (checkboxes ''/'1', COUNTRY_CODE uppercased,
 // tz + dynamic tables resolved). No cross-field gating. Keys are emitted in
