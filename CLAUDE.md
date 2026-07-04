@@ -3,9 +3,13 @@
 This repo implements the WrtNova firmware builder per docs/SPEC.md.
 
 ## Invariants — never violate
-- wrtnova.sh is the canonical source of truth. Never modify it from frontend work.
-  When fields/behavior change, update wrtnova.sh first, then regenerate via
-  scripts/embed-wrtnova.mjs.
+- wrtnova.sh is the canonical source of truth, owned and maintained by the user.
+  Claude must NEVER modify, edit, stage, or commit wrtnova.sh under any
+  circumstances. If the user asks to fix a typo or make any change to
+  wrtnova.sh, Claude should only output the suggested change and let the user
+  apply it manually.
+  Claude may only stage or commit frontend files (e.g. public/, scripts/, etc.),
+  never wrtnova.sh.
 - The marker "# ===================\n# End config section\n# ==================="
   in wrtnova.sh splits config block (rendered per build) from body (embedded).
 - No SPDX license headers in any source file except wrtnova.sh (MIT) and LICENSE.
