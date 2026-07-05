@@ -669,7 +669,7 @@
               </label>
             </div>
             <div class="form-row">
-              <label class="form-label" data-i18n="bandSuffix">Per-band SSID</label>
+              <label class="form-label" data-i18n="bandSuffix">Add band suffix</label>
               <label class="toggle-label">
                 <span class="toggle-wrap">
                   <input type="checkbox" id="BAND_SUFFIX" name="BAND_SUFFIX" value="1" class="toggle-input">
@@ -1034,6 +1034,17 @@
               <div>
                 <span class="toggle-text" data-i18n="blockDoh">Block public DoH servers</span>
                 <p class="form-help mt-0" data-i18n="blockDohHelp">Block known DoH resolvers via banIP so clients cannot bypass filtering.</p>
+              </div>
+            </label>
+            <label class="toggle-label">
+              <span class="toggle-wrap">
+                <input type="checkbox" id="FORCE_DNS" name="FORCE_DNS" value="1" class="toggle-input" checked>
+                <span class="toggle-track"></span>
+                <span class="toggle-thumb"></span>
+              </span>
+              <div>
+                <span class="toggle-text" data-i18n="forceDns">Force DNS to router</span>
+                <p class="form-help mt-0" data-i18n="forceDnsHelp">Redirect all DNS queries (TCP/UDP port 53) from LAN, Guest, and IoT networks to the router.</p>
               </div>
             </label>
           </div>

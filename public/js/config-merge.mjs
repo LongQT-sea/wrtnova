@@ -85,6 +85,7 @@ export function mergeNodeConfig(sharedConfig, nodeOverrides) {
     SOFTWARE_OFFLOAD: flag(c.SOFTWARE_OFFLOAD), HARDWARE_OFFLOAD: flag(c.HARDWARE_OFFLOAD),
     BLOCK_DOT_DOQ:    flag(c.BLOCK_DOT_DOQ),
     BLOCK_DOH:        flag(c.BLOCK_DOH),
+    FORCE_DNS:        flag(c.FORCE_DNS),
     BANIP_COUNTRY_LIST: c.BANIP_COUNTRY_LIST || '',
     DENY_GUEST_NIGHT: flag(c.DENY_GUEST_NIGHT),
     QUARTERLY_REBOOT: flag(c.QUARTERLY_REBOOT),

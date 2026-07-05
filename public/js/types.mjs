@@ -113,6 +113,7 @@
  * @property {string} [HARDWARE_OFFLOAD]   flag
  * @property {string} [BLOCK_DOT_DOQ]      flag
  * @property {string} [BLOCK_DOH]          flag
+ * @property {string} [FORCE_DNS]          flag
  * @property {string} [BANIP_COUNTRY_LIST] space-separated lowercase country codes
  * @property {string} [DENY_GUEST_NIGHT]   flag
  * @property {string} [QUARTERLY_REBOOT]   flag
