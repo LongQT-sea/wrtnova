@@ -6,7 +6,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { parseList, serializeList, clampOctet } from '../public/js/list-grammar.mjs';
+import { parseList, serializeList, clampOctet4, ipv6OctetValid, firstInvalidIpv6Octet } from '../public/js/list-grammar.mjs';
 
 // ---------------------------------------------------------------------------
 // parseList
@@ -62,32 +62,64 @@ test('serializeList: trims fields before emitting', () => {
   assert.equal(serializeList([{ host: ' h ', octet: ' 20 ', ports: ' 80 ' }]), '\n\th | 20 | 80\n');
 });
 
-test('serializeList: clamps the last octet to 10-99', () => {
-  assert.equal(serializeList([{ host: 'lo', octet: '2', ports: '80' }]), '\n\tlo | 10 | 80\n');
-  assert.equal(serializeList([{ host: 'hi', octet: '254', ports: '80' }]), '\n\thi | 99 | 80\n');
-  assert.equal(serializeList([{ host: 'ok', octet: '42', ports: '80' }]), '\n\tok | 42 | 80\n');
+test('serializeList: v4 clamps the last octet to 1-254', () => {
+  assert.equal(serializeList([{ host: 'lo', octet: '0', ports: '80' }], 'v4'), '\n\tlo | 1 | 80\n');
+  assert.equal(serializeList([{ host: 'hi', octet: '300', ports: '80' }], 'v4'), '\n\thi | 254 | 80\n');
+  assert.equal(serializeList([{ host: 'ok', octet: '42', ports: '80' }], 'v4'), '\n\tok | 42 | 80\n');
+  // default kind is v4
+  assert.equal(serializeList([{ host: 'd', octet: '255', ports: '' }]), '\n\td | 254 | \n');
+});
+
+test('serializeList: v6 trims but never clamps the hex hostid', () => {
+  assert.equal(serializeList([{ host: 'h', octet: ' ff ', ports: '80' }], 'v6'), '\n\th | ff | 80\n');
+  assert.equal(serializeList([{ host: 'h', octet: '1', ports: '80' }], 'v6'), '\n\th | 1 | 80\n');
+  assert.equal(serializeList([{ host: 'h', octet: 'abcd', ports: '' }], 'v6'), '\n\th | abcd | \n');
 });
 
 // ---------------------------------------------------------------------------
-// clampOctet
+// clampOctet4
 // ---------------------------------------------------------------------------
 
-test('clampOctet: clamps numeric input into [10, 99]', () => {
-  assert.equal(clampOctet('2'), '10');
-  assert.equal(clampOctet('9'), '10');
-  assert.equal(clampOctet('10'), '10');
-  assert.equal(clampOctet('99'), '99');
-  assert.equal(clampOctet('100'), '99');
-  assert.equal(clampOctet('254'), '99');
-  assert.equal(clampOctet('-5'), '10');
+test('clampOctet4: clamps numeric input into [1, 254]', () => {
+  assert.equal(clampOctet4('0'), '1');
+  assert.equal(clampOctet4('1'), '1');
+  assert.equal(clampOctet4('42'), '42');
+  assert.equal(clampOctet4('254'), '254');
+  assert.equal(clampOctet4('255'), '254');
+  assert.equal(clampOctet4('300'), '254');
+  assert.equal(clampOctet4('-5'), '1');
 });
 
-test('clampOctet: leaves empty / non-numeric input untouched', () => {
-  assert.equal(clampOctet(''), '');
-  assert.equal(clampOctet('  '), '');
-  assert.equal(clampOctet('abc'), 'abc');
-  assert.equal(clampOctet(null), '');
-  assert.equal(clampOctet(undefined), '');
+test('clampOctet4: leaves empty / non-numeric input untouched', () => {
+  assert.equal(clampOctet4(''), '');
+  assert.equal(clampOctet4('  '), '');
+  assert.equal(clampOctet4('abc'), 'abc');
+  assert.equal(clampOctet4(null), '');
+  assert.equal(clampOctet4(undefined), '');
+});
+
+// ---------------------------------------------------------------------------
+// ipv6OctetValid / firstInvalidIpv6Octet
+// ---------------------------------------------------------------------------
+
+test('ipv6OctetValid: empty passes, hex 1-4 digits pass, 0 and non-hex fail', () => {
+  assert.equal(ipv6OctetValid(''), true);
+  assert.equal(ipv6OctetValid('  '), true);
+  assert.equal(ipv6OctetValid('1'), true);        // 1 is allowed
+  assert.equal(ipv6OctetValid('20'), true);
+  assert.equal(ipv6OctetValid('ff'), true);
+  assert.equal(ipv6OctetValid('FFFF'), true);
+  assert.equal(ipv6OctetValid('0'), false);       // all-zero rejected
+  assert.equal(ipv6OctetValid('0000'), false);
+  assert.equal(ipv6OctetValid('g1'), false);      // non-hex
+  assert.equal(ipv6OctetValid('12345'), false);   // > 4 digits
+  assert.equal(ipv6OctetValid(null), true);
+});
+
+test('firstInvalidIpv6Octet: returns the first bad octet or null', () => {
+  assert.equal(firstInvalidIpv6Octet('\ta | 20 | 80\n\tb | ff | 443'), null);
+  assert.equal(firstInvalidIpv6Octet('\ta | 20 | 80\n\tb | 0 | 443'), '0');
+  assert.equal(firstInvalidIpv6Octet(''), null);
 });
 
 // ---------------------------------------------------------------------------

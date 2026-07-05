@@ -14,6 +14,7 @@ import { deriveNetRows } from './visibility.mjs';
 import { createStore } from './store.mjs';
 import { renderConfigBlock } from './render-config.mjs';
 import { parseAdditionalPackages } from './packages.mjs';
+import { ipv6OctetValid } from './list-grammar.mjs';
 import { collectTarget, devicesState } from './devices.js';
 
   const $  = ui.$, $$ = ui.$$;
@@ -423,6 +424,21 @@ import { collectTarget, devicesState } from './devices.js';
     return first;
   }
 
+  // IPv6 host IDs (the ipv6-table octet column): 1-4 hex digits, not 0.
+  function refreshOctetV6Validity(el) {
+    el.setCustomValidity('');
+    if (ipv6OctetValid(el.value)) return false;
+    el.setCustomValidity(t('octetV6Invalid'));
+    return true;
+  }
+  function checkOctetV6Fields() {
+    let first = null;
+    for (const el of $$('#ipv6-table [data-col="octet"]')) {
+      if (refreshOctetV6Validity(el) && !first && el.offsetParent !== null) first = el;
+    }
+    return first;
+  }
+
   // Live feedback: when the user leaves a range/iface/prefix field with a bad
   // value, set the message and show the bubble immediately rather than waiting
   // for Build.
@@ -495,6 +511,10 @@ import { collectTarget, devicesState } from './devices.js';
     // offender's native bubble.
     const badPrefix = checkPrefixFields();
     if (badPrefix) { badPrefix.reportValidity(); return; }
+
+    // IPv6 host IDs: 1-4 hex digits, not 0. Pop the first visible offender.
+    const badOctet = checkOctetV6Fields();
+    if (badOctet) { badOctet.reportValidity(); return; }
 
     await import('/js/history.js');       // ES module - dynamic import
 

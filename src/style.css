@@ -452,6 +452,10 @@
   @media (min-width: 768px) {
     .responsive-table th:first-child,
     .responsive-table td:first-child { width: 30%; }
+    /* Pin the "Last octet" column so it matches across the IPv4 (number) and
+       IPv6 (text) tables instead of auto-sizing to each input's intrinsic width. */
+    .responsive-table th:nth-child(2),
+    .responsive-table td:nth-child(2) { width: 8rem; }
   }
   @media (max-width: 767px) {
     .responsive-table thead { display: none; }

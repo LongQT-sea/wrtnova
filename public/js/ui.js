@@ -5,7 +5,7 @@
 import { ui } from './ui-ns.mjs';
 import { renderConfigBlock } from './render-config.mjs';
 import { resolvePackages } from './packages.mjs';
-import { serializeList, clampOctet } from './list-grammar.mjs';
+import { serializeList, clampOctet4, ipv6OctetValid } from './list-grammar.mjs';
 import { deriveVisibility, deriveNetRows, detectVlanConflict, resolveVlanAssignment } from './visibility.mjs';
 
   ui.$  = (sel, root) => (root || document).querySelector(sel);
@@ -87,26 +87,43 @@ import { deriveVisibility, deriveNetRows, detectVlanConflict, resolveVlanAssignm
   };
   ui.clearProgress = function () { ui.$('#progress').classList.add('hidden'); };
 
+  function octetAttrs(isV6) {
+    return isV6
+      ? 'type="text" pattern="[0-9a-fA-F]{1,4}" maxlength="4"'
+      : 'type="number" min="1" max="254"';
+  }
+  ui.octetAttrs = octetAttrs;
+
   function addRow(kind) {
     const tbody = document.querySelector('#' + kind + '-table tbody');
     const tr = document.createElement('tr');
     tr.innerHTML =
       '<td data-label="Hostname"><input type="text" data-col="host" class="input-base" placeholder="docker-host"></td>' +
-      '<td data-label="Last octet"><input type="number" data-col="octet" class="input-base" min="10" max="99" placeholder="20"></td>' +
+      '<td data-label="Last octet"><input ' + octetAttrs(kind === 'ipv6') + ' data-col="octet" class="input-base" placeholder="20"></td>' +
       '<td data-label="Ports"><input type="text" data-col="ports" class="input-base" placeholder="80 443"></td>' +
       '<td><button class="btn btn-icon" type="button" data-remove="1" aria-label="Remove row">×</button></td>';
     tbody.appendChild(tr);
     tr.querySelector('[data-remove]').addEventListener('click', () => tr.remove());
-    bindOctetClamp(tr.querySelector('[data-col="octet"]'));
+    bindOctetClamp(tr.querySelector('[data-col="octet"]'), kind === 'ipv6' ? 'v6' : 'v4');
     return tr;
   }
 
-  // Clamp on blur so the visible value matches what serializeList writes.
-  function bindOctetClamp(el) {
+  // v4: clamp to 1-254 on blur. v6: never rewrite; block a bad hostid via a
+  // validity bubble (like the prefix fields).
+  function bindOctetClamp(el, kind) {
     if (!el) return;
+    if (kind === 'v6') {
+      const validate = () => {
+        el.setCustomValidity(ipv6OctetValid(el.value) ? '' : ui.t('octetV6Invalid'));
+        if (!el.validity.valid) el.reportValidity();
+      };
+      el.addEventListener('change', validate);
+      el.addEventListener('focusout', validate);
+      return;
+    }
     el.addEventListener('change', () => {
       const v = el.value.trim();
-      if (v !== '') el.value = clampOctet(v);
+      if (v !== '') el.value = clampOctet4(v);
     });
   }
   ui.bindOctetClamp = bindOctetClamp;
@@ -132,7 +149,7 @@ import { deriveVisibility, deriveNetRows, detectVlanConflict, resolveVlanAssignm
       octet: tr.querySelector('[data-col="octet"]').value,
       ports: tr.querySelector('[data-col="ports"]').value,
     }));
-    return serializeList(rows);
+    return serializeList(rows, kind === 'ipv6' ? 'v6' : 'v4');
   };
 
   // Render the per-network derived rows (prefix placeholder, router IP, default-

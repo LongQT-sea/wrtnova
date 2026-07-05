@@ -14,7 +14,7 @@ import { mergeNodeConfig } from './config-merge.mjs';
 import { IFACE_FIELDS, ifaceValid, PREFIX_FIELDS, prefixValid, pskVlanPassIssue } from './config-form.mjs';
 import { detectVlanConflict } from './visibility.mjs';
 import { renderConfigBlock } from './render-config.mjs';
-import { parseList } from './list-grammar.mjs';
+import { parseList, firstInvalidIpv6Octet } from './list-grammar.mjs';
 import { parseAdditionalPackages } from './packages.mjs';
 import { createStore } from './store.mjs';
 
@@ -933,14 +933,15 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
   function addTableRow(tableId, host, octet, ports) {
     const tbody = document.querySelector('#' + tableId + ' tbody');
     if (!tbody) return;
+    const isV6 = tableId === 'ipv6-table';
     const tr = document.createElement('tr');
     tr.innerHTML =
       '<td data-label="Hostname"><input type="text" data-col="host" class="input-base" placeholder="hostname" value="' + esc(host || '') + '"></td>' +
-      '<td data-label="Last octet"><input type="number" data-col="octet" class="input-base" min="10" max="99" placeholder="20" value="' + esc(octet || '') + '"></td>' +
+      '<td data-label="Last octet"><input ' + ui.octetAttrs(isV6) + ' data-col="octet" class="input-base" placeholder="20" value="' + esc(octet || '') + '"></td>' +
       '<td data-label="Ports"><input type="text" data-col="ports" class="input-base" placeholder="80 443" value="' + esc(ports || '') + '"></td>' +
       '<td><button class="btn btn-icon" type="button" aria-label="Remove row">×</button></td>';
     tr.querySelector('button').addEventListener('click', () => tr.remove());
-    ui.bindOctetClamp(tr.querySelector('[data-col="octet"]'));
+    ui.bindOctetClamp(tr.querySelector('[data-col="octet"]'), isV6 ? 'v6' : 'v4');
     tbody.appendChild(tr);
   }
 
@@ -1175,6 +1176,13 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
     const badPrefix = PREFIX_FIELDS.find(k => !prefixValid(mergedForCheck[k]));
     if (badPrefix) {
       showPanelError(actEl, t('prefixInvalid', { field: mergedForCheck[badPrefix] }), () => buildNode(net, node));
+      return;
+    }
+
+    // IPv6 host IDs: 1-4 hex digits, not 0 (::0 is the network address).
+    const badOctet = firstInvalidIpv6Octet(mergedForCheck.IPV6_SERVER_LIST);
+    if (badOctet !== null) {
+      showPanelError(actEl, t('octetV6Invalid'), () => buildNode(net, node));
       return;
     }
 

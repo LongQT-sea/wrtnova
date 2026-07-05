@@ -15,23 +15,27 @@
 
 /** @typedef {{ host: string, octet: string, ports: string }} ListRow */
 
-// Hosts live at .10-.99: leaves the low end for router/infra and the high end
-// for DHCP.
-const OCTET_MIN = 10;
-const OCTET_MAX = 99;
+// IPv4 (PORT_FORWARD_LIST) octet is decimal 1-254 (.1 is the router, a valid
+// forward target); IPv6 (IPV6_SERVER_LIST) is a hex hostid, 1-4 digits, not 0.
 
-/**
- * Clamp a last-octet string to [OCTET_MIN, OCTET_MAX]. Empty or non-numeric
- * input passes through unchanged (the grammar stays lenient; the DOM keeps the
- * raw text). Numeric input is clamped and re-stringified.
- * @param {string} octet
- * @returns {string}
- */
-export function clampOctet(octet) {
+/** Clamp an IPv4 octet to [1,254]; empty / non-numeric passes through. @param {string} octet @returns {string} */
+export function clampOctet4(octet) {
   const s = String(octet == null ? '' : octet).trim();
   if (!/^-?\d+$/.test(s)) return s;
-  const n = parseInt(s, 10);
-  return String(Math.max(OCTET_MIN, Math.min(OCTET_MAX, n)));
+  return String(Math.max(1, Math.min(254, parseInt(s, 10))));
+}
+
+/** Valid IPv6 hostid? Empty passes (like prefixValid); else 1-4 hex digits, not 0. @param {string} octet @returns {boolean} */
+export function ipv6OctetValid(octet) {
+  const s = String(octet == null ? '' : octet).trim();
+  if (!s) return true;
+  return /^[0-9a-fA-F]{1,4}$/.test(s) && parseInt(s, 16) !== 0;
+}
+
+/** First octet in a stored IPV6_SERVER_LIST failing ipv6OctetValid, else null. @param {string} listStr @returns {string|null} */
+export function firstInvalidIpv6Octet(listStr) {
+  const bad = parseList(listStr).find((r) => !ipv6OctetValid(r.octet));
+  return bad ? bad.octet : null;
 }
 
 /**
@@ -55,16 +59,19 @@ export function parseList(listStr) {
 /**
  * Serialize rows back into the stored list block. A row with neither host nor
  * octet is dropped (a blank row the user never filled). The result is wrapped
- * with leading/trailing newlines when non-empty, or '' when there are no rows -
- * byte-identical to the previous ui.serializeRows / readTable output.
+ * with leading/trailing newlines when non-empty, or '' when there are no rows.
+ * kind selects octet handling: 'v4' clamps to 1-254; 'v6' only trims (the hex
+ * hostid is validated at the DOM/build gates, never silently rewritten).
  * @param {ReadonlyArray<Partial<ListRow>>} rows
+ * @param {'v4'|'v6'} [kind]
  * @returns {string}
  */
-export function serializeList(rows) {
+export function serializeList(rows, kind = 'v4') {
   const lines = [];
   for (const r of rows || []) {
     const host = String((r && r.host) || '').trim();
-    const octet = clampOctet(String((r && r.octet) || '').trim());
+    const rawOctet = String((r && r.octet) || '').trim();
+    const octet = kind === 'v6' ? rawOctet : clampOctet4(rawOctet);
     const ports = String((r && r.ports) || '').trim();
     if (!host && !octet) continue;
     lines.push('\t' + host + ' | ' + octet + ' | ' + ports);
