@@ -1506,7 +1506,7 @@ chmod +x /sbin/ip6host
 
 # === Static Leases & Port Forwarding ===
 process_host_list() {
-	local hostname octet ports duid name idx
+	local hostname octet ports duid name idx v4 v6
 
 	while IFS='|' read -r hostname octet ports duid; do
 		hostname=$(echo "$hostname" | tr -d ' \t')
@@ -1515,18 +1515,12 @@ process_host_list() {
 		ports="${ports# }"
 		[ -z "$hostname" ] && continue
 
-		name="${hostname//-/_}"
-		uci -q get "dhcp.${name}" || {
-			_uci dhcp host "$name" \
-				name="$hostname" ip="${lan_net_pfx}.${octet}" \
-				hostid="$octet" duid="${duid:-$(duid_gen)}" dns=1
-		}
-
 		[ "$1" = ipv4 ] && {
 			for port in $ports; do
 				[ -z "$port" ] && continue
 				fw_port_forwarding "$hostname | $port" "${lan_net_pfx}.${octet}" "$port"
 			done
+			v4=1
 		}
 
 		[ "$1" = ipv6 ] && {
@@ -1540,7 +1534,14 @@ process_host_list() {
 			else
 				fw_accept_to_lan "$hostname | Forward any protocol" "::${octet}/-64"
 			fi
+			v6=1
+			while [ ${#octet} -lt 4 ]; do octet=0$octet; done
 		}
+
+		name="${hostname//-/_}"
+		_uci dhcp host "$name" \
+			name="$hostname" ${v4:+ip=${lan_net_pfx}.${octet}} \
+			${v6:+hostid=$octet duid=${duid:-$(duid_gen)}} dns=1
 	done
 }
 
