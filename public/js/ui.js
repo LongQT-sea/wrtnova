@@ -249,6 +249,32 @@ import { deriveVisibility, deriveNetRows, detectVlanConflict, resolveVlanAssignm
           dense.dispatchEvent(new Event('change', { bubbles: true }));
         }
       }
+
+      // When PSK_VLAN is on, disable the toggle and force it off, dispatching a
+      // bubbling change so each page's store re-syncs (same pattern as DENSE_ENV).
+      const pskVlan = ui.$('#PSK_VLAN');
+      const guestIso = ui.$('#GUEST_ISOLATE');
+      if (pskVlan && guestIso) {
+        guestIso.disabled = pskVlan.checked;
+        if (pskVlan.checked && guestIso.checked) {
+          guestIso.checked = false;
+          guestIso.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+      }
+
+      // "IoT: 802.11r" (IOT_NO_DOT11R, shown checked = IoT fast transition on)
+      // only means anything when the base 802.11r (DOT11R) is on. When DOT11R is
+      // off the toggle is inert: disable it and force it off (same pattern as
+      // DENSE_ENV; the bubbling change lets each page's store re-sync the value).
+      const dot11r = ui.$('#DOT11R');
+      const iotFt = ui.$('#IOT_NO_DOT11R');
+      if (dot11r && iotFt) {
+        iotFt.disabled = !dot11r.checked;
+        if (!dot11r.checked && iotFt.checked) {
+          iotFt.checked = false;
+          iotFt.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+      }
       const wgRouter = cfg.WG_ENABLE === '1' && cfg.AP_MODE !== '1';
       if (wgRouter && e && e.target && e.target.id === 'WG_ENABLE') {
         const wgCard = ui.$('#card-wg');
