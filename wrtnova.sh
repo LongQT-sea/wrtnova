@@ -23,8 +23,8 @@ COUNTRY_CODE=
 DOT11KV=1		# 1 = enable neighbor reports and assisted roaming (802.11k/v)
 DOT11R=1		# 1 = enable fast transition support (802.11r)
 DENSE_ENV=		# 1 = optimize roaming and steering for high-interference areas
-PSK_VLAN=		# 1 = Guest and LAN_VPN share the LAN SSID (each still uses its own passphrase)
-BAND_SUFFIX=		# 1 = append band (2g 5g 6g) to the end of the SSID
+PSK_VLAN=		# 1 = one SSID; wifi password determines which VLAN the client joins
+BAND_SUFFIX=		# 1 = append band (2G/5G/6G) to the end of the SSID
 
 LAN_WIFI_SSID=""	# Default: WrtNova
 LAN_WIFI_PASSWD=""
@@ -780,7 +780,7 @@ add_wifi_iface() {
 
 	[ "$net" = "$iot_if" ] && [ -n "$IOT_NO_DOT11R" ] && iot_plain=1
 
-	set -- device="$dev" mode="$mode" ssid="${ssid}${BAND_SUFFIX:+ $band}" key="$key" network="$net" encryption="$enc"
+	set -- device="$dev" mode="$mode" ssid="${ssid}${BAND_SUFFIX:+ ${band%g}G}" key="$key" network="$net" encryption="$enc"
 
 	[ "$net" = "$guest_if" ] && [ -n "$GUEST_ISOLATE" ] && set -- "$@" isolate=1 bridge_isolate=1
 
@@ -792,8 +792,8 @@ add_wifi_iface() {
 		set -- "$@" ieee80211r=1 mobility_domain="$(printf '%s' "$ssid" | md5sum | cut -c1-4)"
 
 	[ "$PSK_VLAN" = 1 ] && [ "$mode" = ap ] && {
-		if [ "$band" = 6g ]; then
-			set -- "$@" ssid="${ssid}_6G"
+		if [ "$band" = 6g ] && [ -z "$BAND_SUFFIX" ]; then
+			set -- "$@" ssid="${ssid} 6G"
 		elif [ -z "$iot_plain" ]; then
 			add_wifi_vlan "$vid" "$key" "$net" "${dev}_${lan_if}"
 			[ "$net" != "$lan_if" ] && return
