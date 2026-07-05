@@ -503,6 +503,52 @@ import { deriveVisibility, deriveNetRows, detectVlanConflict, resolveVlanAssignm
       block + _SCRIPT_MARKER + wrtnovaBody;
   };
 
+  // ASU caps uci-defaults at 40960 B; over that, keep the header+config plaintext
+  // (readable on the router) and ship only the body as a gzip+base64 blob that is
+  // decoded to /tmp and sourced (so it sees the plaintext config vars). gunzip is
+  // in busybox but base64 needs coreutils-base64 (compressed:true -> callers add it).
+  const _ASU_MAX = 40960;
+  async function _gzB64(str) {
+    if (typeof CompressionStream === 'undefined')
+      throw new Error('Config too large; browser cannot compress.');
+    const gz = await new Response(new Blob([str]).stream().pipeThrough(new CompressionStream('gzip'))).arrayBuffer();
+    const u8 = new Uint8Array(gz);
+    let raw = '';
+    for (let i = 0; i < u8.length; i += 0x8000) raw += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000));
+    return btoa(raw).replace(/(.{76})/g, '$1\n');
+  }
+  function _bodyStub(payload) {
+    return "wrtnova_body=/tmp/wrtnova.sh\n" +
+      "base64 -d <<'WRTNOVA_B64' 2>/dev/null | gunzip > \"$wrtnova_body\" 2>/dev/null\n" +
+      payload + "\nWRTNOVA_B64\n" +
+      "[ -s \"$wrtnova_body\" ] && . \"$wrtnova_body\"\n";
+  }
+  function _tooBig(script) {
+    let hint = 'Config too large even compressed; reduce IPv4 port forward / IPv6 servers expose host';
+    if (/^DOH_UPSTREAMS=/m.test(script)) hint += ' / DoH upstreams URL';
+    return new Error(hint + '.');
+  }
+  // Standalone script (advanced editor): decode + source the whole thing.
+  ui.compressDefaultsIfNeeded = async function (script) {
+    if (new Blob([script]).size <= _ASU_MAX) return { script, compressed: false };
+    const out = '#!/bin/sh\n' + _bodyStub(await _gzB64(script));
+    if (new Blob([out]).size > _ASU_MAX) throw _tooBig(script);
+    return { script: out, compressed: true };
+  };
+  // header+config stay plaintext; only the body is compressed if the total is over.
+  ui.assembleScriptForBuild = async function (cfg, wrtnovaBody) {
+    const plain = ui.assembleScript(cfg, wrtnovaBody, false);
+    if (new Blob([plain]).size <= _ASU_MAX) return { script: plain, compressed: false };
+    const prefix = plain.slice(0, plain.length - wrtnovaBody.length);
+    const out = prefix + _bodyStub(await _gzB64(wrtnovaBody));
+    if (new Blob([out]).size > _ASU_MAX) throw _tooBig(plain);
+    return { script: out, compressed: true };
+  };
+  ui.withBase64Pkg = function (packages, compressed) {
+    if (!compressed || packages.includes('coreutils-base64')) return packages;
+    return packages.concat('coreutils-base64');
+  };
+
   // Render a final-package list as chips into `el` (shared by /builder and the
   // /networks per-node panel). Removal tokens ('-pkg') render struck-through.
   // textContent only - the list can include user-typed names, never markup.

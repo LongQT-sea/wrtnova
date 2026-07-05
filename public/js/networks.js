@@ -1131,12 +1131,12 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
   }
 
   // Shared so the single-node and build-all paths send an identical payload shape.
-  function buildAsuBody({ tgt, version, version_code, packages, fullCfg, wrtnovaBody }) {
+  function buildAsuBody({ tgt, version, version_code, packages, defaults }) {
     return {
       profile: tgt.profile, target: tgt.target,
       version, version_code,
       packages,
-      defaults: ui.assembleScript(fullCfg, wrtnovaBody),
+      defaults,
       diff_packages: true, client: 'wrtnova/1.0',
     };
   }
@@ -1222,9 +1222,17 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
       }
 
       if (adguardHash) fullCfg.ADGUARD_PASSWD = adguardHash;
+      let built;
+      try {
+        built = await ui.assembleScriptForBuild(fullCfg, wrtnovaBody);
+      } catch (e) {
+        showPanelError(panelActEl(node.id) || actEl, t('buildFailed', { msg: e.message }), () => buildNode(net, node));
+        return;
+      }
       const asuBody = buildAsuBody({
         tgt, version: effectiveVersion, version_code: vt.version_code,
-        packages, fullCfg, wrtnovaBody,
+        packages: ui.withBase64Pkg(packages, built.compressed),
+        defaults: built.script,
       });
 
       showPanelProgress(panelActEl(node.id) || actEl, 8, S.submittingToServer);
@@ -1468,9 +1476,18 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
     }
 
     if (adguardHash) fullCfg.ADGUARD_PASSWD = adguardHash;
+    let built;
+    try {
+      built = await ui.assembleScriptForBuild(fullCfg, wrtnovaBody);
+    } catch (e) {
+      updateBuildAllRow(node.id, null, t('buildFailed', { msg: e.message }));
+      onComplete();
+      return;
+    }
     const asuBody = buildAsuBody({
       tgt, version: effectiveVersion, version_code: vt.version_code,
-      packages, fullCfg, wrtnovaBody,
+      packages: ui.withBase64Pkg(packages, built.compressed),
+      defaults: built.script,
     });
 
     let asuR, asuData;

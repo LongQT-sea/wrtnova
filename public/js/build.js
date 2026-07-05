@@ -559,13 +559,23 @@ import { collectTarget, devicesState } from './devices.js';
       return;
     }
 
+    let built;
+    try {
+      built = await ui.assembleScriptForBuild(cfg, wrtnovaBody);
+    } catch (e) {
+      $('#build-btn').disabled = false;
+      ui.clearProgress();
+      ui.status(t('buildFailed', { msg: e.message }), 'error');
+      return;
+    }
+
     const asuBody = {
       profile:      target.profile,
       target:       target.target,
       version:      target.version,
       version_code: target.version_code,
-      packages:     packages,
-      defaults:     ui.assembleScript(cfg, wrtnovaBody),
+      packages:     ui.withBase64Pkg(packages, built.compressed),
+      defaults:     built.script,
       diff_packages: true,
       client:       'wrtnova/1.0',
     };

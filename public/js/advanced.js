@@ -141,17 +141,23 @@ import { collapsePackages } from './packages.mjs';
     if (!target) { ui.status('Pick a device first.', 'error'); return; }
     if (!editor)  { ui.status('Editor not ready yet.', 'error'); return; }
 
-    const script = stripConfigComments(editorValue());
+    let built;
+    try {
+      built = await ui.compressDefaultsIfNeeded(stripConfigComments(editorValue()));
+    } catch (e) {
+      ui.status('Submit failed: ' + e.message, 'error');
+      return;
+    }
 
     const asu     = asuBase();
-    const packages = finalPackages();
+    const packages = ui.withBase64Pkg(finalPackages(), built.compressed);
     const payload = {
       target:        target.target,
       version:       target.version,
       version_code:  target.version_code,
       profile:       target.profile,
       packages:      packages,
-      defaults:      script,
+      defaults:      built.script,
       diff_packages: true,
       client:        'wrtnova-advanced/1.0',
     };
