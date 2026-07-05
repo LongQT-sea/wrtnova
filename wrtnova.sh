@@ -150,6 +150,7 @@ USB_TETHERING=
 LAN_DHCP_START=
 GUEST_DHCP_START=
 DNSMASQ_SINGLE_INSTANCE=	# 1 = use a single dnsmasq instance instead of multiple
+FORCE_DNS=		# 1 = force DNS (redirect port 53 TCP/UDP) from LAN, GUEST, and IOT to the router
 
 # AdGuardHome admin passwd in bcrypt hash (default 12345678)
 ADGUARD_PASSWD=''
@@ -1403,12 +1404,12 @@ fw_redirect_ntp() {
 }
 
 _uci firewall zone @zone[0] -network +network="$lan_if" ~lan
-fw_redirect_dns lan
+[ "$FORCE_DNS" ] && fw_redirect_dns lan
 
 [ "$GUEST_ENABLE" = 1 ] && {
 	fw_add_zone guest "$guest_if"
 	fw_add_base_rules guest
-	fw_redirect_dns guest
+	[ "$FORCE_DNS" ] && fw_redirect_dns guest
 	fw_add_forwarding guest wan
 
 	[ "$DENY_GUEST_NIGHT" = 1 ] && \
@@ -1420,7 +1421,7 @@ fw_redirect_dns lan
 [ "$IOT_ENABLE" = 1 ] && {
 	fw_add_zone iot "$iot_if"
 	fw_add_base_rules iot
-	fw_redirect_dns iot
+	[ "$FORCE_DNS" ] && fw_redirect_dns iot
 	fw_redirect_ntp iot
 	fw_add_forwarding lan iot
 
