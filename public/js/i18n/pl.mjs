@@ -313,7 +313,7 @@ export default {
   buildLog:           'Włącz dziennik debugowania',
   buildLogHelp:       'Zapisuj wykonanie skryptu pierwszego uruchomienia do /root/99-asu-defaults.log.',
   asuEndpoint:        'Punkt końcowy ASU',
-  asuSecurityWarning: 'Pozostaw hasla i wrazliwe pola puste. Domyslne wartosci sa bezpieczne przy pierwszym uruchomieniu: brak hasla root, haslo Wi-Fi to 12345678. Wszystko, co wpiszesz, jest wysylane na serwer ASU i wbudowane w firmware — ustaw prawdziwe dane logowania po pierwszym uruchomieniu przez LuCI lub SSH.',
+  asuSecurityWarning: 'Wszystko, co wpiszesz, jest wysylane na serwer kompilacji ASU, a nastepnie przechowywane w wygenerowanym obrazie, gdzie kazdy, kto zna <strong>hash kompilacji</strong>, moze go pobrac i odczytac. Pozostaw hasla puste (domyslne wartosci sa bezpieczne przy pierwszym uruchomieniu: brak hasla root, haslo administratora AdGuard i Wi-Fi 12345678) i ustaw prawdziwe dane logowania po pierwszym uruchomieniu przez LuCI lub SSH.',
   recentBuilds:       'Ostatnie kompilacje',
   noBuildsYet:        'Brak kompilacji.',
   configPreview:      'Podgląd konfiguracji',

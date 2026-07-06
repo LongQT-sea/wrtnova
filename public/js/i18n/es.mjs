@@ -313,7 +313,7 @@ export default {
   buildLog:           'Activar registro de depuración',
   buildLogHelp:       'Registrar la ejecución del script de primer arranque en /root/99-asu-defaults.log.',
   asuEndpoint:        'Punto de conexión ASU',
-  asuSecurityWarning: 'Deja los campos de contrasena y datos sensibles vacios. Los valores predeterminados son seguros para el primer arranque: sin contrasena root, contrasena Wi-Fi: 12345678. Todo lo que rellenes se envia al servidor ASU y se integra en el firmware — configura credenciales reales tras el primer arranque mediante LuCI o SSH.',
+  asuSecurityWarning: 'Todo lo que escribas se envia al servidor de compilacion ASU y luego queda almacenado dentro de la imagen generada, donde cualquiera que conozca el <strong>hash de compilacion</strong> puede descargarla y leerla. Deja las contrasenas vacias (los valores predeterminados son seguros para el primer arranque: sin contrasena root, contrasena de administrador de AdGuard y Wi-Fi 12345678) y configura credenciales reales tras el primer arranque mediante LuCI o SSH.',
   recentBuilds:       'Compilaciones recientes',
   noBuildsYet:        'Sin compilaciones aún.',
   configPreview:      'Vista previa de configuración',

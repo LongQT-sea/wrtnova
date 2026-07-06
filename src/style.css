@@ -214,6 +214,32 @@
   .dark .btn-primary:hover { background-color: #e3731a; }
   .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
 
+  /* Cloudflare WARP prefill: on-brand orange gradient pill */
+  .btn-warp {
+    gap: 0.4rem;
+    padding: 0.35rem 0.85rem;
+    min-height: unset;
+    font-size: 0.8125rem;
+    /* #18181b on #f6821f = 7.12:1 (matches .btn-primary rationale) */
+    color: #18181b;
+    border: 0;
+    border-radius: 9999px;
+    background-image: linear-gradient(135deg, #f6821f 0%, #e3731a 100%);
+    box-shadow: 0 1px 2px rgba(246,130,31,0.35), 0 2px 8px rgba(246,130,31,0.28);
+    transition: box-shadow 0.15s, transform 0.1s, filter 0.15s;
+  }
+  .btn-warp:hover {
+    background-image: linear-gradient(135deg, #f6821f 0%, #e3731a 100%);
+    filter: brightness(1.06);
+    box-shadow: 0 2px 4px rgba(246,130,31,0.42), 0 4px 14px rgba(246,130,31,0.38);
+  }
+  .btn-warp:active { transform: translateY(1px); }
+  .btn-warp:focus-visible { box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px #f6821f; }
+  .dark .btn-warp { color: #18181b; }
+  .dark .btn-warp:focus-visible { box-shadow: 0 0 0 2px #18181b, 0 0 0 4px #f6821f; }
+  .btn-warp svg { width: 0.95rem; height: 0.95rem; flex-shrink: 0; }
+  .btn-warp:disabled { opacity: 0.5; cursor: not-allowed; filter: none; }
+
   .btn-icon {
     padding: 0.375rem;
     min-height: 32px;

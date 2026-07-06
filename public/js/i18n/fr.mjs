@@ -313,7 +313,7 @@ export default {
   buildLog:           'Activer le journal de débogage',
   buildLogHelp:       "Enregistrer l'exécution du script de premier démarrage dans /root/99-asu-defaults.log.",
   asuEndpoint:        'Point de terminaison ASU',
-  asuSecurityWarning: "Laissez les mots de passe et les champs sensibles vides. Les valeurs par defaut sont sures pour le premier demarrage : pas de mot de passe root, mot de passe Wi-Fi : 12345678. Tout ce que vous saisissez est envoye au serveur ASU et integre dans le firmware — configurez de vrais identifiants apres le premier demarrage via LuCI ou SSH.",
+  asuSecurityWarning: "Tout ce que vous saisissez est envoye au serveur de compilation ASU puis stocke dans l'image generee, ou quiconque connait le <strong>hash de compilation</strong> peut la telecharger et la lire. Laissez les mots de passe vides (les valeurs par defaut sont sures pour le premier demarrage : pas de mot de passe root, mot de passe administrateur AdGuard et Wi-Fi 12345678) et configurez de vrais identifiants apres le premier demarrage via LuCI ou SSH.",
   recentBuilds:       'Compilations récentes',
   noBuildsYet:        "Aucune compilation pour l'instant.",
   configPreview:      'Aperçu de la configuration',

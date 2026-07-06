@@ -314,7 +314,7 @@ export default {
   buildLog:           '启用调试日志',
   buildLogHelp:       '将首次启动脚本执行过程追踪写入 /root/99-asu-defaults.log。',
   asuEndpoint:        'ASU 端点',
-  asuSecurityWarning: '请将密码和敏感字段留空。默认值适合首次启动：无 root 密码，Wi-Fi 密码为 12345678。您填写的任何内容都会发送至 ASU 构建服务器并写入固件——请在首次启动后通过 LuCI 或 SSH 设置真实凭据。',
+  asuSecurityWarning: '您输入的任何内容都会发送到 ASU 构建服务器，随后存储在生成的固件映像中，任何知道<strong>构建哈希</strong>的人都可以下载并读取。请将密码留空（默认值适合首次启动：无 root 密码，AdGuard 管理员和 Wi-Fi 密码均为 12345678），并在首次启动后通过 LuCI 或 SSH 设置真实凭据。',
   recentBuilds:       '最近构建',
   noBuildsYet:        '暂无构建记录。',
   configPreview:      '配置预览',

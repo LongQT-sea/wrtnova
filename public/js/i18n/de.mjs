@@ -313,7 +313,7 @@ export default {
   buildLog:           'Debug-Protokoll aktivieren',
   buildLogHelp:       'Skriptausführung beim Erststart nach /root/99-asu-defaults.log protokollieren.',
   asuEndpoint:        'ASU-Endpunkt',
-  asuSecurityWarning: 'Passworter und sensible Felder leer lassen. Die Standardwerte sind fur den ersten Start sicher: kein Root-Passwort, WLAN-Passwort ist 12345678. Alles, was Sie eingeben, wird an den ASU-Build-Server gesendet und in die Firmware eingebettet — echte Zugangsdaten nach dem ersten Start uber LuCI oder SSH einrichten.',
+  asuSecurityWarning: 'Alles, was Sie eingeben, wird an den ASU-Build-Server gesendet und dann im erzeugten Image gespeichert, wo jeder, der den <strong>Build-Hash</strong> kennt, es herunterladen und lesen kann. Lassen Sie Passworter leer (die Standardwerte sind fur den ersten Start sicher: kein Root-Passwort, AdGuard-Admin- und WLAN-Passwort 12345678) und richten Sie echte Zugangsdaten nach dem ersten Start uber LuCI oder SSH ein.',
   recentBuilds:       'Zuletzt erstellte Builds',
   noBuildsYet:        'Noch keine Builds.',
   configPreview:      'Konfigurationsvorschau',

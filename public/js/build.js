@@ -709,10 +709,11 @@ import { collectTarget, devicesState } from './devices.js';
     if (!btn) return;
     const msg = $('#warp-prefill-msg');
 
+    const lbl = btn.querySelector('span') || btn;
     btn.addEventListener('click', async () => {
       btn.disabled = true;
-      const origText = btn.textContent;
-      btn.textContent = S.fetchingWarp;
+      const origText = lbl.textContent;
+      lbl.textContent = S.fetchingWarp;
       if (msg) { msg.textContent = ''; msg.classList.add('hidden'); }
 
       try {
@@ -768,7 +769,7 @@ import { collectTarget, devicesState } from './devices.js';
           msg.classList.remove('hidden');
         }
       } finally {
-        btn.textContent = origText;
+        lbl.textContent = origText;
         btn.disabled = false;
       }
     });

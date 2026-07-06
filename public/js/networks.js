@@ -1808,9 +1808,10 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
     const btn = document.getElementById('warp-prefill-btn');
     const msg = document.getElementById('warp-prefill-msg');
     if (!btn) return;
+    const lbl = btn.querySelector('span') || btn;
     btn.disabled = true;
-    const origText = btn.textContent;
-    btn.textContent = S.fetchingWarp;
+    const origText = lbl.textContent;
+    lbl.textContent = S.fetchingWarp;
     if (msg) { msg.textContent = ''; msg.classList.add('hidden'); }
     try {
       const r = await fetch('/api/warp/register', {
@@ -1848,7 +1849,7 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
       if (msg) { msg.textContent = e.message; msg.style.color = '#dc2626'; msg.classList.remove('hidden'); }
     }
     btn.disabled = false;
-    btn.textContent = origText;
+    lbl.textContent = origText;
   }
 
   function initCardToggles() {

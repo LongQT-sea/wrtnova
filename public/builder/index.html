@@ -387,7 +387,7 @@
       <div class="card-body">
         <p class="form-help" data-i18n="wgNeedConfig">Don't have a WireGuard config? Use Cloudflare's free WARP.</p>
         <div class="mt-1.5">
-          <button id="warp-prefill-btn" type="button" class="btn" style="font-size:0.8125rem;padding:0.3rem 0.625rem;min-height:unset" data-i18n="prefillWithWarp">Prefill with Cloudflare WARP</button>
+          <button id="warp-prefill-btn" type="button" class="btn btn-warp"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg><span data-i18n="prefillWithWarp">Prefill with Cloudflare WARP</span></button>
           <p id="warp-prefill-msg" class="form-help mt-1 hidden"></p>
         </div>
         <div class="warn-note wg-off-notice hidden" role="alert">
@@ -1239,7 +1239,7 @@
       <pre class="config-preview" id="config-preview"></pre>
     </details>
 
-    <div class="warn-note" role="note" data-i18n="asuSecurityWarning">Leave passwords and sensitive fields empty. Defaults are safe for first boot: no root password, Wi-Fi password is 12345678. Anything you enter is sent to the ASU build server and baked into the firmware — set real credentials after first boot via LuCI or SSH.</div>
+    <div class="warn-note" role="note" data-i18n-html="asuSecurityWarning">Anything you type is sent to the ASU build server and then stored inside the generated image, where anyone who knows the <strong>build hash</strong> can download and read it. Leave passwords empty (defaults are safe for first boot: no root password, AdGuard admin and Wi-Fi password 12345678) and set real credentials after first boot via LuCI or SSH.</div>
 
     <div class="build-actions">
       <button class="btn btn-primary" type="button" id="build-btn" disabled data-i18n="buildFirmware">Build firmware</button>

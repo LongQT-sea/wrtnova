@@ -313,7 +313,7 @@ export default {
   buildLog:           'Enable debug log',
   buildLogHelp:       'Trace first-boot script execution to /root/99-asu-defaults.log.',
   asuEndpoint:        'ASU endpoint',
-  asuSecurityWarning: 'Leave passwords and sensitive fields empty. Defaults are safe for first boot: no root password, Wi-Fi password is 12345678. Anything you enter is sent to the ASU build server and baked into the firmware — set real credentials after first boot via LuCI or SSH.',
+  asuSecurityWarning: 'Anything you type is sent to the ASU build server and then stored inside the generated image, where anyone who knows the <strong>build hash</strong> can download and read it. Leave passwords empty (defaults are safe for first boot: no root password, AdGuard admin and Wi-Fi password 12345678) and set real credentials after first boot via LuCI or SSH.',
   recentBuilds:       'Recent builds',
   noBuildsYet:        'No builds yet.',
   configPreview:      'Config preview',
