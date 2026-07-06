@@ -186,6 +186,7 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
     if (c.DNS_MODE && c.DNS_MODE !== 'none')
       p.push(c.DNS_MODE === 'adguardhome' ? S.adguardHome
            : c.DNS_MODE === 'https-dns-proxy' ? 'https-dns-proxy'
+           : c.DNS_MODE === 'adblock-fast' ? 'adblock-fast'
            : S.dnsproxy);
     if (c.WG_ENABLE === '1') p.push(S.wireGuardVpn);
     return p.join(' · ') || S.notYetConfigured;
@@ -1087,10 +1088,12 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
     if (node.overrides.AP_MODE === '1') return '';            // router-only
     const cur = net.shared_config.DNS_MODE || 'adguardhome';
     if (cur !== builtDns) return cur;                         // a sibling already downgraded - rebuild at current mode
-    if (cur !== 'adguardhome' && cur !== 'dnsproxy' && cur !== 'https-dns-proxy') return ''; // already dnsmasq - nothing left to try
-    const next = cur === 'adguardhome' ? 'dnsproxy'
-               : cur === 'dnsproxy'    ? 'https-dns-proxy'
-               : 'none';
+    const next = cur === 'adguardhome'     ? 'dnsproxy'
+               : cur === 'dnsproxy'        ? 'https-dns-proxy'
+               : cur === 'https-dns-proxy' ? 'adblock-fast'
+               : cur === 'adblock-fast'    ? 'none'
+               : '';
+    if (!next) return '';                                     // already plain dnsmasq - nothing left to try
     net.shared_config.DNS_MODE = next;
     if (st.configStore && st.networkId === net.id) st.configStore.set({ DNS_MODE: next });
     net.updated_at = Date.now();
@@ -1103,7 +1106,10 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
   }
 
   function dnsAutoRetryNote(mode) {
-    return mode === 'none' ? S.autoSwitchedDnsmasq : S.autoSwitchedDnsproxy;
+    return mode === 'https-dns-proxy' ? S.autoSwitchedHttpsDnsProxy
+         : mode === 'adblock-fast'    ? S.autoSwitchedAdblock
+         : mode === 'none'            ? S.autoSwitchedDnsmasq
+         : S.autoSwitchedDnsproxy;
   }
 
   // Shared by buildNode and startBuildAllNode. A per-node version override means a

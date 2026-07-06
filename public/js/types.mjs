@@ -103,7 +103,7 @@
  * @property {string} [CLOUDFLARE_API_KEY] sensitive
  * @property {string} [CELLULAR_MODEM]     flag
  * @property {string} [USB_TETHERING]      flag
- * @property {string} [DNS_MODE]           BUILD-ONLY: 'adguardhome' | 'dnsproxy' | 'https-dns-proxy' | 'none'
+ * @property {string} [DNS_MODE]           BUILD-ONLY: 'adguardhome' | 'dnsproxy' | 'https-dns-proxy' | 'adblock-fast' | 'none'
  * @property {string} [ADGUARD_MAIN_DNS]   flag
  * @property {string} [DOH_UPSTREAMS]      DoH upstream URLs (space/newline list)
  * @property {string} [BOOTSTRAP_DNS]      bootstrap/fallback IPs (space/newline list)

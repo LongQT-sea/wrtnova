@@ -136,9 +136,10 @@ export function deriveConfig(raw) {
     DNS_MODE:         v('DNS_MODE') || 'adguardhome',
     // Only meaningful with AdGuard Home; never emit it for dnsproxy/none.
     ADGUARD_MAIN_DNS: (v('DNS_MODE') || 'adguardhome') === 'adguardhome' ? v('ADGUARD_MAIN_DNS') : '',
-    // Encrypted-DNS upstreams apply to every engine except 'none'.
-    DOH_UPSTREAMS:    (v('DNS_MODE') || 'adguardhome') !== 'none' ? v('DOH_UPSTREAMS') : '',
-    BOOTSTRAP_DNS:    (v('DNS_MODE') || 'adguardhome') !== 'none' ? v('BOOTSTRAP_DNS') : '',
+    // Encrypted-DNS upstreams apply only to the DoH engines, not the plain
+    // dnsmasq modes ('none' and 'adblock-fast').
+    DOH_UPSTREAMS:    !['none', 'adblock-fast'].includes(v('DNS_MODE') || 'adguardhome') ? v('DOH_UPSTREAMS') : '',
+    BOOTSTRAP_DNS:    !['none', 'adblock-fast'].includes(v('DNS_MODE') || 'adguardhome') ? v('BOOTSTRAP_DNS') : '',
     // UI toggle "Per-Network Dnsmasq" defaults off; emit the single-instance flag
     // unless the user turns multi on (applies in AP mode too).
     DNSMASQ_SINGLE_INSTANCE: v('DNSMASQ_MULTI_INSTANCE') !== '1' ? '1' : '',

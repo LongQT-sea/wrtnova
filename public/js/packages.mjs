@@ -35,6 +35,10 @@ export function computeAdds({ base = [], device = [], config = {} }) {
     if (dnsMode === 'adguardhome') adds.push('adguardhome');
     else if (dnsMode === 'dnsproxy') adds.push('dnsproxy');
     else if (dnsMode === 'https-dns-proxy') adds.push('https-dns-proxy');
+    if (dnsMode !== 'none') adds.push('adblock-fast', 'grep', 'sed', 'coreutils-sort');
+    if (dnsMode === 'adblock-fast' || dnsMode === 'dnsproxy' || dnsMode === 'https-dns-proxy') {
+      adds.push('luci-app-adblock-fast');
+    }
   }
   adds.push('zram-swap', 'luci-app-commands', 'ip-bridge');
 

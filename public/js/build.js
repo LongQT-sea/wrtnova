@@ -31,10 +31,12 @@ import { collectTarget, devicesState } from './devices.js';
     if (!/exceed.*storage|storage.*exceed/i.test(errMsg)) return false;
     const dnsRadio = $('input[name="DNS_MODE"]:checked');
     const dnsVal = dnsRadio ? dnsRadio.value : '';
-    if (dnsVal !== 'adguardhome' && dnsVal !== 'dnsproxy' && dnsVal !== 'https-dns-proxy') return false;
-    const nextVal = dnsVal === 'adguardhome' ? 'dnsproxy'
-                  : dnsVal === 'dnsproxy'    ? 'https-dns-proxy'
-                  : 'none';
+    const nextVal = dnsVal === 'adguardhome'     ? 'dnsproxy'
+                  : dnsVal === 'dnsproxy'        ? 'https-dns-proxy'
+                  : dnsVal === 'https-dns-proxy' ? 'adblock-fast'
+                  : dnsVal === 'adblock-fast'    ? 'none'
+                  : '';
+    if (!nextVal) return false;
     // Store-first: downgrade DNS_MODE in the store (single source of truth) and
     // reflect it into the radio, so the auto-retry rebuild uses the new value.
     // The downgrade always leaves AdGuard Home mode, so clear ADGUARD_MAIN_DNS too.
@@ -51,6 +53,7 @@ import { collectTarget, devicesState } from './devices.js';
       tip.className = 'text-xs text-zinc-500 dark:text-zinc-400 mt-1';
       tip.textContent = t(nextVal === 'dnsproxy' ? 'autoSwitchedDnsproxy'
                         : nextVal === 'https-dns-proxy' ? 'autoSwitchedHttpsDnsProxy'
+                        : nextVal === 'adblock-fast' ? 'autoSwitchedAdblock'
                         : 'autoSwitchedDnsmasq');
       rn.appendChild(tip);
     }
