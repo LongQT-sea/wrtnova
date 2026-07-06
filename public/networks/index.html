@@ -429,6 +429,19 @@
                     </div>
                   </div>
                   <div class="info-note dnsmasq-multi-only" role="note" data-i18n-html="dnsmasqMultiNote">To add DHCP on a new interface, use the built-in <code>dhcp-instance-add</code> command.</div>
+                  <div class="form-row">
+                    <label class="form-label" data-i18n="tagLanVlan">Tag LAN VLAN</label>
+                    <div>
+                      <label class="toggle-label">
+                        <span class="toggle-wrap">
+                          <input type="checkbox" id="TAGGED_LAN_VLAN" name="TAGGED_LAN_VLAN" value="1" class="toggle-input">
+                          <span class="toggle-track"></span>
+                          <span class="toggle-thumb"></span>
+                        </span>
+                        <span class="toggle-text" data-i18n="tagLanVlanHelp">Turn all LAN ports into trunk-only ports</span>
+                      </label>
+                    </div>
+                  </div>
                 </div>
               </details>
             </div>
@@ -1294,6 +1307,26 @@
     <div class="flex gap-2 justify-end">
       <button class="btn" id="btn-cancel-delete-node" data-i18n="cancel">Cancel</button>
       <button class="btn" id="btn-confirm-delete-node" style="background:#ef4444;border-color:#ef4444;color:#fff" data-i18n="delete">Delete</button>
+    </div>
+  </dialog>
+
+
+  <!-- ============= MODAL: Tag LAN VLAN confirm ============= -->
+  <dialog id="modal-tag-lan"
+          class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-lg p-6 w-full max-w-sm text-zinc-900 dark:text-zinc-100 font-mono shadow-xl backdrop:bg-zinc-950/60">
+    <h3 class="font-semibold mb-2" data-i18n="tagLanVlanTitle">Tag the LAN VLAN?</h3>
+    <p class="text-sm text-zinc-500 dark:text-zinc-400 mb-4" data-i18n-html="tagLanVlanBody">Every LAN port becomes a <strong>trunk port</strong> instead of a normal access port (untagged/PVID) on the LAN VLAN. Trunk ports expect every connected device to be VLAN-aware, like a managed switch or a Linux/Mac with a VLAN configured on its Ethernet port.</p>
+    <label class="toggle-label mb-4">
+      <span class="toggle-wrap">
+        <input type="checkbox" id="tag-lan-understand" class="toggle-input">
+        <span class="toggle-track"></span>
+        <span class="toggle-thumb"></span>
+      </span>
+      <span class="toggle-text" data-i18n="tagLanVlanConfirm">I understand this can lock me out of the router.</span>
+    </label>
+    <div class="flex gap-2 justify-end">
+      <button class="btn" id="btn-cancel-tag-lan" data-i18n="cancel">Cancel</button>
+      <button class="btn" id="btn-confirm-tag-lan" style="background:#ef4444;border-color:#ef4444;color:#fff" data-i18n="tagLanVlanEnable" disabled>Enable tagging</button>
     </div>
   </dialog>
 

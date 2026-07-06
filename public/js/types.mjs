@@ -60,6 +60,7 @@
  * @property {string} [LAN_WG_VLAN_ID]
  * @property {string} [LAN_WG_SUBNET]
  * @property {string} [ADDITIONAL_VLAN_LIST]
+ * @property {string} [TAGGED_LAN_VLAN]    flag: tag the LAN VLAN (trunk) on all ports
  * @property {string} [P_STEERING]         packet steering: '' | '1' | '2' (all CPUs, 24+)
  * @property {string} [ULA_PREFIX]         IPv6 ULA prefix override
  * @property {string} [COUNTRY_CODE]

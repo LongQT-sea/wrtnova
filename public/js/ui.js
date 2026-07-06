@@ -304,6 +304,29 @@ import { deriveVisibility, deriveNetRows, detectVlanConflict, resolveVlanAssignm
     ui.initChannelSelects();
   };
 
+  // Lockout guard TAGGED_LAN_VLAN
+  ui.initTaggedLanGuard = function () {
+    const box = ui.$('#TAGGED_LAN_VLAN'), modal = ui.$('#modal-tag-lan');
+    if (!box || !modal || !modal.showModal) return;
+    const arm = ui.$('#tag-lan-understand'), ok = ui.$('#btn-confirm-tag-lan');
+    const close = (v) => () => { modal.returnValue = v; modal.close(); };
+    const setEnabled = (on) => { if (!ok) return; ok.disabled = !on; ok.style.opacity = on ? '' : '0.5'; };
+    arm?.addEventListener('change', () => setEnabled(arm.checked));
+    box.addEventListener('change', () => {
+      if (!box.checked) return;
+      if (arm) arm.checked = false;
+      setEnabled(false);
+      modal.returnValue = ''; modal.showModal();
+    });
+    ok?.addEventListener('click', close('confirm'));
+    ui.$('#btn-cancel-tag-lan')?.addEventListener('click', close('cancel'));
+    modal.addEventListener('close', () => {
+      if (modal.returnValue === 'confirm' || !box.checked) return;
+      box.checked = false;
+      box.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+  };
+
   ui.WIFI_CHANNELS = {
     CHANNEL_2G: Array.from({ length: 13 }, (_, i) => i + 1),
     CHANNEL_5G: [36, 40, 44, 48, 52, 56, 60, 64, 100, 104, 108, 112, 116, 120,

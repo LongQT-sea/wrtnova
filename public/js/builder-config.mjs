@@ -83,6 +83,7 @@ export function deriveConfig(raw) {
     LAN_WG_VLAN_ID:     vlan.LAN_WG_VLAN_ID,
     LAN_WG_SUBNET:      wgOn ? v('LAN_WG_SUBNET')      : '',
     ADDITIONAL_VLAN_LIST: v('ADDITIONAL_VLAN_LIST'),
+    TAGGED_LAN_VLAN: v('TAGGED_LAN_VLAN'),
     P_STEERING:     v('P_STEERING'),
     ULA_PREFIX:     v('ULA_PREFIX'),
 

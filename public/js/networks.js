@@ -96,7 +96,7 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
       IOT_ENABLE: '', IOT_BASE_PREFIX: '', IOT_IFACE: '', IOT_VLAN_ID: '', IOT_SUBNET: '',
       IOT_INTERNET: '1', IOT_ROUTE_VIA_WG: '',
       WG_ENABLE: '', LAN_WG_BASE_PREFIX: '', LAN_WG_IFACE: '', LAN_WG_VLAN_ID: '', LAN_WG_SUBNET: '',
-      ADDITIONAL_VLAN_LIST: '',
+      ADDITIONAL_VLAN_LIST: '', TAGGED_LAN_VLAN: '',
       P_STEERING: '', ULA_PREFIX: '',
       WG_PRIVATE_KEY: '', PEER_PUBLIC_KEY: '', ENDPOINT: '',
       ENDPOINT_PORT: '', PRESHARED_KEY: '', WG_IPV4: '', WG_IPV6: '',
@@ -1866,6 +1866,7 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
     // Wire up ui.js helpers for the config form (they attach to document.body
     // so they work regardless of which view is visible)
     if (ui.initConditionalVisibility) ui.initConditionalVisibility();
+    if (ui.initTaggedLanGuard) ui.initTaggedLanGuard();
     if (ui.initPasswordToggles) ui.initPasswordToggles();
     if (ui.wireDotTouches) ui.wireDotTouches();
     if (ui.wireSubnetAnchors) ui.wireSubnetAnchors();

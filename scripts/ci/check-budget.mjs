@@ -18,8 +18,10 @@ const root = resolve(here, '..', '..');
 
 const CSS_NFR_KB = 15;       // hard NFR - enforced
 const JS_TARGET_KB = 30;     // SPEC NFR target - documented, not yet met
-const JS_CEILING_KB = 57;    // ratchet: /networks ~56.1 KB after the self-extracting
-                             // gzip+base64 defaults path was added; no growth past this
+const JS_CEILING_KB = 58;    // ratchet: /networks ~57.4 KB after the TAGGED_LAN_VLAN
+                             // lockout guard (confirm dialog + warn-note) was added on
+                             // top of the self-extracting gzip+base64 defaults path;
+                             // no growth past this
 
 const PAGES = {
   builder: 'public/builder/index.html',

@@ -26,6 +26,7 @@ import './build.js';
     // exists and after its boundary listener is wired (so the store is updated
     // before the visibility handler reads it).
     ui.initConditionalVisibility();
+    ui.initTaggedLanGuard();
 
     $('#build-btn').addEventListener('click', () => ui.startBuild());
 
