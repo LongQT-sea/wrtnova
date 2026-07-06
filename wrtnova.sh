@@ -91,6 +91,8 @@ WAN_B_VLAN_ID=		# Default: 21
 # Additional VLANs to trunk through this device (e.g. "25 30 40" or "30-50"), ranges must be low-high
 ADDITIONAL_VLAN_LIST=""
 
+TAGGED_LAN_VLAN=	# Make LAN_VLAN tagged instead of untagged & pvid
+
 BRIDGE_STP=		# 1 = enable Spanning Tree Protocol on br-vlan
 
 # === IPv4 Port Forwarding and IPv6 Server Exposure ===
@@ -675,6 +677,8 @@ if [ "$use_bridge_vlan" = 1 ]; then
 		fi
 	}
 
+	[ "$TAGGED_LAN_VLAN" = 1 ] && lan_vlan_ports="$trunk_ports"
+
 	_uci network device @device[0] name=br-vlan -ports ${BRIDGE_STP:+stp=1}
 	for p in $lan_ports ${bridge_wan_port:+$wan_port}; do
 		_uci network device @device[0] +ports="$p"
@@ -722,6 +726,8 @@ else
 		wan_vlan_ports="$trunk_ports"
 #		[ -z "$sw_wan_port" ] # Not worth handling, connect LAN to LAN port instead
 	}
+
+	[ "$TAGGED_LAN_VLAN" = 1 ] && lan_vlan_ports="$trunk_ports"
 
 	[ -n "$sw_wan_port" ] && [ "$WAN_IS_TAGGED" = 1 ] && wan_vlan_ports="$trunk_ports"
 
