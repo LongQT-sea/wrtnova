@@ -151,6 +151,7 @@ export default {
   mainRouter:         'Main router',
   accessPoint:        'Access point',
   apModeHelp:         'Disables DHCP — device acts as a wireless access point and managed switch, forwarding all traffic to the main router.',
+  apFleetTip:         'Managing several nodes? Configure them together in the <a href="/networks" class="text-[#f6821f] hover:underline">fleet builder</a>.',
   hostname:           'Hostname',
   rootPasswordHelp:   'Used for SSH login and AdGuard Home admin.',
   sshPublicKeys:      'SSH public keys',

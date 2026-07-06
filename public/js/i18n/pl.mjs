@@ -151,6 +151,7 @@ export default {
   mainRouter:         'Główny router',
   accessPoint:        'Punkt dostępu',
   apModeHelp:         'Wyłącza DHCP — urządzenie działa jako bezprzewodowy punkt dostępu i zarządzany przełącznik, przekierowując cały ruch do głównego routera.',
+  apFleetTip:         'Zarządzasz wieloma węzłami? Skonfiguruj je razem w <a href="/networks" class="text-[#f6821f] hover:underline">kreatorze floty</a>.',
   hostname:           'Nazwa hosta',
   rootPasswordHelp:   'Używane do logowania SSH i administracji AdGuard Home.',
   sshPublicKeys:      'Publiczne klucze SSH',

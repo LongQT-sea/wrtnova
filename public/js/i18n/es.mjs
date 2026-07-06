@@ -151,6 +151,7 @@ export default {
   mainRouter:         'Router principal',
   accessPoint:        'Punto de acceso',
   apModeHelp:         'Deshabilita DHCP — el dispositivo actúa como punto de acceso inalámbrico y switch gestionado, enviando todo el tráfico al router principal.',
+  apFleetTip:         '¿Gestionas varios nodos? Configúralos juntos en el <a href="/networks" class="text-[#f6821f] hover:underline">constructor de flota</a>.',
   hostname:           'Nombre de host',
   rootPasswordHelp:   'Usado para inicio de sesión SSH y administración de AdGuard Home.',
   sshPublicKeys:      'Claves SSH públicas',

@@ -151,6 +151,7 @@ export default {
   mainRouter:         'Основной роутер',
   accessPoint:        'Точка доступа',
   apModeHelp:         'Отключает DHCP — устройство работает как беспроводная точка доступа и управляемый коммутатор, перенаправляя весь трафик на основной роутер.',
+  apFleetTip:         'Управляете несколькими узлами? Настройте их вместе в <a href="/networks" class="text-[#f6821f] hover:underline">конструкторе флота</a>.',
   hostname:           'Имя хоста',
   rootPasswordHelp:   'Используется для входа по SSH и администрирования AdGuard Home.',
   sshPublicKeys:      'Открытые SSH-ключи',

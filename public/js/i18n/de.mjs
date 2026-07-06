@@ -151,6 +151,7 @@ export default {
   mainRouter:         'Hauptrouter',
   accessPoint:        'Zugangspunkt',
   apModeHelp:         'Deaktiviert DHCP — Gerät fungiert als WLAN-Zugangspunkt und verwalteter Switch, der den gesamten Datenverkehr an den Hauptrouter weiterleitet.',
+  apFleetTip:         'Mehrere Geräte im Einsatz? Konfigurieren Sie sie gemeinsam im <a href="/networks" class="text-[#f6821f] hover:underline">Fleet-Builder</a>.',
   hostname:           'Hostname',
   rootPasswordHelp:   'Wird für SSH-Login und AdGuard Home-Administration verwendet.',
   sshPublicKeys:      'Öffentliche SSH-Schlüssel',

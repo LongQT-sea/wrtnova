@@ -151,6 +151,7 @@ export default {
   mainRouter:         'Routeur principal',
   accessPoint:        "Point d'accès",
   apModeHelp:         "Désactive le DHCP — l'appareil fonctionne comme un point d'accès sans fil et un commutateur géré, transmettant tout le trafic au routeur principal.",
+  apFleetTip:         "Vous gérez plusieurs nœuds ? Configurez-les ensemble dans le <a href=\"/networks\" class=\"text-[#f6821f] hover:underline\">générateur de flotte</a>.",
   hostname:           "Nom d'hôte",
   rootPasswordHelp:   "Utilisé pour la connexion SSH et l'administration AdGuard Home.",
   sshPublicKeys:      'Clés SSH publiques',

@@ -151,6 +151,7 @@ export default {
   mainRouter:         '主路由器',
   accessPoint:        '接入点',
   apModeHelp:         '禁用 DHCP——设备作为无线接入点和受管交换机，将所有流量转发到主路由器。',
+  apFleetTip:         '管理多个节点？请在<a href="/networks" class="text-[#f6821f] hover:underline">集群构建器</a>中统一配置。',
   hostname:           '主机名',
   rootPasswordHelp:   '用于 SSH 登录和 AdGuard Home 管理。',
   sshPublicKeys:      'SSH 公钥',
