@@ -287,6 +287,21 @@ uci -q get wireless || {
 	BATMAN_ADV=
 }
 
+has_pkg dnsproxy && dnsproxy=1
+has_pkg https-dns-proxy && https_dns=1
+has_pkg adblock-fast && adblock_fast=1
+
+has_pkg adguardhome && {
+	# Skip setup Adguard Home if less than 230MB RAM
+	read -r _ TOTAL_RAM_KB _ < /proc/meminfo
+	if [ "$TOTAL_RAM_KB" -ge 235520 ]; then
+		[ "$adblock_fast" = 1 ] && /etc/init.d/adblock-fast disable
+		adguardhome=1 adblock_fast=
+	else
+		/etc/init.d/adguardhome disable
+	fi
+}
+
 # === System ===
 cat > /bin/run-cmd <<'EOF'
 #!/bin/sh
@@ -1230,27 +1245,19 @@ bootstrap_dns="${BOOTSTRAP_DNS:-
 2620:fe::9
 }"
 
-# Skip setup Adguard Home if less than 230MB RAM
-[ -x /usr/bin/AdGuardHome ] && {
-	read -r _ TOTAL_RAM_KB _ < /proc/meminfo
-	if [ "$TOTAL_RAM_KB" -ge 235520 ]; then
-		[ -n "$ADGUARD_MAIN_DNS" ] && {
-			adguard_main=true
-			adguard_bind_host=0.0.0.0
-			adguard_dns_port=53
-			dnsmasq_dns_port=54
-			adguard_upstream="'[/lan/]127.0.0.1:54'"
-			[ "$WG_ENABLE" = 1 ] && adguard_upstream="$adguard_upstream '[/vpn.lan/]${wg_net_pfx}.1:54'"
-		}
+[ "$adguardhome" = 1 ] && {
+	[ -n "$ADGUARD_MAIN_DNS" ] && {
+		adguard_main=true
+		adguard_bind_host=0.0.0.0
+		adguard_dns_port=53
+		dnsmasq_dns_port=54
+		adguard_upstream="'[/lan/]127.0.0.1:54'"
+		[ "$WG_ENABLE" = 1 ] && adguard_upstream="$adguard_upstream '[/vpn.lan/]${wg_net_pfx}.1:54'"
+	}
 
-		setup_dnsmasq_upstream
-		echo "0 3 1 * * /etc/init.d/adguardhome restart" >> /etc/crontabs/root
-		echo "sleep 20; /etc/init.d/adguardhome restart &" >> "$hplug_ifup_wan"
-
-		[ -x /usr/bin/dnsproxy ] && /etc/init.d/dnsproxy disable
-	else
-		/etc/init.d/adguardhome disable
-	fi
+	setup_dnsmasq_upstream
+	echo "0 3 1 * * /etc/init.d/adguardhome restart" >> /etc/crontabs/root
+	echo "sleep 20; /etc/init.d/adguardhome restart &" >> "$hplug_ifup_wan"
 }
 
 adguard_upstream="$(for u in $doh_upstreams $adguard_upstream; do printf "    - %s\n" "$u"; done)"
@@ -1302,7 +1309,7 @@ EOF
 
 doh_upstreams="${DOH_UPSTREAMS:-https://dns.adguard-dns.com/dns-query}"
 
-[ -x /usr/bin/dnsproxy ] && {
+[ "$dnsproxy" = 1 ] && {
 	setup_dnsmasq_upstream
 	_uci dnsproxy global global -listen_port \
 		+listen_port=5354 enabled=1 log_file=/dev/null rate_limit=500
@@ -1325,7 +1332,7 @@ doh_upstreams="${DOH_UPSTREAMS:-https://dns.adguard-dns.com/dns-query}"
 	echo "sleep 5; /etc/init.d/dnsproxy restart &" >> "$hplug_ifup_wan"
 }
 
-[ -x /usr/sbin/https-dns-proxy ] && {
+[ "$https_dns" = 1 ] && {
 	while uci -q del https-dns-proxy.@https-dns-proxy[0]; do :; done
 	uci set https-dns-proxy.config.force_dns=0
 	bootstrap_csv="$(echo "$bootstrap_dns" | tr -s ' \t\n' ',')"
@@ -1340,6 +1347,8 @@ doh_upstreams="${DOH_UPSTREAMS:-https://dns.adguard-dns.com/dns-query}"
 
 	echo "sleep 5; /etc/init.d/https-dns-proxy restart &" >> "$hplug_ifup_wan"
 }
+
+[ "$adblock_fast" = 1 ] && _uci adblock-fast "" config enabled=1 force_dns=0 verbosity=1
 
 # === Firewall ===
 fw_add_zone() {
