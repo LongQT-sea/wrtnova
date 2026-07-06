@@ -76,7 +76,7 @@ export default {
 
   // -- Build errors --------------------------------------------------
   retry:                'Erneut versuchen',
-  storageTip:           'Versuchen Sie, <strong>DNS &amp; Adblock</strong> auf dnsproxy (statt AdGuard Home) in der Netzwerkkonfiguration umzustellen.',
+  storageTip:           'Die <strong>ausgewählten Funktionen sind zu groß</strong> für dieses Gerät. Entfernen Sie einige Funktionen oder wählen Sie ein Gerät mit mehr Speicher.',
   autoSwitchedDnsproxy: 'Wechsel von AdGuard Home zu dnsproxy, erneuter Versuch...',
   autoSwitchedHttpsDnsProxy: 'Wechsel von dnsproxy zu https-dns-proxy, erneuter Versuch...',
   autoSwitchedAdblock:  'Wechsel von https-dns-proxy zu adblock-fast, erneuter Versuch...',
@@ -287,7 +287,7 @@ export default {
   bootstrapDnsHelp:   'Einfache IPs zum Auflösen der Upstream-Hostnamen + Fallback. Leer nutzt 1.0.0.1 / 9.9.9.9.',
   dnsmasqMulti:       'Dnsmasq pro Netzwerk',
   dnsmasqMultiHelp:   'Mehrere DHCP/DNS-Instanzen aktivieren',
-  dnsmasqMultiNote:   'Um DHCP auf einer neuen Schnittstelle hinzuzufuegen, den eingebauten Befehl dhcp-instance-add verwenden.',
+  dnsmasqMultiNote:   'Um DHCP auf einer neuen Schnittstelle hinzuzufuegen, den eingebauten Befehl <code>dhcp-instance-add</code> verwenden.',
   bootstrapDnsPh:     'einfache IPs, eine pro Zeile; leer = Standard',
   additionalPackages: 'Zusätzliche Pakete',
   autoAdded:          'Automatisch hinzugefügt',

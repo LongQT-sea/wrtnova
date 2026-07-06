@@ -76,7 +76,7 @@ export default {
 
   // -- Build errors --------------------------------------------------
   retry:                'Повторить',
-  storageTip:           'Попробуйте переключить <strong>DNS и блокировку рекламы</strong> на dnsproxy (вместо AdGuard Home) в конфигурации сети.',
+  storageTip:           'Выбранные <strong>функции слишком велики</strong> для этого устройства. Уберите часть функций или выберите устройство с большим объёмом памяти.',
   autoSwitchedDnsproxy: 'Переключение с AdGuard Home на dnsproxy, повторная попытка...',
   autoSwitchedHttpsDnsProxy: 'Переключение с dnsproxy на https-dns-proxy, повторная попытка...',
   autoSwitchedAdblock:  'Переключение с https-dns-proxy на adblock-fast, повторная попытка...',
@@ -287,7 +287,7 @@ export default {
   bootstrapDnsHelp:   'Обычные IP для разрешения имён апстримов + запасной вариант. Пусто - 1.0.0.1 / 9.9.9.9.',
   dnsmasqMulti:       'Dnsmasq для каждой сети',
   dnsmasqMultiHelp:   'Включить несколько экземпляров DHCP/DNS',
-  dnsmasqMultiNote:   'Чтобы добавить DHCP на новом интерфейсе, используйте встроенную команду dhcp-instance-add.',
+  dnsmasqMultiNote:   'Чтобы добавить DHCP на новом интерфейсе, используйте встроенную команду <code>dhcp-instance-add</code>.',
   bootstrapDnsPh:     'обычные IP, по одному в строке; пусто = по умолчанию',
   additionalPackages: 'Дополнительные пакеты',
   autoAdded:          'Добавлены автоматически',

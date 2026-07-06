@@ -76,7 +76,7 @@ export default {
 
   // -- Build errors --------------------------------------------------
   retry:                'Reintentar',
-  storageTip:           'Intenta cambiar <strong>DNS y bloqueo de anuncios</strong> a dnsproxy (en lugar de AdGuard Home) en la configuración de red.',
+  storageTip:           'Las <strong>funciones seleccionadas son demasiado grandes</strong> para este dispositivo. Prueba a quitar algunas funciones o elegir un dispositivo con más almacenamiento.',
   autoSwitchedDnsproxy: 'Cambiando de AdGuard Home a dnsproxy, reintentando...',
   autoSwitchedHttpsDnsProxy: 'Cambiando de dnsproxy a https-dns-proxy, reintentando...',
   autoSwitchedAdblock:  'Cambiando de https-dns-proxy a adblock-fast, reintentando...',
@@ -287,7 +287,7 @@ export default {
   bootstrapDnsHelp:   'IPs simples para resolver los nombres de upstreams + reserva. Vacío = 1.0.0.1 / 9.9.9.9.',
   dnsmasqMulti:       'Dnsmasq por red',
   dnsmasqMultiHelp:   'Activar varias instancias de DHCP/DNS',
-  dnsmasqMultiNote:   'Para añadir DHCP en una nueva interfaz, usa el comando integrado dhcp-instance-add.',
+  dnsmasqMultiNote:   'Para añadir DHCP en una nueva interfaz, usa el comando integrado <code>dhcp-instance-add</code>.',
   bootstrapDnsPh:     'IPs simples, una por línea; vacío = predeterminado',
   additionalPackages: 'Paquetes adicionales',
   autoAdded:          'Añadido automáticamente',

@@ -76,7 +76,7 @@ export default {
 
   // -- Build errors --------------------------------------------------
   retry:                'Retry',
-  storageTip:           'Try switching <strong>DNS &amp; adblock</strong> to dnsproxy (instead of AdGuard Home) in network config.',
+  storageTip:           'The selected <strong>features are too big</strong> for this device. Try removing some features or picking a device with more storage.',
   autoSwitchedDnsproxy: 'Switching AdGuard Home to dnsproxy and retrying...',
   autoSwitchedHttpsDnsProxy: 'Switching dnsproxy to https-dns-proxy and retrying...',
   autoSwitchedAdblock:  'Switching https-dns-proxy to adblock-fast and retrying...',
@@ -287,7 +287,7 @@ export default {
   bootstrapDnsHelp:   'Plain IPs to resolve upstream hostnames + fallback. Blank uses 1.0.0.1 / 9.9.9.9.',
   dnsmasqMulti:       'Per-Network Dnsmasq',
   dnsmasqMultiHelp:   'Enable multiple DHCP/DNS instances',
-  dnsmasqMultiNote:   'To add DHCP on a new interface, use the built-in dhcp-instance-add command.',
+  dnsmasqMultiNote:   'To add DHCP on a new interface, use the built-in <code>dhcp-instance-add</code> command.',
   bootstrapDnsPh:     'plain IPs, one per line; blank = defaults',
   additionalPackages: 'Additional packages',
   autoAdded:          'Auto-added',

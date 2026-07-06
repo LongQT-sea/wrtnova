@@ -76,7 +76,7 @@ export default {
 
   // -- Build errors --------------------------------------------------
   retry:                '重试',
-  storageTip:           '尝试在网络配置中将 <strong>DNS 和广告拦截</strong> 切换为 dnsproxy（而非 AdGuard Home）。',
+  storageTip:           '所选<strong>功能对该设备来说太大</strong>。请尝试移除部分功能，或选择存储空间更大的设备。',
   autoSwitchedDnsproxy: '正在将 AdGuard Home 切换为 dnsproxy 并重试...',
   autoSwitchedHttpsDnsProxy: '正在将 dnsproxy 切换为 https-dns-proxy 并重试...',
   autoSwitchedAdblock:  '正在将 https-dns-proxy 切换为 adblock-fast 并重试...',
@@ -287,7 +287,7 @@ export default {
   bootstrapDnsHelp:   '用于解析上游主机名的纯 IP + 回退。留空则使用 1.0.0.1 / 9.9.9.9。',
   dnsmasqMulti:       '按网络的 Dnsmasq',
   dnsmasqMultiHelp:   '启用多个 DHCP/DNS 实例',
-  dnsmasqMultiNote:   '要为新接口添加 DHCP，请使用内置命令 dhcp-instance-add。',
+  dnsmasqMultiNote:   '要为新接口添加 DHCP，请使用内置命令 <code>dhcp-instance-add</code>。',
   bootstrapDnsPh:     '纯 IP，每行一个；留空 = 默认值',
   additionalPackages: '额外软件包',
   autoAdded:          '自动添加',

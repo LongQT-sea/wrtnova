@@ -559,6 +559,18 @@
     background-color: #18181b;
     color: #a1a1aa;
   }
+  /* Inline command / code chip inside an info note */
+  .info-note code {
+    padding: 0.0625rem 0.3125rem;
+    border-radius: 0.25rem;
+    background-color: #f4f4f5;
+    border: 1px solid #e4e4e7;
+    font-size: 1em;
+  }
+  .dark .info-note code {
+    background-color: #27272a;
+    border-color: #3f3f46;
+  }
 
   /* ── Warning note (security / data-retention alerts) ─────────── */
   .warn-note {
