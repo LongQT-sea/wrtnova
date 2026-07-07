@@ -38,7 +38,7 @@ test('BASE_SCHEMA: radio defaults match the contract', () => {
   const defs = Object.fromEntries(
     BASE_SCHEMA.filter(([, kind]) => kind === 'radio').map(([key, , , def]) => [key, def]),
   );
-  assert.deepEqual(defs, { SSH_PASSWD_AUTH: '', wan_type: 'dhcp', DNS_MODE: 'adguardhome' });
+  assert.deepEqual(defs, { SSH_PASSWD_AUTH: '', wan_type: 'dhcp', DNS_MODE: 'https-dns-proxy' });
 });
 
 test('keySets: partitions radios vs checkboxes; text/select/tz/table excluded', () => {

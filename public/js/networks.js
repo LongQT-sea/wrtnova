@@ -114,7 +114,7 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
       PORT_FORWARD_LIST: '', IPV6_SERVER_LIST: '',
       DDNS_ENABLE: '', LOOKUP_HOSTNAME: '', CLOUDFLARE_API_KEY: '',
       USB_TETHERING: '', CELLULAR_MODEM: '',
-      DNS_MODE: 'adguardhome', ADGUARD_MAIN_DNS: '', BLOCK_DOT_DOQ: '',
+      DNS_MODE: 'https-dns-proxy', ADGUARD_MAIN_DNS: '', BLOCK_DOT_DOQ: '',
       BLOCK_DOH: '', FORCE_DNS: '1', BANIP_COUNTRY_LIST: '',
       DOH_UPSTREAMS: '', BOOTSTRAP_DNS: '', DNSMASQ_MULTI_INSTANCE: '',
       DENY_GUEST_NIGHT: '', QUARTERLY_REBOOT: '', LOG: '',
@@ -1086,7 +1086,7 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
   function planDnsAutoRetry(net, node, builtDns, errMsg) {
     if (!/exceed.*storage|storage.*exceed/i.test(errMsg)) return '';
     if (node.overrides.AP_MODE === '1') return '';            // router-only
-    const cur = net.shared_config.DNS_MODE || 'adguardhome';
+    const cur = net.shared_config.DNS_MODE || 'https-dns-proxy';
     if (cur !== builtDns) return cur;                         // a sibling already downgraded - rebuild at current mode
     const next = cur === 'adguardhome'     ? 'dnsproxy'
                : cur === 'dnsproxy'        ? 'https-dns-proxy'
@@ -1209,7 +1209,7 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
     const effectiveVersion = node.overrides.version || tgt.version || net.shared_config.shared_version;
     // DNS mode this build uses - captured up front so an auto-retry compares
     // against it rather than a value a concurrent sibling build may have moved.
-    const builtDns = net.shared_config.DNS_MODE || 'adguardhome';
+    const builtDns = net.shared_config.DNS_MODE || 'https-dns-proxy';
 
     Promise.all([bcryptHash(rootPasswd), resolveVersionedTarget(net, node)])
       .then(async ([adguardHash, vt]) => {
@@ -1456,7 +1456,7 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
     const adguardHash = await bcryptHash(rootPasswd);
     // DNS mode this build uses - captured before any concurrent sibling build
     // can downgrade the shared value (see planDnsAutoRetry).
-    const builtDns = net.shared_config.DNS_MODE || 'adguardhome';
+    const builtDns = net.shared_config.DNS_MODE || 'https-dns-proxy';
 
     const effectiveVersion = node.overrides.version || tgt.version || net.shared_config.shared_version;
     let vt;

@@ -99,8 +99,9 @@ test('resolvePackages: always-on additions present, sorted, deduped', () => {
     'luci-app-commands', 'ip-bridge', 'luci-app-ddns', 'ddns-scripts-cloudflare']) {
     assert.ok(out.includes(p), `missing ${p}`);
   }
-  // default DNS mode is adguardhome
-  assert.ok(out.includes('adguardhome'));
+  // default DNS mode is https-dns-proxy (+ its luci app)
+  assert.ok(out.includes('https-dns-proxy'));
+  assert.ok(out.includes('luci-app-https-dns-proxy'));
   // sorted ignoring leading '-'
   const keys = out.map(p => p.replace(/^-/, ''));
   assert.deepEqual(keys, [...keys].sort((a, b) => a.localeCompare(b)));
@@ -110,8 +111,10 @@ test('resolvePackages: always-on additions present, sorted, deduped', () => {
 
 test('resolvePackages: DNS modes', () => {
   assert.ok(resolvePackages({ config: { DNS_MODE: 'dnsproxy' } }).includes('dnsproxy'));
+  const hdp = resolvePackages({ config: { DNS_MODE: 'https-dns-proxy' } });
+  assert.ok(hdp.includes('https-dns-proxy') && hdp.includes('luci-app-https-dns-proxy'));
   const none = resolvePackages({ config: { DNS_MODE: 'none' } });
-  assert.ok(!none.includes('adguardhome') && !none.includes('dnsproxy'));
+  assert.ok(!none.includes('adguardhome') && !none.includes('dnsproxy') && !none.includes('https-dns-proxy'));
 });
 
 test('resolvePackages: AP mode skips DNS package and wireguard proto', () => {

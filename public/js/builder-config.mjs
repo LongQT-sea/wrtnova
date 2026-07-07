@@ -134,13 +134,13 @@ export function deriveConfig(raw) {
     CELLULAR_MODEM: isRouter ? v('CELLULAR_MODEM') : '',
     USB_TETHERING:  isRouter ? v('USB_TETHERING')  : '',
 
-    DNS_MODE:         v('DNS_MODE') || 'adguardhome',
+    DNS_MODE:         v('DNS_MODE') || 'https-dns-proxy',
     // Only meaningful with AdGuard Home; never emit it for dnsproxy/none.
-    ADGUARD_MAIN_DNS: (v('DNS_MODE') || 'adguardhome') === 'adguardhome' ? v('ADGUARD_MAIN_DNS') : '',
+    ADGUARD_MAIN_DNS: (v('DNS_MODE') || 'https-dns-proxy') === 'adguardhome' ? v('ADGUARD_MAIN_DNS') : '',
     // Encrypted-DNS upstreams apply only to the DoH engines, not the plain
     // dnsmasq modes ('none' and 'adblock-fast').
-    DOH_UPSTREAMS:    !['none', 'adblock-fast'].includes(v('DNS_MODE') || 'adguardhome') ? v('DOH_UPSTREAMS') : '',
-    BOOTSTRAP_DNS:    !['none', 'adblock-fast'].includes(v('DNS_MODE') || 'adguardhome') ? v('BOOTSTRAP_DNS') : '',
+    DOH_UPSTREAMS:    !['none', 'adblock-fast'].includes(v('DNS_MODE') || 'https-dns-proxy') ? v('DOH_UPSTREAMS') : '',
+    BOOTSTRAP_DNS:    !['none', 'adblock-fast'].includes(v('DNS_MODE') || 'https-dns-proxy') ? v('BOOTSTRAP_DNS') : '',
     // UI toggle "Per-Network Dnsmasq" defaults off; emit the single-instance flag
     // unless the user turns multi on (applies in AP mode too).
     DNSMASQ_SINGLE_INSTANCE: v('DNSMASQ_MULTI_INSTANCE') !== '1' ? '1' : '',

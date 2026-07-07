@@ -158,7 +158,7 @@ test('deriveConfig: wan_type dhcp blanks PPPoE', () => {
 
 test('deriveConfig: defaults and BUILD-ONLY keys', () => {
   const out = deriveConfig({});
-  assert.equal(out.DNS_MODE, 'adguardhome');   // default
+  assert.equal(out.DNS_MODE, 'https-dns-proxy');   // default
   assert.ok('NON_CT_ATH10K' in out);            // BUILD-ONLY passthrough present
   assert.equal(out.HOST_NAME, '');              // missing -> ''
 });

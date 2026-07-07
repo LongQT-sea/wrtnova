@@ -103,7 +103,7 @@
           </div>
         </div>
         <div class="info-note ap-only hidden" role="note">
-          <p data-i18n-html="apFleetTip">Managing several nodes? Configure them together in the <a href="/networks" class="text-[#f6821f] hover:underline">fleet builder</a>.</p>
+          <p data-i18n-html="apFleetTip">Tip: Managing several nodes? Configure them together in the <a href="/networks" class="text-[#f6821f] hover:underline">fleet builder</a>.</p>
         </div>
       </div>
       </div>
@@ -502,7 +502,7 @@
               <span class="toggle-track"></span>
               <span class="toggle-thumb"></span>
             </span>
-            <span class="toggle-text" data-i18n="tightenRoaming">Tighten roaming/steering thresholds</span>
+            <span class="toggle-text" data-i18n-html="tightenRoaming">Tighten <code>usteer</code> roaming/steering thresholds</span>
           </label>
         </div>
         <div class="form-row">
@@ -516,7 +516,7 @@
               </span>
               <span class="toggle-text" data-i18n="enableMeshBackhaul">Enable 5GHz 802.11s mesh backhaul</span>
             </label>
-            <p class="form-help" data-i18n="wiredBackhaulNote">Prefer wired backhaul over wireless whenever feasible.</p>
+            <p class="form-help" data-i18n="wiredBackhaulNote">Tip: Prefer wired backhaul over wireless whenever feasible.</p>
           </div>
         </div>
 
@@ -659,7 +659,7 @@
                   <span class="toggle-track"></span>
                   <span class="toggle-thumb"></span>
                 </span>
-                <span class="toggle-text" data-i18n="dot11rHelp">Fast transition (fast roaming)</span>
+                <span class="toggle-text" data-i18n="dot11rHelp">Fast transition (fast roaming) support</span>
               </label>
             </div>
             <div class="form-row wifi-iot hidden">
@@ -734,6 +734,7 @@
                 <option value="4">Warning</option>
               </select>
             </div>
+            <div class="info-note dot11r-only" role="note" data-i18n="dot11rBuggyNote">Note: 802.11r works well with most modern devices, but some older or low-cost devices may fail to connect. If a device can't connect, try disabling 802.11r. For IoT devices, use the IoT: 802.11r toggle above.</div>
           </div>
         </details>
       </div>
@@ -988,7 +989,7 @@
         <div class="form-row form-row--full">
           <div class="space-y-3">
             <label class="toggle-label items-start">
-              <input type="radio" name="DNS_MODE" value="adguardhome" checked class="mt-0.5 flex-shrink-0">
+              <input type="radio" name="DNS_MODE" value="adguardhome" class="mt-0.5 flex-shrink-0">
               <div>
                 <span class="toggle-text">AdGuard Home</span>
                 <p class="form-help mt-0" data-i18n="adguardHomeHelp">Ad blocking + DNS over HTTPS upstream. Requires ≥32 MB flash / ≥230 MB RAM.</p>
@@ -1002,7 +1003,7 @@
               </div>
             </label>
             <label class="toggle-label items-start">
-              <input type="radio" name="DNS_MODE" value="https-dns-proxy" class="mt-0.5 flex-shrink-0">
+              <input type="radio" name="DNS_MODE" value="https-dns-proxy" checked class="mt-0.5 flex-shrink-0">
               <div>
                 <span class="toggle-text">https-dns-proxy + adblock-fast</span>
                 <p class="form-help mt-0" data-i18n="httpsDnsProxyHelp">Lightweight ad blocking + DNS over HTTPS upstream. For ≥8 MB flash / ≥64 MB RAM.</p>
@@ -1282,7 +1283,7 @@
   <dialog id="modal-tag-lan"
           class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-lg p-6 w-full max-w-sm text-zinc-900 dark:text-zinc-100 font-mono shadow-xl backdrop:bg-zinc-950/60">
     <h3 class="font-semibold mb-2" data-i18n="tagLanVlanTitle">Tag the LAN VLAN?</h3>
-    <p class="text-sm text-zinc-500 dark:text-zinc-400 mb-4" data-i18n-html="tagLanVlanBody">Every LAN port becomes a <strong>trunk port</strong> instead of a normal access port (untagged/PVID) on the LAN VLAN. Trunk ports expect every connected device to be VLAN-aware, like a managed switch or a Linux/Mac with a VLAN configured on its Ethernet port.</p>
+    <p class="text-sm text-zinc-500 dark:text-zinc-400 mb-4" data-i18n-html="tagLanVlanBody">Instead of acting as normal access ports (LAN VLAN untagged/PVID), all LAN ports become <strong>trunk-only ports</strong>. Devices connected to these ports must support VLANs, such as a managed switch or a Linux/macOS computer with VLANs configured on its Ethernet port.</p>
     <label class="toggle-label mb-4">
       <span class="toggle-wrap">
         <input type="checkbox" id="tag-lan-understand" class="toggle-input">
