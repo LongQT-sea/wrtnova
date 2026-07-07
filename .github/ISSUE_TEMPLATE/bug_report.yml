@@ -1,0 +1,83 @@
+name: Bug Report
+description: Report something in WrtNova that behaves incorrectly
+title: "[Bug report] "
+labels: ["bug"]
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Thanks for taking the time to report a bug!
+        Clear steps and details help get it fixed faster.
+
+  - type: checkboxes
+    attributes:
+      label: Prerequisites
+      options:
+        - label: I searched existing issues and this has not been reported
+          required: true
+        - label: I confirmed this issue is specific to WrtNova (wrtnova.sh, /builder, or /networks) by tested against stock OpenWrt firmware, where the issue does not occur.
+          required: true
+        - label: "I starred the repo :star: (or will star it later!)"
+          required: false
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      description: Which part of WrtNova is affected?
+      options:
+        - Builder (/builder)
+        - Fleet builder (/networks)
+        - Other / not sure
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      placeholder: A clear description of what is wrong.
+    validations:
+      required: true
+
+  - type: textarea
+    id: config_block
+    attributes:
+      label: Rendered config
+      placeholder: The rendered config block (with secrets redacted).
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: How do you trigger this bug? Please walk us through it step by step.
+    validations:
+      required: false
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected vs actual
+      placeholder: What you expected to happen, and what actually happened.
+    validations:
+      required: false
+
+  - type: input
+    id: device
+    attributes:
+      label: Device / target
+      description: The router model or OpenWrt target, if relevant.
+      placeholder: e.g. TP-Link Archer C7
+    validations:
+      required: false
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      placeholder: logs, screenshots if helpful.
+    validations:
+      required: false

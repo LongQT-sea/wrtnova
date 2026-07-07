@@ -1,8 +1,1 @@
 blank_issues_enabled: false
-contact_links:
-  - name: Security vulnerability
-    url: https://github.com/LongQT-sea/wrtnova/security/advisories/new
-    about: Please report security issues privately, not as a public issue.
-  - name: wrtnova.sh (provisioning script) issues
-    url: https://github.com/LongQT-sea/wrtnova.sh/issues
-    about: Bugs in the firmware script itself live in its own repository.

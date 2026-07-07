@@ -1,0 +1,78 @@
+name: Feature Request
+description: Suggest a new feature or improvement for WrtNova
+title: "[Feature request] "
+labels: ["enhancement"]
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Thanks for suggesting a feature for WrtNova!
+        Your ideas help make the firmware builder better for everyone.
+
+        **Enjoying WrtNova?** A :star: on the repo helps others find it.
+
+  - type: checkboxes
+    attributes:
+      label: Prerequisites
+      options:
+        - label: I searched existing issues and this has not been requested
+          required: true
+        - label: I believe this would benefit most users, not just a specific hardware, ISP, or niche setup
+          required: true
+        - label: "I starred the repo :star: (or will star it later!)"
+          required: false
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      description: Which part of WrtNova does this touch?
+      options:
+        - Builder (/builder)
+        - Fleet builder (/networks)
+        - Landing page / docs
+        - Translations (i18n)
+        - Other / not sure
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Feature Description
+      placeholder: What would you like to see?
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem It Solves
+      placeholder: What issue does this address?
+    validations:
+      required: true
+
+  - type: textarea
+    id: implementation
+    attributes:
+      label: Proposed Implementation
+      placeholder: How should this work? Note any device/target or OpenWrt-specific behavior.
+    validations:
+      required: false
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional Context
+      placeholder: Any other details, alternatives you considered, mockups, or screenshots.
+    validations:
+      required: false
+
+  - type: checkboxes
+    attributes:
+      label: I can help with
+      options:
+        - label: Testing
+        - label: Documentation
+        - label: Implementation
