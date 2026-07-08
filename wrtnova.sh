@@ -299,8 +299,7 @@ has_pkg adguardhome && {
 	# Skip setup Adguard Home if less than 230MB RAM
 	read -r _ TOTAL_RAM_KB _ < /proc/meminfo
 	if [ "$TOTAL_RAM_KB" -ge 235520 ]; then
-		[ "$adblock_fast" = 1 ] && /etc/init.d/adblock-fast disable
-		adguardhome=1 adblock_fast=
+		adguardhome=1
 	else
 		/etc/init.d/adguardhome disable
 	fi
