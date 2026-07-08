@@ -16,6 +16,7 @@ SSH_PASSWD_AUTH=""	# off = disable password login (SSH keys auth only)
 # See https://github.com/openwrt/luci/blob/master/modules/luci-lua-runtime/luasrc/sys/zoneinfo/tzdata.lua
 ZONE_NAME=""
 TIME_ZONE=""
+TIME_FORMAT=		# h12 = 12-hour clock; h23 = 24-hour clock
 
 # === WiFi ===
 DEFAULT_WIFI_PASSWD=""	# Default: 12345678
@@ -369,11 +370,11 @@ EOF
 board_info=$(ubus call system board)
 os_version=$(echo "$board_info" | jsonfilter -e '@.release.version' | cut -d. -f1)
 [ "${os_version:=25}" -ge 25 ] && ZONE_NAME="${ZONE_NAME// /_}"
-
+[ "${os_version}" -le 24 ] && TIME_FORMAT=
 host_name="${HOST_NAME:-WrtNova${AP_MODE:+-${AP_INDEX:=2}}}"
 
-_uci system "" "@system[0]" \
-	hostname="$host_name" "${ZONE_NAME:+zonename=$ZONE_NAME}" "${TIME_ZONE:+timezone=$TIME_ZONE}"
+_uci system "" "@system[0]" hostname="$host_name" \
+	"${ZONE_NAME:+zonename=$ZONE_NAME}" "${TIME_ZONE:+timezone=$TIME_ZONE}" "${TIME_FORMAT:+clock_hourcycle=$TIME_FORMAT}"
 
 uci set uhttpd.main.redirect_https=1
 
