@@ -121,6 +121,7 @@
  * @property {string} [QUARTERLY_REBOOT]   flag
  * @property {string} [LOG]                flag
  * @property {string} [NON_CT_ATH10K]      BUILD-ONLY flag
+ * @property {string} [WED_ENABLE]         flag (MediaTek Filogic WED wireless offload)
  * @property {string} [ADGUARD_PASSWD]     sensitive; build-time bcrypt only
  */
 

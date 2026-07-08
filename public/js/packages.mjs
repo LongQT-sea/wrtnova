@@ -80,6 +80,10 @@ export function computeAdds({ base = [], device = [], config = {} }) {
     ctPkgs.forEach(p => { adds.push('-' + p); adds.push(p.replace(/-ct.*$/, '')); });
   }
 
+  // WED (MediaTek Filogic wireless hardware offload) in dumb-AP mode needs the
+  // bridger package to track bridged flows for the PPE (router mode is native).
+  if (config.WED_ENABLE === '1' && config.AP_MODE === '1') adds.push('bridger');
+
   const ddns = config.DDNS_ENABLE === '1' ||
                String(config.LOOKUP_HOSTNAME || '').trim() !== '' ||
                String(config.CLOUDFLARE_API_KEY || '').trim() !== '';

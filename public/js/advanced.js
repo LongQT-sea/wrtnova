@@ -18,6 +18,7 @@ import { collapsePackages } from './packages.mjs';
     if (el) ui.renderPackageChips(el, finalPackages());
   };
   ui.updateAth10kVisibility  = function () {};
+  ui.updateWedVisibility     = function () {};
   ui.notifyTargetChanged     = function () {
     const ok  = !!collectTarget();
     const btn = document.getElementById('build-btn');

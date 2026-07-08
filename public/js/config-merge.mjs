@@ -94,5 +94,6 @@ export function mergeNodeConfig(sharedConfig, nodeOverrides) {
     QUARTERLY_REBOOT: flag(c.QUARTERLY_REBOOT),
     LOG:              flag(c.LOG),
     NON_CT_ATH10K:    flag(c.NON_CT_ATH10K),
+    WED_ENABLE:       flag(c.WED_ENABLE),
   };
 }

@@ -373,6 +373,11 @@ import './ui.js';
     const hasWifi = /\bwpad[-\w]|\bhostapd|\bmac80211/.test(allPkgs.join(' '));
     const hasCt   = allPkgs.some(p => /^ath10k-firmware-|^kmod-ath10k-ct/.test(p));
     if (ui.updateAth10kVisibility) ui.updateAth10kVisibility(hasCt);
+    // WED needs the mt7915e MediaTek Filogic wireless driver (MT7622/7981/7986);
+    // presence of the driver kmod is the capability signal. Newer mt7996e parts
+    // (MT7988) use a different module name and are intentionally out of scope.
+    const wedCapable = allPkgs.some(p => /^kmod-mt7915e$/.test(p));
+    if (ui.updateWedVisibility) ui.updateWedVisibility(wedCapable);
   }
 
   // -------------------------------------- programmatic device selection (used by history restore)

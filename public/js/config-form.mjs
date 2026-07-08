@@ -84,7 +84,7 @@ export const BASE_SCHEMA = /** @type {[string,string,(string|undefined)?,(string
 ]);
 
 export const BUILDER_SCHEMA = /** @type {[string,string,(string|undefined)?,(string|undefined)?][]} */ ([
-  ...BASE_SCHEMA, ['AP_MODE', 'radio'], ['AP_INDEX', 'text'], ['NON_CT_ATH10K', 'checkbox'],
+  ...BASE_SCHEMA, ['AP_MODE', 'radio'], ['AP_INDEX', 'text'], ['NON_CT_ATH10K', 'checkbox'], ['WED_ENABLE', 'checkbox'],
 ]);
 
 // Interface-name fields guard (Network card). Empty means "use the wrtnova.sh

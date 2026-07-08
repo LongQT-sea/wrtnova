@@ -596,6 +596,14 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
         '<span class="toggle-track"></span><span class="toggle-thumb"></span></span>' +
         '<span class="toggle-text text-xs">' + S.useNonCtAth10k + '</span></label></div>'
       : '';
+    const wedCapable = allPkgs.some(p => /^kmod-mt7915e$/.test(p));
+    const wedRow = wedCapable
+      ? '<div class="form-row"><span class="form-label">' + S.wedAccel + '</span>' +
+        '<label class="toggle-label"><span class="toggle-wrap">' +
+        '<input type="checkbox" class="toggle-input" id="np-wed-' + id + '"' + (node.overrides.WED_ENABLE === '1' ? ' checked' : '') + '>' +
+        '<span class="toggle-track"></span><span class="toggle-thumb"></span></span>' +
+        '<span class="toggle-text text-xs">' + S.useWed + '</span></label></div>'
+      : '';
 
     let fields;
     const deviceRow =
@@ -623,7 +631,7 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
         '<input type="checkbox" class="toggle-input" id="np-mesh-' + id + '"' + (meshChecked ? ' checked' : '') + '>' +
         '<span class="toggle-track"></span><span class="toggle-thumb"></span></span>' +
         '<span class="toggle-text text-xs">' + S.enableMeshBackhaul + '</span></label></div>' : '') +
-        nonCtRow;
+        nonCtRow + wedRow;
     } else {
       fields = deviceRow +
         versionRow(id, verOverride, cfg.shared_version) +
@@ -643,7 +651,7 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
         '<input type="checkbox" class="toggle-input" id="np-mesh-' + id + '"' + (meshChecked ? ' checked' : '') + '>' +
         '<span class="toggle-track"></span><span class="toggle-thumb"></span></span>' +
         '<span class="toggle-text text-xs">' + S.enableMeshBackhaul + '</span></label></div>' : '') +
-        nonCtRow;
+        nonCtRow + wedRow;
     }
 
     return (
@@ -732,6 +740,9 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
 
     const nonCtInp = panel.querySelector('#np-nonct-' + node.id);
     if (nonCtInp) node.overrides.NON_CT_ATH10K = nonCtInp.checked ? '1' : '';
+
+    const wedInp = panel.querySelector('#np-wed-' + node.id);
+    if (wedInp) node.overrides.WED_ENABLE = wedInp.checked ? '1' : '';
 
     if (node.overrides.AP_MODE === '1') {
       const idxInp = panel.querySelector('#np-apidx-' + node.id);
@@ -1772,6 +1783,8 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
         const newAllPkgs = [...(target.default_packages || []), ...(target.device_packages || [])];
         if (!newAllPkgs.some(p => /^ath10k-firmware-|^kmod-ath10k-ct/.test(p)))
           node.overrides.NON_CT_ATH10K = '';
+        if (!newAllPkgs.some(p => /^kmod-mt7915e$/.test(p)))
+          node.overrides.WED_ENABLE = '';
         // Sync to shared version if not set
         if (!net.shared_config.shared_version) net.shared_config.shared_version = DP.currentVersion;
         net.updated_at = Date.now();

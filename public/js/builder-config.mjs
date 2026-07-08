@@ -156,5 +156,6 @@ export function deriveConfig(raw) {
     QUARTERLY_REBOOT: v('QUARTERLY_REBOOT'),
     LOG:              v('LOG'),
     NON_CT_ATH10K:    v('NON_CT_ATH10K'),
+    WED_ENABLE:       v('WED_ENABLE'),
   };
 }

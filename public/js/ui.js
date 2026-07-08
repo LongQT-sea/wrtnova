@@ -409,6 +409,16 @@ import { deriveVisibility, deriveNetRows, detectVlanConflict, resolveVlanAssignm
     }
   };
 
+  // Show the WED (MediaTek Filogic wireless offload) toggle only for devices
+  // whose driver supports it; clear the checkbox when the device cannot.
+  ui.updateWedVisibility = function (capable) {
+    ui.$$('.wed-row').forEach(el => el.classList.toggle('hidden', !capable));
+    if (!capable) {
+      const cb = ui.$('#WED_ENABLE');
+      if (cb) cb.checked = false;
+    }
+  };
+
   // ----------------------------------- show/hide password toggle buttons
   // Toggles input type between password/text. Does NOT alter button content
   // (SVG icons stay intact). Updates aria-label for screen reader context.
