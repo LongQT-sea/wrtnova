@@ -262,6 +262,15 @@ import { deriveVisibility, deriveNetRows, detectVlanConflict, resolveVlanAssignm
         }
       }
 
+      // Per-VLAN PSK is a single shared SSID, so the per-network Guest/IoT/VPN
+      // SSID inputs no longer apply; disable them while PSK_VLAN is on.
+      if (pskVlan) {
+        ['GUEST_WIFI_SSID', 'IOT_WIFI_SSID', 'LAN_WG_WIFI_SSID'].forEach(function (id) {
+          const el = ui.$('#' + id);
+          if (el) el.disabled = pskVlan.checked;
+        });
+      }
+
       // "IoT: 802.11r" (IOT_NO_DOT11R, shown checked = IoT fast transition on)
       // only means anything when the base 802.11r (DOT11R) is on. When DOT11R is
       // off the toggle is inert: disable it and force it off (same pattern as

@@ -245,14 +245,6 @@
                 <option value="172.31">
               </datalist>
             </div>
-            <div class="form-row">
-              <label for="DEFAULT_SUBNET" class="form-label" data-i18n="defaultSubnet">Default subnet</label>
-              <select id="DEFAULT_SUBNET" name="DEFAULT_SUBNET" class="input-base" style="max-width:180px">
-                <option value="" data-i18n="defaultSubnetOpt">/24 (default)</option>
-                <option value="/23">/23</option>
-                <option value="/22">/22</option>
-              </select>
-            </div>
 
             <div class="sub-section">
               <p class="sub-section-title" data-i18n="networksAddressing">Networks &amp; addressing</p>
@@ -397,6 +389,14 @@
                   <span data-i18n="advancedNetwork">Advanced Network options</span>
                 </summary>
                 <div class="mt-2 pl-4 border-l-2 border-zinc-200 dark:border-zinc-700 space-y-3">
+                  <div class="form-row">
+                    <label for="DEFAULT_SUBNET" class="form-label" data-i18n="defaultSubnet">Default subnet</label>
+                    <select id="DEFAULT_SUBNET" name="DEFAULT_SUBNET" class="input-base" style="max-width:180px">
+                      <option value="" data-i18n="defaultSubnetOpt">/24 (default)</option>
+                      <option value="/23">/23</option>
+                      <option value="/22">/22</option>
+                    </select>
+                  </div>
                   <div class="form-row">
                     <label for="P_STEERING" class="form-label" data-i18n="packetSteering">Packet steering</label>
                     <div>
@@ -552,7 +552,7 @@
               <label for="COUNTRY_CODE" class="form-label" data-i18n="countryCode">Country code</label>
               <input type="text" id="COUNTRY_CODE" name="COUNTRY_CODE" class="input-base" maxlength="2" placeholder="US" style="max-width:80px;text-transform:uppercase">
             </div>
-            <div class="form-row">
+            <div class="form-row dense-env-only">
               <label class="form-label" data-i18n="denseEnvironment">Dense environment</label>
               <label class="toggle-label">
                 <span class="toggle-wrap">
@@ -735,7 +735,7 @@
                     <span class="toggle-text" data-i18n="bandSuffixHelp">Add 2G/5G/6G to the end of each SSID</span>
                   </label>
                 </div>
-                <div class="form-row wifi-guest hidden">
+                <div class="form-row guest-isolate-only hidden">
                   <label class="form-label" data-i18n="guestIsolate">Guest isolation</label>
                   <label class="toggle-label">
                     <span class="toggle-wrap">
@@ -1074,17 +1074,6 @@
               <div class="space-y-3">
                 <label class="toggle-label">
                   <span class="toggle-wrap">
-                    <input type="checkbox" id="ADGUARD_MAIN_DNS" name="ADGUARD_MAIN_DNS" value="1" class="toggle-input">
-                    <span class="toggle-track"></span>
-                    <span class="toggle-thumb"></span>
-                  </span>
-                  <div>
-                    <span class="toggle-text" data-i18n="adguardMainDns">AdGuard Home as main DNS resolver</span>
-                    <p class="form-help mt-0" data-i18n="adguardMainDnsHelp">Bind AdGuard Home to port 53, use as the primary DNS resolver.</p>
-                  </div>
-                </label>
-                <label class="toggle-label">
-                  <span class="toggle-wrap">
                     <input type="checkbox" id="BLOCK_DOT_DOQ" name="BLOCK_DOT_DOQ" value="1" class="toggle-input">
                     <span class="toggle-track"></span>
                     <span class="toggle-thumb"></span>
@@ -1114,6 +1103,17 @@
                   <div>
                     <span class="toggle-text" data-i18n="forceDns">Force DNS to router</span>
                     <p class="form-help mt-0" data-i18n="forceDnsHelp">Redirect all DNS queries (TCP/UDP port 53) from LAN, Guest, and IoT networks to the router.</p>
+                  </div>
+                </label>
+                <label class="toggle-label adguard-main-only hidden">
+                  <span class="toggle-wrap">
+                    <input type="checkbox" id="ADGUARD_MAIN_DNS" name="ADGUARD_MAIN_DNS" value="1" class="toggle-input">
+                    <span class="toggle-track"></span>
+                    <span class="toggle-thumb"></span>
+                  </span>
+                  <div>
+                    <span class="toggle-text" data-i18n="adguardMainDns">AdGuard Home as main DNS resolver</span>
+                    <p class="form-help mt-0" data-i18n="adguardMainDnsHelp">Bind AdGuard Home to port 53, use as the primary DNS resolver.</p>
                   </div>
                 </label>
               </div>

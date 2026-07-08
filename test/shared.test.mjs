@@ -122,7 +122,7 @@ test('mergeNodeConfig: overrides win over shared', () => {
 test('resolvePackages: always-on additions present, sorted, deduped', () => {
   const out = resolvePackages({ base: [], device: [], extra: [], config: {} });
   for (const p of ['curl', 'ip-full', 'umdns', 'luci', 'zram-swap',
-    'luci-app-commands', 'ip-bridge', 'luci-app-ddns', 'ddns-scripts-cloudflare']) {
+    'luci-app-commands', 'ip-bridge']) {
     assert.ok(out.includes(p), `missing ${p}`);
   }
   // default DNS mode is https-dns-proxy (+ its luci app)
@@ -141,6 +141,17 @@ test('resolvePackages: DNS modes', () => {
   assert.ok(hdp.includes('https-dns-proxy') && hdp.includes('luci-app-https-dns-proxy'));
   const none = resolvePackages({ config: { DNS_MODE: 'none' } });
   assert.ok(!none.includes('adguardhome') && !none.includes('dnsproxy') && !none.includes('https-dns-proxy'));
+});
+
+test('resolvePackages: DDNS only when enabled, hostname or token set', () => {
+  const off = resolvePackages({ config: {} });
+  assert.ok(!off.includes('luci-app-ddns') && !off.includes('ddns-scripts-cloudflare'));
+  for (const cfg of [{ DDNS_ENABLE: '1' }, { LOOKUP_HOSTNAME: 'ddns.example.com' },
+    { CLOUDFLARE_API_KEY: 'token' }]) {
+    const out = resolvePackages({ config: cfg });
+    assert.ok(out.includes('luci-app-ddns') && out.includes('ddns-scripts-cloudflare'),
+      `DDNS packages missing for ${JSON.stringify(cfg)}`);
+  }
 });
 
 test('resolvePackages: AP mode skips DNS package and wireguard proto', () => {

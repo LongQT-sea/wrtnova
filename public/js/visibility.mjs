@@ -70,6 +70,12 @@ export function deriveVisibility(cfg) {
     'pppoe-only': cfg.wan_type !== 'pppoe',
     'wifi-iot': !iot,
     'wifi-guest': !guest,
+    // Dense-env tightens usteer thresholds, which only run with 802.11k/v.
+    'dense-env-only': !on(cfg, 'DOT11KV'),
+    // Guest isolation is meaningless in Per-VLAN PSK mode (one shared SSID).
+    'guest-isolate-only': !guest || on(cfg, 'PSK_VLAN'),
+    // "AdGuard Home as main DNS resolver" only applies in AdGuard Home mode.
+    'adguard-main-only': cfg.DNS_MODE !== 'adguardhome',
     // IoT internet access and route-via-WG are L3 decisions that do not exist in
     // AP mode (IoT is L2-only there), so hide these two when AP mode is on too.
     // Each class is used only for its one control block.

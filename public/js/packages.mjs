@@ -80,7 +80,10 @@ export function computeAdds({ base = [], device = [], config = {} }) {
     ctPkgs.forEach(p => { adds.push('-' + p); adds.push(p.replace(/-ct.*$/, '')); });
   }
 
-  adds.push('luci-app-ddns', 'ddns-scripts-cloudflare');
+  const ddns = config.DDNS_ENABLE === '1' ||
+               String(config.LOOKUP_HOSTNAME || '').trim() !== '' ||
+               String(config.CLOUDFLARE_API_KEY || '').trim() !== '';
+  if (ddns) adds.push('luci-app-ddns', 'ddns-scripts-cloudflare');
   // AP mode: WG_ENABLE signals "create the WG VLAN/SSID for trunking" - the AP
   // does not terminate a WireGuard tunnel, so the protocol package is not needed.
   if (config.WG_ENABLE === '1' && config.AP_MODE !== '1') adds.push('luci-proto-wireguard');
