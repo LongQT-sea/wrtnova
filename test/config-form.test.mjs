@@ -38,12 +38,12 @@ test('BASE_SCHEMA: radio defaults match the contract', () => {
   const defs = Object.fromEntries(
     BASE_SCHEMA.filter(([, kind]) => kind === 'radio').map(([key, , , def]) => [key, def]),
   );
-  assert.deepEqual(defs, { SSH_PASSWD_AUTH: '', wan_type: 'dhcp', DNS_MODE: 'https-dns-proxy' });
+  assert.deepEqual(defs, { SSH_PASSWD_AUTH: '', TIME_FORMAT: '', wan_type: 'dhcp', DNS_MODE: 'https-dns-proxy' });
 });
 
 test('keySets: partitions radios vs checkboxes; text/select/tz/table excluded', () => {
   const { radio, checkbox } = keySets(BASE_SCHEMA);
-  assert.deepEqual([...radio].sort(), ['DNS_MODE', 'SSH_PASSWD_AUTH', 'wan_type']);
+  assert.deepEqual([...radio].sort(), ['DNS_MODE', 'SSH_PASSWD_AUTH', 'TIME_FORMAT', 'wan_type']);
   // Spot-check representative checkboxes and exclusions.
   for (const k of ['GUEST_ENABLE', 'WG_ENABLE', 'DOT11KV', 'DOT11R', 'IOT_NO_DOT11R', 'SOFTWARE_OFFLOAD']) {
     assert.ok(checkbox.has(k), `${k} should be a checkbox`);

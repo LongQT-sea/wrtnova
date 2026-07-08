@@ -220,6 +220,26 @@
                 <p class="form-help" id="tz-help"></p>
               </div>
             </div>
+            <div class="form-row">
+              <label class="form-label" data-i18n="timeFormat">Time format</label>
+              <div>
+                <div class="radio-seg" role="radiogroup" aria-label="Time format">
+                  <label>
+                    <input type="radio" name="TIME_FORMAT" value="" checked>
+                    <span data-i18n="timeFormatDefault">Default</span>
+                  </label>
+                  <label>
+                    <input type="radio" name="TIME_FORMAT" value="h23">
+                    <span data-i18n="timeFormat24">24-hour</span>
+                  </label>
+                  <label>
+                    <input type="radio" name="TIME_FORMAT" value="h12">
+                    <span data-i18n="timeFormat12">12-hour</span>
+                  </label>
+                </div>
+                <p class="form-help" data-i18n="timeFormatHelp">Applies to OpenWrt 25.12+</p>
+              </div>
+            </div>
           </div>
           </div>
         </div>

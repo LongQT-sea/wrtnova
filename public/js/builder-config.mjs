@@ -49,6 +49,7 @@ export function deriveConfig(raw) {
     SSH_PASSWD_AUTH: v('SSH_PASSWD_AUTH'),
     ZONE_NAME:       v('ZONE_NAME'),
     TIME_ZONE:       v('TIME_ZONE'),
+    TIME_FORMAT:     v('TIME_FORMAT'),
 
     PPPOE_USERNAME: wanType === 'pppoe' ? v('PPPOE_USERNAME') : '',
     PPPOE_PASSWD:   wanType === 'pppoe' ? v('PPPOE_PASSWD')   : '',

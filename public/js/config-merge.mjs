@@ -32,7 +32,7 @@ export function mergeNodeConfig(sharedConfig, nodeOverrides) {
     AP_MODE: isAp ? '1' : '', AP_INDEX: isAp ? (c.AP_INDEX || '2') : '',
     HOST_NAME: c.HOST_NAME || '', ROOT_PASSWD: c.ROOT_PASSWD || '',
     SSH_PUBLIC_KEY: c.SSH_PUBLIC_KEY || '', SSH_PASSWD_AUTH: c.SSH_PASSWD_AUTH || '',
-    ZONE_NAME: c.ZONE_NAME || '', TIME_ZONE: c.TIME_ZONE || '',
+    ZONE_NAME: c.ZONE_NAME || '', TIME_ZONE: c.TIME_ZONE || '', TIME_FORMAT: c.TIME_FORMAT || '',
     PPPOE_USERNAME: !isAp && c.wan_type === 'pppoe' ? (c.PPPOE_USERNAME || '') : '',
     PPPOE_PASSWD:   !isAp && c.wan_type === 'pppoe' ? (c.PPPOE_PASSWD   || '') : '',
     WAN_MAC_ADDR:   !isAp ? (c.WAN_MAC_ADDR  || '') : '',

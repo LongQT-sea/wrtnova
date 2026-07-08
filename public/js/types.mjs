@@ -27,6 +27,7 @@
  * @property {string} [SSH_PASSWD_AUTH]
  * @property {string} [ZONE_NAME]
  * @property {string} [TIME_ZONE]
+ * @property {string} [TIME_FORMAT]        '' auto | 'h23' 24-hour | 'h12' 12-hour (OpenWrt >= 25)
  * @property {string} [wan_type]           gating-only: 'dhcp' | 'pppoe' (not emitted)
  * @property {string} [PPPOE_USERNAME]
  * @property {string} [PPPOE_PASSWD]       sensitive

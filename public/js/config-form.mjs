@@ -46,7 +46,7 @@ export function writeSubnet(el, val) {
 export const BASE_SCHEMA = /** @type {[string,string,(string|undefined)?,(string|undefined)?][]} */ ([
   ['HOST_NAME', 'text'], ['ROOT_PASSWD', 'text'], ['SSH_PUBLIC_KEY', 'text'],
   ['SSH_PASSWD_AUTH', 'radio', undefined, ''],
-  ['__tz__', 'tz'],
+  ['__tz__', 'tz'], ['TIME_FORMAT', 'radio', undefined, ''],
   ['BASE_NET_PREFIX', 'text'], ['DEFAULT_SUBNET', 'text'],
   ['LAN_BASE_PREFIX', 'text'], ['LAN_IFACE', 'text'], ['LAN_VLAN_ID', 'text'], ['LAN_SUBNET', 'subnet'],
   ['GUEST_ENABLE', 'checkbox'], ['GUEST_BASE_PREFIX', 'text'], ['GUEST_IFACE', 'text'], ['GUEST_VLAN_ID', 'text'], ['GUEST_SUBNET', 'subnet'],
