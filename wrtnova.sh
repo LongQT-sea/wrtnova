@@ -51,6 +51,7 @@ CHANNEL_2G=
 CHANNEL_5G=
 CHANNEL_6G=
 WIFI_LOG_LVL=
+WED_ENABLE=		# https://openwrt.org/docs/guide-user/network/wifi/wed
 
 # === Network ===
 BASE_NET_PREFIX="192.168"
@@ -976,6 +977,15 @@ done
 		fi
 		shift 2
 	done
+}
+
+# === WED ===
+[ -n "$WED_ENABLE" ] && {
+	if [ "${os_version}" -ge 24 ]; then
+		echo "options mt7915e wed_enable=Y" >> /etc/modules.conf
+	else
+		echo "mt7915e wed_enable=Y" >> /etc/modules.d/mt7915e
+	fi
 }
 
 # === banIP ===
