@@ -286,6 +286,7 @@ export default {
   enableMbimFailover: 'Włącz przełączanie awaryjne modemu MBIM',
   encryptedDns:       'DNS i blokowanie reklam',
   adguardHomeHelp:    'Blokowanie reklam + upstream DNS over HTTPS. Wymaga ≥32 MB flash / ≥230 MB RAM.',
+  adguardRamNote:     'Na urządzeniach z mniej niż 230 MB RAM WrtNova pominie początkową konfigurację AdGuard Home.',
   dnsproxyHelp:       'Lekkie blokowanie reklam + upstream DNS over HTTPS. Dla ≥16 MB flash / ≥128 MB RAM.',
   httpsDnsProxyHelp:  'Lekkie blokowanie reklam + upstream DNS over HTTPS. Dla ≥8 MB flash / ≥64 MB RAM.',
   adblockFastHelp:    'Lekka blokada reklam. Bez szyfrowanego DNS, niewielki rozmiar.',

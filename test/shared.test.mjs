@@ -141,6 +141,13 @@ test('resolvePackages: DNS modes', () => {
   assert.ok(hdp.includes('https-dns-proxy') && hdp.includes('luci-app-https-dns-proxy'));
   const none = resolvePackages({ config: { DNS_MODE: 'none' } });
   assert.ok(!none.includes('adguardhome') && !none.includes('dnsproxy') && !none.includes('https-dns-proxy'));
+  const agh = resolvePackages({ config: { DNS_MODE: 'adguardhome' } });
+  assert.ok(agh.includes('adguardhome'));
+  for (const p of ['adblock-fast', 'luci-app-adblock-fast', 'grep', 'sed', 'coreutils-sort']) {
+    assert.ok(!agh.includes(p), `adguardhome must not pull in ${p}`);
+  }
+  // The lightweight modes still bundle adblock-fast.
+  assert.ok(resolvePackages({ config: { DNS_MODE: 'dnsproxy' } }).includes('adblock-fast'));
 });
 
 test('resolvePackages: DDNS only when enabled, hostname or token set', () => {

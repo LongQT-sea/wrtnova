@@ -286,6 +286,7 @@ export default {
   enableMbimFailover: 'Activar conmutación por error de módem MBIM',
   encryptedDns:       'DNS y bloqueo de anuncios',
   adguardHomeHelp:    'Bloqueo de anuncios + upstream DNS over HTTPS. Requiere ≥32 MB flash / ≥230 MB RAM.',
+  adguardRamNote:     'En dispositivos con menos de 230 MB de RAM, WrtNova omitirá la configuración inicial de AdGuard Home.',
   dnsproxyHelp:       'Bloqueo ligero de anuncios + upstream DNS over HTTPS. Para ≥16 MB flash / ≥128 MB RAM.',
   httpsDnsProxyHelp:  'Bloqueo ligero de anuncios + upstream DNS over HTTPS. Para ≥8 MB flash / ≥64 MB RAM.',
   adblockFastHelp:    'Bloqueo de anuncios ligero. Sin DNS cifrado, tamaño reducido.',

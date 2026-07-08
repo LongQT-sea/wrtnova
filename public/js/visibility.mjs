@@ -76,6 +76,8 @@ export function deriveVisibility(cfg) {
     'guest-isolate-only': !guest || on(cfg, 'PSK_VLAN'),
     // "AdGuard Home as main DNS resolver" only applies in AdGuard Home mode.
     'adguard-main-only': cfg.DNS_MODE !== 'adguardhome',
+    // AdGuard Home RAM-requirement note only shows in AdGuard Home mode.
+    'adguard-only': cfg.DNS_MODE !== 'adguardhome',
     // IoT internet access and route-via-WG are L3 decisions that do not exist in
     // AP mode (IoT is L2-only there), so hide these two when AP mode is on too.
     // Each class is used only for its one control block.

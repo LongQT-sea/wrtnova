@@ -286,6 +286,7 @@ export default {
   enableMbimFailover: 'Включить резервирование через MBIM-модем',
   encryptedDns:       'DNS и блокировка рекламы',
   adguardHomeHelp:    'Блокировка рекламы + DNS over HTTPS upstream. Требуется ≥32 МБ flash / ≥230 МБ RAM.',
+  adguardRamNote:     'На устройствах с объёмом ОЗУ менее 230 МБ WrtNova пропустит начальную настройку AdGuard Home.',
   dnsproxyHelp:       'Лёгкая блокировка рекламы + DNS over HTTPS upstream. Для ≥16 МБ flash / ≥128 МБ RAM.',
   httpsDnsProxyHelp:  'Лёгкая блокировка рекламы + DNS over HTTPS upstream. Для ≥8 МБ flash / ≥64 МБ RAM.',
   adblockFastHelp:    'Лёгкая блокировка рекламы. Без шифрования DNS, небольшой размер.',

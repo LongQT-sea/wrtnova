@@ -286,6 +286,7 @@ export default {
   enableMbimFailover: '启用 MBIM 调制解调器故障转移',
   encryptedDns:       'DNS 与广告拦截',
   adguardHomeHelp:    '广告拦截 + DNS over HTTPS 上游。需要 ≥32 MB 闪存 / ≥230 MB RAM。',
+  adguardRamNote:     '在内存小于 230 MB 的设备上，WrtNova 将跳过 AdGuard Home 的初始设置。',
   dnsproxyHelp:       '轻量级广告拦截 + DNS over HTTPS 上游。适用于 ≥16 MB 闪存 / ≥128 MB RAM。',
   httpsDnsProxyHelp:  '轻量级广告拦截 + DNS over HTTPS 上游。适用于 ≥8 MB 闪存 / ≥64 MB RAM。',
   adblockFastHelp:    '轻量广告拦截。无加密 DNS，占用小。',
