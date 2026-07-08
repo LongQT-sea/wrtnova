@@ -116,6 +116,7 @@
  * @property {string} [BLOCK_DOH]          flag
  * @property {string} [FORCE_DNS]          flag
  * @property {string} [BANIP_COUNTRY_LIST] space-separated lowercase country codes
+ * @property {string} [BANIP_FEEDS]        space-separated banIP feed names (country auto-added)
  * @property {string} [DENY_GUEST_NIGHT]   flag
  * @property {string} [QUARTERLY_REBOOT]   flag
  * @property {string} [LOG]                flag

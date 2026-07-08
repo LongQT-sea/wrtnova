@@ -999,7 +999,7 @@
               <input type="radio" name="DNS_MODE" value="dnsproxy" class="mt-0.5 flex-shrink-0">
               <div>
                 <span class="toggle-text">dnsproxy + adblock-fast</span>
-                <p class="form-help mt-0" data-i18n="dnsproxyHelp">Lightweight ad blocking + DNS over HTTPS upstream. For ≥16 MB flash / &lt;230 MB RAM.</p>
+                <p class="form-help mt-0" data-i18n="dnsproxyHelp">Lightweight ad blocking + DNS over HTTPS upstream. For ≥16 MB flash / ≥128 MB RAM.</p>
               </div>
             </label>
             <label class="toggle-label items-start">
@@ -1114,14 +1114,31 @@
       </div>
       <div class="card-body-wrap">
       <div class="card-body">
-        <div class="form-row form-row--full">
-          <label for="BANIP_COUNTRY_LIST" class="form-label" data-i18n="banipCountry">Block countries</label>
-          <div>
-            <input type="text" id="BANIP_COUNTRY_LIST" name="BANIP_COUNTRY_LIST" class="input-base" data-i18n-placeholder="banipCountryPh" placeholder="e.g. lk in cn">
-            <p class="form-help" data-i18n="banipCountryHelp">Drop WAN traffic from these countries via banIP. Lowercase ISO codes, space-separated.</p>
+        <div class="sub-section" style="margin-top:0;padding-top:0;border-top:none">
+          <p class="sub-section-title" data-i18n="threatFeedsSection">Threat feeds</p>
+          <p class="form-help" data-i18n="banipFeedsHelp">Pre-configured IP blocklist feeds for banIP.</p>
+          <label class="form-label" style="display:block;padding-top:0;margin-top:0.75rem" data-i18n="banipActiveFeeds">Active feeds</label>
+          <div id="banip-feed-chips" class="flex flex-wrap gap-1 py-1 min-h-[1.75rem]"></div>
+          <input type="hidden" id="BANIP_FEEDS" name="BANIP_FEEDS">
+          <div class="combo" style="margin-top:0.5rem">
+            <input type="text" id="banip-feed-search" class="input-base" autocomplete="off" aria-autocomplete="list" aria-controls="banip-feed-list" aria-label="Add feed" data-i18n-placeholder="banipAddFeedPh" placeholder="Type a feed name to add...">
+            <div class="combo-list hidden" id="banip-feed-list" role="listbox" aria-label="Feed suggestions"></div>
           </div>
         </div>
-        <div class="form-row form-row--full">
+        <div class="sub-section">
+          <p class="sub-section-title" data-i18n="countryBlockingSection">Country blocking</p>
+          <p class="form-help" data-i18n="banipCountryHelp">Drop WAN traffic from these countries via banIP.</p>
+          <label class="form-label" style="display:block;padding-top:0;margin-top:0.75rem" data-i18n="banipBlockedCountries">Blocked countries</label>
+          <div id="banip-country-chips" class="flex flex-wrap gap-1 py-1 min-h-[1.75rem]"></div>
+          <input type="hidden" id="BANIP_COUNTRY_LIST" name="BANIP_COUNTRY_LIST">
+          <div class="combo" style="margin-top:0.5rem">
+            <input type="text" id="banip-country-search" class="input-base" autocomplete="off" aria-autocomplete="list" aria-controls="banip-country-list" aria-label="Add country" data-i18n-placeholder="banipAddCountryPh" placeholder="Type a country name or code to add...">
+            <div class="combo-list hidden" id="banip-country-list" role="listbox" aria-label="Country suggestions"></div>
+          </div>
+        </div>
+        <div class="warn-note banip-multi-feed hidden" role="note" data-i18n="banipMemoryNote">Each enabled feed increases memory usage. Enabling too many feeds can quickly exhaust RAM and may trigger the OOM killer.</div>
+        <div class="sub-section">
+          <p class="sub-section-title" data-i18n="additionalRulesSection">Additional rules</p>
           <div class="space-y-3">
             <label class="toggle-label">
               <span class="toggle-wrap">
@@ -1130,7 +1147,7 @@
                 <span class="toggle-thumb"></span>
               </span>
               <div>
-                <span class="toggle-text" data-i18n="denyGuestNight">Block guest at night</span>
+                <span class="toggle-text" data-i18n="denyGuestNight">Block guest internet at night</span>
                 <p class="form-help mt-0" data-i18n="denyGuestNightHelp">Block guest internet from 9 PM to 7 AM. Requires guest network.</p>
               </div>
             </label>

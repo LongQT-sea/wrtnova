@@ -74,7 +74,7 @@ export const BASE_SCHEMA = /** @type {[string,string,(string|undefined)?,(string
   ['DDNS_ENABLE', 'checkbox'], ['LOOKUP_HOSTNAME', 'text'], ['CLOUDFLARE_API_KEY', 'text'],
   ['USB_TETHERING', 'checkbox'], ['CELLULAR_MODEM', 'checkbox'],
   ['DNS_MODE', 'radio', undefined, 'https-dns-proxy'], ['ADGUARD_MAIN_DNS', 'checkbox'], ['BLOCK_DOT_DOQ', 'checkbox'],
-  ['BLOCK_DOH', 'checkbox'], ['FORCE_DNS', 'checkbox'], ['BANIP_COUNTRY_LIST', 'text'],
+  ['BLOCK_DOH', 'checkbox'], ['FORCE_DNS', 'checkbox'], ['BANIP_COUNTRY_LIST', 'text'], ['BANIP_FEEDS', 'text'],
   ['DOH_UPSTREAMS', 'text'], ['BOOTSTRAP_DNS', 'text'], ['DNSMASQ_MULTI_INSTANCE', 'checkbox'],
   ['DENY_GUEST_NIGHT', 'checkbox'], ['QUARTERLY_REBOOT', 'checkbox'], ['LOG', 'checkbox'],
   ['SOFTWARE_OFFLOAD', 'checkbox'], ['HARDWARE_OFFLOAD', 'checkbox'],

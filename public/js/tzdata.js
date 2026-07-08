@@ -6,6 +6,45 @@ import './ui.js';
 
   const $  = ui.$, $$ = ui.$$;
 
+  // Shared type-to-search combobox, reused by the timezone and banIP feed/country
+  // pickers. opts: { inputSel, listSel, getItems, format, match, onPick, limit? };
+  // limit caps the visible list (default 15).
+  ui.makeCombo = function (opts) {
+    const inp = $(opts.inputSel), list = $(opts.listSel);
+    if (!inp || !list) return;
+    const limit = opts.limit || 15;
+    let active = -1;
+    const close = () => { list.classList.add('hidden'); active = -1; };
+    const search = q => {
+      const items = opts.getItems();
+      if (!q) return items.slice(0, limit);
+      const words = q.toLowerCase().split(/\s+/).filter(Boolean);
+      return items.filter(it => opts.match(it, words));
+    };
+    const pick = it => { opts.onPick(it); close(); };
+    const render = items => {
+      list.innerHTML = '';
+      items.slice(0, limit).forEach((it, i) => {
+        const d = document.createElement('div');
+        d.textContent = opts.format(it);
+        if (i === active) d.classList.add('active');
+        d.addEventListener('mousedown', e => { e.preventDefault(); pick(it); });
+        list.appendChild(d);
+      });
+      list.classList.toggle('hidden', !items.length);
+    };
+    inp.addEventListener('input', () => { active = -1; render(search(inp.value)); });
+    inp.addEventListener('focus', () => render(search(inp.value)));
+    inp.addEventListener('blur',  () => setTimeout(close, 120));
+    inp.addEventListener('keydown', e => {
+      const items = $$('div', list);
+      if (e.key === 'ArrowDown') { active = Math.min(active + 1, items.length - 1); render(search(inp.value)); e.preventDefault(); }
+      else if (e.key === 'ArrowUp') { active = Math.max(active - 1, 0); render(search(inp.value)); e.preventDefault(); }
+      else if (e.key === 'Enter' && active >= 0) { pick(search(inp.value)[active]); e.preventDefault(); }
+      else if (e.key === 'Escape') { close(); }
+    });
+  };
+
   const state = ui.tzState = {
     zones: [],        // [{ zoneName, tzString }]
     zoneName: '',
@@ -25,47 +64,20 @@ import './ui.js';
   };
 
   ui.initTzCombo = function () {
-    const inp = $('#timezone'), list = $('#tz-list'), help = $('#tz-help');
-    let active = -1;
-
-    function close() { list.classList.add('hidden'); active = -1; }
-    function render(items) {
-      list.innerHTML = '';
-      items.slice(0, 15).forEach((z, i) => {
-        const d = document.createElement('div');
-        d.textContent = z.zoneName + '  →  ' + z.tzString;
-        if (i === active) d.classList.add('active');
-        d.addEventListener('mousedown', e => { e.preventDefault(); pick(z); });
-        list.appendChild(d);
-      });
-      list.classList.toggle('hidden', !items.length);
-    }
-    function search(q) {
-      if (!q) return state.zones.slice(0, 15);
-      const qs = q.toLowerCase().split(/\s+/).filter(Boolean);
-      return state.zones.filter(z => {
-        const lc = z.zoneName.toLowerCase();
-        return qs.every(w => lc.includes(w));
-      });
-    }
-    function pick(z) {
-      state.zoneName = z.zoneName;
-      state.tzString = z.tzString;
-      inp.value = z.zoneName;
-      help.textContent = 'ZONE_NAME="' + z.zoneName + '"  TIME_ZONE="' + z.tzString + '"';
-      close();
-      ui.setDot('system', 'touched');
-    }
-
-    inp.addEventListener('input', () => { active = -1; render(search(inp.value)); });
-    inp.addEventListener('focus', () => render(search(inp.value)));
-    inp.addEventListener('blur',  () => setTimeout(close, 120));
-    inp.addEventListener('keydown', e => {
-      const items = $$('div', list);
-      if (e.key === 'ArrowDown') { active = Math.min(active + 1, items.length - 1); render(search(inp.value)); e.preventDefault(); }
-      else if (e.key === 'ArrowUp') { active = Math.max(active - 1, 0); render(search(inp.value)); e.preventDefault(); }
-      else if (e.key === 'Enter' && active >= 0) { pick(search(inp.value)[active]); e.preventDefault(); }
-      else if (e.key === 'Escape') { close(); }
+    const inp = $('#timezone'), help = $('#tz-help');
+    ui.makeCombo({
+      inputSel: '#timezone',
+      listSel:  '#tz-list',
+      getItems: () => state.zones,
+      format:   z => z.zoneName + '  →  ' + z.tzString,
+      match:    (z, words) => { const lc = z.zoneName.toLowerCase(); return words.every(w => lc.includes(w)); },
+      onPick:   z => {
+        state.zoneName = z.zoneName;
+        state.tzString = z.tzString;
+        inp.value = z.zoneName;
+        help.textContent = 'ZONE_NAME="' + z.zoneName + '"  TIME_ZONE="' + z.tzString + '"';
+        ui.setDot('system', 'touched');
+      },
     });
   };
 

@@ -872,6 +872,7 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
 
     loadTable('portfwd-table', cfg.PORT_FORWARD_LIST || '');
     loadTable('ipv6-table', cfg.IPV6_SERVER_LIST || '');
+    if (ui.refreshBanipChips) ui.refreshBanipChips();
 
     // Let ui.js refresh conditional visibility
     document.body.dispatchEvent(new Event('change', { bubbles: true }));
@@ -1873,6 +1874,9 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
 
     // Timezone combo (tzdata.js exposes ui.initTzCombo + ui.loadTzdata)
     if (ui.loadTzdata) ui.loadTzdata().then(() => { if (ui.initTzCombo) ui.initTzCombo(); }).catch(() => {});
+
+    // banIP pickers for the Firewall card: lazy (kept out of the initial JS budget).
+    import('/js/banip.js').then(() => { ui.initBanipChips(); return ui.loadBanipData(); }).catch(() => {});
 
     // Wire up [data-add] buttons for port-fwd / ipv6 tables
     document.body.addEventListener('click', e => {

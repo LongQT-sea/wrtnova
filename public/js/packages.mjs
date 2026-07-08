@@ -23,6 +23,21 @@ export function parseAdditionalPackages(str) {
 }
 
 /**
+ * Assemble the emitted banIP feed list: user-selected feeds plus the
+ * auto-managed `country` feed (when any country is selected). Deduped,
+ * space-joined. `doh` is added by wrtnova.sh itself from BLOCK_DOH, so it is not
+ * injected here. Both /builder and /networks use this.
+ * @param {string} [feedsStr] space-separated selected feed names
+ * @param {string} [countryListStr] space-separated country codes
+ * @returns {string}
+ */
+export function assembleBanipFeeds(feedsStr, countryListStr) {
+  const feeds = String(feedsStr || '').trim().split(/\s+/).filter(Boolean);
+  if (String(countryListStr || '').trim() !== '') feeds.push('country');
+  return [...new Set(feeds)].join(' ');
+}
+
+/**
  * @param {{ base?: string[], device?: string[], config?: import('./types.mjs').Config }} args
  * @returns {string[]}
  */
@@ -47,7 +62,8 @@ export function computeAdds({ base = [], device = [], config = {} }) {
   if (config.WAN_B_ENABLE === '1') adds.push('luci-app-mwan3');
 
   const banip = config.BLOCK_DOH === '1' ||
-                String(config.BANIP_COUNTRY_LIST || '').trim() !== '';
+                String(config.BANIP_COUNTRY_LIST || '').trim() !== '' ||
+                String(config.BANIP_FEEDS || '').trim() !== '';
   if (banip && config.AP_MODE !== '1') adds.push('luci-app-banip');
 
   // Heuristic: WiFi-capable if any wifi-related toggle is set or any wifi pkg

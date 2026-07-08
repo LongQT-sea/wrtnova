@@ -9,6 +9,7 @@
 // off-state is '' never '0').
 
 import { resolveVlanEmit } from './visibility.mjs';
+import { assembleBanipFeeds } from './packages.mjs';
 
 /**
  * @param {import('./types.mjs').Config} sharedConfig
@@ -88,6 +89,7 @@ export function mergeNodeConfig(sharedConfig, nodeOverrides) {
     BLOCK_DOH:        flag(c.BLOCK_DOH),
     FORCE_DNS:        flag(c.FORCE_DNS),
     BANIP_COUNTRY_LIST: c.BANIP_COUNTRY_LIST || '',
+    BANIP_FEEDS:      assembleBanipFeeds(c.BANIP_FEEDS, c.BANIP_COUNTRY_LIST),
     DENY_GUEST_NIGHT: flag(c.DENY_GUEST_NIGHT),
     QUARTERLY_REBOOT: flag(c.QUARTERLY_REBOOT),
     LOG:              flag(c.LOG),

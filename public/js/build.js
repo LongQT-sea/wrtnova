@@ -175,6 +175,7 @@ import { collectTarget, devicesState } from './devices.js';
       const el = $('#' + k);                            // text / select / textarea
       if (el && 'value' in el) el.value = val == null ? '' : val;
     }
+    if (ui.refreshBanipChips && ('BANIP_COUNTRY_LIST' in patch || 'BANIP_FEEDS' in patch)) ui.refreshBanipChips();
   }
 
   function applyStorePatch(patch) {

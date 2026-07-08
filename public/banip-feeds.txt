@@ -1,0 +1,38 @@
+asn	in	ASN IP segments
+backscatterer	in	backscatterer IPs
+becyber	in	malicious attacker IPs
+binarydefense	in	binary defense banlist
+bogon	in	bogon prefixes
+bruteforceblock	in	bruteforceblocker IPs
+cinsscore	in	suspicious attacker IPs
+debl	in	fail2ban IP blocklist
+dns	out	public DNS-Server
+dshield	in	dshield IP blocklist
+etcompromised	in	ET compromised hosts
+feodo	inout	feodo tracker
+firehol1	in	firehol level 1 compilation
+firehol2	in	firehol level 2 compilation
+firehol3	in	firehol level 3 compilation
+firehol4	in	firehol level 4 compilation
+greensnow	in	suspicious server IPs
+hagezi	out	Threat IP blocklist
+ipblackhole	in	blackhole IP blocklist
+ipexdbl	in	IPEX dynamic blocklists
+ipsum	in	malicious IPs
+ipthreat	in	hacker and botnet IPs
+myip	in	real-time IP blocklist
+proxy	inout	open proxies
+spamhaus	inout	Spamhaus DROP
+threat	inout	emerging threats
+threatview	inout	malicious IPs
+tor	inout	tor exit nodes
+turris	in	turris sentinel blocklist
+uceprotect1	in	spam protection level 1
+uceprotect2	in	spam protection level 2
+uceprotect3	in	spam protection level 3
+urlhaus	out	urlhaus IDS IPs
+urlvir	out	malware related IPs
+voip	in	VoIP fraud blocklist
+vpn	inout	vpn IPs
+vpndc	inout	vpn datacenter IPs
+webclient	out	malware related IPs

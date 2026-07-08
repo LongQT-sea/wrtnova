@@ -17,6 +17,7 @@
 // as the old collectConfig output omitted them.
 
 import { resolveVlanEmit } from './visibility.mjs';
+import { assembleBanipFeeds } from './packages.mjs';
 
 /**
  * @param {import('./types.mjs').Config} raw
@@ -150,6 +151,7 @@ export function deriveConfig(raw) {
     BLOCK_DOH:        v('BLOCK_DOH'),
     FORCE_DNS:        v('FORCE_DNS'),
     BANIP_COUNTRY_LIST: v('BANIP_COUNTRY_LIST'),
+    BANIP_FEEDS:      assembleBanipFeeds(v('BANIP_FEEDS'), v('BANIP_COUNTRY_LIST')),
     DENY_GUEST_NIGHT: v('DENY_GUEST_NIGHT'),
     QUARTERLY_REBOOT: v('QUARTERLY_REBOOT'),
     LOG:              v('LOG'),

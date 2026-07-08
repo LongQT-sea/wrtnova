@@ -59,11 +59,14 @@ export function deriveVisibility(cfg) {
   const guest = on(cfg, 'GUEST_ENABLE');
   const wg = on(cfg, 'WG_ENABLE');
   const hasKeys = String(cfg.SSH_PUBLIC_KEY || '').trim().length > 0;
+  const feedCount = String(cfg.BANIP_FEEDS || '').trim().split(/\s+/).filter(Boolean).length;
+  const countryCount = String(cfg.BANIP_COUNTRY_LIST || '').trim().split(/\s+/).filter(Boolean).length;
   // WG client config present but the VPN is off (config would be dropped at build).
   const wgConfigEntered = WG_CLIENT_FIELDS.some(k => String(cfg[k] || '').trim() !== '');
   return {
     'router-only': ap,
     'ap-only': !ap,
+    'banip-multi-feed': feedCount <= 1 && countryCount <= 1,
     'pppoe-only': cfg.wan_type !== 'pppoe',
     'wifi-iot': !iot,
     'wifi-guest': !guest,

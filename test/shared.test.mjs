@@ -5,8 +5,34 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
 import { mergeNodeConfig } from '../public/js/config-merge.mjs';
-import { computeAdds, resolvePackages } from '../public/js/packages.mjs';
+import { computeAdds, resolvePackages, assembleBanipFeeds } from '../public/js/packages.mjs';
 import { renderConfigBlock, shQuote, BUILD_ONLY_KEYS } from '../public/js/render-config.mjs';
+
+// ---------------------------------------------------------------------------
+// assembleBanipFeeds
+// ---------------------------------------------------------------------------
+
+test('assembleBanipFeeds: empty in, empty out', () => {
+  assert.equal(assembleBanipFeeds('', ''), '');
+  assert.equal(assembleBanipFeeds(undefined, undefined), '');
+});
+
+test('assembleBanipFeeds: selected feeds pass through', () => {
+  assert.equal(assembleBanipFeeds('tor asn', ''), 'tor asn');
+});
+
+test('assembleBanipFeeds: adds country when countries present (feeds then country)', () => {
+  assert.equal(assembleBanipFeeds('tor', 'vn us'), 'tor country');
+  assert.equal(assembleBanipFeeds('tor asn', 'vn'), 'tor asn country');
+});
+
+test('assembleBanipFeeds: does not inject doh (wrtnova.sh adds it from BLOCK_DOH)', () => {
+  assert.equal(assembleBanipFeeds('tor', ''), 'tor');
+});
+
+test('assembleBanipFeeds: dedupes country when the user also picked it', () => {
+  assert.equal(assembleBanipFeeds('tor country', 'vn'), 'tor country');
+});
 
 // ---------------------------------------------------------------------------
 // mergeNodeConfig

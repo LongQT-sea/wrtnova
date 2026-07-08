@@ -28,6 +28,9 @@ import './build.js';
     ui.initConditionalVisibility();
     ui.initTaggedLanGuard();
 
+    // Firewall banIP pickers: lazy (kept out of the initial JS budget).
+    import('/js/banip.js').then(() => { ui.initBanipChips(); return ui.loadBanipData(); }).catch(() => {});
+
     $('#build-btn').addEventListener('click', () => ui.startBuild());
 
     // session cookie ping (best-effort; not required to proceed)

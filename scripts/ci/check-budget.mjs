@@ -18,10 +18,10 @@ const root = resolve(here, '..', '..');
 
 const CSS_NFR_KB = 15;       // hard NFR - enforced
 const JS_TARGET_KB = 30;     // SPEC NFR target - documented, not yet met
-const JS_CEILING_KB = 58;    // ratchet: /networks ~57.4 KB after the TAGGED_LAN_VLAN
-                             // lockout guard (confirm dialog + warn-note) was added on
-                             // top of the self-extracting gzip+base64 defaults path;
-                             // no growth past this
+const JS_CEILING_KB = 60;    // ratchet: bumped from 58 for the banIP feed + country
+                             // chip selectors (banip.js is lazy-loaded and stays out of
+                             // the counted graph; the small config-merge/packages/
+                             // builder-config additions nudge the number); no growth past this
 
 const PAGES = {
   builder: 'public/builder/index.html',

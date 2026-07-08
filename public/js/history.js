@@ -136,6 +136,7 @@ import { selectDevice, loadOverview, devicesState } from './devices.js';
 
     if (cfg.PORT_FORWARD_LIST) restoreTable('portfwd', cfg.PORT_FORWARD_LIST);
     if (cfg.IPV6_SERVER_LIST)  restoreTable('ipv6',    cfg.IPV6_SERVER_LIST);
+    if (ui.refreshBanipChips) ui.refreshBanipChips();
   }
 
   function restoreTable(kind, list) {
