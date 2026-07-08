@@ -367,7 +367,7 @@ EOF
 
 board_info=$(ubus call system board)
 os_version=$(echo "$board_info" | jsonfilter -e '@.release.version' | cut -d. -f1)
-[ "$os_version" -ge 25 ] && ZONE_NAME="${ZONE_NAME// /_}"
+[ "${os_version:=25}" -ge 25 ] && ZONE_NAME="${ZONE_NAME// /_}"
 
 host_name="${HOST_NAME:-WrtNova${AP_MODE:+-${AP_INDEX:=2}}}"
 
@@ -981,8 +981,8 @@ done
 # === banIP ===
 [ -x /etc/init.d/banip ] && {
 	_uci banip "" global \
-		ban_enabled=1 ban_trigger=wan ban_autodetect=0 ban_protov4=1 ban_protov6=1 \
-		+ban_feed=country ${BLOCK_DOH:++ban_feed=doh} ${PPPOE_USERNAME:++ban_dev=pppoe-wan}
+		ban_enabled=1 ban_trigger=wan ban_autodetect=0 \
+		ban_protov4=1 ban_protov6=1 ${PPPOE_USERNAME:++ban_dev=pppoe-wan}
 
 	for i in $ifaces_wan; do
 		dev=$(uci -q get network."${i}".device)
@@ -990,6 +990,10 @@ done
 			*_6) _uci banip "" global +ban_ifv6="$i" ${dev:++ban_dev="$dev"} ;;
 			*)   _uci banip "" global +ban_ifv4="$i" ${dev:++ban_dev="$dev"} ;;
 		esac
+	done
+
+	for f in $BANIP_FEEDS ${BLOCK_DOH:+doh}; do
+		_uci banip "" global +ban_feed="$f"
 	done
 
 	for c in $BANIP_COUNTRY_LIST; do
@@ -1052,6 +1056,8 @@ _uci mwan3 member "$NAME" interface="$IFACE" metric="$METRIC" weight="$WEIGHT"
 _uci mwan3 policy "${BASE_IFACE:0:10}_only" ^use_member="$NAME" +use_member="$NAME"
 
 [ "$LOAD_BALANCED" = 1 ] && _uci mwan3 policy balanced ^use_member="$NAME" +use_member="$NAME"
+
+/etc/init.d/log status | grep -q running && uci commit mwan3
 EOF
 chmod +x /sbin/mwan3-iface-add
 
@@ -1171,6 +1177,8 @@ _uci dhcp "" "$IFACE" \
 		ra=server dhcpv6=server \
 		+ra_flags=managed-config +ra_flags=other-config \
 		-dns "${DEV:++dns=$(ip -6 a s dev "$DEV" | grep -o 'fe80[^/]*')}"
+
+/etc/init.d/log status | grep -q running && uci commit dhcp
 EOF
 chmod +x /sbin/dhcp-instance-add
 
