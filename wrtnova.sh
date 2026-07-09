@@ -190,6 +190,8 @@ DENY_GUEST_NIGHT=
 ULA_PREFIX=
 P_STEERING=
 
+LUCI_HTTPS=		# 1 = force LuCI HTTPS redirect
+
 # 1 = log to /root/99-asu-defaults.log
 LOG=
 
@@ -377,7 +379,7 @@ host_name="${HOST_NAME:-WrtNova${AP_MODE:+-${AP_INDEX:=2}}}"
 _uci system "" "@system[0]" hostname="$host_name" \
 	"${ZONE_NAME:+zonename=$ZONE_NAME}" "${TIME_ZONE:+timezone=$TIME_ZONE}" "${TIME_FORMAT:+clock_hourcycle=$TIME_FORMAT}"
 
-uci set uhttpd.main.redirect_https=1
+[ -n "$LUCI_HTTPS" ] && uci set uhttpd.main.redirect_https=1
 
 [ "$QUARTERLY_REBOOT" = 1 ] && \
 	echo "30 3 1 1,4,7,10 * sleep 70 && { touch /etc/banner; reboot; }" >> /etc/crontabs/root
