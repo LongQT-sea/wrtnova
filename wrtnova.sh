@@ -1575,8 +1575,10 @@ process_host_list() {
 				fw_accept_to_lan "$hostname | Forward any protocol" "::${octet}/-64"
 			fi
 			v6=1
-			while [ ${#octet} -lt 4 ]; do octet=0$octet; done
 		}
+
+		[ "$octet" = 1 ] && continue
+		[ "$1" = ipv6 ] && while [ ${#octet} -lt 4 ]; do octet=0$octet; done
 
 		name="${hostname//-/_}"
 		_uci dhcp host "$name" \
