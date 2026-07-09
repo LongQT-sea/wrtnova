@@ -918,13 +918,15 @@ for radio in $radios; do
 		}
 	done
 
-	[ "$role" = tbd ] && {
-		[ "$chan" = "$min" ] && role=mesh || role=ap
+	[ "$WIRELESS_MESH" = 1 ] && {
+		[ "$role" = tbd ] && {
+			[ "$chan" = "$min" ] && role=mesh || role=ap
+		}
+
+		[ "$role" = solo ] && [ "$band" = 5g ] && [ -n "$has_6g" ] && role=mesh
 	}
 
-	[ "$WIRELESS_MESH" = 1 ] && [ "$band" = 5g ] && [ "$role" = solo ] && [ -n "$has_6g" ] && role=mesh
-
-	setup_radio "$radio" "$([ "$role" != ap ] && echo "$ch")"
+	setup_radio "$radio" "$([ "$chan" = "$min" ] && echo "$ch")"
 
 	while IFS='|' read -r mode ssid key network bands enabled vid enc_over; do
 		[ -n "$mode" ] && [ "$enabled" = 1 ] || continue
