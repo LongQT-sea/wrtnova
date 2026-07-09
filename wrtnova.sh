@@ -638,16 +638,17 @@ bridge_wan_port=1
 # Single NIC: reuse lan port as tagged WAN
 [ -z "$wan_port" ] && WAN_IS_TAGGED=1
 
-if [ "$hw_type" = "dsa" ] && [ "$AP_MODE" != 1 ]; then
+[ "$AP_MODE" != 1 ] && {
 	[ "$BRIDGE_WAN_PORT" != 1 ] && bridge_wan_port=
 	# Cannot enslave a bridge to another bridge
 	[ "$wan_port" = br-wan ] && bridge_wan_port=
+}
 
-elif [ "$hw_type" = "swconfig" ]; then
+[ "$hw_type" = "swconfig" ] && {
 	use_bridge_vlan=
 	lan_eth="${lan_ports%%.*}"
 	wan_eth="$wan_port"
-fi
+}
 
 ifaces_lan="$lan_if ${GUEST_ENABLE:+$guest_if} ${IOT_ENABLE:+$iot_if} ${WG_ENABLE:+$lan_wg_if}"
 ifaces_wan="wan wan_6 ${WAN_B_ENABLE:+wanb wanb_6} ${CELLULAR_MODEM:+cellular} ${USB_TETHERING:+usb0}"
