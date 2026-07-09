@@ -35,6 +35,8 @@ export function renderConfigBlock(cfg, maskKeys) {
   for (const [k, v] of Object.entries(cfg)) {
     if (k.startsWith('_')) continue;
     if (BUILD_ONLY_KEYS.has(k)) continue;
+    // CUSTOM_SCRIPT is emitted as a decode block, not KEY=value.
+    if (k === 'CUSTOM_SCRIPT') continue;
     if (v === undefined || v === null) continue;
     const s = String(v);
     if (s === '' || s === '0') continue;

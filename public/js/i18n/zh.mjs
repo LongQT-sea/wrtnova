@@ -315,7 +315,9 @@ export default {
   irqbalance:         '启用 <code>irqbalance</code>',
   irqbalanceHelp:     '建议用于具有 4 个及以上 CPU 核心的系统。自动在 CPU 核心之间均衡 IRQ。某些设备可能需要手动调整 IRQ 亲和性以获得最佳性能。',
   luciHttps:          'LuCI HTTPS',
-  luciHttpsHelp:      '为 LuCI 网页界面启用 HTTP 到 HTTPS 重定向',
+  luciHttpsHelp:      '为 LuCI 启用 HTTP 到 HTTPS 重定向',
+  customScript:       '自定义脚本',
+  customScriptPh:     'WrtNova 完成后运行一次的 Shell 脚本',
   useIrqbalance:      '建议用于具有 4 个及以上 CPU 核心的系统。',
 
   blockDotDoq:        '阻断基于 TLS/QUIC 的 DNS',

@@ -97,5 +97,6 @@ export function mergeNodeConfig(sharedConfig, nodeOverrides) {
     WED_ENABLE:       flag(c.WED_ENABLE),
     IRQBALANCE:       flag(c.IRQBALANCE),
     LUCI_HTTPS:       flag(c.LUCI_HTTPS),
+    CUSTOM_SCRIPT:         c.CUSTOM_SCRIPT || '',
   };
 }

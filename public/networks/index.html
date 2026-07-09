@@ -248,7 +248,7 @@
                     <span class="toggle-track"></span>
                     <span class="toggle-thumb"></span>
                   </span>
-                  <span class="toggle-text" data-i18n="luciHttpsHelp">Enable HTTP-to-HTTPS redirect for the LuCI web UI</span>
+                  <span class="toggle-text" data-i18n="luciHttpsHelp">Enable HTTP-to-HTTPS redirect for LuCI</span>
                 </label>
               </div>
             </div>
@@ -1322,6 +1322,20 @@
                 </div>
               </label>
             </div>
+          </div>
+          </div>
+        </div>
+
+        <div class="group card card-anim" id="card-custom" data-section="custom">
+          <div class="card-header">
+            <span class="dot" aria-label="Not started"></span>
+            <h2 class="flex-1 text-sm font-semibold" data-i18n="customScript">Custom script</h2>
+            <svg class="w-4 h-4 text-zinc-400 card-chev transition-transform duration-200 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="card-body-wrap">
+          <div class="card-body">
+            <label for="CUSTOM_SCRIPT" class="sr-only" data-i18n="customScript">Custom script</label>
+            <textarea id="CUSTOM_SCRIPT" name="CUSTOM_SCRIPT" class="input-base font-mono" rows="8" data-i18n-placeholder="customScriptPh" placeholder="Shell script to run once after WrtNova finishes"></textarea>
           </div>
           </div>
         </div>

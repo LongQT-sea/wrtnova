@@ -548,10 +548,16 @@ import { deriveVisibility, deriveNetRows, detectVlanConflict, resolveVlanAssignm
 
   // masked=true renders the config block with sensitive values as '****' (used by
   // the live full-script preview). Default false: the real script POSTed to ASU.
+  // CUSTOM_SCRIPT emits a /tmp/_user_script.sh block, not KEY=value: build gzips
+  // (_customBlockGz), preview uses a heredoc (_customBlockPlain).
+  const _HEADER = '#!/bin/sh\n# SPDX-License-Identifier: MIT\n# Copyright (C) 2024 - 2026 Tieu Long (https://github.com/LongQT-sea/wrtnova)\n\n';
+  function _customBlockPlain(cmd) {
+    if (!cmd) return '';
+    return "cat > /tmp/_user_script.sh <<'USER_SCRIPT_EOF'\n" + cmd + '\nUSER_SCRIPT_EOF\n';
+  }
   ui.assembleScript = function (cfg, wrtnovaBody, masked) {
     const block = masked ? ui.renderConfigBlockMasked(cfg) : renderConfigBlock(cfg);
-    return '#!/bin/sh\n# SPDX-License-Identifier: MIT\n# Copyright (C) 2024 - 2026 Tieu Long (https://github.com/LongQT-sea/wrtnova)\n\n' +
-      block + _SCRIPT_MARKER + wrtnovaBody;
+    return _HEADER + block + _customBlockPlain(cfg.CUSTOM_SCRIPT) + _SCRIPT_MARKER + wrtnovaBody;
   };
 
   // ASU caps uci-defaults at 40960 B; over that, keep the header+config plaintext
@@ -574,6 +580,13 @@ import { deriveVisibility, deriveNetRows, detectVlanConflict, resolveVlanAssignm
       payload + "\nWRTNOVA_B64\n" +
       "[ -s \"$wrtnova_body\" ] && . \"$wrtnova_body\"\n";
   }
+  // Custom script, always gzip+base64 -> /tmp/_user_script.sh (needs coreutils-base64).
+  async function _customBlockGz(cmd) {
+    return "# === Custom script ===\n" +
+      "u_script=/tmp/_user_script.sh\n" +
+      "base64 -d <<'USER_SCRIPT_B64' 2>/dev/null | gunzip > \"$u_script\" 2>/dev/null\n" +
+      await _gzB64(cmd) + "\nUSER_SCRIPT_B64\n";
+  }
   function _tooBig(script) {
     let hint = 'Config too large even compressed; reduce IPv4 port forward / IPv6 servers expose host';
     if (/^DOH_UPSTREAMS=/m.test(script)) hint += ' / DoH upstreams URL';
@@ -586,13 +599,16 @@ import { deriveVisibility, deriveNetRows, detectVlanConflict, resolveVlanAssignm
     if (new Blob([out]).size > _ASU_MAX) throw _tooBig(script);
     return { script: out, compressed: true };
   };
-  // header+config stay plaintext; only the body is compressed if the total is over.
+  // header+config stay plaintext; body compressed only if over. `compressed` =
+  // "needs coreutils-base64" (body compressed OR custom present); only withBase64Pkg reads it.
   ui.assembleScriptForBuild = async function (cfg, wrtnovaBody) {
-    const plain = ui.assembleScript(cfg, wrtnovaBody, false);
-    if (new Blob([plain]).size <= _ASU_MAX) return { script: plain, compressed: false };
-    const prefix = plain.slice(0, plain.length - wrtnovaBody.length);
+    const hasCustom = !!cfg.CUSTOM_SCRIPT;
+    const customGz = hasCustom ? await _customBlockGz(cfg.CUSTOM_SCRIPT) : '';
+    const prefix = _HEADER + renderConfigBlock(cfg) + customGz + _SCRIPT_MARKER;
+    const full = prefix + wrtnovaBody;
+    if (new Blob([full]).size <= _ASU_MAX) return { script: full, compressed: hasCustom };
     const out = prefix + _bodyStub(await _gzB64(wrtnovaBody));
-    if (new Blob([out]).size > _ASU_MAX) throw _tooBig(plain);
+    if (new Blob([out]).size > _ASU_MAX) throw _tooBig(full);
     return { script: out, compressed: true };
   };
   ui.withBase64Pkg = function (packages, compressed) {

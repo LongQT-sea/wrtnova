@@ -160,5 +160,6 @@ export function deriveConfig(raw) {
     WED_ENABLE:       v('WED_ENABLE'),
     IRQBALANCE:       v('IRQBALANCE'),
     LUCI_HTTPS:       v('LUCI_HTTPS'),
+    CUSTOM_SCRIPT:    v('CUSTOM_SCRIPT'),
   };
 }

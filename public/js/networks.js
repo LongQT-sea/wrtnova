@@ -120,6 +120,7 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
       DENY_GUEST_NIGHT: '', QUARTERLY_REBOOT: '', LOG: '',
       SOFTWARE_OFFLOAD: '1', HARDWARE_OFFLOAD: '', IRQBALANCE: '',
       LUCI_HTTPS: '',
+      CUSTOM_SCRIPT: '',
       additional_packages: '',
     };
   }

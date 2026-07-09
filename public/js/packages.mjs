@@ -71,8 +71,9 @@ export function computeAdds({ base = [], device = [], config = {} }) {
   const names = [...base, ...device].join(' ');
   const hasWifi = /\bwpad-?|\bhostapd|\bmac80211/.test(names) ||
                   Object.entries(config).some(([k, v]) => /WIFI/.test(k) && v);
-  if (hasWifi) adds.push('-wpad-basic-mbedtls', 'wpad-mbedtls');
-  if (hasWifi && config.DOT11KV === '1') adds.push('luci-app-usteer');
+  // Full wpad + usteer only for 802.11k/v roaming or 802.11s mesh.
+  if (hasWifi && (config.DOT11KV === '1' || config.WIRELESS_MESH === '1'))
+    adds.push('-wpad-basic-mbedtls', 'wpad-mbedtls', 'luci-app-usteer');
 
   const isAth10kCt = p => /^ath10k-firmware-|^kmod-ath10k-ct/.test(p);
   const ctPkgs = [...base, ...device].filter(isAth10kCt);
