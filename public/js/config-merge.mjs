@@ -96,5 +96,6 @@ export function mergeNodeConfig(sharedConfig, nodeOverrides) {
     NON_CT_ATH10K:    flag(c.NON_CT_ATH10K),
     WED_ENABLE:       flag(c.WED_ENABLE),
     IRQBALANCE:       flag(c.IRQBALANCE),
+    LUCI_HTTPS:       flag(c.LUCI_HTTPS),
   };
 }

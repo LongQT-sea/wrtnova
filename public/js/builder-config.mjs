@@ -159,5 +159,6 @@ export function deriveConfig(raw) {
     NON_CT_ATH10K:    v('NON_CT_ATH10K'),
     WED_ENABLE:       v('WED_ENABLE'),
     IRQBALANCE:       v('IRQBALANCE'),
+    LUCI_HTTPS:       v('LUCI_HTTPS'),
   };
 }

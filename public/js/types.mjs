@@ -124,6 +124,7 @@
  * @property {string} [NON_CT_ATH10K]      BUILD-ONLY flag
  * @property {string} [WED_ENABLE]         flag (MediaTek Filogic WED wireless offload)
  * @property {string} [IRQBALANCE]         BUILD-ONLY flag (adds luci-app-irqbalance)
+ * @property {string} [LUCI_HTTPS]         flag (adds luci-ssl; forces LuCI HTTPS redirect)
  * @property {string} [ADGUARD_PASSWD]     sensitive; build-time bcrypt only
  */
 

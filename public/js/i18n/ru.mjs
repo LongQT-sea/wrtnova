@@ -314,6 +314,8 @@ export default {
   hardwareOffload:    'Hardware flow offload',
   irqbalance:         'Включить <code>irqbalance</code>',
   irqbalanceHelp:     'Рекомендуется для систем с ≥4 ядрами CPU. Автоматически распределяет IRQ по ядрам CPU. Некоторым устройствам для лучшей производительности может потребоваться ручная настройка привязки IRQ.',
+  luciHttps:          'LuCI HTTPS',
+  luciHttpsHelp:      'Включить перенаправление с HTTP на HTTPS для веб-интерфейса LuCI',
   useIrqbalance:      'Рекомендуется для систем с ≥4 ядрами CPU.',
   blockDotDoq:        'Блокировать DNS через TLS/QUIC',
   blockDotDoqHelp:    'Принудительная блокировка рекламы на упрямых клиентских устройствах.',

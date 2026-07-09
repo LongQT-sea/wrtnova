@@ -119,6 +119,7 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
       DOH_UPSTREAMS: '', BOOTSTRAP_DNS: '', DNSMASQ_MULTI_INSTANCE: '',
       DENY_GUEST_NIGHT: '', QUARTERLY_REBOOT: '', LOG: '',
       SOFTWARE_OFFLOAD: '1', HARDWARE_OFFLOAD: '', IRQBALANCE: '',
+      LUCI_HTTPS: '',
       additional_packages: '',
     };
   }

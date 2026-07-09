@@ -87,6 +87,9 @@ export function computeAdds({ base = [], device = [], config = {} }) {
   // irqbalance daemon (base pkg pulled in by the luci app)
   if (config.IRQBALANCE === '1') adds.push('luci-app-irqbalance');
 
+  // TLS support for the LuCI web UI when HTTPS redirect is forced
+  if (config.LUCI_HTTPS === '1') adds.push('luci-ssl');
+
   const ddns = config.DDNS_ENABLE === '1' ||
                String(config.LOOKUP_HOSTNAME || '').trim() !== '' ||
                String(config.CLOUDFLARE_API_KEY || '').trim() !== '';

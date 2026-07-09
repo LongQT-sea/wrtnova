@@ -314,6 +314,8 @@ export default {
   hardwareOffload:    'Descarga de flujo por hardware',
   irqbalance:         'Activar <code>irqbalance</code>',
   irqbalanceHelp:     'Recomendado para sistemas con ≥4 nucleos de CPU. Equilibra automaticamente las IRQ entre los nucleos de CPU. Algunos dispositivos pueden requerir un ajuste manual de la afinidad de IRQ para obtener el mejor rendimiento.',
+  luciHttps:          'LuCI HTTPS',
+  luciHttpsHelp:      'Habilitar la redireccion de HTTP a HTTPS para la interfaz web LuCI',
   useIrqbalance:      'Recomendado para sistemas con ≥4 nucleos de CPU.',
   blockDotDoq:        'Bloquear DNS sobre TLS/QUIC',
   blockDotDoqHelp:    'Forzar el bloqueo de anuncios en dispositivos cliente obstinados.',
