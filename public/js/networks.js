@@ -832,7 +832,9 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
     // form-level, so it runs (and updates the store) before the body-level
     // visibility handler in ui.js reads the store.
     const syncStore = () => {
-      updatePacketSteeringOpts(document.getElementById('shared-version')?.value);
+      const ver = document.getElementById('shared-version')?.value;
+      updatePacketSteeringOpts(ver);
+      updateTimeFormatRow(ver);
       st.configStore.set(readConfig());
     };
     const form = document.getElementById('config-form');
@@ -874,6 +876,7 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
 
     writeForm(BASE_SCHEMA, cfg);
     updatePacketSteeringOpts(cfg.shared_version);
+    updateTimeFormatRow(cfg.shared_version);
 
     // Timezone - mirrors history.js restore: update state + input via setTimezone
     if (cfg.ZONE_NAME && ui.setTimezone && !ui.setTimezone(cfg.ZONE_NAME)) {
@@ -912,6 +915,22 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
       opt2.hidden = !allow24;
       opt2.disabled = !allow24;
       if (!allow24 && sel.value === '2') sel.value = '';
+    }
+  }
+
+  // Time format (clock_hourcycle) needs OpenWrt 25.12+
+  function updateTimeFormatRow(ver) {
+    const maj = parseInt(String(ver).split('.')[0], 10);
+    const allow = isNaN(maj) || maj >= 25;   // SNAPSHOT/unknown -> newest, show
+    const row = document.getElementById('row-time-format');
+    if (!row) return;
+    row.classList.toggle('hidden', !allow);
+    if (!allow) {
+      const cur = row.querySelector('input[name="TIME_FORMAT"]:checked');
+      if (cur && cur.value !== '') {
+        const def = row.querySelector('input[name="TIME_FORMAT"][value=""]');
+        if (def) def.checked = true;
+      }
     }
   }
 

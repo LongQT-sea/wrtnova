@@ -357,28 +357,31 @@ import { deriveVisibility, deriveNetRows, detectVlanConflict, resolveVlanAssignm
     });
   };
 
+  // DoH presets: one plain-IP bootstrap resolver per family (v4 + v6), from each
+  // variant's current published resolvers.
   ui.DOH_PROVIDERS = [
-    { name: 'Cloudflare',          url: 'https://cloudflare-dns.com/dns-query' },
-    { name: 'Cloudflare Security', url: 'https://security.cloudflare-dns.com/dns-query' },
-    { name: 'Google',              url: 'https://dns.google/dns-query' },
-    { name: 'Quad9',               url: 'https://dns.quad9.net/dns-query' },
-    { name: 'AdGuard',             url: 'https://dns.adguard-dns.com/dns-query' },
-    { name: 'AdGuard Family',      url: 'https://family.adguard-dns.com/dns-query' },
-    { name: 'Mullvad',             url: 'https://dns.mullvad.net/dns-query' },
-    { name: 'Mullvad Adblock',     url: 'https://adblock.dns.mullvad.net/dns-query' },
-    { name: 'DNS4EU',              url: 'https://protective.joindns4.eu/dns-query' },
-    { name: 'OpenDNS',             url: 'https://doh.opendns.com/dns-query' },
-    { name: 'Wikimedia',           url: 'https://wikimedia-dns.org/dns-query' },
+    { name: 'Cloudflare',          url: 'https://cloudflare-dns.com/dns-query',          bootstrap: '1.0.0.1 2606:4700:4700::1001' },
+    { name: 'Cloudflare Security', url: 'https://security.cloudflare-dns.com/dns-query', bootstrap: '1.0.0.2 2606:4700:4700::1002' },
+    { name: 'Google',              url: 'https://dns.google/dns-query',                  bootstrap: '8.8.8.8 2001:4860:4860::8888' },
+    { name: 'Quad9',               url: 'https://dns.quad9.net/dns-query',               bootstrap: '9.9.9.9 2620:fe::fe' },
+    { name: 'AdGuard',             url: 'https://dns.adguard-dns.com/dns-query',         bootstrap: '94.140.14.14 2a10:50c0::ad1:ff' },
+    { name: 'AdGuard Family',      url: 'https://family.adguard-dns.com/dns-query',      bootstrap: '94.140.14.15 2a10:50c0::bad1:ff' },
+    { name: 'Mullvad',             url: 'https://dns.mullvad.net/dns-query',             bootstrap: '194.242.2.2 2a07:e340::2' },
+    { name: 'Mullvad Adblock',     url: 'https://adblock.dns.mullvad.net/dns-query',     bootstrap: '194.242.2.3 2a07:e340::3' },
+    { name: 'DNS4EU',              url: 'https://protective.joindns4.eu/dns-query',      bootstrap: '86.54.11.1 2a13:1001::86:54:11:1' },
+    { name: 'OpenDNS',             url: 'https://doh.opendns.com/dns-query',             bootstrap: '208.67.222.222 2620:119:35::35' },
+    { name: 'Wikimedia',           url: 'https://wikimedia-dns.org/dns-query',           bootstrap: '185.71.138.138 2001:67c:930::1' },
+    { name: 'AliDNS',              url: 'https://dns.alidns.com/dns-query',              bootstrap: '223.5.5.5 2400:3200::1' },
+    { name: 'Tencent DNSPod',      url: 'https://doh.pub/dns-query',                     bootstrap: '119.29.29.29 2402:4e00::' },
   ];
 
-  // The Advanced DNS "Add DoH preset" <select> is a UI helper, not a config
-  // field: picking a provider appends its URL to the DOH_UPSTREAMS textarea
-  // (newline-separated, deduped). The textarea is written programmatically, so
-  // we dispatch a bubbling 'input' event for each page's store to re-sync
-  // (store-DOM sync hazard) and reset the select back to its placeholder.
+  // The Advanced DNS "Add DoH preset" <select> is a UI helper, not a config field.
+  // It writes the textareas programmatically, so each append dispatches a bubbling
+  // 'input' event to re-sync the page store (store-DOM sync hazard).
   ui.initDohPreset = function () {
     const sel = ui.$('#doh-preset');
     const ta = ui.$('#DOH_UPSTREAMS');
+    const bootTa = ui.$('#BOOTSTRAP_DNS');
     if (!sel || !ta) return;                       // page without the control
     if (sel.childElementCount <= 1) {              // only the placeholder: build options
       ui.DOH_PROVIDERS.forEach(function (p) {
@@ -388,15 +391,21 @@ import { deriveVisibility, deriveNetRows, detectVlanConflict, resolveVlanAssignm
         sel.appendChild(opt);
       });
     }
+    function appendLines(el, values) {
+      if (!el) return;
+      const list = el.value.split(/\s+/).filter(Boolean);
+      const added = values.filter(function (v) { return !list.includes(v); });
+      if (!added.length) return;
+      el.value = list.concat(added).join('\n');
+      el.dispatchEvent(new Event('input', { bubbles: true }));
+    }
     sel.addEventListener('change', function () {
       const url = sel.value;
       sel.value = '';                              // reset to placeholder
       if (!url) return;
-      const list = ta.value.split(/\s+/).filter(Boolean);
-      if (list.includes(url)) return;              // already present
-      list.push(url);
-      ta.value = list.join('\n');
-      ta.dispatchEvent(new Event('input', { bubbles: true }));
+      const provider = ui.DOH_PROVIDERS.find(function (p) { return p.url === url; });
+      appendLines(ta, [url]);
+      if (provider) appendLines(bootTa, provider.bootstrap.split(/\s+/));
     });
   };
 

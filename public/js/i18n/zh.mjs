@@ -164,7 +164,6 @@ export default {
   timeFormatDefault:  '默认',
   timeFormat24:       '24 小时',
   timeFormat12:       '12 小时',
-  timeFormatHelp:     '适用于 OpenWrt 25.12+',
   networkSection:     '网络',
   defaultIpPrefix:    '默认 IP 前缀',
   defaultSubnet:      '默认子网',

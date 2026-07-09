@@ -18,10 +18,10 @@ const root = resolve(here, '..', '..');
 
 const CSS_NFR_KB = 15;       // hard NFR - enforced
 const JS_TARGET_KB = 30;     // SPEC NFR target - documented, not yet met
-const JS_CEILING_KB = 60;    // ratchet: bumped from 58 for the banIP feed + country
-                             // chip selectors (banip.js is lazy-loaded and stays out of
-                             // the counted graph; the small config-merge/packages/
-                             // builder-config additions nudge the number); no growth past this
+const JS_CEILING_KB = 61;    // ratchet: 58 -> 60 for the banIP feed + country chip
+                             // selectors; 60 -> 61 for the DoH-preset bootstrap IPs
+                             // (ui.DOH_PROVIDERS gained per-provider v4+v6 bootstrap
+                             // resolvers, shipped in ui.js on both pages); no growth past this
 
 const PAGES = {
   builder: 'public/builder/index.html',

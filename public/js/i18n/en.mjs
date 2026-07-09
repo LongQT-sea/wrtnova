@@ -164,7 +164,6 @@ export default {
   timeFormatDefault:  'Default',
   timeFormat24:       '24-hour',
   timeFormat12:       '12-hour',
-  timeFormatHelp:     'Applies to OpenWrt 25.12+',
   networkSection:     'Network',
   defaultIpPrefix:    'Default IP prefix',
   defaultSubnet:      'Default subnet',

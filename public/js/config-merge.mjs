@@ -8,7 +8,7 @@
 // Boolean flags use flag(v) so '0' never leaks through (Section 1 invariant:
 // off-state is '' never '0').
 
-import { resolveVlanEmit } from './visibility.mjs';
+import { resolveVlanEmit, DNS_DEFAULT, isAdguard, isDohEngine } from './visibility.mjs';
 import { assembleBanipFeeds } from './packages.mjs';
 
 /**
@@ -76,13 +76,13 @@ export function mergeNodeConfig(sharedConfig, nodeOverrides) {
     CLOUDFLARE_API_KEY: !isAp ? (c.CLOUDFLARE_API_KEY || '') : '',
     CELLULAR_MODEM: !isAp ? flag(c.CELLULAR_MODEM) : '',
     USB_TETHERING:  !isAp ? flag(c.USB_TETHERING)  : '',
-    DNS_MODE:         c.DNS_MODE || 'https-dns-proxy',
+    DNS_MODE:         c.DNS_MODE || DNS_DEFAULT,
     // Only meaningful with AdGuard Home; never emit it for dnsproxy/none.
-    ADGUARD_MAIN_DNS: (c.DNS_MODE || 'https-dns-proxy') === 'adguardhome' ? flag(c.ADGUARD_MAIN_DNS) : '',
+    ADGUARD_MAIN_DNS: isAdguard(c.DNS_MODE) ? flag(c.ADGUARD_MAIN_DNS) : '',
     // Encrypted-DNS upstreams apply only to the DoH engines, not the plain
     // dnsmasq modes ('none' and 'adblock-fast').
-    DOH_UPSTREAMS:    !['none', 'adblock-fast'].includes(c.DNS_MODE || 'https-dns-proxy') ? (c.DOH_UPSTREAMS || '') : '',
-    BOOTSTRAP_DNS:    !['none', 'adblock-fast'].includes(c.DNS_MODE || 'https-dns-proxy') ? (c.BOOTSTRAP_DNS || '') : '',
+    DOH_UPSTREAMS:    isDohEngine(c.DNS_MODE) ? (c.DOH_UPSTREAMS || '') : '',
+    BOOTSTRAP_DNS:    isDohEngine(c.DNS_MODE) ? (c.BOOTSTRAP_DNS || '') : '',
     DNSMASQ_SINGLE_INSTANCE: flag(c.DNSMASQ_MULTI_INSTANCE) !== '1' ? '1' : '',
     SOFTWARE_OFFLOAD: flag(c.SOFTWARE_OFFLOAD), HARDWARE_OFFLOAD: flag(c.HARDWARE_OFFLOAD),
     BLOCK_DOT_DOQ:    flag(c.BLOCK_DOT_DOQ),

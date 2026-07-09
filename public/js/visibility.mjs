@@ -22,6 +22,15 @@ const NETS = [
 
 const on = (cfg, k) => cfg[k] === '1';
 
+// -- DNS-mode predicates (shared by builder-config.mjs / config-merge.mjs) ----
+// Kept here once so a change to the DoH-engine set or the default mode does not
+// have to be mirrored across the two build paths. 'none' and 'adblock-fast' are
+// the plain dnsmasq modes (no encrypted upstream); the rest are DoH engines.
+export const DNS_DEFAULT = 'https-dns-proxy';
+export const dnsMode = m => m || DNS_DEFAULT;
+export const isAdguard = m => dnsMode(m) === 'adguardhome';
+export const isDohEngine = m => !['none', 'adblock-fast'].includes(dnsMode(m));
+
 // WG client config fields (Interface + Peer); drive the "config entered but VPN off" notice.
 const WG_CLIENT_FIELDS = [
   'WG_PRIVATE_KEY', 'WG_IPV4', 'WG_IPV6', 'WG_DNS_V4', 'WG_DNS_V6',
@@ -75,9 +84,9 @@ export function deriveVisibility(cfg) {
     // Guest isolation is meaningless in Per-VLAN PSK mode (one shared SSID).
     'guest-isolate-only': !guest || on(cfg, 'PSK_VLAN'),
     // "AdGuard Home as main DNS resolver" only applies in AdGuard Home mode.
-    'adguard-main-only': cfg.DNS_MODE !== 'adguardhome',
+    'adguard-main-only': !isAdguard(cfg.DNS_MODE),
     // AdGuard Home RAM-requirement note only shows in AdGuard Home mode.
-    'adguard-only': cfg.DNS_MODE !== 'adguardhome',
+    'adguard-only': !isAdguard(cfg.DNS_MODE),
     // IoT internet access and route-via-WG are L3 decisions that do not exist in
     // AP mode (IoT is L2-only there), so hide these two when AP mode is on too.
     // Each class is used only for its one control block.

@@ -220,7 +220,7 @@
                 <p class="form-help" id="tz-help"></p>
               </div>
             </div>
-            <div class="form-row">
+            <div class="form-row" id="row-time-format">
               <label class="form-label" data-i18n="timeFormat">Time format</label>
               <div>
                 <div class="radio-seg" role="radiogroup" aria-label="Time format">
@@ -237,7 +237,6 @@
                     <span data-i18n="timeFormat12">12-hour</span>
                   </label>
                 </div>
-                <p class="form-help" data-i18n="timeFormatHelp">Applies to OpenWrt 25.12+</p>
               </div>
             </div>
           </div>
@@ -1090,7 +1089,6 @@
                 </label>
               </div>
             </div>
-            <div class="warn-note adguard-only hidden" role="note" data-i18n="adguardRamNote">On devices with less than 230 MB of RAM, WrtNova will skip the initial AdGuard Home setup.</div>
             <div class="form-row form-row--full">
               <div class="space-y-3">
                 <label class="toggle-label">
@@ -1139,6 +1137,7 @@
                 </label>
               </div>
             </div>
+            <div class="warn-note adguard-only hidden" role="note" data-i18n="adguardRamNote">On devices with less than 230 MB of RAM, WrtNova will skip the initial AdGuard Home setup.</div>
             <details class="mt-4 dns-advanced">
               <summary class="text-xs text-zinc-500 dark:text-zinc-400 cursor-pointer hover:text-zinc-700 dark:hover:text-zinc-200 select-none flex items-center gap-1">
                 <svg class="w-3 h-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>

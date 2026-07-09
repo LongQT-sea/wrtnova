@@ -164,7 +164,6 @@ export default {
   timeFormatDefault:  'Predeterminado',
   timeFormat24:       '24 horas',
   timeFormat12:       '12 horas',
-  timeFormatHelp:     'Se aplica a OpenWrt 25.12+',
   networkSection:     'Red',
   defaultIpPrefix:    'Prefijo IP predeterminado',
   defaultSubnet:      'Subred predeterminada',

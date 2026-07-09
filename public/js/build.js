@@ -143,6 +143,28 @@ import { collectTarget, devicesState } from './devices.js';
     }
   }
 
+  // Time format (clock_hourcycle) needs OpenWrt 25.12+
+  function updateTimeFormatRow(ver) {
+    const maj = parseInt(String(ver).split('.')[0], 10);
+    const allow = isNaN(maj) || maj >= 25;   // SNAPSHOT/unknown -> newest, show
+    const row = $('#row-time-format');
+    if (!row) return;
+    row.classList.toggle('hidden', !allow);
+    if (!allow) {
+      const cur = row.querySelector('input[name="TIME_FORMAT"]:checked');
+      if (cur && cur.value !== '') {
+        const def = row.querySelector('input[name="TIME_FORMAT"][value=""]');
+        if (def) def.checked = true;
+        refreshStore();
+      }
+    }
+  }
+
+  function updateVersionGatedOpts(ver) {
+    updatePacketSteeringOpts(ver);
+    updateTimeFormatRow(ver);
+  }
+
   // -- Store-first programmatic writes (single-writer model) -----------------
   // The store is the single source of truth. Programmatic config changes (WARP
   // prefill, DNS auto-retry) go through applyStorePatch: write the store first
@@ -293,8 +315,8 @@ import { collectTarget, devicesState } from './devices.js';
     document.body.addEventListener('input',  refreshStore);
     document.body.addEventListener('change', refreshStore);
     if (ui.wireSubnetAnchors) ui.wireSubnetAnchors();
-    $('#version')?.addEventListener('change', () => updatePacketSteeringOpts($('#version').value));
-    updatePacketSteeringOpts(devicesState.version);
+    $('#version')?.addEventListener('change', () => updateVersionGatedOpts($('#version').value));
+    updateVersionGatedOpts(devicesState.version);
     initPreviewControls();
     renderAutoPackages();
     syncSsidPlaceholders();
@@ -789,8 +811,8 @@ import { collectTarget, devicesState } from './devices.js';
     $('#build-hint').textContent = ok ? '' : S.pickDeviceHint;
     if (ok) ui.setDot('target', 'valid');
     // The selected version may have changed (device pick can switch branches),
-    // so refresh the version-gated packet-steering options.
-    updatePacketSteeringOpts(devicesState.version);
+    // so refresh the version-gated options.
+    updateVersionGatedOpts(devicesState.version);
     // Chips depend on the target's base/device packages, which are not part of
     // the config store; re-render on target change.
     renderAutoPackages();
