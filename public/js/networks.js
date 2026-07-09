@@ -118,7 +118,7 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
       BLOCK_DOH: '', FORCE_DNS: '1', BANIP_COUNTRY_LIST: '',
       DOH_UPSTREAMS: '', BOOTSTRAP_DNS: '', DNSMASQ_MULTI_INSTANCE: '',
       DENY_GUEST_NIGHT: '', QUARTERLY_REBOOT: '', LOG: '',
-      SOFTWARE_OFFLOAD: '1', HARDWARE_OFFLOAD: '',
+      SOFTWARE_OFFLOAD: '1', HARDWARE_OFFLOAD: '', IRQBALANCE: '',
       additional_packages: '',
     };
   }
@@ -580,6 +580,11 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
     const isAp = node.overrides.AP_MODE === '1';
     const cfg = net.shared_config;
     const meshChecked = node.overrides.WIRELESS_MESH === '1';
+    // Per-device override on top of the misc-card default (core count varies per
+    // node). No stored override means inherit the network-wide IRQBALANCE.
+    const irqChecked = 'IRQBALANCE' in node.overrides
+      ? node.overrides.IRQBALANCE === '1'
+      : cfg.IRQBALANCE === '1';
     const id = esc(node.id);
     const devTitle = esc(node.device_target.title || '');
     const verOverride = node.overrides.version || '';
@@ -604,6 +609,12 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
         '<span class="toggle-track"></span><span class="toggle-thumb"></span></span>' +
         '<span class="toggle-text text-xs">' + S.useWed + '</span></label></div>'
       : '';
+    const irqRow =
+      '<div class="form-row"><span class="form-label">' + S.irqbalance + '</span>' +
+      '<label class="toggle-label"><span class="toggle-wrap">' +
+      '<input type="checkbox" class="toggle-input" id="np-irq-' + id + '"' + (irqChecked ? ' checked' : '') + '>' +
+      '<span class="toggle-track"></span><span class="toggle-thumb"></span></span>' +
+      '<span class="toggle-text text-xs">' + S.useIrqbalance + '</span></label></div>';
 
     let fields;
     const deviceRow =
@@ -631,7 +642,7 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
         '<input type="checkbox" class="toggle-input" id="np-mesh-' + id + '"' + (meshChecked ? ' checked' : '') + '>' +
         '<span class="toggle-track"></span><span class="toggle-thumb"></span></span>' +
         '<span class="toggle-text text-xs">' + S.enableMeshBackhaul + '</span></label></div>' : '') +
-        nonCtRow + wedRow;
+        nonCtRow + wedRow + irqRow;
     } else {
       fields = deviceRow +
         versionRow(id, verOverride, cfg.shared_version) +
@@ -651,7 +662,7 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
         '<input type="checkbox" class="toggle-input" id="np-mesh-' + id + '"' + (meshChecked ? ' checked' : '') + '>' +
         '<span class="toggle-track"></span><span class="toggle-thumb"></span></span>' +
         '<span class="toggle-text text-xs">' + S.enableMeshBackhaul + '</span></label></div>' : '') +
-        nonCtRow + wedRow;
+        nonCtRow + wedRow + irqRow;
     }
 
     return (
@@ -743,6 +754,9 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
 
     const wedInp = panel.querySelector('#np-wed-' + node.id);
     if (wedInp) node.overrides.WED_ENABLE = wedInp.checked ? '1' : '';
+
+    const irqInp = panel.querySelector('#np-irq-' + node.id);
+    if (irqInp) node.overrides.IRQBALANCE = irqInp.checked ? '1' : '';
 
     if (node.overrides.AP_MODE === '1') {
       const idxInp = panel.querySelector('#np-apidx-' + node.id);

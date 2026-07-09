@@ -158,5 +158,6 @@ export function deriveConfig(raw) {
     LOG:              v('LOG'),
     NON_CT_ATH10K:    v('NON_CT_ATH10K'),
     WED_ENABLE:       v('WED_ENABLE'),
+    IRQBALANCE:       v('IRQBALANCE'),
   };
 }

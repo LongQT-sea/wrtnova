@@ -1277,6 +1277,17 @@
               </label>
               <label class="toggle-label">
                 <span class="toggle-wrap">
+                  <input type="checkbox" id="IRQBALANCE" name="IRQBALANCE" value="1" class="toggle-input">
+                  <span class="toggle-track"></span>
+                  <span class="toggle-thumb"></span>
+                </span>
+                <div>
+                  <span class="toggle-text" data-i18n-html="irqbalance">Enable <code>irqbalance</code></span>
+                  <p class="form-help mt-0" data-i18n="irqbalanceHelp">Recommended for systems with ≥4 CPU cores. Automatically balances IRQs across CPU cores. Some devices may require manual IRQ affinity tuning for the best performance.</p>
+                </div>
+              </label>
+              <label class="toggle-label">
+                <span class="toggle-wrap">
                   <input type="checkbox" id="QUARTERLY_REBOOT" name="QUARTERLY_REBOOT" value="1" class="toggle-input">
                   <span class="toggle-track"></span>
                   <span class="toggle-thumb"></span>

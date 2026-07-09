@@ -312,6 +312,9 @@ export default {
   softwareOffload:    '软件流卸载',
   softwareOffloadHelp: '可以提高网络吞吐量。',
   hardwareOffload:    '硬件流卸载',
+  irqbalance:         '启用 <code>irqbalance</code>',
+  irqbalanceHelp:     '建议用于具有 4 个及以上 CPU 核心的系统。自动在 CPU 核心之间均衡 IRQ。某些设备可能需要手动调整 IRQ 亲和性以获得最佳性能。',
+  useIrqbalance:      '建议用于具有 4 个及以上 CPU 核心的系统。',
 
   blockDotDoq:        '阻断基于 TLS/QUIC 的 DNS',
   blockDotDoqHelp:    '对顽固客户端设备强制执行广告拦截。',

@@ -587,7 +587,8 @@
   }
   /* Inline command / code chip inside an info note or toggle label */
   .info-note code,
-  .toggle-text code {
+  .toggle-text code,
+  .form-label code {
     padding: 0.0625rem 0.3125rem;
     border-radius: 0.25rem;
     background-color: #f4f4f5;
@@ -595,7 +596,8 @@
     font-size: 1em;
   }
   .dark .info-note code,
-  .dark .toggle-text code {
+  .dark .toggle-text code,
+  .dark .form-label code {
     background-color: #27272a;
     border-color: #3f3f46;
   }

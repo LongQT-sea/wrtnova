@@ -84,6 +84,9 @@ export function computeAdds({ base = [], device = [], config = {} }) {
   // bridger package to track bridged flows for the PPE (router mode is native).
   if (config.WED_ENABLE === '1' && config.AP_MODE === '1') adds.push('bridger');
 
+  // irqbalance daemon (base pkg pulled in by the luci app)
+  if (config.IRQBALANCE === '1') adds.push('luci-app-irqbalance');
+
   const ddns = config.DDNS_ENABLE === '1' ||
                String(config.LOOKUP_HOSTNAME || '').trim() !== '' ||
                String(config.CLOUDFLARE_API_KEY || '').trim() !== '';

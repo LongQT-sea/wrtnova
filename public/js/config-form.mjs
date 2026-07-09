@@ -77,7 +77,7 @@ export const BASE_SCHEMA = /** @type {[string,string,(string|undefined)?,(string
   ['BLOCK_DOH', 'checkbox'], ['FORCE_DNS', 'checkbox'], ['BANIP_COUNTRY_LIST', 'text'], ['BANIP_FEEDS', 'text'],
   ['DOH_UPSTREAMS', 'text'], ['BOOTSTRAP_DNS', 'text'], ['DNSMASQ_MULTI_INSTANCE', 'checkbox'],
   ['DENY_GUEST_NIGHT', 'checkbox'], ['QUARTERLY_REBOOT', 'checkbox'], ['LOG', 'checkbox'],
-  ['SOFTWARE_OFFLOAD', 'checkbox'], ['HARDWARE_OFFLOAD', 'checkbox'],
+  ['SOFTWARE_OFFLOAD', 'checkbox'], ['HARDWARE_OFFLOAD', 'checkbox'], ['IRQBALANCE', 'checkbox'],
   // Not a config key (deriveConfig never emits it); carried in the store as a raw
   // passthrough so editing extras re-renders the final package list.
   ['additional_packages', 'text'],
