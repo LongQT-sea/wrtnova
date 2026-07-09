@@ -173,6 +173,8 @@ AP_INDEX=		# AP management IP last octet (2-19)
 HARDWARE_OFFLOAD=	# NOTE: Do not set if using QoS/SQM
 SOFTWARE_OFFLOAD=
 
+IRQBALANCE=		# 1 = enable irqbalance
+
 # 1 = block DNS over TLS/QUIC
 BLOCK_DOT_DOQ=
 
@@ -381,6 +383,8 @@ uci set uhttpd.main.redirect_https=1
 	echo "30 3 1 1,4,7,10 * sleep 70 && { touch /etc/banner; reboot; }" >> /etc/crontabs/root
 
 [ -x /etc/init.d/zram ] && echo vm.swappiness=70 > /etc/sysctl.d/13-zram.conf
+
+[ -n "$IRQBALANCE" ] && _uci irqbalance "" irqbalance enabled=1
 
 hplug_ifup_wan=/etc/hotplug.d/iface/96-ifup-wan
 cat > "$hplug_ifup_wan" <<'EOF'
