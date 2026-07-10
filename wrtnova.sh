@@ -638,16 +638,16 @@ bridge_wan_port=1
 # Single NIC: reuse lan port as tagged WAN
 [ -z "$wan_port" ] && WAN_IS_TAGGED=1
 
-[ "$AP_MODE" != 1 ] && {
-	[ "$BRIDGE_WAN_PORT" != 1 ] && bridge_wan_port=
-	# Cannot enslave a bridge to another bridge
-	[ "$wan_port" = br-wan ] && bridge_wan_port=
-}
-
 [ "$hw_type" = "swconfig" ] && {
 	use_bridge_vlan=
 	lan_eth="${lan_ports%%.*}"
 	wan_eth="$wan_port"
+}
+
+[ "$AP_MODE" != 1 ] && [ "$use_bridge_vlan" = 1 ] && [ -n "$wan_port" ] && {
+	[ "$BRIDGE_WAN_PORT" != 1 ] && bridge_wan_port=
+	# Cannot enslave a bridge to another bridge
+	[ "$wan_port" = br-wan ] && bridge_wan_port=
 }
 
 ifaces_lan="$lan_if ${GUEST_ENABLE:+$guest_if} ${IOT_ENABLE:+$iot_if} ${WG_ENABLE:+$lan_wg_if}"
@@ -1599,4 +1599,7 @@ process_host_list() {
 	$IPV6_SERVER_LIST
 	EOF
 }
+
+# === Custom script ===
+[ -s "$u_script" ] && sh "$u_script"
 :
