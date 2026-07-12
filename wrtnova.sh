@@ -262,6 +262,10 @@ duid_gen() {
 add_luci_command() {
 	_uci luci command "" command="$1" param="${2:-1}"
 }
+
+get_os_version() {
+	ubus call system board | jsonfilter -e '@.release.version' | cut -d. -f1
+}
 EOF
 . /usr/share/wrtnova/functions.sh
 
@@ -284,6 +288,8 @@ has_pkg wpad-mesh && wpad_mesh=1
 		BATMAN_ADV=
 	}
 }
+
+iw phy | grep -Fq "* mesh point" || WIRELESS_MESH=
 
 iw phy | grep -q "AP/VLAN" || PSK_VLAN=
 
@@ -370,8 +376,7 @@ EOF
 	[ "$SSH_PASSWD_AUTH" = off ] && _uci dropbear "" @dropbear[0] PasswordAuth=off RootPasswordAuth=off
 }
 
-board_info=$(ubus call system board)
-os_version=$(echo "$board_info" | jsonfilter -e '@.release.version' | cut -d. -f1)
+os_version="$(get_os_version)"
 [ "${os_version:=25}" -ge 25 ] && ZONE_NAME="${ZONE_NAME// /_}"
 [ "${os_version}" -le 24 ] && TIME_FORMAT=
 host_name="${HOST_NAME:-WrtNova${AP_MODE:+-${AP_INDEX:=2}}}"
@@ -1156,7 +1161,7 @@ START=${6:-100}
 
 Usage: dhcp-instance-add <iface> [time] [domain] [local] [ipv6] [start] [limit]
 
-  iface		Interface name (required)
+  iface		Logical interface name (required)
   time		Lease time, default 12h
   domain	DNS domain, default <iface>.lan
   local		Domain to resolve locally, default /<iface>.lan/
@@ -1167,8 +1172,9 @@ Usage: dhcp-instance-add <iface> [time] [domain] [local] [ipv6] [start] [limit]
 	exit 1
 }
 
-uci -q get "network.${IFACE}" > /dev/null || {
-	echo "'$IFACE' interface not found in network config" >&2
+PROTO=$(uci get "network.${IFACE}.proto")
+[ "$PROTO" != static ] && {
+	echo "Interface '$IFACE' not found or not set to static protocol" >&2
 	exit 1
 }
 
@@ -1187,7 +1193,7 @@ _uci dhcp dnsmasq "${IFACE}_dns" \
 	-interface +interface="$IFACE" \
 	-notinterface +notinterface=loopback
 
-_uci dhcp "" "$IFACE" \
+_uci dhcp "" "$IFACE" dhcpv4=server \
 	instance="${IFACE}_dns" interface="$IFACE" \
 	start="$START" limit="$LIMIT" leasetime="$TIME"
 
