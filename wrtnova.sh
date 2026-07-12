@@ -875,6 +875,7 @@ mesh_iface=${BATMAN_ADV:+bat0_}mesh0
 	[ add = "\$ACTION" ] || exit 0
 	[ $mesh_iface = "\$DEVICENAME" ] || exit 0
 	sleep 4
+	/etc/init.d/network reload
 	$set_mesh_param mesh_rssi_threshold -78
 	$set_mesh_param mesh_max_peer_links 6
 	EOF
