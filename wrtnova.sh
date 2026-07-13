@@ -1173,7 +1173,7 @@ Usage: dhcp-instance-add <iface> [time] [domain] [local] [ipv6] [start] [limit]
 	exit 1
 }
 
-PROTO=$(uci get "network.${IFACE}.proto")
+PROTO=$(uci -q get "network.${IFACE}.proto")
 [ "$PROTO" != static ] && {
 	echo "Interface '$IFACE' not found or not set to static protocol" >&2
 	exit 1
@@ -1181,7 +1181,6 @@ PROTO=$(uci get "network.${IFACE}.proto")
 
 BITS=$(uci -q get "network.${IFACE}.ipaddr" | grep -o '/[0-9]*$' | tr -d '/')
 LIMIT=${7:-$(( (1 << (32 - ${BITS:-24})) - 156 ))}
-DEV=$(ifstatus "$IFACE" | jsonfilter -e '@.device' 2>/dev/null)
 
 _uci dhcp dnsmasq "${IFACE}_dns" \
 	domainneeded=1 localise_queries=1 \
@@ -1201,8 +1200,7 @@ _uci dhcp "" "$IFACE" dhcpv4=server \
 [ "$IPV6" = 1 ] && \
 	_uci dhcp "" "$IFACE" \
 		ra=server dhcpv6=server \
-		+ra_flags=managed-config +ra_flags=other-config \
-		-dns "${DEV:++dns=$(ip -6 a s dev "$DEV" | grep -o 'fe80[^/]*')}"
+		+ra_flags=managed-config +ra_flags=other-config
 
 /etc/init.d/log status | grep -q running && uci commit dhcp
 EOF
