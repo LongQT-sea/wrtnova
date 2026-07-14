@@ -736,7 +736,6 @@ else
 
 	[ "$AP_MODE" = 1 ] && {
 		lan_vlan_ports="${sw_lan_ports}${sw_wan_port:+ $sw_wan_port} $cpu_ports"
-		wan_vlan_ports="$trunk_ports"
 #		[ -z "$sw_wan_port" ] # Not worth handling, connect LAN to LAN port instead
 	}
 
@@ -760,8 +759,10 @@ add_vlan "$lan_vid" "$lan_vlan_ports" "$lan_if"
 [ "$GUEST_ENABLE" = 1 ] && add_vlan "$guest_vid" "$trunk_ports" "$guest_if"
 [ "$IOT_ENABLE" = 1 ] && add_vlan "$iot_vid" "$trunk_ports" "$iot_if"
 [ "$WG_ENABLE" = 1 ] && add_vlan "$wg_vid" "$trunk_ports" "$lan_wg_if"
-[ "$bridge_wan_port" = 1 ] && add_vlan "$wan_vid" "$wan_vlan_ports" ${src_ports:+wan}
-[ "$WAN_B_ENABLE" = 1 ] && add_vlan "$wanb_vid" "$trunk_ports" ${src_ports:+wanb}
+[ "$AP_MODE" != 1 ] && {
+	[ "$bridge_wan_port" = 1 ] && add_vlan "$wan_vid" "$wan_vlan_ports" ${src_ports:+wan}
+	[ "$WAN_B_ENABLE" = 1 ] && add_vlan "$wanb_vid" "$trunk_ports" ${src_ports:+wanb}
+}
 
 set +x
 for vid in $(expand_vlan "$ADDITIONAL_VLAN_LIST"); do
@@ -1173,9 +1174,8 @@ Usage: dhcp-instance-add <iface> [time] [domain] [local] [ipv6] [start] [limit]
 	exit 1
 }
 
-PROTO=$(uci -q get "network.${IFACE}.proto")
-[ "$PROTO" != static ] && {
-	echo "Interface '$IFACE' not found or not set to static protocol" >&2
+uci -q get "network.${IFACE}" > /dev/null || {
+	echo "'$IFACE' interface not found in network config" >&2
 	exit 1
 }
 
