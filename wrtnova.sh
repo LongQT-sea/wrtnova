@@ -759,10 +759,8 @@ add_vlan "$lan_vid" "$lan_vlan_ports" "$lan_if"
 [ "$GUEST_ENABLE" = 1 ] && add_vlan "$guest_vid" "$trunk_ports" "$guest_if"
 [ "$IOT_ENABLE" = 1 ] && add_vlan "$iot_vid" "$trunk_ports" "$iot_if"
 [ "$WG_ENABLE" = 1 ] && add_vlan "$wg_vid" "$trunk_ports" "$lan_wg_if"
-[ "$AP_MODE" != 1 ] && {
-	[ "$bridge_wan_port" = 1 ] && add_vlan "$wan_vid" "$wan_vlan_ports" ${src_ports:+wan}
-	[ "$WAN_B_ENABLE" = 1 ] && add_vlan "$wanb_vid" "$trunk_ports" ${src_ports:+wanb}
-}
+[ "$bridge_wan_port" = 1 ] && add_vlan "$wan_vid" "$wan_vlan_ports" ${src_ports:+wan}
+[ "$WAN_B_ENABLE" = 1 ] && add_vlan "$wanb_vid" "$trunk_ports" ${src_ports:+wanb}
 
 set +x
 for vid in $(expand_vlan "$ADDITIONAL_VLAN_LIST"); do
@@ -795,6 +793,8 @@ done >/dev/null
 		[ "$i" = "$lan_if" ] && continue
 		_uci network interface "$i" proto=none -ipaddr -ip6assign
 	done
+
+	[ -z "$BRIDGE_WAN_PORT" ] && uci del network.vlan_"$wan_vid"
 }
 
 _uci network globals globals \
