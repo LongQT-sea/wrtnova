@@ -41,7 +41,7 @@ test('assembleBanipFeeds: dedupes country when the user also picked it', () => {
 test('mergeNodeConfig: AP mode suppresses WAN/WG/forward/DDNS/failover fields', () => {
   const out = mergeNodeConfig({
     AP_MODE: '1',
-    WAN_VLAN_ID: '20', WAN_IS_TAGGED: '1', WAN_B_ENABLE: '1', BRIDGE_WAN_PORT: '1',
+    WAN_VLAN_ID: '20', WAN_IS_TAGGED: '1', WAN_B_ENABLE: '1',
     WAN_MAC_ADDR: '00:11:22:33:44:55',
     WG_ENABLE: '1', WG_PRIVATE_KEY: 'priv', PEER_PUBLIC_KEY: 'pub', ENDPOINT: 'e',
     PORT_FORWARD_LIST: 'x', IPV6_SERVER_LIST: 'y',
@@ -49,7 +49,7 @@ test('mergeNodeConfig: AP mode suppresses WAN/WG/forward/DDNS/failover fields', 
     CELLULAR_MODEM: '1', USB_TETHERING: '1',
     IOT_ENABLE: '1', IOT_INTERNET: '1', IOT_ROUTE_VIA_WG: '1',
   }, {});
-  for (const k of ['WAN_VLAN_ID', 'WAN_IS_TAGGED', 'WAN_B_ENABLE', 'BRIDGE_WAN_PORT',
+  for (const k of ['WAN_VLAN_ID', 'WAN_IS_TAGGED', 'WAN_B_ENABLE',
     'WAN_MAC_ADDR', 'WG_PRIVATE_KEY', 'PEER_PUBLIC_KEY', 'ENDPOINT',
     'PORT_FORWARD_LIST', 'IPV6_SERVER_LIST', 'DDNS_ENABLE', 'LOOKUP_HOSTNAME',
     'CLOUDFLARE_API_KEY', 'CELLULAR_MODEM', 'USB_TETHERING',
@@ -61,6 +61,22 @@ test('mergeNodeConfig: AP mode suppresses WAN/WG/forward/DDNS/failover fields', 
   assert.equal(out.AP_INDEX, '2', 'AP_INDEX defaults to 2');
   // WG_ENABLE itself is retained (signals the WG VLAN/SSID trunk on an AP)
   assert.equal(out.WG_ENABLE, '1');
+});
+
+test('mergeNodeConfig: a bridged WAN exposes BRIDGE_WAN_PORT + WAN VLAN to AP nodes', () => {
+  // Shared config bridges the WAN port (L2 WAN VLAN carried through), so an AP node
+  // must get the same BRIDGE_WAN_PORT and the router-resolved WAN VLAN id.
+  const shared = { BRIDGE_WAN_PORT: '1', WAN_VLAN_ID: '30' };
+  const router = mergeNodeConfig(shared, { AP_MODE: '' });
+  const ap     = mergeNodeConfig(shared, { AP_MODE: '1' });
+  assert.equal(router.BRIDGE_WAN_PORT, '1');
+  assert.equal(ap.BRIDGE_WAN_PORT, '1');    // exposed on the AP node too
+  assert.equal(router.WAN_VLAN_ID, '30');
+  assert.equal(ap.WAN_VLAN_ID, '30');       // same WAN VLAN id as the router
+  // Without the bridge, the AP node still drops the WAN VLAN + flag.
+  const apNoBridge = mergeNodeConfig({ WAN_VLAN_ID: '30' }, { AP_MODE: '1' });
+  assert.equal(apNoBridge.WAN_VLAN_ID, '');
+  assert.equal(apNoBridge.BRIDGE_WAN_PORT, '');
 });
 
 test('mergeNodeConfig: sub-fields gated on their parent flag', () => {

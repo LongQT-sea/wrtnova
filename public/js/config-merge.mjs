@@ -28,6 +28,10 @@ export function mergeNodeConfig(sharedConfig, nodeOverrides) {
   // Frontend-owned VLAN ids: resolved value when it differs from the natural
   // default, else '' (participation/AP gating handled by the allocator).
   const vlan = resolveVlanEmit(c);
+  // AP nodes bridging the WAN carry the router's BRIDGE_WAN_PORT + WAN VLAN id
+  // (allocator drops WAN in AP, so resolve the vid in router view for that case).
+  const brWan = flag(c.BRIDGE_WAN_PORT);
+  const wanVid = isAp && brWan ? resolveVlanEmit({ ...c, AP_MODE: '' }).WAN_VLAN_ID : vlan.WAN_VLAN_ID;
   return {
     AP_MODE: isAp ? '1' : '', AP_INDEX: isAp ? (c.AP_INDEX || '2') : '',
     HOST_NAME: c.HOST_NAME || '', ROOT_PASSWD: c.ROOT_PASSWD || '',
@@ -37,10 +41,10 @@ export function mergeNodeConfig(sharedConfig, nodeOverrides) {
     PPPOE_PASSWD:   !isAp && c.wan_type === 'pppoe' ? (c.PPPOE_PASSWD   || '') : '',
     WAN_MAC_ADDR:   !isAp ? (c.WAN_MAC_ADDR  || '') : '',
     WAN_IS_TAGGED:  !isAp ? flag(c.WAN_IS_TAGGED) : '',
-    WAN_VLAN_ID:    vlan.WAN_VLAN_ID,
+    WAN_VLAN_ID:    wanVid,
     WAN_B_ENABLE:   !isAp ? flag(c.WAN_B_ENABLE) : '',
     WAN_B_VLAN_ID:  vlan.WAN_B_VLAN_ID,
-    BRIDGE_WAN_PORT: !isAp ? flag(c.BRIDGE_WAN_PORT) : '',
+    BRIDGE_WAN_PORT: brWan,
     BASE_NET_PREFIX: c.BASE_NET_PREFIX || '', DEFAULT_SUBNET: c.DEFAULT_SUBNET || '',
     GUEST_ENABLE: guestOn ? '1' : '', IOT_ENABLE: iotOn ? '1' : '',
     IOT_INTERNET: (iotOn && !isAp) ? flag(c.IOT_INTERNET) : '', IOT_ROUTE_VIA_WG: (iotOn && wgOn && !isAp) ? flag(c.IOT_ROUTE_VIA_WG) : '', WG_ENABLE: wgOn ? '1' : '',
