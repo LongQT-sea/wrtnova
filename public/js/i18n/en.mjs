@@ -130,6 +130,7 @@ export default {
   fixVlanConflict:  'Resolve the VLAN ID conflict before building.',
   rangeMsg:         '{label} must be {min}-{max}',
   wifiPassTooShort: 'WiFi password must be at least 8 characters ({field}).',
+  wifiPipeInvalid:  'WiFi SSID and password cannot contain the "|" character ({field}).',
   ifaceInvalid:     'Interface name "{field}" may only contain a-z, A-Z, 0-9, _ and be at most 15 characters.',
   prefixInvalid:    'IP prefix "{field}" must be two octets 0-255, e.g. 192.168',
   octetV6Invalid:   'IPv6 host ID must be 1-4 hex digits and not 0, e.g. 20 or ff',

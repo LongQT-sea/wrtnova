@@ -95,6 +95,15 @@ export const IFACE_FIELDS = ['LAN_IFACE', 'GUEST_IFACE', 'IOT_IFACE', 'LAN_WG_IF
 export const IFACE_RE = /^[A-Za-z0-9_]{1,15}$/;
 export function ifaceValid(v) { return !v || IFACE_RE.test(v); }
 
+// wrtnova.sh packs these into the '|'-delimited wifi_networks table (parsed
+// with IFS='|' read), so a literal '|' would split a value across fields and
+// corrupt the config.
+export const WIFI_TEXT_FIELDS = [
+  'LAN_WIFI_SSID', 'LAN_WIFI_PASSWD', 'GUEST_WIFI_SSID', 'GUEST_WIFI_PASSWD',
+  'IOT_WIFI_SSID', 'IOT_WIFI_PASSWD', 'LAN_WG_WIFI_SSID', 'LAN_WG_WIFI_PASSWD',
+];
+export function wifiTextValid(v) { return !String(v == null ? '' : v).includes('|'); }
+
 // IP-prefix fields (first two octets, e.g. "192.168"). Empty means "use the
 // wrtnova.sh default". Only the two octets' numeric range (0-255) is checked;
 // no RFC1918 restriction, so users with a real (public/ASN) range are allowed.

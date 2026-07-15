@@ -11,7 +11,7 @@ import './i18n/core.mjs';
 import './tzdata.js';
 import { BASE_SCHEMA, readForm, writeForm } from './config-form.mjs';
 import { mergeNodeConfig } from './config-merge.mjs';
-import { IFACE_FIELDS, ifaceValid, PREFIX_FIELDS, prefixValid, pskVlanPassIssue } from './config-form.mjs';
+import { IFACE_FIELDS, ifaceValid, PREFIX_FIELDS, prefixValid, WIFI_TEXT_FIELDS, wifiTextValid, pskVlanPassIssue } from './config-form.mjs';
 import { detectVlanConflict } from './visibility.mjs';
 import { renderConfigBlock } from './render-config.mjs';
 import { parseList, firstInvalidIpv6Octet } from './list-grammar.mjs';
@@ -1229,6 +1229,14 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
     const badPrefix = PREFIX_FIELDS.find(k => !prefixValid(mergedForCheck[k]));
     if (badPrefix) {
       showPanelError(actEl, t('prefixInvalid', { field: mergedForCheck[badPrefix] }), () => buildNode(net, node));
+      return;
+    }
+
+    // '|' would corrupt the wifi_networks table (its field delimiter); mergeNodeConfig
+    // blanks disabled networks' SSID/password, so only active ones are checked.
+    const badWifiText = WIFI_TEXT_FIELDS.find(k => !wifiTextValid(mergedForCheck[k]));
+    if (badWifiText) {
+      showPanelError(actEl, t('wifiPipeInvalid', { field: badWifiText }), () => buildNode(net, node));
       return;
     }
 

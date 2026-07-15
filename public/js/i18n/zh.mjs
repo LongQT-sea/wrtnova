@@ -130,6 +130,7 @@ export default {
   fixVlanConflict:  '构建前请解决 VLAN ID 冲突。',
   rangeMsg:         '{label} 必须为 {min}-{max}',
   wifiPassTooShort: 'WiFi 密码至少需要 8 个字符（{field}）。',
+  wifiPipeInvalid:  'WiFi SSID 和密码不能包含 "|" 字符（{field}）。',
   ifaceInvalid:     '接口名称 "{field}" 只能包含 a-z、A-Z、0-9、_，且最多 15 个字符。',
   prefixInvalid:    'IP 前缀 "{field}" 必须是两个 0-255 的八位组，例如 192.168',
   octetV6Invalid:   'IPv6 主机 ID 必须是 1-4 位十六进制数且不能为 0，例如 20 或 ff',

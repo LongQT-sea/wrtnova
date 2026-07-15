@@ -130,6 +130,7 @@ export default {
   fixVlanConflict:  'Beheben Sie den VLAN-ID-Konflikt vor dem Erstellen.',
   rangeMsg:         '{label} muss {min}-{max} sein',
   wifiPassTooShort: 'WLAN-Passwort muss mindestens 8 Zeichen haben ({field}).',
+  wifiPipeInvalid:  'WLAN-SSID und -Passwort dürfen das Zeichen "|" nicht enthalten ({field}).',
   ifaceInvalid:     'Schnittstellenname "{field}" darf nur a-z, A-Z, 0-9, _ enthalten und maximal 15 Zeichen lang sein.',
   prefixInvalid:    'IP-Präfix "{field}" muss zwei Oktette 0-255 sein, z. B. 192.168',
   octetV6Invalid:   'IPv6-Host-ID muss 1-4 Hex-Ziffern und nicht 0 sein, z. B. 20 oder ff',

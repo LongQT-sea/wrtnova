@@ -8,7 +8,7 @@
 import { ui } from './ui-ns.mjs';
 import './ui.js';
 import './i18n/core.mjs';
-import { BUILDER_SCHEMA, readForm, keySets, textVal, SUBNET_KEYS, writeSubnet, IFACE_FIELDS, ifaceValid, PREFIX_FIELDS, prefixValid, pskVlanPassIssue } from './config-form.mjs';
+import { BUILDER_SCHEMA, readForm, keySets, textVal, SUBNET_KEYS, writeSubnet, IFACE_FIELDS, ifaceValid, PREFIX_FIELDS, prefixValid, WIFI_TEXT_FIELDS, wifiTextValid, pskVlanPassIssue } from './config-form.mjs';
 import { deriveConfig } from './builder-config.mjs';
 import { deriveNetRows } from './visibility.mjs';
 import { createStore } from './store.mjs';
@@ -450,6 +450,23 @@ import { collectTarget, devicesState } from './devices.js';
     return first;
   }
 
+  const WIFI_TEXT_SET = new Set(WIFI_TEXT_FIELDS);
+  function refreshWifiTextValidity(el) {
+    el.setCustomValidity('');
+    if (wifiTextValid(el.value)) return false;
+    el.setCustomValidity(t('wifiPipeInvalid', { field: el.id }));
+    return true;
+  }
+  function checkWifiTextFields() {
+    let first = null;
+    for (const id of WIFI_TEXT_FIELDS) {
+      const el = $('#' + id);
+      if (!el) continue;
+      if (refreshWifiTextValidity(el) && !first && el.offsetParent !== null) first = el;
+    }
+    return first;
+  }
+
   // IPv6 host IDs (the ipv6-table octet column): 1-4 hex digits, not 0.
   function refreshOctetV6Validity(el) {
     el.setCustomValidity('');
@@ -474,6 +491,7 @@ import { collectTarget, devicesState } from './devices.js';
     if (RANGE_NOUN[el.id] && refreshRangeValidity(el)) el.reportValidity();
     else if (IFACE_SET.has(el.id) && refreshIfaceValidity(el)) el.reportValidity();
     else if (PREFIX_SET.has(el.id) && refreshPrefixValidity(el)) el.reportValidity();
+    else if (WIFI_TEXT_SET.has(el.id) && refreshWifiTextValidity(el)) el.reportValidity();
   });
 
   ui.startBuild = async function () {
@@ -537,6 +555,10 @@ import { collectTarget, devicesState } from './devices.js';
     // offender's native bubble.
     const badPrefix = checkPrefixFields();
     if (badPrefix) { badPrefix.reportValidity(); return; }
+
+    // '|' would corrupt the wifi_networks table (its field delimiter).
+    const badWifiText = checkWifiTextFields();
+    if (badWifiText) { badWifiText.reportValidity(); return; }
 
     // IPv6 host IDs: 1-4 hex digits, not 0. Pop the first visible offender.
     const badOctet = checkOctetV6Fields();

@@ -130,6 +130,7 @@ export default {
   fixVlanConflict:  'Rozwiąż konflikt identyfikatorów VLAN przed kompilacją.',
   rangeMsg:         '{label} musi być w zakresie {min}-{max}',
   wifiPassTooShort: 'Hasło WiFi musi mieć co najmniej 8 znaków ({field}).',
+  wifiPipeInvalid:  'SSID i hasło WiFi nie mogą zawierać znaku "|" ({field}).',
   ifaceInvalid:     'Nazwa interfejsu "{field}" może zawierać tylko a-z, A-Z, 0-9, _ i mieć maksymalnie 15 znaków.',
   prefixInvalid:    'Prefiks IP "{field}" musi składać się z dwóch oktetów 0-255, np. 192.168',
   octetV6Invalid:   'ID hosta IPv6 musi mieć 1-4 cyfry szesnastkowe i nie może być 0, np. 20 lub ff',
