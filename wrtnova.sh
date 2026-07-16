@@ -736,6 +736,7 @@ else
 
 	[ "$AP_MODE" = 1 ] && {
 		lan_vlan_ports="${sw_lan_ports}${sw_wan_port:+ $sw_wan_port} $cpu_ports"
+		wan_vlan_ports="$trunk_ports"
 #		[ -z "$sw_wan_port" ] # Not worth handling, connect LAN to LAN port instead
 	}
 
