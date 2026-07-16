@@ -38,6 +38,61 @@ export function firstInvalidIpv6Octet(listStr) {
   return bad ? bad.octet : null;
 }
 
+// -- Value validators (hostname / ports / endpoint) --------------------------
+// Empty passes everywhere: it means "use the wrtnova.sh default".
+
+// RFC 1123 sec 2.1 relaxed RFC 952 to allow a leading digit, so a label's first
+// char is [A-Za-z0-9]. Label: 1-63 chars, alnum ends, internal hyphens.
+const HN_LABEL = '[A-Za-z0-9]([A-Za-z0-9-]{0,61}[A-Za-z0-9])?';
+const HOSTNAME_RE = new RegExp('^' + HN_LABEL + '(\\.' + HN_LABEL + ')*$');
+
+/** @param {string} v @returns {boolean} */
+export function hostnameValid(v) {
+  const s = String(v == null ? '' : v).trim();
+  return !s || (s.length <= 253 && HOSTNAME_RE.test(s));
+}
+
+/** RFC 1035 FQDN for DDNS: a hostname with a dot (e.g. ddns.example.com). @param {string} v @returns {boolean} */
+export function ddnsHostnameValid(v) {
+  const s = String(v == null ? '' : v).trim();
+  return !s || (s.includes('.') && hostnameValid(s));
+}
+
+function portTokenValid(tok) {
+  const r = /^(\d{1,5})-(\d{1,5})$/.exec(tok);   // low-high range
+  if (r) return +r[1] >= 1 && +r[2] <= 65535 && +r[1] <= +r[2];
+  return /^\d{1,5}$/.test(tok) && +tok >= 1 && +tok <= 65535;
+}
+
+/** Space-separated ports/ranges within 1-65535. @param {string} v @returns {boolean} */
+export function portListValid(v) {
+  const s = String(v == null ? '' : v).trim();
+  return !s || s.split(/\s+/).every(portTokenValid);
+}
+
+/** @param {string} listStr @returns {string|null} */
+export function firstInvalidHost(listStr) {
+  const bad = parseList(listStr).find((r) => r.host && !hostnameValid(r.host));
+  return bad ? bad.host : null;
+}
+
+/** @param {string} listStr @returns {string|null} */
+export function firstInvalidPort(listStr) {
+  const bad = parseList(listStr).find((r) => !portListValid(r.ports));
+  return bad ? bad.ports : null;
+}
+
+// Endpoint is host-only, so split off any pasted port; a bracketed [ipv6] keeps
+// brackets that UCI rejects. [ipv6]:port -> strip + port; a lone ':' -> host:port.
+/** @param {string} raw @returns {{ host: string, port: string }} */
+export function normalizeEndpoint(raw) {
+  const s = String(raw == null ? '' : raw).trim();
+  const b = /^\[([^\]]+)\](?::(\d+))?$/.exec(s);
+  if (b) return { host: b[1], port: b[2] || '' };
+  if ((s.match(/:/g) || []).length === 1) { const [host, port] = s.split(':'); return { host, port }; }
+  return { host: s, port: '' };
+}
+
 /**
  * Parse a stored list block into rows. Blank lines and lines without a '|'
  * separator are skipped (matches the historical filter). Each field is

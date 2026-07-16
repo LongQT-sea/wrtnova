@@ -14,7 +14,7 @@ import { deriveNetRows } from './visibility.mjs';
 import { createStore } from './store.mjs';
 import { renderConfigBlock } from './render-config.mjs';
 import { parseAdditionalPackages } from './packages.mjs';
-import { ipv6OctetValid } from './list-grammar.mjs';
+import { ipv6OctetValid, hostnameValid, ddnsHostnameValid, portListValid, normalizeEndpoint } from './list-grammar.mjs';
 import { collectTarget, devicesState } from './devices.js';
 
   const $  = ui.$, $$ = ui.$$;
@@ -482,6 +482,67 @@ import { collectTarget, devicesState } from './devices.js';
     return first;
   }
 
+  // Hostnames: System card HOST_NAME + the portfwd/ipv6 host column (they become
+  // UCI section names / DHCP hosts, so a malformed one corrupts the config).
+  function refreshHostnameValidity(el) {
+    el.setCustomValidity('');
+    if (hostnameValid(el.value)) return false;
+    el.setCustomValidity(t('hostnameInvalid', { field: el.value }));
+    return true;
+  }
+  function checkHostnameFields() {
+    let first = null;
+    const els = [$('#HOST_NAME'), ...$$('#portfwd-table [data-col="host"], #ipv6-table [data-col="host"]')];
+    for (const el of els) {
+      if (!el) continue;
+      if (refreshHostnameValidity(el) && !first && el.offsetParent !== null) first = el;
+    }
+    return first;
+  }
+
+  function refreshDdnsValidity(el) {
+    el.setCustomValidity('');
+    if (ddnsHostnameValid(el.value)) return false;
+    el.setCustomValidity(t('ddnsHostnameInvalid', { field: el.value }));
+    return true;
+  }
+  function checkDdnsFields() {
+    const el = $('#LOOKUP_HOSTNAME');
+    if (el && refreshDdnsValidity(el) && el.offsetParent !== null) return el;
+    return null;
+  }
+
+  function refreshPortsValidity(el) {
+    el.setCustomValidity('');
+    if (portListValid(el.value)) return false;
+    el.setCustomValidity(t('portInvalid', { field: el.value }));
+    return true;
+  }
+  function checkPortFields() {
+    let first = null;
+    for (const el of $$('#portfwd-table [data-col="ports"], #ipv6-table [data-col="ports"]')) {
+      if (refreshPortsValidity(el) && !first && el.offsetParent !== null) first = el;
+    }
+    return first;
+  }
+
+  // Mutating value in JS fires no input/change, so dispatch one on each mutated
+  // input to re-sync the store (same trick as ui.js's ADGUARD reset).
+  function normalizeEndpointField() {
+    const epEl = $('#ENDPOINT');
+    if (!epEl) return;
+    const { host, port } = normalizeEndpoint(epEl.value);
+    if (host !== epEl.value) {
+      epEl.value = host;
+      epEl.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+    const portEl = $('#ENDPOINT_PORT');
+    if (port && portEl) {
+      portEl.value = port;
+      portEl.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+  }
+
   // Live feedback: when the user leaves a range/iface/prefix field with a bad
   // value, set the message and show the bubble immediately rather than waiting
   // for Build.
@@ -492,6 +553,10 @@ import { collectTarget, devicesState } from './devices.js';
     else if (IFACE_SET.has(el.id) && refreshIfaceValidity(el)) el.reportValidity();
     else if (PREFIX_SET.has(el.id) && refreshPrefixValidity(el)) el.reportValidity();
     else if (WIFI_TEXT_SET.has(el.id) && refreshWifiTextValidity(el)) el.reportValidity();
+    else if (el.id === 'ENDPOINT') normalizeEndpointField();
+    else if (el.id === 'LOOKUP_HOSTNAME') { if (refreshDdnsValidity(el)) el.reportValidity(); }
+    else if (el.id === 'HOST_NAME' || (el.matches && el.matches('[data-col="host"]'))) { if (refreshHostnameValidity(el)) el.reportValidity(); }
+    else if (el.matches && el.matches('[data-col="ports"]')) { if (refreshPortsValidity(el)) el.reportValidity(); }
   });
 
   ui.startBuild = async function () {
@@ -563,6 +628,18 @@ import { collectTarget, devicesState } from './devices.js';
     // IPv6 host IDs: 1-4 hex digits, not 0. Pop the first visible offender.
     const badOctet = checkOctetV6Fields();
     if (badOctet) { badOctet.reportValidity(); return; }
+
+    // Normalize the endpoint first so its cleaned value is what gets built.
+    normalizeEndpointField();
+
+    // Hostname / DDNS / port formats: a bad value corrupts the emitted config.
+    // Pop the first visible offender's bubble.
+    const badHostname = checkHostnameFields();
+    if (badHostname) { badHostname.reportValidity(); return; }
+    const badDdns = checkDdnsFields();
+    if (badDdns) { badDdns.reportValidity(); return; }
+    const badPorts = checkPortFields();
+    if (badPorts) { badPorts.reportValidity(); return; }
 
     await import('/js/history.js');       // ES module - dynamic import
 

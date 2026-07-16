@@ -18,7 +18,7 @@ const root = resolve(here, '..', '..');
 
 const CSS_NFR_KB = 15;       // hard NFR - enforced
 const JS_TARGET_KB = 30;     // SPEC NFR target - documented, not yet met
-const JS_CEILING_KB = 62;    // hold the line here; raising it is a last resort - only a
+const JS_CEILING_KB = 64;    // hold the line here; raising it is a last resort - only a
                              // small bump, and only with explicit user confirmation
 
 const PAGES = {

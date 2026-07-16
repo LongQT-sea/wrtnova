@@ -6,7 +6,9 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { parseList, serializeList, clampOctet4, ipv6OctetValid, firstInvalidIpv6Octet } from '../public/js/list-grammar.mjs';
+import { parseList, serializeList, clampOctet4, ipv6OctetValid, firstInvalidIpv6Octet,
+  hostnameValid, ddnsHostnameValid, portListValid, firstInvalidHost, firstInvalidPort,
+  normalizeEndpoint } from '../public/js/list-grammar.mjs';
 
 // ---------------------------------------------------------------------------
 // parseList
@@ -120,6 +122,95 @@ test('firstInvalidIpv6Octet: returns the first bad octet or null', () => {
   assert.equal(firstInvalidIpv6Octet('\ta | 20 | 80\n\tb | ff | 443'), null);
   assert.equal(firstInvalidIpv6Octet('\ta | 20 | 80\n\tb | 0 | 443'), '0');
   assert.equal(firstInvalidIpv6Octet(''), null);
+});
+
+// ---------------------------------------------------------------------------
+// hostnameValid (RFC 1123) / ddnsHostnameValid (RFC 1035 FQDN)
+// ---------------------------------------------------------------------------
+
+test('hostnameValid: empty passes; RFC 1123 labels pass', () => {
+  assert.equal(hostnameValid(''), true);          // empty = use default
+  assert.equal(hostnameValid('  '), true);
+  assert.equal(hostnameValid(null), true);
+  assert.equal(hostnameValid('WrtNova'), true);
+  assert.equal(hostnameValid('docker-host'), true);
+  assert.equal(hostnameValid('3com'), true);       // RFC 1123 allows a leading digit
+  assert.equal(hostnameValid('a'), true);
+  assert.equal(hostnameValid('ddns.example.com'), true);  // multi-label ok
+});
+
+test('hostnameValid: rejects bad characters, edge hyphens, and over-length labels', () => {
+  assert.equal(hostnameValid('bad_host'), false);  // underscore not allowed
+  assert.equal(hostnameValid('has space'), false);
+  assert.equal(hostnameValid('-lead'), false);     // leading hyphen
+  assert.equal(hostnameValid('trail-'), false);    // trailing hyphen
+  assert.equal(hostnameValid('a..b'), false);      // empty label
+  assert.equal(hostnameValid('host!'), false);
+  assert.equal(hostnameValid('a'.repeat(64)), false);          // label > 63
+  assert.equal(hostnameValid('a'.repeat(63)), true);           // label == 63 ok
+});
+
+test('ddnsHostnameValid: empty passes; requires a dot (FQDN)', () => {
+  assert.equal(ddnsHostnameValid(''), true);
+  assert.equal(ddnsHostnameValid('ddns.example.com'), true);
+  assert.equal(ddnsHostnameValid('example.com'), true);
+  assert.equal(ddnsHostnameValid('nodot'), false);            // single label rejected
+  assert.equal(ddnsHostnameValid('bad_host.com'), false);     // still hostname-checked
+});
+
+// ---------------------------------------------------------------------------
+// portListValid / firstInvalidHost / firstInvalidPort
+// ---------------------------------------------------------------------------
+
+test('portListValid: empty passes; single ports and ranges within 1-65535 pass', () => {
+  assert.equal(portListValid(''), true);           // empty = all (IPv6)
+  assert.equal(portListValid('80'), true);
+  assert.equal(portListValid('80 443 8080'), true);
+  assert.equal(portListValid('1000-2000'), true);
+  assert.equal(portListValid('80 443 1000-2000'), true);
+  assert.equal(portListValid('65535'), true);
+});
+
+test('portListValid: rejects 0, out-of-range, inverted ranges, and non-numeric', () => {
+  assert.equal(portListValid('0'), false);
+  assert.equal(portListValid('70000'), false);
+  assert.equal(portListValid('80 70000'), false);
+  assert.equal(portListValid('90-80'), false);     // low > high
+  assert.equal(portListValid('0-100'), false);     // low < 1
+  assert.equal(portListValid('http'), false);
+});
+
+test('firstInvalidHost / firstInvalidPort: return the first offender or null', () => {
+  assert.equal(firstInvalidHost('\tok-host | 20 | 80\n\tbad_host | 30 | 443'), 'bad_host');
+  assert.equal(firstInvalidHost('\tok-host | 20 | 80'), null);
+  assert.equal(firstInvalidHost('\t | 20 | 80'), null);          // empty host skipped
+  assert.equal(firstInvalidPort('\ta | 20 | 80\n\tb | 30 | 70000'), '70000');
+  assert.equal(firstInvalidPort('\ta | 20 | 80 443'), null);
+});
+
+// ---------------------------------------------------------------------------
+// normalizeEndpoint
+// ---------------------------------------------------------------------------
+
+test('normalizeEndpoint: strips brackets and lifts a trailing port', () => {
+  assert.deepEqual(normalizeEndpoint('[2606:4700:d0::a29f:c006]:2408'),
+    { host: '2606:4700:d0::a29f:c006', port: '2408' });
+  assert.deepEqual(normalizeEndpoint('[2606:4700:d0::a29f:c006]'),
+    { host: '2606:4700:d0::a29f:c006', port: '' });
+});
+
+test('normalizeEndpoint: splits host:port for IPv4 / hostname (single colon)', () => {
+  assert.deepEqual(normalizeEndpoint('162.159.192.3:2408'), { host: '162.159.192.3', port: '2408' });
+  assert.deepEqual(normalizeEndpoint('engage.cloudflareclient.com:1234'),
+    { host: 'engage.cloudflareclient.com', port: '1234' });
+});
+
+test('normalizeEndpoint: leaves bare IPv6 and plain hosts untouched', () => {
+  assert.deepEqual(normalizeEndpoint('2606:4700:d0::a29f:c006'),
+    { host: '2606:4700:d0::a29f:c006', port: '' });
+  assert.deepEqual(normalizeEndpoint('engage.cloudflareclient.com'),
+    { host: 'engage.cloudflareclient.com', port: '' });
+  assert.deepEqual(normalizeEndpoint('  1.2.3.4  '), { host: '1.2.3.4', port: '' });
 });
 
 // ---------------------------------------------------------------------------

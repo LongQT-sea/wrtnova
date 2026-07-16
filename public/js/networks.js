@@ -14,7 +14,7 @@ import { mergeNodeConfig } from './config-merge.mjs';
 import { IFACE_FIELDS, ifaceValid, PREFIX_FIELDS, prefixValid, WIFI_TEXT_FIELDS, wifiTextValid, pskVlanPassIssue } from './config-form.mjs';
 import { detectVlanConflict } from './visibility.mjs';
 import { renderConfigBlock } from './render-config.mjs';
-import { parseList, firstInvalidIpv6Octet } from './list-grammar.mjs';
+import { parseList, firstInvalidIpv6Octet, hostnameValid, ddnsHostnameValid, firstInvalidHost, firstInvalidPort, portListValid, normalizeEndpoint } from './list-grammar.mjs';
 import { parseAdditionalPackages } from './packages.mjs';
 import { createStore } from './store.mjs';
 
@@ -857,12 +857,30 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
     form.addEventListener('input', syncStore, { signal });
     form.addEventListener('change', syncStore, { signal });
 
-    // Live feedback: when the user leaves an IP-prefix field with a bad value
-    // (not empty and not two octets 0-255), pop its native validation bubble.
+    // Live feedback: when the user leaves a validated field with a bad value,
+    // pop its native validation bubble (mirrors /builder's focusout handler).
     form.addEventListener('focusout', e => {
       const el = e.target;
-      if (!el || !PREFIX_FIELDS.includes(el.id)) return;
-      el.setCustomValidity(prefixValid(el.value) ? '' : t('prefixInvalid', { field: el.value }));
+      if (!el) return;
+      if (PREFIX_FIELDS.includes(el.id)) {
+        el.setCustomValidity(prefixValid(el.value) ? '' : t('prefixInvalid', { field: el.value }));
+      } else if (el.id === 'ENDPOINT') {
+        // Dispatch change after mutating so the store re-syncs (JS value sets
+        // fire no input/change on their own).
+        const { host, port } = normalizeEndpoint(el.value);
+        if (host !== el.value) { el.value = host; el.dispatchEvent(new Event('change', { bubbles: true })); }
+        const portEl = document.getElementById('ENDPOINT_PORT');
+        if (port && portEl) { portEl.value = port; portEl.dispatchEvent(new Event('change', { bubbles: true })); }
+        return;
+      } else if (el.id === 'LOOKUP_HOSTNAME') {
+        el.setCustomValidity(ddnsHostnameValid(el.value) ? '' : t('ddnsHostnameInvalid', { field: el.value }));
+      } else if (el.matches && el.matches('[data-col="host"]')) {
+        el.setCustomValidity(hostnameValid(el.value) ? '' : t('hostnameInvalid', { field: el.value }));
+      } else if (el.matches && el.matches('[data-col="ports"]')) {
+        el.setCustomValidity(portListValid(el.value) ? '' : t('portInvalid', { field: el.value }));
+      } else {
+        return;
+      }
       if (!el.validity.valid) el.reportValidity();
     }, { signal });
 
@@ -1244,6 +1262,25 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
     const badOctet = firstInvalidIpv6Octet(mergedForCheck.IPV6_SERVER_LIST);
     if (badOctet !== null) {
       showPanelError(actEl, t('octetV6Invalid'), () => buildNode(net, node));
+      return;
+    }
+
+    // Table host column becomes UCI section names / DHCP hosts. HOST_NAME has no
+    // input on /networks (always ''), so only the tables are checked here.
+    const badHost = firstInvalidHost(mergedForCheck.PORT_FORWARD_LIST) || firstInvalidHost(mergedForCheck.IPV6_SERVER_LIST);
+    if (badHost !== null) {
+      showPanelError(actEl, t('hostnameInvalid', { field: badHost }), () => buildNode(net, node));
+      return;
+    }
+
+    if (!ddnsHostnameValid(mergedForCheck.LOOKUP_HOSTNAME)) {
+      showPanelError(actEl, t('ddnsHostnameInvalid', { field: mergedForCheck.LOOKUP_HOSTNAME }), () => buildNode(net, node));
+      return;
+    }
+
+    const badPort = firstInvalidPort(mergedForCheck.PORT_FORWARD_LIST) || firstInvalidPort(mergedForCheck.IPV6_SERVER_LIST);
+    if (badPort !== null) {
+      showPanelError(actEl, t('portInvalid', { field: badPort }), () => buildNode(net, node));
       return;
     }
 
