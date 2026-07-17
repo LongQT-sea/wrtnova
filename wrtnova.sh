@@ -384,6 +384,8 @@ host_name="${HOST_NAME:-WrtNova${AP_MODE:+-${AP_INDEX:=2}}}"
 _uci system "" "@system[0]" hostname="$host_name" \
 	"${ZONE_NAME:+zonename=$ZONE_NAME}" "${TIME_ZONE:+timezone=$TIME_ZONE}" "${TIME_FORMAT:+clock_hourcycle=$TIME_FORMAT}"
 
+_uci system timeserver ntp enable_server=1
+
 [ -n "$LUCI_HTTPS" ] && uci set uhttpd.main.redirect_https=1
 
 [ "$QUARTERLY_REBOOT" = 1 ] && \
@@ -1256,20 +1258,9 @@ uci del dhcp."$lan_if"_dns.notinterface
 		^server="/vpn.lan/${wg_net_pfx}.1"
 }
 
-_uci system timeserver ntp -server \
-	enable_server=1 +server=time1.google.com +server=time2.google.com +server=time.cloudflare.com
-
 cat >> /etc/hosts << EOF
 
 ${ula_prefix%%/*}1	$host_name
-
-216.239.35.0		time1.google.com
-216.239.35.4		time2.google.com
-162.159.200.1		time.cloudflare.com
-
-2001:4860:4806::	time1.google.com
-2001:4860:4806:4::	time2.google.com
-2606:4700:f1::1		time.cloudflare.com
 EOF
 
 doh_upstreams="${DOH_UPSTREAMS:-
