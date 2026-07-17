@@ -192,6 +192,8 @@ P_STEERING=
 
 LUCI_HTTPS=		# 1 = force LuCI HTTPS redirect
 
+NTP_IP=			# Last resort NTP server
+
 # 1 = log to /root/99-asu-defaults.log
 LOG=
 
@@ -392,17 +394,17 @@ _uci system timeserver ntp enable_server=1
 [ -n "$IRQBALANCE" ] && _uci irqbalance "" irqbalance enabled=1
 
 hplug_ifup_wan=/etc/hotplug.d/iface/96-ifup-wan
-cat > "$hplug_ifup_wan" <<'EOF'
-[ ifup = "$ACTION" ] || exit 0
+cat > "$hplug_ifup_wan" << EOF
+[ ifup = "\$ACTION" ] || exit 0
 . /lib/functions/network.sh
 sleep 5
 network_find_wan WAN_IF
 network_find_wan6 WAN6_IF
 
-[ "$WAN_IF" = "$INTERFACE" ] ||
-[ "$WAN6_IF" = "$INTERFACE" ] || exit 0
+[ "\$WAN_IF" = "\$INTERFACE" ] ||
+[ "\$WAN6_IF" = "\$INTERFACE" ] || exit 0
 
-ntpd -q -p pool.ntp.org &
+ntpd -q -p ${NTP_IP:-162.159.200.1} &
 EOF
 
 wg_iface=${WG_IFACE:-vpn}
