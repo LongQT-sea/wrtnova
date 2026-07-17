@@ -289,10 +289,6 @@ has_pkg wpad-mesh && wpad_mesh=1
 	}
 }
 
-iw phy | grep -Fq "* mesh point" || WIRELESS_MESH=
-
-iw phy | grep -q "AP/VLAN" || PSK_VLAN=
-
 has_pkg luci-proto-batman || BATMAN_ADV=
 
 uci -q get wireless || {
@@ -872,23 +868,15 @@ mesh_id="${MESH_ID:-mesh0_5ghz}"
 mesh_pass="${MESH_PASSWD:-$def_pass}"
 mesh_iface=${BATMAN_ADV:+bat0_}mesh0
 
-[ "$WIRELESS_MESH" = 1 ] && {
-	hplug_mesh=/etc/hotplug.d/net/94-ifup-$mesh_iface
-	set_mesh_param="iw dev $mesh_iface set mesh_param"
-	cat > "$hplug_mesh" <<-EOF
-	[ add = "\$ACTION" ] || exit 0
-	[ $mesh_iface = "\$DEVICENAME" ] || exit 0
-	sleep 4
-	/etc/init.d/network reload
-	$set_mesh_param mesh_rssi_threshold -78
-	$set_mesh_param mesh_max_peer_links 6
-	EOF
+radios="radio0 radio1 radio2 radio3"
 
-	[ "$AP_MODE" != 1 ] && {
-		echo "$set_mesh_param mesh_hwmp_rootmode 2" >> "$hplug_mesh"
-		echo "$set_mesh_param mesh_gate_announcements 1" >> "$hplug_mesh"
-	}
-}
+for r in $radios; do
+	b=$(get_band "$r") || continue
+	[ "$b" = 6g ] && has_6g=1
+	_phy=$(iw phy "phy${r#radio}" info 2>/dev/null) || _phy=$(iw phy phy0 info 2>/dev/null)
+	[ "$b" = 5g ] && ! echo "$_phy" | grep -Fq "* mesh point" && WIRELESS_MESH=
+	echo "$_phy" | grep -Fq "AP/VLAN" || PSK_VLAN=
+done
 
 # Fields: mode|ssid|key|network|bands|enabled|vlan|enc_override (empty = band default)
 wifi_networks="
@@ -901,15 +889,8 @@ mesh|$mesh_id|$mesh_pass|$mesh_iface|5g|$WIRELESS_MESH||sae
 
 while uci -q del wireless.@wifi-iface[0]; do :; done
 
-radios="radio0 radio1 radio2 radio3"
-
-for r in $radios; do
-	[ "$(get_band "$r")" = 6g ] && has_6g=1
-done
-
 for radio in $radios; do
-	band=$(get_band "$radio")
-	[ -z "$band" ] && continue
+	band=$(get_band "$radio") || continue
 	chan=$(get_channel "$radio")
 
 	case "$band" in
@@ -952,6 +933,24 @@ for radio in $radios; do
 	$wifi_networks
 	EOF
 done
+
+[ "$WIRELESS_MESH" = 1 ] && {
+	hplug_mesh=/etc/hotplug.d/net/94-ifup-$mesh_iface
+	set_mesh_param="iw dev $mesh_iface set mesh_param"
+	cat > "$hplug_mesh" <<-EOF
+	[ add = "\$ACTION" ] || exit 0
+	[ $mesh_iface = "\$DEVICENAME" ] || exit 0
+	sleep 4
+	/etc/init.d/network reload
+	$set_mesh_param mesh_rssi_threshold -78
+	$set_mesh_param mesh_max_peer_links 9
+	EOF
+
+	[ "$AP_MODE" != 1 ] && {
+		echo "$set_mesh_param mesh_hwmp_rootmode 2" >> "$hplug_mesh"
+		echo "$set_mesh_param mesh_gate_announcements 1" >> "$hplug_mesh"
+	}
+}
 
 # https://openwrt.org/docs/guide-user/network/wifi/usteer
 [ -x /sbin/usteerd ] && {
