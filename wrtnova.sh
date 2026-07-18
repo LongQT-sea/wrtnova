@@ -645,6 +645,7 @@ bridge_wan_port=1
 
 [ "$hw_type" = "swconfig" ] && {
 	use_bridge_vlan=
+	bridge_wan_port=
 	lan_eth="${lan_ports%%.*}"
 	wan_eth="$wan_port"
 }
@@ -727,6 +728,7 @@ else
 
 		tagged_wan_port="${sw_wan_port}t"
 		wan_eth="${wan_port%%.*}"
+		bridge_wan_port=1
 	}
 
 	cpu_ports="${lan_cpu_port}${wan_cpu_port:+ $wan_cpu_port}"
