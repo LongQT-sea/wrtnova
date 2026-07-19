@@ -189,6 +189,7 @@ export default {
   apModeNetworkNote:  '在 AP 模式下，仅为访客、物联网和 WireGuard VPN 创建 L2 网络（VLAN 和 WiFi SSID）——L3 流量回路到主路由器。',
   additionalTrunkVlans: '额外 VLAN',
   additionalTrunkHelp: '通过此设备每个端口进行干道（标记）传输的额外 VLAN ID。空格分隔；范围格式为低-高。',
+  vlanTruncNote:      '此交换机仅支持 {max} 个 VLAN，因此中继 VLAN {dropped} 已被丢弃。',
   wgVpnClient:        'WireGuard VPN 客户端',
   wgNeedConfig:       '没有 WireGuard 配置？使用 Cloudflare 的免费 WARP。',
   prefillWithWarp:    '从 Cloudflare WARP 预填',

@@ -10,7 +10,7 @@ import './ui.js';
 import './i18n/core.mjs';
 import { BUILDER_SCHEMA, readForm, keySets, textVal, SUBNET_KEYS, writeSubnet, IFACE_FIELDS, ifaceValid, PREFIX_FIELDS, prefixValid, WIFI_TEXT_FIELDS, wifiTextValid, pskVlanPassIssue } from './config-form.mjs';
 import { deriveConfig } from './builder-config.mjs';
-import { deriveNetRows } from './visibility.mjs';
+import { deriveNetRows, truncateAdditionalVlans, SWCONFIG_VLAN_MAX } from './visibility.mjs';
 import { createStore } from './store.mjs';
 import { renderConfigBlock } from './render-config.mjs';
 import { parseAdditionalPackages } from './packages.mjs';
@@ -118,6 +118,24 @@ import { collectTarget, devicesState } from './devices.js';
   // read if called before the store is initialized).
   function collectConfig() {
     return deriveConfig(store ? store.get() : readRawForm());
+  }
+
+  // swconfig switches (ath79/mt7620/mt76x8) expose only SWCONFIG_VLAN_MAX (16)
+  // hardware VLAN slots. When the selected device is one of these, auto-truncate
+  // ADDITIONAL_VLAN_LIST to fit and surface a live note explaining the drop, so
+  // the preview, the copied config and the built image all agree. On DSA targets
+  // the config is returned unchanged and the note stays hidden.
+  function withVlanTrunc(cfg) {
+    const target = collectTarget();
+    const trunc = truncateAdditionalVlans(cfg, target && target.target);
+    const note = $('#vlan-trunc-note');
+    if (note) {
+      note.classList.toggle('hidden', !trunc.truncated);
+      note.textContent = trunc.truncated
+        ? t('vlanTruncNote', { max: String(SWCONFIG_VLAN_MAX), dropped: trunc.dropped })
+        : '';
+    }
+    return trunc.truncated ? { ...cfg, ADDITIONAL_VLAN_LIST: trunc.list } : cfg;
   }
 
   function refreshStore() {
@@ -233,7 +251,7 @@ import { collectTarget, devicesState } from './devices.js';
     const pre = $('#config-preview');
     if (!pre) return;
     if (!previewFullScript) {
-      const cfg = ui.injectAdguardPasswd(collectConfig(), renderPreview);
+      const cfg = ui.injectAdguardPasswd(withVlanTrunc(collectConfig()), renderPreview);
       pre.textContent = previewRevealed ? renderConfigBlock(cfg) : ui.renderConfigBlockMasked(cfg);
       return;
     }
@@ -241,7 +259,7 @@ import { collectTarget, devicesState } from './devices.js';
     // the latest store state wins if it changed while fetching.
     ui.fetchWrtnovaBody().then(body => {
       if (!previewFullScript) return;
-      const cfg = ui.injectAdguardPasswd(collectConfig(), renderPreview);
+      const cfg = ui.injectAdguardPasswd(withVlanTrunc(collectConfig()), renderPreview);
       pre.textContent = ui.assembleScript(cfg, body, !previewRevealed);
     }).catch(e => { pre.textContent = t('failedLoadTemplate', { msg: e.message }); });
   }
@@ -250,7 +268,7 @@ import { collectTarget, devicesState } from './devices.js';
   // Always-unmasked text for the Copy button, regardless of the reveal toggle:
   // copying masked asterisks would paste an unusable config.
   async function previewUnmaskedText() {
-    const cfg = collectConfig();
+    const cfg = withVlanTrunc(collectConfig());
     if (cfg.ROOT_PASSWD) {
       const h = await ui.adguardHashFromRoot(cfg.ROOT_PASSWD);
       if (h) cfg.ADGUARD_PASSWD = h;
@@ -643,7 +661,7 @@ import { collectTarget, devicesState } from './devices.js';
 
     await import('/js/history.js');       // ES module - dynamic import
 
-    const cfg = collectConfig();
+    const cfg = withVlanTrunc(collectConfig());
     // AdGuard Home admin password = deterministic bcrypt of the root password
     // (ui.adguardHashFromRoot loads bcrypt + derives a stable salt), so the
     // emitted script is byte-identical across rebuilds and the ASU cache hits.
@@ -915,4 +933,7 @@ import { collectTarget, devicesState } from './devices.js';
     // Chips depend on the target's base/device packages, which are not part of
     // the config store; re-render on target change.
     renderAutoPackages();
+    // The 16-slot VLAN cap is target-dependent, so re-run the preview (which
+    // refreshes the truncation note) when the device changes.
+    renderPreview();
   };

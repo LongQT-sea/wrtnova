@@ -254,3 +254,79 @@ export function detectVlanConflict(cfg) {
   const { conflict } = resolveVlanAssignment(cfg);
   return conflict.anchorCollision || conflict.trunkCollision || conflict.exhausted;
 }
+
+/** Max VLAN table slots on a swconfig switch (see isSwconfigTarget). */
+export const SWCONFIG_VLAN_MAX = 16;
+
+/**
+ * OpenWrt targets whose built-in switch is driven by swconfig and exposes only a
+ * 16-entry hardware VLAN table: ath79 (all subtargets), ramips/mt7620,
+ * ramips/mt76x8. Each add_vlan in wrtnova.sh consumes one slot. ramips/mt7621 is
+ * DSA (bridge-vlan, no such limit) and is deliberately excluded.
+ * @param {string} target  e.g. "ath79/generic", "ramips/mt7620"
+ * @returns {boolean}
+ */
+export function isSwconfigTarget(target) {
+  const t = String(target || '');
+  return t.startsWith('ath79/') || t === 'ramips/mt7620' || t === 'ramips/mt76x8';
+}
+
+/**
+ * Hardware VLAN slots the base networks (lan/guest/iot/wg/wan/wanb) consume -
+ * one per participating add_vlan call. Trunk VLANs take one slot each on top.
+ * @param {Config} cfg
+ * @returns {number}
+ */
+export function countBaseVlanSlots(cfg) {
+  return VLAN_TABLE.reduce((n, row) => n + (vlanParticipates(cfg, row) ? 1 : 0), 0);
+}
+
+// Compress an ascending unique VID list into "low-high" range tokens.
+function compressVids(sorted) {
+  const out = [];
+  for (let i = 0; i < sorted.length; ) {
+    let j = i;
+    while (j + 1 < sorted.length && sorted[j + 1] === sorted[j] + 1) j++;
+    out.push(i === j ? String(sorted[i]) : sorted[i] + '-' + sorted[j]);
+    i = j + 1;
+  }
+  return out.join(' ');
+}
+
+/**
+ * Fit ADDITIONAL_VLAN_LIST to a swconfig switch's SWCONFIG_VLAN_MAX slots: base
+ * networks reserve countBaseVlanSlots(cfg), the rest is the trunk budget. Keeps
+ * the first `budget` trunk VLANs (typed order), drops the overflow, re-emits both
+ * range-compressed. Unchanged on DSA / empty / within-budget (truncated: false).
+ * @param {Config} cfg
+ * @param {string} target
+ * @returns {{ list: string, dropped: string, truncated: boolean, budget: number }}
+ */
+export function truncateAdditionalVlans(cfg, target) {
+  const raw = String((cfg && cfg.ADDITIONAL_VLAN_LIST) || '').trim();
+  if (!isSwconfigTarget(target) || !raw) {
+    return { list: raw, dropped: '', truncated: false, budget: SWCONFIG_VLAN_MAX };
+  }
+
+  // Expand to individual VIDs in typed order, unique (dupes reserve no slot).
+  const seen = new Set();
+  const vids = [];
+  for (const tok of raw.split(/\s+/)) {
+    const rng = tok.match(/^(\d+)-(\d+)$/);
+    if (rng) {
+      for (let v = +rng[1]; v <= +rng[2]; v++) if (!seen.has(v)) { seen.add(v); vids.push(v); }
+    } else if (/^\d+$/.test(tok)) {
+      const v = +tok;
+      if (!seen.has(v)) { seen.add(v); vids.push(v); }
+    }
+  }
+
+  const budget = Math.max(0, SWCONFIG_VLAN_MAX - countBaseVlanSlots(cfg));
+  if (vids.length <= budget) {
+    return { list: raw, dropped: '', truncated: false, budget };
+  }
+
+  const kept = vids.slice(0, budget).sort((a, b) => a - b);
+  const dropped = vids.slice(budget).sort((a, b) => a - b);
+  return { list: compressVids(kept), dropped: compressVids(dropped), truncated: true, budget };
+}

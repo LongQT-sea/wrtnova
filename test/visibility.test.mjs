@@ -6,7 +6,9 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
 import { deriveVisibility, deriveNetRows, detectVlanConflict,
-         resolveVlanAssignment, resolveVlanEmit } from '../public/js/visibility.mjs';
+         resolveVlanAssignment, resolveVlanEmit,
+         isSwconfigTarget, countBaseVlanSlots, truncateAdditionalVlans,
+         SWCONFIG_VLAN_MAX } from '../public/js/visibility.mjs';
 
 // ---------------------------------------------------------------------------
 // deriveVisibility
@@ -205,4 +207,74 @@ test('resolveVlanEmit: disabled / AP-excluded fields emit empty', () => {
   const e = resolveVlanEmit({ AP_MODE: '1', GUEST_VLAN_ID: '20', WAN_VLAN_ID: '30' });
   assert.equal(e.GUEST_VLAN_ID, '');   // GUEST_ENABLE off
   assert.equal(e.WAN_VLAN_ID, '');     // AP excludes WAN
+});
+
+// ---------------------------------------------------------------------------
+// isSwconfigTarget / countBaseVlanSlots / truncateAdditionalVlans - the
+// swconfig 16-slot VLAN cap
+// ---------------------------------------------------------------------------
+
+test('isSwconfigTarget: ath79 (any subtarget), mt7620, mt76x8 only', () => {
+  assert.equal(isSwconfigTarget('ath79/generic'), true);
+  assert.equal(isSwconfigTarget('ath79/nand'), true);
+  assert.equal(isSwconfigTarget('ath79/tiny'), true);
+  assert.equal(isSwconfigTarget('ramips/mt7620'), true);
+  assert.equal(isSwconfigTarget('ramips/mt76x8'), true);
+  assert.equal(isSwconfigTarget('ramips/mt7621'), false); // DSA, not swconfig
+  assert.equal(isSwconfigTarget('mediatek/filogic'), false);
+  assert.equal(isSwconfigTarget(''), false);
+  assert.equal(isSwconfigTarget(undefined), false);
+});
+
+test('countBaseVlanSlots: lan+wan by default; flags and AP mode adjust it', () => {
+  assert.equal(countBaseVlanSlots({}), 2);                                   // lan + wan
+  assert.equal(countBaseVlanSlots({ GUEST_ENABLE: '1', IOT_ENABLE: '1', WG_ENABLE: '1' }), 5); // +3
+  assert.equal(countBaseVlanSlots({ WAN_B_ENABLE: '1' }), 3);               // lan + wan + wanb
+  assert.equal(countBaseVlanSlots({ AP_MODE: '1' }), 1);                    // AP excludes wan/wanb -> lan only
+});
+
+test('truncateAdditionalVlans: no-op on DSA targets and empty lists', () => {
+  const cfg = { ADDITIONAL_VLAN_LIST: '100 101 102' };
+  const dsa = truncateAdditionalVlans(cfg, 'ramips/mt7621');
+  assert.equal(dsa.truncated, false);
+  assert.equal(dsa.list, '100 101 102');
+  const empty = truncateAdditionalVlans({ ADDITIONAL_VLAN_LIST: '' }, 'ath79/generic');
+  assert.equal(empty.truncated, false);
+});
+
+test('truncateAdditionalVlans: within budget passes through unchanged', () => {
+  // base = lan + wan = 2, so budget = 14; 3 trunk VLANs fit.
+  const r = truncateAdditionalVlans({ ADDITIONAL_VLAN_LIST: '100 101 102' }, 'ath79/generic');
+  assert.equal(r.truncated, false);
+  assert.equal(r.list, '100 101 102');
+});
+
+test('truncateAdditionalVlans: drops overflow past the 16-slot table', () => {
+  // base = lan + wan = 2 -> budget 14. A 30-item range keeps 14, drops 16.
+  const r = truncateAdditionalVlans({ ADDITIONAL_VLAN_LIST: '100-129' }, 'ramips/mt7620');
+  assert.equal(r.truncated, true);
+  assert.equal(SWCONFIG_VLAN_MAX, 16);
+  assert.equal(r.list, '100-113');      // first 14, range-compressed
+  assert.equal(r.dropped, '114-129');   // remaining 16
+});
+
+test('truncateAdditionalVlans: budget shrinks as base networks are enabled', () => {
+  // base = lan+guest+iot+wg+wan+wanb = 6 -> budget 10.
+  const cfg = {
+    GUEST_ENABLE: '1', IOT_ENABLE: '1', WG_ENABLE: '1', WAN_B_ENABLE: '1',
+    ADDITIONAL_VLAN_LIST: '200-220',
+  };
+  const r = truncateAdditionalVlans(cfg, 'ramips/mt76x8');
+  assert.equal(r.truncated, true);
+  assert.equal(r.list, '200-209');      // 10 kept
+  assert.equal(r.dropped, '210-220');   // 11 dropped
+});
+
+test('truncateAdditionalVlans: dedupes and keeps first-typed VIDs before dropping', () => {
+  // budget 14; typed order preserved for the keep/drop split, output sorted.
+  const list = '50 50 60 70 80 90 100 110 120 130 140 150 160 170 180 190';
+  const r = truncateAdditionalVlans({ ADDITIONAL_VLAN_LIST: list }, 'ath79/generic');
+  assert.equal(r.truncated, true);
+  // 16 tokens, one dupe (50) -> 15 unique; keep first 14, drop the 15th (190).
+  assert.equal(r.dropped, '190');
 });

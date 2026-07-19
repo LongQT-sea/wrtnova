@@ -189,6 +189,7 @@ export default {
   apModeNetworkNote:  'В режиме AP создаются только L2-сети (VLAN и WiFi SSID) для Гость, IoT и WireGuard VPN — L3-трафик маршрутизируется обратно на основной роутер.',
   additionalTrunkVlans: 'Дополнительные VLAN',
   additionalTrunkHelp: 'Дополнительные VLAN ID для trunking (tagged) через каждый порт этого устройства. Разделены пробелами; диапазоны в формате низкий-высокий.',
+  vlanTruncNote:      'Этот коммутатор поддерживает только {max} VLAN, поэтому магистральные VLAN {dropped} были отброшены.',
   wgVpnClient:        'Клиент WireGuard VPN',
   wgNeedConfig:       'Нет конфигурации WireGuard? Используйте бесплатный WARP от Cloudflare.',
   prefillWithWarp:    'Заполнить из Cloudflare WARP',

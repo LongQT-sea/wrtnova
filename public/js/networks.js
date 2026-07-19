@@ -12,7 +12,7 @@ import './tzdata.js';
 import { BASE_SCHEMA, readForm, writeForm } from './config-form.mjs';
 import { mergeNodeConfig } from './config-merge.mjs';
 import { IFACE_FIELDS, ifaceValid, PREFIX_FIELDS, prefixValid, WIFI_TEXT_FIELDS, wifiTextValid, pskVlanPassIssue } from './config-form.mjs';
-import { detectVlanConflict } from './visibility.mjs';
+import { detectVlanConflict, truncateAdditionalVlans, SWCONFIG_VLAN_MAX } from './visibility.mjs';
 import { renderConfigBlock } from './render-config.mjs';
 import { parseList, firstInvalidIpv6Octet, hostnameValid, ddnsHostnameValid, firstInvalidHost, firstInvalidPort, portListValid, normalizeEndpoint } from './list-grammar.mjs';
 import { parseAdditionalPackages } from './packages.mjs';
@@ -291,11 +291,19 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
     if (!actEl) return;
     const id = 'buildbtn-' + uid();
     const isAp = node.overrides.AP_MODE === '1';
+    const vlanTrunc = truncateAdditionalVlans(
+      mergeNodeConfig(net.shared_config, node.overrides), node.device_target.target);
+    const vlanTruncHtml = vlanTrunc.truncated
+      ? '<p class="text-xs text-amber-600 dark:text-amber-400 mt-1.5">' +
+        esc(t('vlanTruncNote', { max: String(SWCONFIG_VLAN_MAX), dropped: vlanTrunc.dropped })) +
+        '</p>'
+      : '';
     actEl.innerHTML =
       '<button type="button" class="btn btn-primary text-xs" id="' + id + '">' + S.buildFirmware + '</button>' +
       (isAp ? deleteNodeBtnHtml(node.id) : '') +
       flashNoteHtml(images) +
-      imageFilesHtml(images, bin_dir, asuBase);
+      imageFilesHtml(images, bin_dir, asuBase) +
+      vlanTruncHtml;
     actEl.querySelector('#' + id)?.addEventListener('click', onDone);
     wireDeleteNode(net, node, actEl);
   }
@@ -1308,6 +1316,9 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
       showPanelProgress(actEl, 5, S.preparingBuild);
 
       const fullCfg = mergeNodeConfig(net.shared_config, node.overrides);
+      // Fit the trunk list to a swconfig switch's 16 slots (panel notes the drop).
+      const vlanTrunc = truncateAdditionalVlans(fullCfg, tgt.target);
+      if (vlanTrunc.truncated) fullCfg.ADDITIONAL_VLAN_LIST = vlanTrunc.list;
       const packages = ui.computeFinalPackages(vt, fullCfg, extraPkgs);
       const asuUrl = activeAsu.replace(/\/+$/, '') + '/api/v1/build';
 

@@ -189,6 +189,7 @@ export default {
   apModeNetworkNote:  'Im AP-Modus werden nur L2-Netzwerke (VLAN und WiFi-SSID) für Gast, IoT und WireGuard VPN erstellt — L3-Datenverkehr wird zurück zum Hauptrouter geleitet.',
   additionalTrunkVlans: 'Zusätzliche VLANs',
   additionalTrunkHelp: 'Zusätzliche VLAN-IDs zum Trunking (getaggt) über jeden Port dieses Geräts. Leerzeichen-getrennt; Bereiche als Niedrig-Hoch.',
+  vlanTruncNote:      'Dieser Switch unterstützt nur {max} VLANs, daher wurden die Trunk-VLANs {dropped} entfernt.',
   wgVpnClient:        'WireGuard-VPN-Client',
   wgNeedConfig:       'Keine WireGuard-Konfiguration? Verwenden Sie Cloudflares kostenloses WARP.',
   prefillWithWarp:    'Mit Cloudflare WARP vorausfüllen',
