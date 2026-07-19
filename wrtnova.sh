@@ -824,10 +824,12 @@ add_wifi_iface() {
 		if [ "$band" = 6g ] && [ -z "$BAND_SUFFIX" ]; then
 			set -- "$@" ssid="${ssid} 6G"
 		elif [ -z "$iot_plain" ]; then
-			add_wifi_vlan "$vid" "$key" "$net" "${dev}_${lan_if}"
-			[ "$net" != "$lan_if" ] && return
-			set -- "$@" encryption=psk2 -key -network
-			[ "$os_version" -le 23 ] && set -- "$@" key=_unused_
+			[ "$net" != "$lan_if" ] && {
+				add_wifi_vlan "$vid" "$key" "$net" "${dev}_${lan_if}"
+				return
+			}
+
+			set -- "$@" encryption=psk2
 			[ "$os_version" -ge 25 ] && set -- "$@" +hostapd_bss_options='vlan_no_bridge=1'
 		fi
 	}
@@ -1349,7 +1351,7 @@ doh_upstreams="${DOH_UPSTREAMS:-https://dns.adguard-dns.com/dns-query}"
 [ "$https_dns" = 1 ] && {
 	while uci -q del https-dns-proxy.@https-dns-proxy[0]; do :; done
 	uci set https-dns-proxy.config.force_dns=0
-	bootstrap_csv="$(echo "$bootstrap_dns" | tr -s ' \t\n' ',')"
+	bootstrap_csv="$(echo $bootstrap_dns | tr ' ' ',')"
 
 	for u in $doh_upstreams; do
 		_uci https-dns-proxy "" "" resolver_url="$u" bootstrap_dns="$bootstrap_csv"
