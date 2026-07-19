@@ -496,16 +496,10 @@ expand_vlan() {
 set_mac_addr() {
 	local mac="$1" iface="$2" dev
 	shift 2
-
-	echo "$mac" | grep -Eq '^([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}$' || return
 	dev="$(uci -q get "network.${iface}.device")" || return
 
-	if [ "$dev" = br-wan ]; then
-		uci set network.@device[1].macaddr="$mac"
-	else
-		[ "$dev" != "${dev%.*}" ] && set -- type=8021q ifname="${dev%.*}" vid="${dev##*.}"
-		_uci network device "" macaddr="$mac" name="$dev" "$@"
-	fi
+	[ "$dev" != "${dev%.*}" ] && set -- type=8021q ifname="${dev%.*}" vid="${dev##*.}"
+	_uci network device "" macaddr="$mac" name="$dev" "$@"
 }
 
 lan_vid=${LAN_VLAN_ID:-1}
@@ -771,7 +765,13 @@ for vid in $(expand_vlan "$ADDITIONAL_VLAN_LIST"); do
 done >/dev/null
 [ "$LOG" = 1 ] && set -x
 
-[ "$AP_MODE" != 1 ] && set_mac_addr "$WAN_MAC_ADDR" wan
+[ "$AP_MODE" != 1 ] && [ -n "$WAN_MAC_ADDR" ] && {
+	if [ "$wan_port" = br-wan ]; then
+		uci set network.@device[1].macaddr="$WAN_MAC_ADDR"
+	else
+		set_mac_addr "$WAN_MAC_ADDR" wan
+	fi
+}
 
 [ "$AP_MODE" = 1 ] && {
 	/etc/init.d/dnsmasq disable
