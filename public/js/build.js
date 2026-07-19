@@ -10,7 +10,7 @@ import './ui.js';
 import './i18n/core.mjs';
 import { BUILDER_SCHEMA, readForm, keySets, textVal, SUBNET_KEYS, writeSubnet, IFACE_FIELDS, ifaceValid, PREFIX_FIELDS, prefixValid, WIFI_TEXT_FIELDS, wifiTextValid, pskVlanPassIssue } from './config-form.mjs';
 import { deriveConfig } from './builder-config.mjs';
-import { deriveNetRows, truncateAdditionalVlans, SWCONFIG_VLAN_MAX } from './visibility.mjs';
+import { deriveNetRows, truncateAdditionalVlans, SWCONFIG_VLAN_MAX, isSwconfigTarget } from './visibility.mjs';
 import { createStore } from './store.mjs';
 import { renderConfigBlock } from './render-config.mjs';
 import { parseAdditionalPackages } from './packages.mjs';
@@ -113,6 +113,31 @@ import { collectTarget, devicesState } from './devices.js';
   }
 
   let store = null;
+
+  // Whether the user has directly picked a DNS engine. Until they do, the DNS
+  // default tracks the selected device (applyDnsDefaultForTarget); once touched,
+  // their choice is sticky across device changes. Set only on a real user
+  // 'change' of the DNS_MODE radios - programmatic writes (applyStorePatch ->
+  // renderConfigToDom set .checked directly, no event) never trip it.
+  let dnsModeTouched = false;
+
+  // AdGuard Home (>=32 MB flash / >=230 MB RAM) is the nicest default DNS engine,
+  // but too heavy for the low-flash swconfig targets (ath79, ramips/mt7620,
+  // ramips/mt76x8), which fall back to the lightweight https-dns-proxy. Pick the
+  // default for the selected device, but never override an explicit user choice.
+  function applyDnsDefaultForTarget(target) {
+    if (dnsModeTouched) return;
+    const desired = target && !isSwconfigTarget(target.target) ? 'adguardhome' : 'https-dns-proxy';
+    const cur = (store ? store.get().DNS_MODE : '') || 'https-dns-proxy';
+    if (cur === desired) return;
+    // Leaving AdGuard Home also clears its port-53 sub-option (mirrors tryAutoRetry).
+    const patch = { DNS_MODE: desired };
+    if (desired !== 'adguardhome') patch.ADGUARD_MAIN_DNS = '';
+    applyStorePatch(patch);
+    // renderConfigToDom sets the radio without an event, so nudge the DNS-mode
+    // conditional visibility (AdGuard RAM note, main-DNS sub-option) to re-run.
+    if (ui.refreshConditionalVisibility) ui.refreshConditionalVisibility();
+  }
 
   // The gated config: pure derivation of the store (falls back to a direct form
   // read if called before the store is initialized).
@@ -332,6 +357,8 @@ import { collectTarget, devicesState } from './devices.js';
     store.subscribe(() => { renderAutoPackages(); syncApIndexPreview(); renderPreview(); });
     document.body.addEventListener('input',  refreshStore);
     document.body.addEventListener('change', refreshStore);
+    $$('input[name="DNS_MODE"]').forEach(el =>
+      el.addEventListener('change', () => { dnsModeTouched = true; }));
     if (ui.wireSubnetAnchors) ui.wireSubnetAnchors();
     $('#version')?.addEventListener('change', () => updateVersionGatedOpts($('#version').value));
     updateVersionGatedOpts(devicesState.version);
@@ -944,6 +971,9 @@ import { collectTarget, devicesState } from './devices.js';
     $('#build-btn').disabled = !ok;
     $('#build-hint').textContent = ok ? '' : S.pickDeviceHint;
     if (ok) ui.setDot('target', 'valid');
+    // Steer the DNS default to match the device's flash/RAM budget (unless the
+    // user already picked one). Runs before renderPreview so the preview agrees.
+    applyDnsDefaultForTarget(t);
     // The selected version may have changed (device pick can switch branches),
     // so refresh the version-gated options.
     updateVersionGatedOpts(devicesState.version);
