@@ -469,28 +469,17 @@ add_bridge_vlan() {
 	[ -n "$iface" ] && uci set "network.${iface}.device=br-vlan.${vlan_id}"
 }
 
-add_bridges() {
-	local iface
-
-	for iface in $1; do
-		_uci network device "br_${iface}" type=bridge name="br-${iface:0:12}"
-		uci set "network.${iface}.device=br-${iface:0:12}"
-	done
-}
-
 add_switch_vlan() {
-	local vlan_id="$1" ports="$2" iface="$3"
+	local vlan_id="$1" ports="$2" iface="$3" p="$br_vlan_trunk"
 
 	vlan_idx=$((vlan_idx + 1))
 
 	_uci network switch_vlan "" \
 		device="$switch_dev" vlan="$vlan_idx" ports="$ports" ${sw_has_vid:+vid=$vlan_id}
 
-	[ -z "$iface" ] && return
-	uci add_list "network.br_${iface}.ports=${lan_eth}.${vlan_id}"
+	[ "$iface" = wan ] && p="$br_vlan_wan"
 
-	[ "$WIRELESS_MESH" = 1 ] && [ "$BATMAN_ADV" != 1 ] && \
-		uci add_list "network.br_${iface}.ports=mesh0.${vlan_id}"
+	add_bridge_vlan "$vlan_id" "$p" "$iface"
 }
 
 expand_vlan() {
@@ -502,6 +491,21 @@ expand_vlan() {
 			*) printf '%s\n' "$entry" ;;
 		esac
 	done
+}
+
+set_mac_addr() {
+	local mac="$1" iface="$2" dev
+	shift 2
+
+	echo "$mac" | grep -Eq '^([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}$' || return
+	dev="$(uci -q get "network.${iface}.device")" || return
+
+	if [ "$dev" = br-wan ]; then
+		uci set network.@device[1].macaddr="$mac"
+	else
+		[ "$dev" != "${dev%.*}" ] && set -- type=8021q ifname="${dev%.*}" vid="${dev##*.}"
+		_uci network device "" macaddr="$mac" name="$dev" "$@"
+	fi
 }
 
 lan_vid=${LAN_VLAN_ID:-1}
@@ -633,78 +637,34 @@ _uci network interface wan6 device=@wan ~wan_6
 	}
 }
 
+ifaces_lan="$lan_if ${GUEST_ENABLE:+$guest_if} ${IOT_ENABLE:+$iot_if} ${WG_ENABLE:+$lan_wg_if}"
+ifaces_wan="wan wan_6 ${WAN_B_ENABLE:+wanb wanb_6} ${CELLULAR_MODEM:+cellular} ${USB_TETHERING:+usb0}"
+
 lan_ports="$(uci -q get network.@device[0].ports)"
 wan_port="$(uci -q get network.wan.device)"
-
-# DSA/x86/SBC: always use bridge VLAN filtering
-use_bridge_vlan=1
-bridge_wan_port=1
 
 # Single NIC: reuse lan port as tagged WAN
 [ -z "$wan_port" ] && WAN_IS_TAGGED=1
 
-[ "$hw_type" = "swconfig" ] && {
-	use_bridge_vlan=
-	bridge_wan_port=
-	lan_eth="${lan_ports%%.*}"
-	wan_eth="$wan_port"
-}
+bridge_wan_port=1
 
-[ "$AP_MODE" != 1 ] && [ "$use_bridge_vlan" = 1 ] && [ -n "$wan_port" ] && {
+[ "$AP_MODE" != 1 ] && [ -n "$wan_port" ] && {
 	[ "$BRIDGE_WAN_PORT" != 1 ] && bridge_wan_port=
 	# Cannot enslave a bridge to another bridge
 	[ "$wan_port" = br-wan ] && bridge_wan_port=
 }
 
-ifaces_lan="$lan_if ${GUEST_ENABLE:+$guest_if} ${IOT_ENABLE:+$iot_if} ${WG_ENABLE:+$lan_wg_if}"
-ifaces_wan="wan wan_6 ${WAN_B_ENABLE:+wanb wanb_6} ${CELLULAR_MODEM:+cellular} ${USB_TETHERING:+usb0}"
-
 # LAN ports are untagged members of the LAN VLAN.
 # WAN port are untagged members of the WAN VLAN unless WAN_IS_TAGGED=1.
 # All ports carry tagged guest/iot/lan_wg/wanb VLANs as trunk ports.
 # AP mode: all ports are untagged on the LAN VLAN and tagged on all other VLANs.
-if [ "$use_bridge_vlan" = 1 ]; then
-	[ "$AP_MODE" = 1 ] && [ "$wan_port" = br-wan ] && {
-		wan_port="$(uci -q get network.@device[1].ports)"
-		uci del network.@device[1]
-	}
+[ "$WAN_IS_TAGGED" = 1 ] && w_tag=t
 
-	[ "$WIRELESS_MESH" = 1 ] && [ "$BATMAN_ADV" != 1 ] && lan_ports="$lan_ports mesh0"
+if [ "$hw_type" = "swconfig" ]; then
+	lan_eth="${lan_ports%%.*}"
+	br_ports="$lan_eth"
 
-	src_ports="$lan_ports"
-	[ "$AP_MODE" = 1 ] && src_ports="$lan_ports $wan_port"
-
-	for port in $src_ports; do
-		trunk_ports="${trunk_ports:+$trunk_ports }$port:t"
-		lan_vlan_ports="${lan_vlan_ports:+$lan_vlan_ports }$port:u*"
-		wan_vlan_ports="${wan_vlan_ports:+$wan_vlan_ports }$port:t"
-	done
-
-	[ "$AP_MODE" != 1 ] && [ "$bridge_wan_port" = 1 ] && [ -n "$wan_port" ] && {
-		lan_vlan_ports="$lan_vlan_ports $wan_port:t"
-		trunk_ports="$trunk_ports $wan_port:t"
-
-		if [ "$WAN_IS_TAGGED" = 1 ]; then
-			wan_vlan_ports="$wan_vlan_ports $wan_port:t"
-		else
-			wan_vlan_ports="$wan_vlan_ports $wan_port:u*"
-		fi
-	}
-
-	[ "$TAGGED_LAN_VLAN" = 1 ] && lan_vlan_ports="$trunk_ports"
-
-	_uci network device @device[0] name=br-vlan -ports ${BRIDGE_STP:+stp=1}
-	for p in $lan_ports ${bridge_wan_port:+$wan_port}; do
-		_uci network device @device[0] +ports="$p"
-	done
-
-	[ "$WAN_IS_TAGGED" = 1 ] && [ "$bridge_wan_port" != 1 ] && \
-		uci set network.wan.device="${wan_port}.${wan_vid}"
-
-	add_vlan() { add_bridge_vlan "$@"; }
-
-else
-	add_bridges "$ifaces_lan"
+	[ "$WIRELESS_MESH" = 1 ] && [ "$BATMAN_ADV" != 1 ] && br_ports="$lan_eth mesh0"
 
 	# switch_vlan[0] is LAN, and switch_vlan[1] is WAN (see config_generate and uci-defaults.sh)
 	for port in $(uci -q get network.@switch_vlan[0].ports); do
@@ -727,7 +687,7 @@ else
 		done
 
 		tagged_wan_port="${sw_wan_port}t"
-		wan_eth="${wan_port%%.*}"
+		wan_port="${wan_port%%.*}"
 		bridge_wan_port=1
 	}
 
@@ -739,31 +699,71 @@ else
 	[ "$AP_MODE" = 1 ] && {
 		lan_vlan_ports="${sw_lan_ports}${sw_wan_port:+ $sw_wan_port} $cpu_ports"
 		wan_vlan_ports="$trunk_ports"
-#		[ -z "$sw_wan_port" ] # Not worth handling, connect LAN to LAN port instead
 	}
-
-	[ "$TAGGED_LAN_VLAN" = 1 ] && lan_vlan_ports="$trunk_ports"
 
 	[ -n "$sw_wan_port" ] && [ "$WAN_IS_TAGGED" = 1 ] && wan_vlan_ports="$trunk_ports"
 
-	if [ "$WAN_IS_TAGGED" = 1 ] || [ -n "$sw_wan_port" ]; then
-		uci set network.wan.device="${wan_eth}.${wan_vid}"
-	fi
+	src_ports="$br_ports"
+	[ "$AP_MODE" = 1 ] && [ -z "$sw_wan_port" ] && src_ports="$br_ports $wan_port"
 
-	[ "$WAN_B_ENABLE" = 1 ] && uci set network.wanb.device="${lan_eth}.${wanb_vid}"
+	for port in $src_ports; do
+		br_vlan_trunk="${br_vlan_trunk:+$br_vlan_trunk }$port:t"
+	done
 
-	uci del network.@device[0]
+	br_vlan_wan="$br_vlan_trunk"
+
+	[ "$AP_MODE" != 1 ] && [ -z "$sw_wan_port" ] && [ "$bridge_wan_port" = 1 ] && {
+		br_ports="$br_ports $wan_port"
+		br_vlan_wan="$br_vlan_trunk $wan_port:${w_tag:-u*}"
+	}
+
 	while uci -q del network.@switch_vlan[0]; do :; done
 
 	add_vlan() { add_switch_vlan "$@"; }
+else
+	[ "$AP_MODE" = 1 ] && [ "$wan_port" = br-wan ] && {
+		wan_port="$(uci -q get network.@device[1].ports)"
+		uci del network.@device[1]
+	}
+
+	[ "$WIRELESS_MESH" = 1 ] && [ "$BATMAN_ADV" != 1 ] && lan_ports="$lan_ports mesh0"
+
+	src_ports="$lan_ports"
+	[ "$AP_MODE" = 1 ] && src_ports="$lan_ports $wan_port"
+
+	for port in $src_ports; do
+		trunk_ports="${trunk_ports:+$trunk_ports }$port:t"
+		lan_vlan_ports="${lan_vlan_ports:+$lan_vlan_ports }$port:u*"
+		wan_vlan_ports="${wan_vlan_ports:+$wan_vlan_ports }$port:t"
+	done
+
+	[ "$AP_MODE" != 1 ] && [ "$bridge_wan_port" = 1 ] && [ -n "$wan_port" ] && {
+		lan_vlan_ports="$lan_vlan_ports $wan_port:t"
+		trunk_ports="$trunk_ports $wan_port:t"
+		wan_vlan_ports="$wan_vlan_ports $wan_port:${w_tag:-u*}"
+	}
+
+	br_ports="$lan_ports ${bridge_wan_port:+$wan_port}"
+
+	add_vlan() { add_bridge_vlan "$@"; }
 fi
+
+[ "$TAGGED_LAN_VLAN" = 1 ] && lan_vlan_ports="$trunk_ports"
+
+_uci network device @device[0] name=br-vlan -ports ${BRIDGE_STP:+stp=1}
+for p in $br_ports; do
+	_uci network device @device[0] +ports="$p"
+done
+
+[ "$WAN_IS_TAGGED" = 1 ] && [ "$bridge_wan_port" != 1 ] && \
+	uci set network.wan.device="${wan_port}.${wan_vid}"
 
 add_vlan "$lan_vid" "$lan_vlan_ports" "$lan_if"
 [ "$GUEST_ENABLE" = 1 ] && add_vlan "$guest_vid" "$trunk_ports" "$guest_if"
 [ "$IOT_ENABLE" = 1 ] && add_vlan "$iot_vid" "$trunk_ports" "$iot_if"
 [ "$WG_ENABLE" = 1 ] && add_vlan "$wg_vid" "$trunk_ports" "$lan_wg_if"
-[ "$bridge_wan_port" = 1 ] && add_vlan "$wan_vid" "$wan_vlan_ports" ${src_ports:+wan}
-[ "$WAN_B_ENABLE" = 1 ] && add_vlan "$wanb_vid" "$trunk_ports" ${src_ports:+wanb}
+[ "$bridge_wan_port" = 1 ] && add_vlan "$wan_vid" "$wan_vlan_ports" wan
+[ "$WAN_B_ENABLE" = 1 ] && add_vlan "$wanb_vid" "$trunk_ports" wanb
 
 set +x
 for vid in $(expand_vlan "$ADDITIONAL_VLAN_LIST"); do
@@ -771,14 +771,7 @@ for vid in $(expand_vlan "$ADDITIONAL_VLAN_LIST"); do
 done >/dev/null
 [ "$LOG" = 1 ] && set -x
 
-[ "$AP_MODE" != 1 ] && echo "$WAN_MAC_ADDR" | grep -Eq '^([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}$' && {
-	if [ "$wan_port" = br-wan ]; then
-		uci set network.@device[1].macaddr="$WAN_MAC_ADDR"
-	else
-		_uci network device "" \
-			macaddr="$WAN_MAC_ADDR" ${src_ports:+name=$wan_port} ${wan_eth:+name=$wan_eth}
-	fi
-}
+[ "$AP_MODE" != 1 ] && set_mac_addr "$WAN_MAC_ADDR" wan
 
 [ "$AP_MODE" = 1 ] && {
 	/etc/init.d/dnsmasq disable
@@ -796,8 +789,6 @@ done >/dev/null
 		[ "$i" = "$lan_if" ] && continue
 		_uci network interface "$i" proto=none -ipaddr -ip6assign
 	done
-
-	[ -z "$BRIDGE_WAN_PORT" ] && uci del network.vlan_"$wan_vid"
 }
 
 _uci network globals globals \
@@ -985,19 +976,9 @@ done
 	_uci network interface bat0 proto=batadv aggregated_ogms=1 bridge_loop_avoidance=1
 	_uci network interface bat0_mesh0 proto=batadv_hardif mtu=2304 master=bat0
 
-	set --	"$lan_if" "$lan_vid" \
-		${GUEST_ENABLE:+$guest_if $guest_vid} \
-		${IOT_ENABLE:+$iot_if $iot_vid} \
-		${WG_ENABLE:+$lan_wg_if $wg_vid}
-
-	while [ $# -ge 2 ]; do
-		if [ "$use_bridge_vlan" = 1 ]; then
-			uci add_list "network.@device[0].ports=bat0.$2"
-			uci add_list "network.vlan_${2}.ports=bat0.${2}:u*"
-		else
-			uci add_list "network.br_${1}.ports=bat0.$2"
-		fi
-		shift 2
+	for vid in "$lan_vid" ${GUEST_ENABLE:+$guest_vid} ${IOT_ENABLE:+$iot_vid} ${WG_ENABLE:+$wg_vid}; do
+		uci add_list "network.@device[0].ports=bat0.$vid"
+		uci add_list "network.vlan_${vid}.ports=bat0.${vid}:u*"
 	done
 }
 
