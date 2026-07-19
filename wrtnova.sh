@@ -852,6 +852,11 @@ get_channel() {
 	uci -q get wireless."$1".channel
 }
 
+get_phy_modes() {
+	{ iw phy "phy${1#radio}" info 2>/dev/null || iw phy phy0 info 2>/dev/null; } |
+	grep -A8 "Supported interface modes:"
+}
+
 def_pass="${DEFAULT_WIFI_PASSWD:-12345678}"
 lan_ssid="${LAN_WIFI_SSID:-WrtNova}"
 lan_pass="${LAN_WIFI_PASSWD:-$def_pass}"
@@ -870,7 +875,7 @@ radios="radio0 radio1 radio2 radio3"
 for r in $radios; do
 	b=$(get_band "$r") || continue
 	[ "$b" = 6g ] && has_6g=1
-	_phy=$(iw phy "phy${r#radio}" info 2>/dev/null) || _phy=$(iw phy phy0 info 2>/dev/null)
+	_phy=$(get_phy_modes "$r")
 	[ "$b" = 5g ] && ! echo "$_phy" | grep -Fq "* mesh point" && WIRELESS_MESH=
 	echo "$_phy" | grep -Fq "AP/VLAN" || PSK_VLAN=
 done
