@@ -136,6 +136,7 @@ export default {
   octetV6Invalid:   'El ID de host IPv6 debe tener 1-4 digitos hex y no ser 0, p. ej. 20 o ff',
   hostnameInvalid:  'El nombre de host "{field}" solo puede contener letras, digitos y guiones, con etiquetas de 1-63 caracteres y sin guion inicial ni final.',
   ddnsHostnameInvalid: 'El nombre de host DDNS "{field}" debe ser un nombre de dominio completo, p. ej. ddns.example.com.',
+  macInvalid:       'La direccion MAC WAN "{field}" debe tener seis pares hexadecimales separados por dos puntos, p. ej. F0:B4:29:2E:33:11.',
   portInvalid:      'Los puertos "{field}" deben ser numeros o rangos separados por espacios dentro de 1-65535, p. ej. 80 443 1000-2000.',
   pskVlanPass:      'El PSK por VLAN requiere una contraseña Wi-Fi única para cada red habilitada ({networks}) para dirigir a los clientes a la red correspondiente.',
   preparingBuild:   'Preparando compilación…',

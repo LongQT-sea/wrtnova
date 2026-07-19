@@ -7,7 +7,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
 import { parseList, serializeList, clampOctet4, ipv6OctetValid, firstInvalidIpv6Octet,
-  hostnameValid, ddnsHostnameValid, portListValid, firstInvalidHost, firstInvalidPort,
+  hostnameValid, ddnsHostnameValid, macValid, portListValid, firstInvalidHost, firstInvalidPort,
   normalizeEndpoint } from '../public/js/list-grammar.mjs';
 
 // ---------------------------------------------------------------------------
@@ -156,6 +156,24 @@ test('ddnsHostnameValid: empty passes; requires a dot (FQDN)', () => {
   assert.equal(ddnsHostnameValid('example.com'), true);
   assert.equal(ddnsHostnameValid('nodot'), false);            // single label rejected
   assert.equal(ddnsHostnameValid('bad_host.com'), false);     // still hostname-checked
+});
+
+// ---------------------------------------------------------------------------
+// macValid (WAN MAC address)
+// ---------------------------------------------------------------------------
+
+test('macValid: empty passes; six colon-separated hex pairs, any case', () => {
+  assert.equal(macValid(''), true);                       // empty = leave stock MAC
+  assert.equal(macValid('   '), true);                    // whitespace-only trims to empty
+  assert.equal(macValid('F0:B4:29:2E:33:11'), true);      // uppercase
+  assert.equal(macValid('f0:b4:29:2e:33:11'), true);      // lowercase
+  assert.equal(macValid('  F0:B4:29:2E:33:11  '), true);  // surrounding whitespace trimmed
+  assert.equal(macValid('F0:B4:29:2E:33'), false);        // only five octets
+  assert.equal(macValid('F0:B4:29:2E:33:11:22'), false);  // seven octets
+  assert.equal(macValid('F0-B4-29-2E-33-11'), false);     // hyphen separators rejected
+  assert.equal(macValid('F0:B4:29:2E:33:GG'), false);     // non-hex digit
+  assert.equal(macValid('F0:B4:29:2E:33:1'), false);      // single-digit octet
+  assert.equal(macValid('F0B4.292E.3311'), false);        // Cisco dotted form rejected
 });
 
 // ---------------------------------------------------------------------------

@@ -14,7 +14,7 @@ import { mergeNodeConfig } from './config-merge.mjs';
 import { IFACE_FIELDS, ifaceValid, PREFIX_FIELDS, prefixValid, WIFI_TEXT_FIELDS, wifiTextValid, pskVlanPassIssue } from './config-form.mjs';
 import { detectVlanConflict, truncateAdditionalVlans, SWCONFIG_VLAN_MAX } from './visibility.mjs';
 import { renderConfigBlock } from './render-config.mjs';
-import { parseList, firstInvalidIpv6Octet, hostnameValid, ddnsHostnameValid, firstInvalidHost, firstInvalidPort, portListValid, normalizeEndpoint } from './list-grammar.mjs';
+import { parseList, firstInvalidIpv6Octet, hostnameValid, ddnsHostnameValid, macValid, firstInvalidHost, firstInvalidPort, portListValid, normalizeEndpoint } from './list-grammar.mjs';
 import { parseAdditionalPackages } from './packages.mjs';
 import { createStore } from './store.mjs';
 
@@ -882,6 +882,8 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
         return;
       } else if (el.id === 'LOOKUP_HOSTNAME') {
         el.setCustomValidity(ddnsHostnameValid(el.value) ? '' : t('ddnsHostnameInvalid', { field: el.value }));
+      } else if (el.id === 'WAN_MAC_ADDR') {
+        el.setCustomValidity(macValid(el.value) ? '' : t('macInvalid', { field: el.value }));
       } else if (el.matches && el.matches('[data-col="host"]')) {
         el.setCustomValidity(hostnameValid(el.value) ? '' : t('hostnameInvalid', { field: el.value }));
       } else if (el.matches && el.matches('[data-col="ports"]')) {
@@ -1283,6 +1285,11 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
 
     if (!ddnsHostnameValid(mergedForCheck.LOOKUP_HOSTNAME)) {
       showPanelError(actEl, t('ddnsHostnameInvalid', { field: mergedForCheck.LOOKUP_HOSTNAME }), () => buildNode(net, node));
+      return;
+    }
+
+    if (!macValid(mergedForCheck.WAN_MAC_ADDR)) {
+      showPanelError(actEl, t('macInvalid', { field: mergedForCheck.WAN_MAC_ADDR }), () => buildNode(net, node));
       return;
     }
 

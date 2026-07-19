@@ -136,6 +136,7 @@ export default {
   octetV6Invalid:   'IPv6 主机 ID 必须是 1-4 位十六进制数且不能为 0，例如 20 或 ff',
   hostnameInvalid:  '主机名 "{field}" 只能包含字母、数字和连字符，每个标签 1-63 个字符，且不能以连字符开头或结尾。',
   ddnsHostnameInvalid: 'DDNS 主机名 "{field}" 必须是完全限定域名，例如 ddns.example.com。',
+  macInvalid:       'WAN MAC 地址 "{field}" 必须是六组以冒号分隔的十六进制数，例如 F0:B4:29:2E:33:11。',
   portInvalid:      '端口 "{field}" 必须是以空格分隔的数字或范围，且在 1-65535 之间，例如 80 443 1000-2000。',
   pskVlanPass:      '按 VLAN 分配 PSK 要求每个已启用的网络（{networks}）使用唯一的 Wi-Fi 密码，以便将客户端引导到对应的网络。',
   preparingBuild:   '准备构建…',

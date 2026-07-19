@@ -52,6 +52,13 @@ export function hostnameValid(v) {
   return !s || (s.length <= 253 && HOSTNAME_RE.test(s));
 }
 
+// Six colon-separated hex octets, e.g. F0:B4:29:2E:33:11 (upper or lower case),
+// the form LuCI accepts. @param {string} v @returns {boolean}
+export function macValid(v) {
+  const s = String(v == null ? '' : v).trim();
+  return !s || /^([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}$/.test(s);
+}
+
 /** RFC 1035 FQDN for DDNS: a hostname with a dot (e.g. ddns.example.com). @param {string} v @returns {boolean} */
 export function ddnsHostnameValid(v) {
   const s = String(v == null ? '' : v).trim();

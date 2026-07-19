@@ -136,6 +136,7 @@ export default {
   octetV6Invalid:   'IPv6-Host-ID muss 1-4 Hex-Ziffern und nicht 0 sein, z. B. 20 oder ff',
   hostnameInvalid:  'Hostname "{field}" darf nur Buchstaben, Ziffern und Bindestriche enthalten; Labels 1-63 Zeichen, ohne führenden oder abschließenden Bindestrich.',
   ddnsHostnameInvalid: 'DDNS-Hostname "{field}" muss ein vollqualifizierter Domainname sein, z. B. ddns.example.com.',
+  macInvalid:       'WAN-MAC-Adresse "{field}" muss aus sechs durch Doppelpunkt getrennten Hex-Paaren bestehen, z. B. F0:B4:29:2E:33:11.',
   portInvalid:      'Ports "{field}" müssen durch Leerzeichen getrennte Zahlen oder Bereiche zwischen 1-65535 sein, z. B. 80 443 1000-2000.',
   pskVlanPass:      'Per-VLAN-PSK erfordert ein eindeutiges WLAN-Passwort für jedes aktivierte Netzwerk ({networks}), um Clients ins passende Netzwerk zu leiten.',
   preparingBuild:   'Build wird vorbereitet…',

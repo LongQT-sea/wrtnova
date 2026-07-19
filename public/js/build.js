@@ -14,7 +14,7 @@ import { deriveNetRows, truncateAdditionalVlans, SWCONFIG_VLAN_MAX } from './vis
 import { createStore } from './store.mjs';
 import { renderConfigBlock } from './render-config.mjs';
 import { parseAdditionalPackages } from './packages.mjs';
-import { ipv6OctetValid, hostnameValid, ddnsHostnameValid, portListValid, normalizeEndpoint } from './list-grammar.mjs';
+import { ipv6OctetValid, hostnameValid, ddnsHostnameValid, macValid, portListValid, normalizeEndpoint } from './list-grammar.mjs';
 import { collectTarget, devicesState } from './devices.js';
 
   const $  = ui.$, $$ = ui.$$;
@@ -530,6 +530,20 @@ import { collectTarget, devicesState } from './devices.js';
     return null;
   }
 
+  // WAN MAC address: empty (leave the stock MAC) or six colon-separated hex
+  // octets (e.g. F0:B4:29:2E:33:11), the form LuCI accepts.
+  function refreshMacValidity(el) {
+    el.setCustomValidity('');
+    if (macValid(el.value)) return false;
+    el.setCustomValidity(t('macInvalid', { field: el.value }));
+    return true;
+  }
+  function checkMacFields() {
+    const el = $('#WAN_MAC_ADDR');
+    if (el && refreshMacValidity(el) && el.offsetParent !== null) return el;
+    return null;
+  }
+
   function refreshPortsValidity(el) {
     el.setCustomValidity('');
     if (portListValid(el.value)) return false;
@@ -573,6 +587,7 @@ import { collectTarget, devicesState } from './devices.js';
     else if (WIFI_TEXT_SET.has(el.id) && refreshWifiTextValidity(el)) el.reportValidity();
     else if (el.id === 'ENDPOINT') normalizeEndpointField();
     else if (el.id === 'LOOKUP_HOSTNAME') { if (refreshDdnsValidity(el)) el.reportValidity(); }
+    else if (el.id === 'WAN_MAC_ADDR') { if (refreshMacValidity(el)) el.reportValidity(); }
     else if (el.id === 'HOST_NAME' || (el.matches && el.matches('[data-col="host"]'))) { if (refreshHostnameValidity(el)) el.reportValidity(); }
     else if (el.matches && el.matches('[data-col="ports"]')) { if (refreshPortsValidity(el)) el.reportValidity(); }
   });
@@ -656,6 +671,8 @@ import { collectTarget, devicesState } from './devices.js';
     if (badHostname) { badHostname.reportValidity(); return; }
     const badDdns = checkDdnsFields();
     if (badDdns) { badDdns.reportValidity(); return; }
+    const badMac = checkMacFields();
+    if (badMac) { badMac.reportValidity(); return; }
     const badPorts = checkPortFields();
     if (badPorts) { badPorts.reportValidity(); return; }
 
