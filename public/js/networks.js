@@ -999,8 +999,7 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
     tbody.innerHTML = '';
     const rows = parseList(listStr);
     if (!rows.length) {
-      if (tableId === 'ipv6-table') addTableRow(tableId, 'docker-host', '20', '80 443');
-      else addTableRow(tableId);
+      addTableRow(tableId);
       return;
     }
     rows.forEach(r => addTableRow(tableId, r.host, r.octet, r.ports));

@@ -41,8 +41,6 @@ This repo implements the WrtNova firmware builder per docs/SPEC.md.
 - WARP API (`/api/warp/register`) returns uppercase keys: `WG_PRIVATE_KEY`,
   `PEER_PUBLIC_KEY`, `ENDPOINT`, `ENDPOINT_PORT`, `WG_IPV4`, `WG_IPV6`, `ALLOWED_IPS`.
   Use `wrtnova_warp_refresh` as the localStorage key (shared between pages).
-- IPv6 expose table empty state: pre-fill with `docker-host / 20 / 80 443` (matches
-  `ui.initDynamicRows` in ui.js).
 - WireGuard card (`#card-wg`): only auto-expand when the user directly toggles
   `WG_ENABLE` on. Check `e?.target?.id === 'WG_ENABLE'` in the visibility handler —
   never force `open = true` on form load.

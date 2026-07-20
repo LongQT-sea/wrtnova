@@ -130,10 +130,7 @@ import { deriveVisibility, deriveNetRows, detectVlanConflict, resolveVlanAssignm
   ui.addRow = addRow;
   ui.initDynamicRows = function () {
     addRow('portfwd');
-    const ipv6Row = addRow('ipv6');
-    ipv6Row.querySelector('[data-col="host"]').value  = 'docker-host';
-    ipv6Row.querySelector('[data-col="octet"]').value = '20';
-    ipv6Row.querySelector('[data-col="ports"]').value = '80 443';
+    addRow('ipv6');
     document.body.addEventListener('click', e => {
       const btn = e.target.closest('[data-add]');
       if (btn) addRow(btn.dataset.add);
