@@ -255,6 +255,7 @@ export default {
   advancedChannels:   'Zaawansowane kanały i rejestrowanie',
   channel2g:          'Kanał 2,4 GHz',
   channel5g:          'Kanał 5 GHz',
+  channel5g2:         'Kanał 5 GHz (drugie radio)',
   channel6g:          'Kanał 6 GHz',
   wifiLogLevel:       'Poziom logowania WiFi',
   dot11kv:            '802.11k/v',

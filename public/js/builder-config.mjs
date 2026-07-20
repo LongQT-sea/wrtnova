@@ -112,6 +112,7 @@ export function deriveConfig(raw) {
     LAN_WG_WIFI_PASSWD: wgOn ? v('LAN_WG_WIFI_PASSWD') : '',
     CHANNEL_2G:   v('CHANNEL_2G'),
     CHANNEL_5G:   v('CHANNEL_5G'),
+    CHANNEL_5G_2: v('CHANNEL_5G_2'),
     CHANNEL_6G:   v('CHANNEL_6G'),
     WIFI_LOG_LVL: v('WIFI_LOG_LVL'),
 

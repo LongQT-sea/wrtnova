@@ -255,6 +255,7 @@ export default {
   advancedChannels:   '高级信道和日志',
   channel2g:          '2.4 GHz 信道',
   channel5g:          '5 GHz 信道',
+  channel5g2:         '5 GHz 信道 (第二射频)',
   channel6g:          '6 GHz 信道',
   wifiLogLevel:       'WiFi 日志级别',
   dot11kv:            '802.11k/v',

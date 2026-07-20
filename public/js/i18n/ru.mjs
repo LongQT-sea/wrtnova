@@ -255,6 +255,7 @@ export default {
   advancedChannels:   'Расширенные каналы и журналирование',
   channel2g:          'Канал 2,4 ГГц',
   channel5g:          'Канал 5 ГГц',
+  channel5g2:         'Канал 5 ГГц (второй радиомодуль)',
   channel6g:          'Канал 6 ГГц',
   wifiLogLevel:       'Уровень логирования WiFi',
   dot11kv:            '802.11k/v',

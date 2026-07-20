@@ -86,6 +86,7 @@
  * @property {string} [LAN_WG_WIFI_PASSWD] sensitive
  * @property {string} [CHANNEL_2G]
  * @property {string} [CHANNEL_5G]
+ * @property {string} [CHANNEL_5G_2]
  * @property {string} [CHANNEL_6G]
  * @property {string} [WIFI_LOG_LVL]
  * @property {string} [WG_PRIVATE_KEY]     sensitive

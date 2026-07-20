@@ -61,7 +61,7 @@ export function mergeNodeConfig(sharedConfig, nodeOverrides) {
     GUEST_WIFI_SSID:  guestOn ? (c.GUEST_WIFI_SSID   || '') : '', GUEST_WIFI_PASSWD:  guestOn ? (c.GUEST_WIFI_PASSWD   || '') : '',
     IOT_WIFI_SSID:    iotOn   ? (c.IOT_WIFI_SSID     || '') : '', IOT_WIFI_PASSWD:    iotOn   ? (c.IOT_WIFI_PASSWD     || '') : '',
     LAN_WG_WIFI_SSID: wgOn   ? (c.LAN_WG_WIFI_SSID  || '') : '', LAN_WG_WIFI_PASSWD: wgOn   ? (c.LAN_WG_WIFI_PASSWD  || '') : '',
-    CHANNEL_2G: c.CHANNEL_2G || '', CHANNEL_5G: c.CHANNEL_5G || '', CHANNEL_6G: c.CHANNEL_6G || '',
+    CHANNEL_2G: c.CHANNEL_2G || '', CHANNEL_5G: c.CHANNEL_5G || '', CHANNEL_5G_2: c.CHANNEL_5G_2 || '', CHANNEL_6G: c.CHANNEL_6G || '',
     WIFI_LOG_LVL: c.WIFI_LOG_LVL || '',
     WG_PRIVATE_KEY:  wgOn && !isAp ? (c.WG_PRIVATE_KEY  || '') : '',
     PEER_PUBLIC_KEY: wgOn && !isAp ? (c.PEER_PUBLIC_KEY  || '') : '',

@@ -342,6 +342,11 @@ import { deriveVisibility, deriveNetRows, detectVlanConflict, resolveVlanAssignm
                  124, 128, 132, 136, 140, 144, 149, 153, 157, 161, 165],
     CHANNEL_6G: Array.from({ length: 59 }, (_, i) => 1 + i * 4),
   };
+  // High-band 5 GHz radio on a tri-band board: only UNII-2C + UNII-3 (the low
+  // band is served by CHANNEL_5G). wrtnova.sh always assigns this to the
+  // higher-frequency radio, so a low channel here would be nonsensical.
+  ui.WIFI_CHANNELS.CHANNEL_5G_2 = [100, 104, 108, 112, 116, 120, 124, 128, 132,
+                                   136, 140, 144, 149, 153, 157, 161, 165];
 
   ui.initChannelSelects = function () {
     Object.keys(ui.WIFI_CHANNELS).forEach(function (id) {

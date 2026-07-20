@@ -255,6 +255,7 @@ export default {
   advancedChannels:   'Erweiterte Kanäle & Protokollierung',
   channel2g:          '2,4-GHz-Kanal',
   channel5g:          '5-GHz-Kanal',
+  channel5g2:         '5-GHz-Kanal (zweites Funkmodul)',
   channel6g:          '6-GHz-Kanal',
   wifiLogLevel:       'WLAN-Protokollstufe',
   dot11kv:            '802.11k/v',
