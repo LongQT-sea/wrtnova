@@ -51,6 +51,7 @@ MESH_PASSWD=""
 CHANNEL_2G=
 CHANNEL_5G=
 CHANNEL_6G=
+CHANNEL_5G_2=		# High-band 5G channel (tri-band board)
 WIFI_LOG_LVL=
 WED_ENABLE=		# https://openwrt.org/docs/guide-user/network/wifi/wed
 
@@ -895,9 +896,10 @@ for radio in $radios; do
 	band=$(get_band "$radio") || continue
 	chan=$(get_channel "$radio")
 
+	ch2=
 	case "$band" in
 		2g) ch=$CHANNEL_2G; enc=psk2 ;;
-		5g) ch=$CHANNEL_5G; enc=sae-mixed ;;
+		5g) ch=$CHANNEL_5G; ch2=$CHANNEL_5G_2; enc=sae-mixed ;;
 		6g) ch=$CHANNEL_6G; enc=sae ;;
 	esac
 
@@ -919,7 +921,7 @@ for radio in $radios; do
 		[ "$role" = solo ] && [ "$band" = 5g ] && [ -n "$has_6g" ] && role=mesh
 	}
 
-	setup_radio "$radio" "$([ "$chan" = "$min" ] && echo "$ch")"
+	setup_radio "$radio" "$([ "$chan" = "$min" ] && echo "$ch" || echo "$ch2")"
 
 	while IFS='|' read -r mode ssid key network bands enabled vid enc_over; do
 		[ -n "$mode" ] && [ "$enabled" = 1 ] || continue
