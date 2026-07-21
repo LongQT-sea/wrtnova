@@ -450,12 +450,6 @@ EOF
 chmod +x /sbin/wg-check
 
 # === Network ===
-detect_hw() {
-	grep -sq DEVTYPE=dsa /sys/class/net/*/uevent && { echo dsa; return; }
-	swconfig list 2>/dev/null | grep -q '^Found:' && { echo swconfig; return; }
-	echo generic
-}
-
 add_bridge_vlan() {
 	local vlan_id="$1" ports="$2" iface="$3"
 
@@ -510,8 +504,8 @@ wg_vid=${LAN_WG_VLAN_ID:-15}
 wan_vid=${WAN_VLAN_ID:-20}
 wanb_vid=${WAN_B_VLAN_ID:-21}
 
-hw_type=$(detect_hw)
-[ "$hw_type" = swconfig ] && {
+swconfig list 2>/dev/null | grep -q '^Found:' && {
+	swconfig=1
 	sw_has_vid=1
 	switch_dev="$(uci -q get network.@switch_vlan[0].device)"
 
@@ -521,6 +515,7 @@ hw_type=$(detect_hw)
 	# must be sequential to match the VLAN table index (see add_switch_vlan()).
 	swconfig dev "$switch_dev" help | grep -q 'Attribute .*: vid' || {
 		sw_has_vid=
+		ADDITIONAL_VLAN_LIST=
 
 		lan_vid=1
 		guest_vid=2
@@ -653,13 +648,8 @@ bridge_wan_port=1
 # WAN port are untagged members of the WAN VLAN unless WAN_IS_TAGGED=1.
 # All ports carry tagged guest/iot/lan_wg/wanb VLANs as trunk ports.
 # AP mode: all ports are untagged on the LAN VLAN and tagged on all other VLANs.
-[ "$WAN_IS_TAGGED" = 1 ] && w_tag=t
-
-if [ "$hw_type" = "swconfig" ]; then
-	lan_eth="${lan_ports%%.*}"
-	br_ports="$lan_eth"
-
-	[ "$WIRELESS_MESH" = 1 ] && [ "$BATMAN_ADV" != 1 ] && br_ports="$lan_eth mesh0"
+if [ -n "$swconfig" ]; then
+	lan_ports="${lan_ports%%.*}"
 
 	# switch_vlan[0] is LAN, and switch_vlan[1] is WAN (see config_generate and uci-defaults.sh)
 	for port in $(uci -q get network.@switch_vlan[0].ports); do
@@ -698,50 +688,50 @@ if [ "$hw_type" = "swconfig" ]; then
 
 	[ -n "$sw_wan_port" ] && [ "$WAN_IS_TAGGED" = 1 ] && wan_vlan_ports="$trunk_ports"
 
-	src_ports="$br_ports"
-	[ "$AP_MODE" = 1 ] && [ -z "$sw_wan_port" ] && src_ports="$br_ports $wan_port"
-
-	for port in $src_ports; do
-		br_vlan_trunk="${br_vlan_trunk:+$br_vlan_trunk }$port:t"
-	done
-
-	br_vlan_wan="$br_vlan_trunk"
-
-	[ "$AP_MODE" != 1 ] && [ -z "$sw_wan_port" ] && [ "$bridge_wan_port" = 1 ] && {
-		br_ports="$br_ports $wan_port"
-		br_vlan_wan="$br_vlan_trunk $wan_port:${w_tag:-u*}"
-	}
-
 	while uci -q del network.@switch_vlan[0]; do :; done
 
 	add_vlan() { add_switch_vlan "$@"; }
-else
-	[ "$AP_MODE" = 1 ] && [ "$wan_port" = br-wan ] && {
-		wan_port="$(uci -q get network.@device[1].ports)"
-		uci del network.@device[1]
-	}
+fi
 
-	[ "$WIRELESS_MESH" = 1 ] && [ "$BATMAN_ADV" != 1 ] && lan_ports="$lan_ports mesh0"
+[ "$AP_MODE" = 1 ] && [ "$wan_port" = br-wan ] && {
+	wan_port="$(uci -q get network.@device[1].ports)"
+	uci del network.@device[1]
+}
 
-	src_ports="$lan_ports"
-	[ "$AP_MODE" = 1 ] && src_ports="$lan_ports $wan_port"
+br_ports="$lan_ports"
+[ "$AP_MODE" = 1 ] && [ -z "$sw_wan_port" ] && br_ports="$lan_ports $wan_port"
+[ "$WIRELESS_MESH" = 1 ] && [ "$BATMAN_ADV" != 1 ] && br_ports="$br_ports mesh0"
 
-	for port in $src_ports; do
+[ -z "$swconfig" ] && {
+	for port in $br_ports; do
 		trunk_ports="${trunk_ports:+$trunk_ports }$port:t"
 		lan_vlan_ports="${lan_vlan_ports:+$lan_vlan_ports }$port:u*"
-		wan_vlan_ports="${wan_vlan_ports:+$wan_vlan_ports }$port:t"
 	done
 
-	[ "$AP_MODE" != 1 ] && [ "$bridge_wan_port" = 1 ] && [ -n "$wan_port" ] && {
+	wan_vlan_ports="$trunk_ports"
+
+	add_vlan() { add_bridge_vlan "$@"; }
+}
+
+for port in $br_ports; do
+	br_vlan_trunk="${br_vlan_trunk:+$br_vlan_trunk }$port:t"
+done
+
+br_vlan_wan="$br_vlan_trunk"
+
+[ "$WAN_IS_TAGGED" = 1 ] && w_tag=t
+
+[ "$AP_MODE" != 1 ] && [ "$bridge_wan_port" = 1 ] && [ -n "$wan_port" ] && [ -z "$sw_wan_port" ] && {
+	br_ports="$br_ports $wan_port"
+	br_vlan_trunk="$br_vlan_trunk $wan_port:t"
+	br_vlan_wan="$br_vlan_wan $wan_port:${w_tag:-u*}"
+
+	[ -z "$swconfig" ] && {
 		lan_vlan_ports="$lan_vlan_ports $wan_port:t"
 		trunk_ports="$trunk_ports $wan_port:t"
 		wan_vlan_ports="$wan_vlan_ports $wan_port:${w_tag:-u*}"
 	}
-
-	br_ports="$lan_ports ${bridge_wan_port:+$wan_port}"
-
-	add_vlan() { add_bridge_vlan "$@"; }
-fi
+}
 
 [ "$TAGGED_LAN_VLAN" = 1 ] && lan_vlan_ports="$trunk_ports"
 
@@ -759,6 +749,8 @@ add_vlan "$lan_vid" "$lan_vlan_ports" "$lan_if"
 [ "$WG_ENABLE" = 1 ] && add_vlan "$wg_vid" "$trunk_ports" "$lan_wg_if"
 [ "$bridge_wan_port" = 1 ] && add_vlan "$wan_vid" "$wan_vlan_ports" wan
 [ "$WAN_B_ENABLE" = 1 ] && add_vlan "$wanb_vid" "$trunk_ports" wanb
+
+[ -n "$wan_cpu_port" ] && uci set network.wan.device="$wan_port.$wan_vid"
 
 set +x
 for vid in $(expand_vlan "$ADDITIONAL_VLAN_LIST"); do
