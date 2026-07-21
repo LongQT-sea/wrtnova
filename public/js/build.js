@@ -127,7 +127,7 @@ import { collectTarget, devicesState } from './devices.js';
   // default for the selected device, but never override an explicit user choice.
   function applyDnsDefaultForTarget(target) {
     if (dnsModeTouched) return;
-    const desired = target && !isSwconfigTarget(target.target) ? 'adguardhome' : 'https-dns-proxy';
+    const desired = target && isSwconfigTarget(target.target) ? 'https-dns-proxy' : 'adguardhome';
     const cur = (store ? store.get().DNS_MODE : '') || 'https-dns-proxy';
     if (cur === desired) return;
     // Leaving AdGuard Home also clears its port-53 sub-option (mirrors tryAutoRetry).
