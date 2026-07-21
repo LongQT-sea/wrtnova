@@ -26,6 +26,7 @@ DOT11R=1		# 1 = enable fast transition support (802.11r)
 DENSE_ENV=		# 1 = optimize roaming and steering for high-interference areas
 PSK_VLAN=		# 1 = one SSID; wifi password determines which VLAN the client joins
 BAND_SUFFIX=		# 1 = append band (2G/5G/6G) to the end of the SSID
+AP_DISABLE=		# 1 = disable all AP interfaces, useful for backhaul-only nodes
 
 LAN_WIFI_SSID=""	# Default: WrtNova
 LAN_WIFI_PASSWD=""
@@ -42,7 +43,8 @@ LAN_WG_WIFI_SSID=""	# Default: WrtNova_VPN
 LAN_WG_WIFI_PASSWD=""
 
 # NOTE: Wired backhaul is always better when feasible
-WIRELESS_MESH=		# 1 = use wireless mesh backhaul (802.11s)
+WIRELESS_MESH=		# 1 = use 5GHz wireless mesh backhaul (802.11s)
+WIRELESS_MESH_2G=	# 1 = use 2.4GHz wireless mesh backhaul (802.11s)
 BATMAN_ADV=		# 1 = use batman-adv on top of 802.11s meshpoint
 MESH_ID=
 MESH_PASSWD=""
@@ -288,6 +290,7 @@ has_pkg wpad-mesh && wpad_mesh=1
 	DOT11KV=
 	[ -z "$wpad_mesh" ] && {
 		WIRELESS_MESH=
+		WIRELESS_MESH_2G=
 		BATMAN_ADV=
 	}
 }
@@ -297,6 +300,7 @@ has_pkg luci-proto-batman || BATMAN_ADV=
 uci -q get wireless || {
 	no_wifi=1
 	WIRELESS_MESH=
+	WIRELESS_MESH_2G=
 	BATMAN_ADV=
 }
 
@@ -457,7 +461,9 @@ add_bridge_vlan() {
 		device=br-vlan vlan="$vlan_id" local=0 "${iface:+-local}"
 
 	for p in $ports; do
-		[ "$p" = "mesh0:u*" ] && p=mesh0:t
+		case "$p" in
+			mesh*:u*) p="${p%u*}t" ;;
+		esac
 		uci add_list "network.vlan_$vlan_id.ports=$p"
 	done
 
@@ -700,7 +706,10 @@ fi
 
 br_ports="$lan_ports"
 [ "$AP_MODE" = 1 ] && [ -z "$sw_wan_port" ] && br_ports="$lan_ports $wan_port"
-[ "$WIRELESS_MESH" = 1 ] && [ "$BATMAN_ADV" != 1 ] && br_ports="$br_ports mesh0"
+[ "$BATMAN_ADV" != 1 ] && {
+	[ "$WIRELESS_MESH" = 1 ] && br_ports="$br_ports mesh0"
+	[ "$WIRELESS_MESH_2G" = 1 ] && br_ports="$br_ports mesh1"
+}
 
 [ -z "$swconfig" ] && {
 	for port in $br_ports; do
@@ -806,7 +815,7 @@ add_wifi_iface() {
 
 	[ "$net" = "$guest_if" ] && [ -n "$GUEST_ISOLATE" ] && set -- "$@" isolate=1 bridge_isolate=1
 
-	[ "$mode" = mesh ] && set -- "$@" -ssid mesh_id="$ssid" ifname="$net" ${BATMAN_ADV:+mesh_fwding=0}
+	[ "$mode" = mesh ] && set -- "$@" -ssid mesh_id="${ssid}_$band" ifname="$net" ${BATMAN_ADV:+mesh_fwding=0}
 
 	[ "$DOT11KV" = 1 ] && [ "$mode" = ap ] && set -- "$@" ieee80211k=1 bss_transition=1
 
@@ -826,6 +835,8 @@ add_wifi_iface() {
 			[ "$os_version" -ge 25 ] && set -- "$@" +hostapd_bss_options='vlan_no_bridge=1'
 		fi
 	}
+
+	[ "$AP_DISABLE" = 1 ] && [ "$mode" = ap ] && set -- "$@" disabled=1
 
 	_uci wireless wifi-iface "${dev}_$net" "$@"
 }
@@ -859,9 +870,10 @@ iot_ssid="${IOT_WIFI_SSID:-WrtNova_IoT}"
 iot_pass="${IOT_WIFI_PASSWD:-$def_pass}"
 lan_wg_ssid="${LAN_WG_WIFI_SSID:-WrtNova_VPN}"
 lan_wg_pass="${LAN_WG_WIFI_PASSWD:-$def_pass}"
-mesh_id="${MESH_ID:-mesh0_5ghz}"
+mesh_id="${MESH_ID:-mesh_trunk_backhaul}"
 mesh_pass="${MESH_PASSWD:-$def_pass}"
-mesh_iface=${BATMAN_ADV:+bat0_}mesh0
+mesh0_if=${BATMAN_ADV:+bat0_}mesh0
+mesh1_if=${BATMAN_ADV:+bat0_}mesh1
 
 radios="radio0 radio1 radio2 radio3"
 
@@ -870,6 +882,7 @@ for r in $radios; do
 	[ "$b" = 6g ] && has_6g=1
 	_phy=$(get_phy_modes "$r")
 	[ "$b" = 5g ] && ! echo "$_phy" | grep -Fq "* mesh point" && WIRELESS_MESH=
+	[ "$b" = 2g ] && ! echo "$_phy" | grep -Fq "* mesh point" && WIRELESS_MESH_2G=
 	echo "$_phy" | grep -Fq "AP/VLAN" || PSK_VLAN=
 done
 
@@ -879,7 +892,8 @@ ap|$lan_ssid|$lan_pass|$lan_if|2g 5g 6g|1|$lan_vid|
 ap|$guest_ssid|$guest_pass|$guest_if|2g 5g 6g|$GUEST_ENABLE|$guest_vid|
 ap|$iot_ssid|$iot_pass|$iot_if|2g 5g|$IOT_ENABLE|$iot_vid|
 ap|$lan_wg_ssid|$lan_wg_pass|$lan_wg_if|2g 5g 6g|$WG_ENABLE|$wg_vid|
-mesh|$mesh_id|$mesh_pass|$mesh_iface|5g|$WIRELESS_MESH||sae
+mesh|$mesh_id|$mesh_pass|$mesh0_if|5g|$WIRELESS_MESH||sae
+mesh|$mesh_id|$mesh_pass|$mesh1_if|2g|$WIRELESS_MESH_2G||sae
 "
 
 while uci -q del wireless.@wifi-iface[0]; do :; done
@@ -930,13 +944,22 @@ for radio in $radios; do
 	EOF
 done
 
-[ "$WIRELESS_MESH" = 1 ] && {
-	hplug_mesh=/etc/hotplug.d/net/94-ifup-$mesh_iface
-	set_mesh_param="iw dev $mesh_iface set mesh_param"
+if [ "$WIRELESS_MESH" = 1 ] || [ "$WIRELESS_MESH_2G" = 1 ]; then
+	hplug_mesh=/etc/hotplug.d/net/94-ifup-mesh
+	set_mesh_param='iw dev "$DEVICENAME" set mesh_param'
 	cat > "$hplug_mesh" <<-EOF
 	[ add = "\$ACTION" ] || exit 0
-	[ $mesh_iface = "\$DEVICENAME" ] || exit 0
+	case "\$DEVICENAME" in
+		mesh*) ;;
+		*) exit 0 ;;
+	esac
 	sleep 4
+
+	case "\$DEVICENAME" in
+		mesh0) bridge link set dev mesh0 cost 200 ;;
+		mesh1) bridge link set dev mesh1 cost 300 ;;
+	esac
+
 	/etc/init.d/network reload
 	$set_mesh_param mesh_rssi_threshold -78
 	$set_mesh_param mesh_max_peer_links 9
@@ -946,7 +969,7 @@ done
 		echo "$set_mesh_param mesh_hwmp_rootmode 2" >> "$hplug_mesh"
 		echo "$set_mesh_param mesh_gate_announcements 1" >> "$hplug_mesh"
 	}
-}
+fi
 
 # https://openwrt.org/docs/guide-user/network/wifi/usteer
 [ -x /sbin/usteerd ] && {
@@ -973,9 +996,10 @@ done
 }
 
 # === batman-adv ===
-[ "$WIRELESS_MESH" = 1 ] && [ "$BATMAN_ADV" = 1 ] && {
+[ "$BATMAN_ADV" = 1 ] && {
 	_uci network interface bat0 proto=batadv aggregated_ogms=1 bridge_loop_avoidance=1
-	_uci network interface bat0_mesh0 proto=batadv_hardif mtu=2304 master=bat0
+	[ "$WIRELESS_MESH" = 1 ] && _uci network interface "$mesh0_if" proto=batadv_hardif mtu=2304 master=bat0
+	[ "$WIRELESS_MESH_2G" = 1 ] && _uci network interface "$mesh1_if" proto=batadv_hardif mtu=2304 master=bat0
 
 	for vid in "$lan_vid" ${GUEST_ENABLE:+$guest_vid} ${IOT_ENABLE:+$iot_vid} ${WG_ENABLE:+$wg_vid}; do
 		uci add_list "network.@device[0].ports=bat0.$vid"
