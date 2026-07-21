@@ -20,7 +20,8 @@ export function mergeNodeConfig(sharedConfig, nodeOverrides) {
   const c = Object.assign({}, sharedConfig, nodeOverrides);
   const isAp    = c.AP_MODE       === '1';
   const wgOn    = c.WG_ENABLE     === '1';
-  const meshOn  = c.WIRELESS_MESH === '1';
+  const meshOn  = c.WIRELESS_MESH === '1' || c.WIRELESS_MESH_2G === '1';
+  const bothMesh = c.WIRELESS_MESH === '1' && c.WIRELESS_MESH_2G === '1';
   const guestOn = c.GUEST_ENABLE  === '1';
   const iotOn   = c.IOT_ENABLE    === '1';
   const flag = v => v === '1' ? '1' : '';
@@ -54,8 +55,8 @@ export function mergeNodeConfig(sharedConfig, nodeOverrides) {
     LAN_WG_BASE_PREFIX: wgOn  ? (c.LAN_WG_BASE_PREFIX || '') : '', LAN_WG_IFACE: wgOn  ? (c.LAN_WG_IFACE || '') : '', LAN_WG_VLAN_ID: vlan.LAN_WG_VLAN_ID, LAN_WG_SUBNET: wgOn  ? (c.LAN_WG_SUBNET || '') : '',
     ADDITIONAL_VLAN_LIST: c.ADDITIONAL_VLAN_LIST || '', TAGGED_LAN_VLAN: flag(c.TAGGED_LAN_VLAN),
     P_STEERING: c.P_STEERING || '', ULA_PREFIX: c.ULA_PREFIX || '',
-    COUNTRY_CODE: c.COUNTRY_CODE || '', DENSE_ENV: flag(c.DENSE_ENV), WIRELESS_MESH: flag(c.WIRELESS_MESH), DOT11KV: flag(c.DOT11KV), DOT11R: flag(c.DOT11R), PSK_VLAN: flag(c.PSK_VLAN), BAND_SUFFIX: flag(c.BAND_SUFFIX), GUEST_ISOLATE: guestOn ? flag(c.GUEST_ISOLATE) : '',
-    BRIDGE_STP: meshOn ? flag(c.BRIDGE_STP) : '',
+    COUNTRY_CODE: c.COUNTRY_CODE || '', DENSE_ENV: flag(c.DENSE_ENV), WIRELESS_MESH: flag(c.WIRELESS_MESH), WIRELESS_MESH_2G: flag(c.WIRELESS_MESH_2G), DOT11KV: flag(c.DOT11KV), DOT11R: flag(c.DOT11R), PSK_VLAN: flag(c.PSK_VLAN), BAND_SUFFIX: flag(c.BAND_SUFFIX), AP_DISABLE: flag(c.AP_DISABLE), GUEST_ISOLATE: guestOn ? flag(c.GUEST_ISOLATE) : '',
+    BRIDGE_STP: meshOn ? (bothMesh ? '1' : flag(c.BRIDGE_STP)) : '',
     MESH_ID: meshOn ? (c.MESH_ID || '') : '', MESH_PASSWD: meshOn ? (c.MESH_PASSWD || '') : '',
     LAN_WIFI_SSID: c.LAN_WIFI_SSID || '', LAN_WIFI_PASSWD: c.LAN_WIFI_PASSWD || '',
     GUEST_WIFI_SSID:  guestOn ? (c.GUEST_WIFI_SSID   || '') : '', GUEST_WIFI_PASSWD:  guestOn ? (c.GUEST_WIFI_PASSWD   || '') : '',

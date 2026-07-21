@@ -601,7 +601,7 @@
         <div class="mesh-only hidden">
           <div class="form-row">
             <label for="MESH_ID" class="form-label" data-i18n="meshId">Mesh ID</label>
-            <input type="text" id="MESH_ID" name="MESH_ID" class="input-base" placeholder="mesh0_5ghz">
+            <input type="text" id="MESH_ID" name="MESH_ID" class="input-base" placeholder="mesh_trunk_backhaul">
           </div>
           <div class="form-row">
             <label for="MESH_PASSWD" class="form-label" data-i18n="meshPassword">Mesh password</label>
@@ -615,6 +615,8 @@
             </div>
           </div>
         </div>
+
+        <div class="info-note mesh-only hidden" role="note" data-i18n="meshTrunkNote">Note: All configured VLANs are automatically trunked over the mesh backhaul.</div>
 
         <div class="sub-section">
           <p class="sub-section-title" data-i18n="networkSsids">Network SSIDs</p>
@@ -752,6 +754,31 @@
                   <span class="toggle-thumb"></span>
                 </span>
                 <span class="toggle-text" data-i18n="guestIsolateHelp">Prevent communication between guest clients</span>
+              </label>
+            </div>
+            <div class="form-row">
+              <label class="form-label" data-i18n="wirelessMesh2g">2.4 GHz mesh</label>
+              <div>
+                <label class="toggle-label">
+                  <span class="toggle-wrap">
+                    <input type="checkbox" id="WIRELESS_MESH_2G" name="WIRELESS_MESH_2G" value="1" class="toggle-input">
+                    <span class="toggle-track"></span>
+                    <span class="toggle-thumb"></span>
+                  </span>
+                  <span class="toggle-text" data-i18n="enableMeshBackhaul2G">Enable 2.4 GHz 802.11s mesh backhaul</span>
+                </label>
+                <p class="form-help" data-i18n="mesh2gNote">Longer range than 5GHz; may need tuning to improve throughput.</p>
+              </div>
+            </div>
+            <div class="form-row">
+              <label class="form-label" data-i18n="backhaulOnly">Backhaul-only</label>
+              <label class="toggle-label">
+                <span class="toggle-wrap">
+                  <input type="checkbox" id="AP_DISABLE" name="AP_DISABLE" value="1" class="toggle-input">
+                  <span class="toggle-track"></span>
+                  <span class="toggle-thumb"></span>
+                </span>
+                <span class="toggle-text" data-i18n="disableAllAps">Turn off AP interfaces (useful for backhaul-only nodes)</span>
               </label>
             </div>
             <div class="form-row">

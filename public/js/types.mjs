@@ -70,7 +70,9 @@
  * @property {string} [DOT11R]             flag (802.11r)
  * @property {string} [PSK_VLAN]           flag (per-VLAN PSK)
  * @property {string} [BAND_SUFFIX]        flag (append band to SSID)
- * @property {string} [WIRELESS_MESH]      flag
+ * @property {string} [AP_DISABLE]         flag (disable all AP ifaces; backhaul-only node)
+ * @property {string} [WIRELESS_MESH]      flag (5GHz 802.11s backhaul)
+ * @property {string} [WIRELESS_MESH_2G]   flag (2.4GHz 802.11s backhaul)
  * @property {string} [BRIDGE_STP]         flag
  * @property {string} [MESH_ID]
  * @property {string} [MESH_PASSWD]        sensitive

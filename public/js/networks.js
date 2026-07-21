@@ -104,7 +104,7 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
       wan_type: 'dhcp', PPPOE_USERNAME: '', PPPOE_PASSWD: '',
       WAN_MAC_ADDR: '', WAN_IS_TAGGED: '', WAN_VLAN_ID: '',
       WAN_B_ENABLE: '', WAN_B_VLAN_ID: '', BRIDGE_WAN_PORT: '',
-      COUNTRY_CODE: '', DENSE_ENV: '', WIRELESS_MESH: '', BRIDGE_STP: '',
+      COUNTRY_CODE: '', DENSE_ENV: '', WIRELESS_MESH: '', WIRELESS_MESH_2G: '', BRIDGE_STP: '',
       MESH_ID: '', MESH_PASSWD: '',
       LAN_WIFI_SSID: '', LAN_WIFI_PASSWD: '',
       GUEST_WIFI_SSID: '', GUEST_WIFI_PASSWD: '',
@@ -125,22 +125,22 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
     };
   }
 
-  function defaultRouterNode(meshDefault = '') {
+  function defaultRouterNode(meshDefault = '', mesh2gDefault = '') {
     return {
       id: uid(), name: 'Main Router',
       device_target: emptyTarget(),
-      overrides: { AP_MODE: '', WIRELESS_MESH: meshDefault === '1' ? '1' : '' },
+      overrides: { AP_MODE: '', WIRELESS_MESH: meshDefault === '1' ? '1' : '', WIRELESS_MESH_2G: mesh2gDefault === '1' ? '1' : '' },
       last_build: null,
     };
   }
 
   const AP_ROOM_NAMES = ['Living Room', 'Kitchen', 'Bedroom', 'Office', 'Garage', 'Dining Room'];
 
-  function defaultApNode(idx, meshDefault = '') {
+  function defaultApNode(idx, meshDefault = '', mesh2gDefault = '') {
     return {
       id: uid(), name: AP_ROOM_NAMES[idx - 2] ?? 'AP-' + idx,
       device_target: emptyTarget(),
-      overrides: { AP_MODE: '1', AP_INDEX: String(idx), WIRELESS_MESH: meshDefault === '1' ? '1' : '' },
+      overrides: { AP_MODE: '1', AP_INDEX: String(idx), WIRELESS_MESH: meshDefault === '1' ? '1' : '', WIRELESS_MESH_2G: mesh2gDefault === '1' ? '1' : '' },
       last_build: null,
     };
   }
@@ -590,6 +590,8 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
     const isAp = node.overrides.AP_MODE === '1';
     const cfg = net.shared_config;
     const meshChecked = node.overrides.WIRELESS_MESH === '1';
+    const meshChecked2g = node.overrides.WIRELESS_MESH_2G === '1';
+    const apDisableChecked = node.overrides.AP_DISABLE === '1';
     // Per-device override on top of the misc-card default (core count varies per
     // node). No stored override means inherit the network-wide IRQBALANCE.
     const irqChecked = 'IRQBALANCE' in node.overrides
@@ -626,6 +628,28 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
       '<span class="toggle-track"></span><span class="toggle-thumb"></span></span>' +
       '<span class="toggle-text text-xs">' + S.useIrqbalance + '</span></label></div>';
 
+    // Per-node 2.4GHz mesh override only where the network opts in (shared WIRELESS_MESH_2G).
+    const mesh2gToggle = cfg.WIRELESS_MESH_2G === '1'
+      ? '<label class="toggle-label" style="margin-top:.4rem"><span class="toggle-wrap">' +
+        '<input type="checkbox" class="toggle-input" id="np-mesh2g-' + id + '"' + (meshChecked2g ? ' checked' : '') + '>' +
+        '<span class="toggle-track"></span><span class="toggle-thumb"></span></span>' +
+        '<span class="toggle-text text-xs">' + S.enableMeshBackhaul2G + '</span></label>'
+      : '';
+
+    const wifiRows =
+      (hasWifi ? '<div class="form-row"><span class="form-label">' + S.wirelessMesh + '</span>' +
+      '<div><label class="toggle-label"><span class="toggle-wrap">' +
+      '<input type="checkbox" class="toggle-input" id="np-mesh-' + id + '"' + (meshChecked ? ' checked' : '') + '>' +
+      '<span class="toggle-track"></span><span class="toggle-thumb"></span></span>' +
+      '<span class="toggle-text text-xs">' + S.enableMeshBackhaul + '</span></label>' +
+      mesh2gToggle + '</div></div>' : '') +
+      (hasWifi ? '<div class="form-row"><span class="form-label">' + S.backhaulOnly + '</span>' +
+      '<label class="toggle-label"><span class="toggle-wrap">' +
+      '<input type="checkbox" class="toggle-input" id="np-apdisable-' + id + '"' + (apDisableChecked ? ' checked' : '') + '>' +
+      '<span class="toggle-track"></span><span class="toggle-thumb"></span></span>' +
+      '<span class="toggle-text text-xs">' + S.disableAllAps + '</span></label></div>' : '') +
+      nonCtRow + wedRow + irqRow;
+
     let fields;
     const deviceRow =
       '<div class="form-row" style="margin-top:0">' +
@@ -647,12 +671,7 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
         '<div class="form-row"><label class="form-label" for="np-host-' + id + '">' + S.hostname + '</label>' +
         '<input class="input-base" id="np-host-' + id + '" value="' + esc(node.overrides.HOST_NAME || '') + '" placeholder="WrtNova" style="max-width:220px"></div>' +
 
-        (hasWifi ? '<div class="form-row"><span class="form-label">' + S.wirelessMesh + '</span>' +
-        '<label class="toggle-label"><span class="toggle-wrap">' +
-        '<input type="checkbox" class="toggle-input" id="np-mesh-' + id + '"' + (meshChecked ? ' checked' : '') + '>' +
-        '<span class="toggle-track"></span><span class="toggle-thumb"></span></span>' +
-        '<span class="toggle-text text-xs">' + S.enableMeshBackhaul + '</span></label></div>' : '') +
-        nonCtRow + wedRow + irqRow;
+        wifiRows;
     } else {
       fields = deviceRow +
         versionRow(id, verOverride, cfg.shared_version) +
@@ -667,12 +686,7 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
         '<div><input type="number" class="input-base" id="np-apidx-' + id + '" min="2" max="19" value="' + esc(node.overrides.AP_INDEX || '2') + '" style="max-width:90px">' +
         '</div></div>' +
 
-        (hasWifi ? '<div class="form-row"><span class="form-label">' + S.wirelessMesh + '</span>' +
-        '<label class="toggle-label"><span class="toggle-wrap">' +
-        '<input type="checkbox" class="toggle-input" id="np-mesh-' + id + '"' + (meshChecked ? ' checked' : '') + '>' +
-        '<span class="toggle-track"></span><span class="toggle-thumb"></span></span>' +
-        '<span class="toggle-text text-xs">' + S.enableMeshBackhaul + '</span></label></div>' : '') +
-        nonCtRow + wedRow + irqRow;
+        wifiRows;
     }
 
     return (
@@ -759,6 +773,12 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
     const meshInp = panel.querySelector('#np-mesh-' + node.id);
     if (meshInp) node.overrides.WIRELESS_MESH = meshInp.checked ? '1' : '';
 
+    const mesh2gInp = panel.querySelector('#np-mesh2g-' + node.id);
+    if (mesh2gInp) node.overrides.WIRELESS_MESH_2G = mesh2gInp.checked ? '1' : '';
+
+    const apDisableInp = panel.querySelector('#np-apdisable-' + node.id);
+    if (apDisableInp) node.overrides.AP_DISABLE = apDisableInp.checked ? '1' : '';
+
     const nonCtInp = panel.querySelector('#np-nonct-' + node.id);
     if (nonCtInp) node.overrides.NON_CT_ATH10K = nonCtInp.checked ? '1' : '';
 
@@ -841,7 +861,10 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
       // once setup is done and never clobbers a manually-edited node.
       if (isNew) {
         const router = net.nodes.find(n => n.overrides.AP_MODE !== '1');
-        if (router) router.overrides.WIRELESS_MESH = net.shared_config.WIRELESS_MESH === '1' ? '1' : '';
+        if (router) {
+          router.overrides.WIRELESS_MESH = net.shared_config.WIRELESS_MESH === '1' ? '1' : '';
+          router.overrides.WIRELESS_MESH_2G = net.shared_config.WIRELESS_MESH_2G === '1' ? '1' : '';
+        }
       }
       net.updated_at = Date.now();
       saveNetworks();
@@ -1038,7 +1061,7 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
     const net = {
       id: 'net_' + uid(), name,
       shared_config: shared,
-      nodes: [defaultRouterNode(shared.WIRELESS_MESH)],
+      nodes: [defaultRouterNode(shared.WIRELESS_MESH, shared.WIRELESS_MESH_2G)],
       created_at: Date.now(), updated_at: Date.now(),
     };
     st.networks.push(net);
@@ -1123,7 +1146,7 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
     const net = getNet(networkId);
     if (!net) return;
     const idx = nextApIdx(net);
-    const node = defaultApNode(idx, net.shared_config.WIRELESS_MESH);
+    const node = defaultApNode(idx, net.shared_config.WIRELESS_MESH, net.shared_config.WIRELESS_MESH_2G);
     net.nodes.push(node);
     net.updated_at = Date.now();
     saveNetworks();

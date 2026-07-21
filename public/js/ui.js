@@ -281,6 +281,21 @@ import { deriveVisibility, deriveNetRows, detectVlanConflict, resolveVlanAssignm
           iotFt.dispatchEvent(new Event('change', { bubbles: true }));
         }
       }
+      // When both 2.4GHz and 5GHz mesh backhauls are on, two 802.11s meshpoints
+      // are bridged into br-vlan and can form an L2 loop; force BRIDGE_STP checked
+      // and disabled so the toggle reflects the built config (same disable/force/dispatch pattern).
+      const mesh5 = ui.$('#WIRELESS_MESH');
+      const mesh2g = ui.$('#WIRELESS_MESH_2G');
+      const stp = ui.$('#BRIDGE_STP');
+      if (stp && mesh5 && mesh2g) {
+        const bothMesh = mesh5.checked && mesh2g.checked;
+        stp.disabled = bothMesh;
+        if (bothMesh && !stp.checked) {
+          stp.checked = true;
+          stp.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+      }
+
       const wgRouter = cfg.WG_ENABLE === '1' && cfg.AP_MODE !== '1';
       if (wgRouter && e && e.target && e.target.id === 'WG_ENABLE') {
         const wgCard = ui.$('#card-wg');

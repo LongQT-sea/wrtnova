@@ -35,7 +35,9 @@ export function deriveConfig(raw) {
   const wanType  = v('wan_type') || 'dhcp';
   const isRouter = apMode !== '1';
   const wgOn     = r.WG_ENABLE     === '1';
-  const meshOn   = r.WIRELESS_MESH === '1';
+  const meshOn   = r.WIRELESS_MESH === '1' || r.WIRELESS_MESH_2G === '1';
+  // Two meshpoints bridged into br-vlan can loop;
+  const bothMesh = r.WIRELESS_MESH === '1' && r.WIRELESS_MESH_2G === '1';
   const guestOn  = r.GUEST_ENABLE  === '1';
   const iotOn    = r.IOT_ENABLE    === '1';
 
@@ -95,8 +97,10 @@ export function deriveConfig(raw) {
     DOT11R:         v('DOT11R'),
     PSK_VLAN:       v('PSK_VLAN'),
     BAND_SUFFIX:    v('BAND_SUFFIX'),
-    WIRELESS_MESH:  v('WIRELESS_MESH'),
-    BRIDGE_STP:     meshOn ? v('BRIDGE_STP')  : '',
+    AP_DISABLE:     v('AP_DISABLE'),
+    WIRELESS_MESH:    v('WIRELESS_MESH'),
+    WIRELESS_MESH_2G: v('WIRELESS_MESH_2G'),
+    BRIDGE_STP:     meshOn ? (bothMesh ? '1' : v('BRIDGE_STP')) : '',
     MESH_ID:        meshOn ? v('MESH_ID')     : '',
     MESH_PASSWD:    meshOn ? v('MESH_PASSWD') : '',
 
