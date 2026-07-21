@@ -123,13 +123,15 @@ test('deriveConfig: AP mode blanks WAN-B/forward/DDNS/failover, keeps AP_INDEX',
   }
 });
 
-test('deriveConfig: WAN_MAC/IS_TAGGED still leak in AP mode, but WAN_VLAN_ID is cleared', () => {
-  // WAN_MAC_ADDR / WAN_IS_TAGGED remain the documented gap #4 leak; the VLAN
-  // allocator now owns WAN_VLAN_ID and excludes WAN in AP mode, so it no longer leaks.
+test('deriveConfig: AP mode blanks WAN identity + WG client fields (parity with mergeNodeConfig)', () => {
+  // An AP has no upstream WAN of its own and terminates no tunnel, so these would
+  // be dead config; deriveConfig drops them to match mergeNodeConfig.
   const out = deriveConfig(Object.assign(rawAllOn(), { AP_MODE: '1' }));
-  assert.equal(out.WAN_MAC_ADDR, '00:11:22:33:44:55');
-  assert.equal(out.WAN_IS_TAGGED, '1');
-  assert.equal(out.WAN_VLAN_ID, '');
+  for (const k of ['WAN_MAC_ADDR', 'WAN_IS_TAGGED', 'WAN_VLAN_ID',
+    'WG_PRIVATE_KEY', 'PEER_PUBLIC_KEY', 'ENDPOINT', 'ENDPOINT_PORT', 'PRESHARED_KEY',
+    'WG_IPV4', 'WG_IPV6', 'WG_DNS_V4', 'WG_DNS_V6', 'ALLOWED_IPS']) {
+    assert.equal(out[k], '', `${k} should be blank in AP mode`);
+  }
 });
 
 test('deriveConfig: parent-off blanks all children', () => {

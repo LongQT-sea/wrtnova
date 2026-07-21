@@ -8,10 +8,9 @@
 // passthrough. It is a pure function of the raw object - the testable selector
 // the store, the build payload, the preview and the package chips all consume.
 //
-// Behavior is a verbatim port of the previous collectConfig() gating; the known
-// AP-leak (WAN_MAC_ADDR/WAN_IS_TAGGED emitted in AP mode) is preserved here.
-// WAN_VLAN_ID is now owned by the VLAN allocator
-// (resolveVlanEmit), which excludes WAN in AP mode, so it no longer leaks there.
+// In AP mode the WAN identity and WireGuard client fields are dropped: an AP has
+// no upstream WAN of its own and terminates no tunnel, so those values would be
+// dead config (config-merge.mjs shares this reasoning).
 //
 // raw carries a few gating-only helpers (wan_type) that are NOT emitted, exactly
 // as the old collectConfig output omitted them.
@@ -55,8 +54,8 @@ export function deriveConfig(raw) {
 
     PPPOE_USERNAME: wanType === 'pppoe' ? v('PPPOE_USERNAME') : '',
     PPPOE_PASSWD:   wanType === 'pppoe' ? v('PPPOE_PASSWD')   : '',
-    WAN_MAC_ADDR:   v('WAN_MAC_ADDR'),
-    WAN_IS_TAGGED:  v('WAN_IS_TAGGED'),
+    WAN_MAC_ADDR:   isRouter ? v('WAN_MAC_ADDR')  : '',
+    WAN_IS_TAGGED:  isRouter ? v('WAN_IS_TAGGED') : '',
     WAN_VLAN_ID:    vlan.WAN_VLAN_ID,
     WAN_B_ENABLE:   isRouter ? v('WAN_B_ENABLE') : '',
     WAN_B_VLAN_ID:  vlan.WAN_B_VLAN_ID,
@@ -120,16 +119,16 @@ export function deriveConfig(raw) {
     CHANNEL_6G:   v('CHANNEL_6G'),
     WIFI_LOG_LVL: v('WIFI_LOG_LVL'),
 
-    WG_PRIVATE_KEY:  wgOn ? v('WG_PRIVATE_KEY')  : '',
-    PEER_PUBLIC_KEY: wgOn ? v('PEER_PUBLIC_KEY') : '',
-    ENDPOINT:        wgOn ? v('ENDPOINT')        : '',
-    ENDPOINT_PORT:   wgOn ? v('ENDPOINT_PORT')   : '',
-    PRESHARED_KEY:   wgOn ? v('PRESHARED_KEY')   : '',
-    WG_IPV4:         wgOn ? v('WG_IPV4')         : '',
-    WG_IPV6:         wgOn ? v('WG_IPV6')         : '',
-    WG_DNS_V4:       wgOn ? v('WG_DNS_V4')       : '',
-    WG_DNS_V6:       wgOn ? v('WG_DNS_V6')       : '',
-    ALLOWED_IPS:     wgOn ? ipList('ALLOWED_IPS') : '',
+    WG_PRIVATE_KEY:  wgOn && isRouter ? v('WG_PRIVATE_KEY')  : '',
+    PEER_PUBLIC_KEY: wgOn && isRouter ? v('PEER_PUBLIC_KEY') : '',
+    ENDPOINT:        wgOn && isRouter ? v('ENDPOINT')        : '',
+    ENDPOINT_PORT:   wgOn && isRouter ? v('ENDPOINT_PORT')   : '',
+    PRESHARED_KEY:   wgOn && isRouter ? v('PRESHARED_KEY')   : '',
+    WG_IPV4:         wgOn && isRouter ? v('WG_IPV4')         : '',
+    WG_IPV6:         wgOn && isRouter ? v('WG_IPV6')         : '',
+    WG_DNS_V4:       wgOn && isRouter ? v('WG_DNS_V4')       : '',
+    WG_DNS_V6:       wgOn && isRouter ? v('WG_DNS_V6')       : '',
+    ALLOWED_IPS:     wgOn && isRouter ? ipList('ALLOWED_IPS') : '',
 
     PORT_FORWARD_LIST: isRouter ? v('PORT_FORWARD_LIST') : '',
     IPV6_SERVER_LIST:  isRouter ? v('IPV6_SERVER_LIST')  : '',
