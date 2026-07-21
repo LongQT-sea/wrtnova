@@ -230,20 +230,20 @@ _uci() {
 
 	if [ -z "$name" ]; then
 		uci add "$config" "$type"
-		name="@${type}[-1]"
+		name="@$type[-1]"
 	else
-		uci set "${config}.${name}=${type}"
+		uci set "$config.$name=$type"
 	fi
 
 	for arg; do
 		[ -z "$arg" ] && continue
 		case "$arg" in
-			+*) uci add_list "${config}.${name}.${arg#+}" ;;
-			-*) uci -q del "${config}.${name}.${arg#-}" ;;
-			^*) uci -q del_list "${config}.${name}.${arg#^}" ;;
-			~*) uci rename "${config}.${name}=${arg#\~}" ;;
-			@*) uci reorder "${config}.${name}=${arg#@}" ;;
-			*) uci set "${config}.${name}.${arg}" ;;
+			+*) uci add_list "$config.$name.${arg#+}" ;;
+			-*) uci -q del "$config.$name.${arg#-}" ;;
+			^*) uci -q del_list "$config.$name.${arg#^}" ;;
+			~*) uci rename "$config.$name=${arg#\~}" ;;
+			@*) uci reorder "$config.$name=${arg#@}" ;;
+			*) uci set "$config.$name.$arg" ;;
 		esac
 	done
 }
@@ -251,8 +251,8 @@ _uci() {
 has_pkg() {
 	local pkg
 	for pkg; do
-		ls /*/apk/*/*"${pkg}"*.list >/dev/null 2>&1 && return 0
-		ls /*/*/opkg/*/*"${pkg}"*.list >/dev/null 2>&1 && return 0
+		ls /*/apk/*/*"$pkg"*.list >/dev/null 2>&1 && return 0
+		ls /*/*/opkg/*/*"$pkg"*.list >/dev/null 2>&1 && return 0
 	done
 	return 1
 }
@@ -377,7 +377,7 @@ EOF
 
 os_version="$(get_os_version)"
 [ "${os_version:=25}" -ge 25 ] && ZONE_NAME="${ZONE_NAME// /_}"
-[ "${os_version}" -le 24 ] && TIME_FORMAT=
+[ "$os_version" -le 24 ] && TIME_FORMAT=
 host_name="${HOST_NAME:-WrtNova${AP_MODE:+-${AP_INDEX:=2}}}"
 
 _uci system "" "@system[0]" hostname="$host_name" \
@@ -459,15 +459,15 @@ detect_hw() {
 add_bridge_vlan() {
 	local vlan_id="$1" ports="$2" iface="$3"
 
-	_uci network bridge-vlan "vlan_${vlan_id}" \
+	_uci network bridge-vlan "vlan_$vlan_id" \
 		device=br-vlan vlan="$vlan_id" local=0 "${iface:+-local}"
 
 	for p in $ports; do
 		[ "$p" = "mesh0:u*" ] && p=mesh0:t
-		uci add_list "network.vlan_${vlan_id}.ports=$p"
+		uci add_list "network.vlan_$vlan_id.ports=$p"
 	done
 
-	[ -n "$iface" ] && uci set "network.${iface}.device=br-vlan.${vlan_id}"
+	[ -n "$iface" ] && uci set "network.$iface.device=br-vlan.$vlan_id"
 }
 
 add_switch_vlan() {
@@ -555,14 +555,14 @@ iot_if=${IOT_IFACE:-iot}
 lan_wg_if=${LAN_WG_IFACE:-lan_vpn}
 
 [ "$GUEST_ENABLE" = 1 ] && \
-	_uci network interface "$guest_if" proto=static +ipaddr="${guest_net_pfx}.1${guest_subnet}"
+	_uci network interface "$guest_if" proto=static +ipaddr="$guest_net_pfx.1$guest_subnet"
 
 [ "$IOT_ENABLE" = 1 ] && {
-	_uci network interface "$iot_if" proto=static +ipaddr="${iot_net_pfx}.1${iot_subnet}"
+	_uci network interface "$iot_if" proto=static +ipaddr="$iot_net_pfx.1$iot_subnet"
 	[ "$IOT_ROUTE_VIA_WG" = 1 ] && iot_via_wg=1
 }
 
-_uci network interface lan -netmask -ipaddr +ipaddr="${lan_net_pfx}.1${lan_subnet}" "~$lan_if"
+_uci network interface lan -netmask -ipaddr +ipaddr="$lan_net_pfx.1$lan_subnet" "~$lan_if"
 
 uci -q get network.wan || {
 	_uci network interface wan proto=dhcp
@@ -588,7 +588,7 @@ _uci network interface wan6 device=@wan ~wan_6
 
 [ "$WG_ENABLE" = 1 ] && {
 	_uci network interface "$lan_wg_if" proto=static \
-		+ipaddr="${wg_net_pfx}.1${wg_subnet}" ip6assign=60 +ip6class=local ip6hint=10
+		+ipaddr="$wg_net_pfx.1$wg_subnet" ip6assign=60 +ip6class=local ip6hint=10
 
 	[ "$AP_MODE" != 1 ] && {
 		_uci network interface "$wg_iface" proto=wireguard \
@@ -686,13 +686,13 @@ if [ "$hw_type" = "swconfig" ]; then
 		bridge_wan_port=1
 	}
 
-	cpu_ports="${lan_cpu_port}${wan_cpu_port:+ $wan_cpu_port}"
-	trunk_ports="${tagged_lan_ports}${tagged_wan_port:+ $tagged_wan_port} $cpu_ports"
-	lan_vlan_ports="${sw_lan_ports}${tagged_wan_port:+ $tagged_wan_port} $cpu_ports"
-	wan_vlan_ports="${tagged_lan_ports}${sw_wan_port:+ $sw_wan_port} $cpu_ports"
+	cpu_ports="$lan_cpu_port${wan_cpu_port:+ $wan_cpu_port}"
+	trunk_ports="$tagged_lan_ports${tagged_wan_port:+ $tagged_wan_port} $cpu_ports"
+	lan_vlan_ports="$sw_lan_ports${tagged_wan_port:+ $tagged_wan_port} $cpu_ports"
+	wan_vlan_ports="$tagged_lan_ports${sw_wan_port:+ $sw_wan_port} $cpu_ports"
 
 	[ "$AP_MODE" = 1 ] && {
-		lan_vlan_ports="${sw_lan_ports}${sw_wan_port:+ $sw_wan_port} $cpu_ports"
+		lan_vlan_ports="$sw_lan_ports${sw_wan_port:+ $sw_wan_port} $cpu_ports"
 		wan_vlan_ports="$trunk_ports"
 	}
 
@@ -751,7 +751,7 @@ for p in $br_ports; do
 done
 
 [ "$WAN_IS_TAGGED" = 1 ] && [ "$bridge_wan_port" != 1 ] && \
-	uci set network.wan.device="${wan_port}.${wan_vid}"
+	uci set network.wan.device="$wan_port.$wan_vid"
 
 add_vlan "$lan_vid" "$lan_vlan_ports" "$lan_if"
 [ "$GUEST_ENABLE" = 1 ] && add_vlan "$guest_vid" "$trunk_ports" "$guest_if"
@@ -783,8 +783,8 @@ done >/dev/null
 	done
 
 	_uci network interface "$lan_if" -ipaddr -ip6assign \
-		+ipaddr="${lan_net_pfx}.${AP_INDEX}${lan_subnet}" \
-		gateway="${lan_net_pfx}.1" dns="${lan_net_pfx}.1" metric=5
+		+ipaddr="$lan_net_pfx.$AP_INDEX$lan_subnet" \
+		gateway="$lan_net_pfx.1" dns="$lan_net_pfx.1" metric=5
 
 	for i in $ifaces_lan; do
 		[ "$i" = "$lan_if" ] && continue
@@ -826,7 +826,7 @@ add_wifi_iface() {
 			set -- "$@" ssid="${ssid} 6G"
 		elif [ -z "$iot_plain" ]; then
 			[ "$net" != "$lan_if" ] && {
-				add_wifi_vlan "$vid" "$key" "$net" "${dev}_${lan_if}"
+				add_wifi_vlan "$vid" "$key" "$net" "${dev}_$lan_if"
 				return
 			}
 
@@ -835,7 +835,7 @@ add_wifi_iface() {
 		fi
 	}
 
-	_uci wireless wifi-iface "${dev}_${net}" "$@"
+	_uci wireless wifi-iface "${dev}_$net" "$@"
 }
 
 add_wifi_vlan() {
@@ -855,7 +855,7 @@ get_channel() {
 
 get_phy_modes() {
 	{ iw phy "phy${1#radio}" info 2>/dev/null || iw phy phy0 info 2>/dev/null; } |
-	grep -A8 "Supported interface modes:"
+	grep -A8 "Support.*modes"
 }
 
 def_pass="${DEFAULT_WIFI_PASSWD:-12345678}"
@@ -987,13 +987,13 @@ done
 
 	for vid in "$lan_vid" ${GUEST_ENABLE:+$guest_vid} ${IOT_ENABLE:+$iot_vid} ${WG_ENABLE:+$wg_vid}; do
 		uci add_list "network.@device[0].ports=bat0.$vid"
-		uci add_list "network.vlan_${vid}.ports=bat0.${vid}:u*"
+		uci add_list "network.vlan_$vid.ports=bat0.$vid:u*"
 	done
 }
 
 # === WED ===
 [ -n "$WED_ENABLE" ] && {
-	if [ "${os_version}" -ge 24 ]; then
+	if [ "$os_version" -ge 24 ]; then
 		echo "options mt7915e wed_enable=Y" >> /etc/modules.conf
 	else
 		echo "mt7915e wed_enable=Y" >> /etc/modules.d/mt7915e
@@ -1128,14 +1128,14 @@ ula_prefix="$(uci -q get network.globals.ula_prefix)"
 		mwan3-iface-add "${wg_iface}_6" ipv6 1 1 0
 
 		_uci mwan3 rule "${lan_wg_if:0:9}_ipv4" \
-			src_ip="${wg_net_pfx}.0${wg_subnet}" use_policy="${wg_iface}_only" @2
+			src_ip="$wg_net_pfx.0$wg_subnet" use_policy="${wg_iface}_only" @2
 
 		_uci mwan3 rule "${lan_wg_if:0:9}_ipv6" \
 			src_ip="${ula_prefix%::*}:10::/60" use_policy="${wg_iface}_only" @3
 
 		[ "$iot_via_wg" = 1 ] && {
 			_uci mwan3 rule "${iot_if}_ipv4" \
-				src_ip="${iot_net_pfx}.0${iot_subnet}" use_policy="${wg_iface}_only" @4
+				src_ip="$iot_net_pfx.0$iot_subnet" use_policy="${wg_iface}_only" @4
 		}
 	}
 }
@@ -1214,7 +1214,7 @@ while uci -q del dhcp.@dhcp[0]; do :; done
 
 [ "$GUEST_ENABLE" = 1 ] && {
 	dhcp-instance-add "$guest_if" 1h guest.lan "" 0 "$GUEST_DHCP_START"
-	_uci dhcp "" "$guest_if" +dhcp_option=6,"${guest_net_pfx}.1"
+	_uci dhcp "" "$guest_if" +dhcp_option=6,"$guest_net_pfx.1"
 }
 
 [ "$IOT_ENABLE" = 1 ] && {
@@ -1224,16 +1224,16 @@ while uci -q del dhcp.@dhcp[0]; do :; done
 
 [ "$WG_ENABLE" = 1 ] && {
 	dhcp-instance-add "$lan_wg_if" 24h "vpn.lan"
-	_uci dhcp "" "$lan_wg_if" ra_default=1 +dhcp_option=6,"${WG_DNS_V4:-${wg_net_pfx}.1}" ${WG_DNS_V6:+dns=$WG_DNS_V6}
+	_uci dhcp "" "$lan_wg_if" ra_default=1 +dhcp_option=6,"${WG_DNS_V4:-$wg_net_pfx.1}" ${WG_DNS_V6:+dns=$WG_DNS_V6}
 	_uci dhcp dnsmasq "${lan_wg_if}_dns" +rebind_domain=lan +server=/lan/127.0.0.1
 }
 
 dhcp-instance-add "$lan_if" 24h lan lan 1 "$LAN_DHCP_START"
-_uci dhcp "" "$lan_if" +dhcp_option=6,"${lan_net_pfx}.1"
+_uci dhcp "" "$lan_if" +dhcp_option=6,"$lan_net_pfx.1"
 uci del dhcp."$lan_if"_dns.notinterface
 
 [ "$WG_ENABLE" = 1 ] && \
-	_uci dhcp dnsmasq "$lan_if"_dns +rebind_domain=lan +server="/vpn.lan/${wg_net_pfx}.1"
+	_uci dhcp dnsmasq "$lan_if"_dns +rebind_domain=lan +server="/vpn.lan/$wg_net_pfx.1"
 
 [ "$DNSMASQ_SINGLE_INSTANCE" = 1 ] && {
 	for i in $ifaces_lan; do
@@ -1248,7 +1248,7 @@ uci del dhcp."$lan_if"_dns.notinterface
 	_uci dhcp "" "$lan_if" @1
 	_uci dhcp dnsmasq "$lan_if"_dns @1 \
 		leasefile=/tmp/dhcp.leases -dhcpleasemax \
-		^server="/vpn.lan/${wg_net_pfx}.1"
+		^server="/vpn.lan/$wg_net_pfx.1"
 }
 
 cat >> /etc/hosts << EOF
@@ -1275,7 +1275,7 @@ bootstrap_dns="${BOOTSTRAP_DNS:-
 		adguard_dns_port=53
 		dnsmasq_dns_port=54
 		adguard_upstream="'[/lan/]127.0.0.1:54'"
-		[ "$WG_ENABLE" = 1 ] && adguard_upstream="$adguard_upstream '[/vpn.lan/]${wg_net_pfx}.1:54'"
+		[ "$WG_ENABLE" = 1 ] && adguard_upstream="$adguard_upstream '[/vpn.lan/]$wg_net_pfx.1:54'"
 	}
 
 	setup_dnsmasq_upstream
@@ -1500,7 +1500,7 @@ add_cf_ddns() {
 		lookup_host="$lookup_host" domain="$domain" \
 		username=Bearer password="${CLOUDFLARE_API_KEY:-cf_api_key}" \
 		use_ipv6="$use_ipv6" interface="$interface" \
-		ip_source="$ip_source" "${ip_key}=$network_or_hostname" \
+		ip_source="$ip_source" "$ip_key=$network_or_hostname" \
 		cacert=/etc/ssl/certs use_https=1 enabled="${DDNS_ENABLE:-0}"
 }
 
@@ -1537,6 +1537,7 @@ chmod +x /sbin/ip6host
 process_host_list() {
 	local hostname octet ports duid name idx v4 v6
 
+	echo "$2" |
 	while IFS='|' read -r hostname octet ports duid; do
 		hostname=$(echo "$hostname" | tr -d ' \t')
 		octet=$(echo "$octet" | tr -d ' \t')
@@ -1547,21 +1548,21 @@ process_host_list() {
 		[ "$1" = ipv4 ] && {
 			for port in $ports; do
 				[ -z "$port" ] && continue
-				fw_port_forwarding "$hostname | $port" "${lan_net_pfx}.${octet}" "$port"
+				fw_port_forwarding "$hostname | $port" "$lan_net_pfx.$octet" "$port"
 			done
 			v4=1
 		}
 
 		[ "$1" = ipv6 ] && {
 			[ -x /usr/bin/ddns ] && {
-				add_cf_ddns wan_6 1 script "$hostname" "${idx:+${hostname}.}${LOOKUP_HOST}"
+				add_cf_ddns wan_6 1 script "$hostname" "${idx:+$hostname.}$LOOKUP_HOST"
 				idx=1
 			}
 
 			if [ -n "$ports" ]; then
-				fw_accept_to_lan "$hostname | Forward $ports" "::${octet}/-64" "tcp udp" "$ports"
+				fw_accept_to_lan "$hostname | Forward $ports" "::$octet/-64" "tcp udp" "$ports"
 			else
-				fw_accept_to_lan "$hostname | Forward any protocol" "::${octet}/-64"
+				fw_accept_to_lan "$hostname | Forward any protocol" "::$octet/-64"
 			fi
 			v6=1
 		}
@@ -1571,19 +1572,14 @@ process_host_list() {
 
 		name="${hostname//-/_}"
 		_uci dhcp host "$name" \
-			name="$hostname" ${v4:+ip=${lan_net_pfx}.${octet}} \
+			name="$hostname" ${v4:+ip=$lan_net_pfx.$octet} \
 			${v6:+hostid=$octet duid=${duid:-$(duid_gen)}} dns=1
 	done
 }
 
 [ "$AP_MODE" != 1 ] && {
-	process_host_list ipv4 <<-EOF
-	$PORT_FORWARD_LIST
-	EOF
-
-	process_host_list ipv6 <<-EOF
-	$IPV6_SERVER_LIST
-	EOF
+	process_host_list ipv4 "$PORT_FORWARD_LIST"
+	process_host_list ipv6 "$IPV6_SERVER_LIST"
 }
 
 # === Custom script ===
