@@ -203,6 +203,8 @@ LOG=
 # 1 = enable quarterly auto-reboot at 3:30 AM
 QUARTERLY_REBOOT=
 
+u_script=custom_script_placeholder
+
 # ===================
 # End config section
 # ===================
@@ -946,21 +948,19 @@ done
 
 if [ "$WIRELESS_MESH" = 1 ] || [ "$WIRELESS_MESH_2G" = 1 ]; then
 	hplug_mesh=/etc/hotplug.d/net/94-ifup-mesh
-	set_mesh_param='iw dev "$DEVICENAME" set mesh_param'
+	set_mesh_param="iw dev \$DEVICENAME set mesh_param"
 	cat > "$hplug_mesh" <<-EOF
 	[ add = "\$ACTION" ] || exit 0
 	case "\$DEVICENAME" in
-		mesh*) ;;
+		mesh*) sleep 4; /etc/init.d/network reload ;;
 		*) exit 0 ;;
 	esac
-	sleep 4
 
 	case "\$DEVICENAME" in
 		mesh0) bridge link set dev mesh0 cost 200 ;;
 		mesh1) bridge link set dev mesh1 cost 300 ;;
 	esac
 
-	/etc/init.d/network reload
 	$set_mesh_param mesh_rssi_threshold -78
 	$set_mesh_param mesh_max_peer_links 9
 	EOF
@@ -1125,7 +1125,7 @@ config rule 'default_rule_v6'
 	option family 'ipv6'
 EOF
 
-ula_prefix="$(uci -q get network.globals.ula_prefix)"
+ula_prefix="$(uci get network.globals.ula_prefix)"
 
 [ -z "$no_mwan3" ] && {
 	mwan3-iface-add wan
@@ -1374,10 +1374,10 @@ doh_upstreams="${DOH_UPSTREAMS:-https://dns.adguard-dns.com/dns-query}"
 [ "$https_dns" = 1 ] && {
 	while uci -q del https-dns-proxy.@https-dns-proxy[0]; do :; done
 	uci set https-dns-proxy.config.force_dns=0
-	bootstrap_csv="$(echo $bootstrap_dns | tr ' ' ',')"
+	for i in $bootstrap_dns; do _csv="${_csv:+$_csv,}$i"; done
 
 	for u in $doh_upstreams; do
-		_uci https-dns-proxy "" "" resolver_url="$u" bootstrap_dns="$bootstrap_csv"
+		_uci https-dns-proxy "" "" resolver_url="$u" bootstrap_dns="$_csv"
 	done
 
 	echo "sleep 5; /etc/init.d/https-dns-proxy restart &" >> "$hplug_ifup_wan"
