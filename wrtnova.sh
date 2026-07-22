@@ -144,6 +144,10 @@ ENDPOINT=
 ENDPOINT_PORT=		# Default: 51820
 ALLOWED_IPS=""		# Default: "0.0.0.0/0 ::/0"
 
+# Exclude IPs or IP ranges from the WireGuard tunnel
+SPLIT_TUNNEL_V4=""	# e.g. "192.168.1.0/16" to allow lan <-> lan_vpn routing
+SPLIT_TUNNEL_V6=""
+
 # 1 = enable MBIM modem failover (prefill path is MT7621-specific, this can change later in LuCI)
 CELLULAR_MODEM=
 MODEM_PATH="/sys/devices/platform/1e1c0000.xhci/usb2/2-1"
@@ -602,6 +606,17 @@ _uci network interface wan6 device=@wan ~wan_6
 			ip4table=20 ip6table=20
 
 		if [ "$no_mwan3" = 1 ]; then
+			[ -n "$WG_DNS_V4" ] && _uci network rule  "" in="$lan_wg_if" dest="$WG_DNS_V4/32" lookup=20 priority=988
+			[ -n "$WG_DNS_V6" ] && _uci network rule6 "" in="$lan_wg_if" dest="$WG_DNS_V6/128" lookup=20 priority=988
+
+			for n in $SPLIT_TUNNEL_V4; do
+				_uci network rule "" in="$lan_wg_if" dest="$n" lookup=254 priority=989
+			done
+
+			for n in $SPLIT_TUNNEL_V6; do
+				_uci network rule6 "" in="$lan_wg_if" dest="$n" lookup=254 priority=989
+			done
+
 			for f in '' 6; do
 				_uci network rule$f "" in="$lan_wg_if" lookup=20 priority=990
 				_uci network rule$f "" in="$lan_wg_if" action=prohibit priority=991
