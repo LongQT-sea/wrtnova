@@ -674,25 +674,18 @@ bridge_wan_port=1
 if [ -n "$swconfig" ]; then
 	lan_ports="${lan_ports%%.*}"
 
-	# switch_vlan[0] is LAN, and switch_vlan[1] is WAN (see config_generate and uci-defaults.sh)
-	for port in $(uci -q get network.@switch_vlan[0].ports); do
-		case "$port" in
-			*t) lan_cpu_port="$port" ;;
-			*) sw_lan_ports="${sw_lan_ports:+$sw_lan_ports }$port" ;;
-		esac
-	done
+	# switch_vlan[0] is LAN and switch_vlan[1] is WAN; the CPU port is always last (see config_generate and uci-defaults.sh)
+	p="$(uci -q get network.@switch_vlan[0].ports)"
+	sw_lan_ports="${p% *}"; p="${p##* }"; lan_cpu_port="${p%t}t"
 
 	for port in $sw_lan_ports; do
 		tagged_lan_ports="${tagged_lan_ports:+$tagged_lan_ports }${port}t"
 	done
 
 	uci -q get network.@switch_vlan[1] && {
-		for port in $(uci -q get network.@switch_vlan[1].ports); do
-			case "$port" in
-				*t) [ "$port" != "$lan_cpu_port" ] && wan_cpu_port="$port" ;;
-				*) sw_wan_port="$port" ;;
-			esac
-		done
+		p="$(uci -q get network.@switch_vlan[1].ports)"
+		sw_wan_port="${p% *}"; p="${p##* }"; p="${p%t}t"
+		[ "$p" != "$lan_cpu_port" ] && wan_cpu_port="$p"
 
 		tagged_wan_port="${sw_wan_port}t"
 		wan_port="${wan_port%%.*}"
