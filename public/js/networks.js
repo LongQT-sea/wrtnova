@@ -101,6 +101,7 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
       WG_PRIVATE_KEY: '', PEER_PUBLIC_KEY: '', ENDPOINT: '',
       ENDPOINT_PORT: '', PRESHARED_KEY: '', WG_IPV4: '', WG_IPV6: '',
       WG_DNS_V4: '', WG_DNS_V6: '', ALLOWED_IPS: '',
+      SPLIT_TUNNEL_V4: '', SPLIT_TUNNEL_V6: '',
       wan_type: 'dhcp', PPPOE_USERNAME: '', PPPOE_PASSWD: '',
       WAN_MAC_ADDR: '', WAN_IS_TAGGED: '', WAN_VLAN_ID: '',
       WAN_B_ENABLE: '', WAN_B_VLAN_ID: '', BRIDGE_WAN_PORT: '',
@@ -942,6 +943,10 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
     if (verSel) verSel.dataset.desired = cfg.shared_version || '';
 
     writeForm(BASE_SCHEMA, cfg);
+    // Anchor the split-tunnel prefill to the loaded value (mirror writeSubnet):
+    // a saved value is user-set and kept; empty re-anchors to the LAN default.
+    const splitEl = document.getElementById('SPLIT_TUNNEL_V4');
+    if (splitEl) { if (cfg.SPLIT_TUNNEL_V4) splitEl.dataset.explicit = '1'; else delete splitEl.dataset.explicit; }
     updatePacketSteeringOpts(cfg.shared_version);
     updateTimeFormatRow(cfg.shared_version);
 

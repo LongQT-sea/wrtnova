@@ -101,6 +101,8 @@
  * @property {string} [WG_DNS_V4]
  * @property {string} [WG_DNS_V6]
  * @property {string} [ALLOWED_IPS]        sensitive
+ * @property {string} [SPLIT_TUNNEL_V4]
+ * @property {string} [SPLIT_TUNNEL_V6]
  * @property {string} [PORT_FORWARD_LIST]
  * @property {string} [IPV6_SERVER_LIST]
  * @property {string} [DDNS_ENABLE]        flag

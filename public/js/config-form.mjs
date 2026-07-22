@@ -58,6 +58,7 @@ export const BASE_SCHEMA = /** @type {[string,string,(string|undefined)?,(string
   ['WG_PRIVATE_KEY', 'text'], ['PEER_PUBLIC_KEY', 'text'], ['ENDPOINT', 'text'], ['ENDPOINT_PORT', 'text'],
   ['PRESHARED_KEY', 'text'], ['WG_IPV4', 'text'], ['WG_IPV6', 'text'],
   ['WG_DNS_V4', 'text'], ['WG_DNS_V6', 'text'], ['ALLOWED_IPS', 'text'],
+  ['SPLIT_TUNNEL_V4', 'text'], ['SPLIT_TUNNEL_V6', 'text'],
   ['wan_type', 'radio', undefined, 'dhcp'], ['PPPOE_USERNAME', 'text'], ['PPPOE_PASSWD', 'text'],
   ['WAN_MAC_ADDR', 'text'], ['WAN_IS_TAGGED', 'checkbox'], ['WAN_VLAN_ID', 'text'],
   ['WAN_B_ENABLE', 'checkbox'], ['WAN_B_VLAN_ID', 'text'], ['BRIDGE_WAN_PORT', 'checkbox'],

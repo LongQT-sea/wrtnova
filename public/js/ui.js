@@ -68,6 +68,7 @@ import { deriveVisibility, deriveNetRows, detectVlanConflict, resolveVlanAssignm
     const mark = function (e) {
       const t = e.target;
       if (t && t.classList && t.classList.contains('net-sub')) t.dataset.explicit = '1';
+      else if (t && t.id === 'SPLIT_TUNNEL_V4') t.dataset.explicit = '1';
     };
     document.addEventListener('input', mark, true);
     document.addEventListener('change', mark, true);
@@ -174,6 +175,15 @@ import { deriveVisibility, deriveNetRows, detectVlanConflict, resolveVlanAssignm
       }
       if (row.dataset.net !== 'lan') row.classList.toggle('net-off', !r.on);
     });
+
+    // Prefill the WG IPv4 split-tunnel exclude with the LAN subnet so VPN-network
+    // clients can reach LAN hosts by default. Anchored like the subnet fields: it
+    // tracks the LAN config until the user edits (or clears) the field.
+    const lanRow = byKey.lan;
+    const splitEl = ui.$('#SPLIT_TUNNEL_V4');
+    if (splitEl && lanRow && !splitEl.dataset.explicit) {
+      splitEl.value = lanRow.effPfx + '.' + lanRow.effVid + '.0' + lanRow.effSub;
+    }
 
     // Reflect the auto-allocated VLAN id in each field's placeholder so an empty
     // field reads its assigned value (e.g. WAN shows 21 when 20 is taken). Covers

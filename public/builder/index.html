@@ -505,6 +505,19 @@
             <input type="text" id="ALLOWED_IPS" name="ALLOWED_IPS" class="input-base" placeholder="0.0.0.0/0 ::/0">
           </div>
         </div>
+        <div class="sub-section">
+          <p class="sub-section-title" data-i18n="wgSplitTunnelSection">Split tunnel</p>
+          <p class="form-help mt-2" data-i18n="splitTunnelHelp">Destination IPs or subnets to bypass the tunnel. Traffic from VPN-network clients to these destinations uses the normal routing table instead of the tunnel.</p>
+          <div class="form-row mt-2">
+            <label for="SPLIT_TUNNEL_V4" class="form-label" data-i18n="splitTunnelV4">Exclude IPv4</label>
+            <input type="text" id="SPLIT_TUNNEL_V4" name="SPLIT_TUNNEL_V4" class="input-base" placeholder="e.g. 192.168.0.0/16 10.0.0.0/8 (optional)">
+          </div>
+          <div class="form-row">
+            <label for="SPLIT_TUNNEL_V6" class="form-label" data-i18n="splitTunnelV6">Exclude IPv6</label>
+            <input type="text" id="SPLIT_TUNNEL_V6" name="SPLIT_TUNNEL_V6" class="input-base" placeholder="e.g. fd00::/8 fc00::/7 (optional)">
+          </div>
+        </div>
+        <div class="sub-section" style="padding-top:0" aria-hidden="true"></div>
 
         <div class="info-note" role="note" data-i18n-html="wgConfigNote">
           You can change to a different WireGuard config later via

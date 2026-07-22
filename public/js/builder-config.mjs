@@ -129,6 +129,8 @@ export function deriveConfig(raw) {
     WG_DNS_V4:       wgOn && isRouter ? v('WG_DNS_V4')       : '',
     WG_DNS_V6:       wgOn && isRouter ? v('WG_DNS_V6')       : '',
     ALLOWED_IPS:     wgOn && isRouter ? ipList('ALLOWED_IPS') : '',
+    SPLIT_TUNNEL_V4: wgOn && isRouter ? ipList('SPLIT_TUNNEL_V4') : '',
+    SPLIT_TUNNEL_V6: wgOn && isRouter ? ipList('SPLIT_TUNNEL_V6') : '',
 
     PORT_FORWARD_LIST: isRouter ? v('PORT_FORWARD_LIST') : '',
     IPV6_SERVER_LIST:  isRouter ? v('IPV6_SERVER_LIST')  : '',
