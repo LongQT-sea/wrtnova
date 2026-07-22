@@ -259,15 +259,6 @@ import { deriveVisibility, deriveNetRows, detectVlanConflict, resolveVlanAssignm
         }
       }
 
-      // Per-VLAN PSK is a single shared SSID, so the per-network Guest/IoT/VPN
-      // SSID inputs no longer apply; disable them while PSK_VLAN is on.
-      if (pskVlan) {
-        ['GUEST_WIFI_SSID', 'IOT_WIFI_SSID', 'LAN_WG_WIFI_SSID'].forEach(function (id) {
-          const el = ui.$('#' + id);
-          if (el) el.disabled = pskVlan.checked;
-        });
-      }
-
       // "IoT: 802.11r" (IOT_NO_DOT11R, shown checked = IoT fast transition on)
       // only means anything when the base 802.11r (DOT11R) is on. When DOT11R is
       // off the toggle is inert: disable it and force it off (same pattern as
@@ -281,6 +272,26 @@ import { deriveVisibility, deriveNetRows, detectVlanConflict, resolveVlanAssignm
           iotFt.dispatchEvent(new Event('change', { bubbles: true }));
         }
       }
+
+      // Per-VLAN PSK is one shared SSID: mirror LAN_WIFI_SSID into Guest/VPN (and
+      // IoT unless "IoT: 802.11r" is off, keeping IoT its own SSID); disable them
+      // (bubbling input so each page's store re-syncs). After the DOT11R block so
+      // iotFt is settled.
+      if (pskVlan) {
+        const lan = ui.$('#LAN_WIFI_SSID');
+        const s = (lan || {}).value;
+        const lanPh = lan ? (lan.value || lan.placeholder) : '';   // what the shared SSID resolves to
+        [['GUEST_WIFI_SSID', true], ['LAN_WG_WIFI_SSID', true], ['IOT_WIFI_SSID', !iotFt || iotFt.checked]].forEach(function (p) {
+          const el = ui.$('#' + p[0]);
+          if (!el) return;
+          if (el.dataset.ph == null) el.dataset.ph = el.placeholder;  // stash own placeholder once
+          const share = pskVlan.checked && p[1];
+          el.disabled = share;
+          el.placeholder = share ? lanPh : el.dataset.ph;
+          if (share && s != null && el.value !== s) { el.value = s; el.dispatchEvent(new Event('input', { bubbles: true })); }
+        });
+      }
+
       // When both 2.4GHz and 5GHz mesh backhauls are on, two 802.11s meshpoints
       // are bridged into br-vlan and can form an L2 loop; force BRIDGE_STP checked
       // and disabled so the toggle reflects the built config (same disable/force/dispatch pattern).

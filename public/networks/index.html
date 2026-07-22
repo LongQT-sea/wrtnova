@@ -706,7 +706,10 @@
               <p class="form-help"></p>
             </div>
 
-            <div class="info-note" role="note" data-i18n="wifiDefaultBlank">Leave password blank to use the default: 12345678</div>
+            <div class="info-note" role="note">
+              <p data-i18n="wifiDefaultBlank">Leave password blank to use the default: 12345678</p>
+              <p class="psk-vlan-only hidden" data-i18n="wifiPskVlanNote">Per-VLAN PSK needs a unique password per enabled network to steer clients.</p>
+            </div>
 
             <details class="mt-4">
               <summary class="text-xs text-zinc-500 dark:text-zinc-400 cursor-pointer hover:text-zinc-700 dark:hover:text-zinc-200 select-none flex items-center gap-1">
@@ -780,7 +783,7 @@
                       </span>
                       <span class="toggle-text" data-i18n="enableMeshBackhaul2GDefault">Enable 2.4 GHz 802.11s mesh backhaul (overridable per node)</span>
                     </label>
-                    <p class="form-help" data-i18n="mesh2gNote">Longer range than 5GHz; may need tuning to improve throughput.</p>
+                    <p class="form-help" data-i18n="mesh2gNote">Longer range than 5GHz but requires tuning for higher throughput.</p>
                   </div>
                 </div>
                 <div class="form-row guest-isolate-only hidden">

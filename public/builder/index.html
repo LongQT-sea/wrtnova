@@ -682,6 +682,7 @@
         <div class="info-note" role="note">
           <p data-i18n="wifiDefaultNote">Leave password blank to use the default: 12345678</p>
           <p data-i18n="wifiRoamingNote">SSID and password must match between nodes for seamless roaming to work.</p>
+          <p class="psk-vlan-only hidden" data-i18n="wifiPskVlanNote">Per-VLAN PSK needs a unique password per enabled network to steer clients.</p>
         </div>
 
         <details class="mt-4">
@@ -767,7 +768,7 @@
                   </span>
                   <span class="toggle-text" data-i18n="enableMeshBackhaul2G">Enable 2.4 GHz 802.11s mesh backhaul</span>
                 </label>
-                <p class="form-help" data-i18n="mesh2gNote">Longer range than 5GHz; may need tuning to improve throughput.</p>
+                <p class="form-help" data-i18n="mesh2gNote">Longer range than 5GHz but requires tuning for higher throughput.</p>
               </div>
             </div>
             <div class="form-row">

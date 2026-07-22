@@ -18,9 +18,10 @@ const root = resolve(here, '..', '..');
 
 const CSS_NFR_KB = 15;       // hard NFR - enforced
 const JS_TARGET_KB = 30;     // SPEC NFR target - documented, not yet met
-const JS_CEILING_KB = 65;    // hold the line here; raising it is a last resort - only a
+const JS_CEILING_KB = 66;    // hold the line here; raising it is a last resort - only a
                              // small bump, and only with explicit user confirmation
-                             // (64 -> 65: WAN MAC address validation on /networks)
+                             // (64 -> 65: WAN MAC address validation on /networks;
+                             //  65 -> 66: Per-VLAN PSK shared-SSID mirroring + note)
 
 const PAGES = {
   builder: 'public/builder/index.html',

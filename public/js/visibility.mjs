@@ -83,6 +83,8 @@ export function deriveVisibility(cfg) {
     'dense-env-only': !on(cfg, 'DOT11KV'),
     // Guest isolation is meaningless in Per-VLAN PSK mode (one shared SSID).
     'guest-isolate-only': !guest || on(cfg, 'PSK_VLAN'),
+    // The Per-VLAN PSK note only applies when that mode is on.
+    'psk-vlan-only': !on(cfg, 'PSK_VLAN'),
     // "AdGuard Home as main DNS resolver" only applies in AdGuard Home mode.
     'adguard-main-only': !isAdguard(cfg.DNS_MODE),
     // AdGuard Home RAM-requirement note only shows in AdGuard Home mode.
