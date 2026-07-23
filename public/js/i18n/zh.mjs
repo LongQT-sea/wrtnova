@@ -213,6 +213,7 @@ export default {
   dnsV4:              'DNS IPv4',
   dnsV6:              'DNS IPv6',
   allowedIps:         '允许的 IP',
+  advancedWg:         'WireGuard 高级选项',
   wgSplitTunnelSection: '分离隧道',
   splitTunnelHelp:    '绕过隧道的目标 IP 或子网。VPN 网络客户端到这些目标的流量将使用正常路由表，而不是隧道。',
   splitTunnelV4:      '排除 IPv4',

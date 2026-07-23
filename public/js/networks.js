@@ -943,10 +943,6 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
     if (verSel) verSel.dataset.desired = cfg.shared_version || '';
 
     writeForm(BASE_SCHEMA, cfg);
-    // Anchor the split-tunnel prefill to the loaded value (mirror writeSubnet):
-    // a saved value is user-set and kept; empty re-anchors to the LAN default.
-    const splitEl = document.getElementById('SPLIT_TUNNEL_V4');
-    if (splitEl) { if (cfg.SPLIT_TUNNEL_V4) splitEl.dataset.explicit = '1'; else delete splitEl.dataset.explicit; }
     updatePacketSteeringOpts(cfg.shared_version);
     updateTimeFormatRow(cfg.shared_version);
 

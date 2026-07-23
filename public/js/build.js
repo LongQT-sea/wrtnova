@@ -237,11 +237,6 @@ import { collectTarget, devicesState } from './devices.js';
         if (el) writeSubnet(el, val || '');
         continue;
       }
-      if (k === 'SPLIT_TUNNEL_V4') {                      // anchored LAN-subnet prefill
-        const el = $('#' + k);
-        if (el) { el.value = val || ''; if (val) el.dataset.explicit = '1'; else delete el.dataset.explicit; }
-        continue;
-      }
       const el = $('#' + k);                            // text / select / textarea
       if (el && 'value' in el) el.value = val == null ? '' : val;
     }

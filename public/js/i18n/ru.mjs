@@ -213,6 +213,7 @@ export default {
   dnsV4:              'DNS IPv4',
   dnsV6:              'DNS IPv6',
   allowedIps:         'Разрешённые IP',
+  advancedWg:         'Расширенные параметры WireGuard',
   wgSplitTunnelSection: 'Раздельный туннель',
   splitTunnelHelp:    'IP-адреса или подсети назначения, которые обходят туннель. Трафик от клиентов VPN-сети к этим адресам использует обычную таблицу маршрутизации вместо туннеля.',
   splitTunnelV4:      'Исключить IPv4',

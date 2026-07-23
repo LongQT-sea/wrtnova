@@ -213,6 +213,7 @@ export default {
   dnsV4:              'DNS IPv4',
   dnsV6:              'DNS IPv6',
   allowedIps:         'Erlaubte IPs',
+  advancedWg:         'Erweiterte WireGuard-Optionen',
   wgSplitTunnelSection: 'Split-Tunnel',
   splitTunnelHelp:    'Ziel-IPs oder -Subnetze, die den Tunnel umgehen. Verkehr von Clients im VPN-Netz zu diesen Zielen nutzt die normale Routing-Tabelle statt des Tunnels.',
   splitTunnelV4:      'IPv4 ausschließen',
