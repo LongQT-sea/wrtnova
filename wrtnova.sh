@@ -561,6 +561,11 @@ guest_if=${GUEST_IFACE:-guest}
 iot_if=${IOT_IFACE:-iot}
 lan_wg_if=${LAN_WG_IFACE:-lan_vpn}
 
+ula_prefix="${ULA_PREFIX:-$(uci get network.globals.ula_prefix)}"
+
+_uci network globals globals \
+	"${P_STEERING:+packet_steering=$P_STEERING}" "ula_prefix=$ula_prefix"
+
 [ "$GUEST_ENABLE" = 1 ] && \
 	_uci network interface "$guest_if" proto=static +ipaddr="$guest_net_pfx.1$guest_subnet"
 
@@ -609,11 +614,11 @@ _uci network interface wan6 device=@wan ~wan_6
 			[ -n "$WG_DNS_V4" ] && _uci network rule  "" in="$lan_wg_if" dest="$WG_DNS_V4/32" lookup=20 priority=988
 			[ -n "$WG_DNS_V6" ] && _uci network rule6 "" in="$lan_wg_if" dest="$WG_DNS_V6/128" lookup=20 priority=988
 
-			for n in $SPLIT_TUNNEL_V4; do
+			for n in $SPLIT_TUNNEL_V4 $lan_net_pfx.1$lan_subnet; do
 				_uci network rule "" in="$lan_wg_if" dest="$n" lookup=254 priority=989
 			done
 
-			for n in $SPLIT_TUNNEL_V6; do
+			for n in $SPLIT_TUNNEL_V6 $ula_prefix; do
 				_uci network rule6 "" in="$lan_wg_if" dest="$n" lookup=254 priority=989
 			done
 
@@ -802,9 +807,6 @@ done >/dev/null
 		_uci network interface "$i" proto=none -ipaddr -ip6assign
 	done
 }
-
-_uci network globals globals \
-	"${P_STEERING:+packet_steering=$P_STEERING}" "${ULA_PREFIX:+ula_prefix=$ULA_PREFIX}"
 
 # === WiFi ===
 setup_radio() {
@@ -1133,8 +1135,6 @@ config rule 'default_rule_v6'
 	option family 'ipv6'
 EOF
 
-ula_prefix="$(uci get network.globals.ula_prefix)"
-
 [ -z "$no_mwan3" ] && {
 	mwan3-iface-add wan
 	mwan3-iface-add wan_6 ipv6
@@ -1274,11 +1274,6 @@ uci del dhcp."$lan_if"_dns.notinterface
 		leasefile=/tmp/dhcp.leases -dhcpleasemax \
 		^server="/vpn.lan/$wg_net_pfx.1"
 }
-
-cat >> /etc/hosts << EOF
-
-${ula_prefix%%/*}1	$host_name
-EOF
 
 doh_upstreams="${DOH_UPSTREAMS:-
 https://dns10.quad9.net/dns-query
