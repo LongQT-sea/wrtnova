@@ -484,6 +484,7 @@ add_switch_vlan() {
 	_uci network switch_vlan "" \
 		device="$switch_dev" vlan="$vlan_idx" ports="$ports" ${sw_has_vid:+vid=$vlan_id}
 
+	[ "$iface" = "$lan_if" ] && p="$br_vlan_lan"
 	[ "$iface" = wan ] && p="$br_vlan_wan"
 
 	add_bridge_vlan "$vlan_id" "$p" "$iface"
@@ -676,16 +677,18 @@ bridge_wan_port=1
 # WAN port are untagged members of the WAN VLAN unless WAN_IS_TAGGED=1.
 # All ports carry tagged guest/iot/lan_wg/wanb VLANs as trunk ports.
 # AP mode: all ports are untagged on the LAN VLAN and tagged on all other VLANs.
-if [ -n "$swconfig" ]; then
+
+[ "$AP_MODE" = 1 ] && [ "$wan_port" = br-wan ] && {
+	wan_port="$(uci -q get network.@device[1].ports)"
+	uci del network.@device[1]
+}
+
+[ -n "$swconfig" ] && {
 	lan_ports="${lan_ports%%.*}"
 
 	# switch_vlan[0] is LAN and switch_vlan[1] is WAN; the CPU port is always last (see config_generate and uci-defaults.sh)
 	p="$(uci -q get network.@switch_vlan[0].ports)"
 	sw_lan_ports="${p% *}"; p="${p##* }"; lan_cpu_port="${p%t}t"
-
-	for port in $sw_lan_ports; do
-		tagged_lan_ports="${tagged_lan_ports:+$tagged_lan_ports }${port}t"
-	done
 
 	uci -q get network.@switch_vlan[1] && {
 		p="$(uci -q get network.@switch_vlan[1].ports)"
@@ -696,6 +699,35 @@ if [ -n "$swconfig" ]; then
 		wan_port="${wan_port%%.*}"
 		bridge_wan_port=1
 	}
+
+	while uci -q del network.@switch_vlan[0]; do :; done
+}
+
+br_ports="$lan_ports"
+[ "$BATMAN_ADV" != 1 ] && {
+	[ "$WIRELESS_MESH" = 1 ] && br_ports="$br_ports mesh0"
+	[ "$WIRELESS_MESH_2G" = 1 ] && br_ports="$br_ports mesh1"
+}
+[ "$AP_MODE" = 1 ] && [ -z "$sw_wan_port" ] && br_ports="$br_ports $wan_port"
+
+for port in $br_ports; do
+	trunk_ports="${trunk_ports:+$trunk_ports }$port:t"
+	lan_vlan_ports="${lan_vlan_ports:+$lan_vlan_ports }$port:u*"
+done
+
+wan_vlan_ports="$trunk_ports"
+
+if [ -n "$swconfig" ]; then
+	br_vlan_trunk="$trunk_ports"
+	br_vlan_lan="$trunk_ports"
+	br_vlan_wan="$trunk_ports"
+
+	[ "$AP_MODE" = 1 ] && [ -z "$sw_wan_port" ] && [ -n "$wan_port" ] && [ "$TAGGED_LAN_VLAN" != 1 ] && \
+		br_vlan_lan="${br_vlan_lan% *} $wan_port:u*"
+
+	for port in $sw_lan_ports; do
+		tagged_lan_ports="${tagged_lan_ports:+$tagged_lan_ports }${port}t"
+	done
 
 	cpu_ports="$lan_cpu_port${wan_cpu_port:+ $wan_cpu_port}"
 	trunk_ports="$tagged_lan_ports${tagged_wan_port:+ $tagged_wan_port} $cpu_ports"
@@ -709,52 +741,24 @@ if [ -n "$swconfig" ]; then
 
 	[ -n "$sw_wan_port" ] && [ "$WAN_IS_TAGGED" = 1 ] && wan_vlan_ports="$trunk_ports"
 
-	while uci -q del network.@switch_vlan[0]; do :; done
-
 	add_vlan() { add_switch_vlan "$@"; }
-fi
-
-[ "$AP_MODE" = 1 ] && [ "$wan_port" = br-wan ] && {
-	wan_port="$(uci -q get network.@device[1].ports)"
-	uci del network.@device[1]
-}
-
-br_ports="$lan_ports"
-[ "$AP_MODE" = 1 ] && [ -z "$sw_wan_port" ] && br_ports="$lan_ports $wan_port"
-[ "$BATMAN_ADV" != 1 ] && {
-	[ "$WIRELESS_MESH" = 1 ] && br_ports="$br_ports mesh0"
-	[ "$WIRELESS_MESH_2G" = 1 ] && br_ports="$br_ports mesh1"
-}
-
-[ -z "$swconfig" ] && {
-	for port in $br_ports; do
-		trunk_ports="${trunk_ports:+$trunk_ports }$port:t"
-		lan_vlan_ports="${lan_vlan_ports:+$lan_vlan_ports }$port:u*"
-	done
-
-	wan_vlan_ports="$trunk_ports"
-
+else
 	add_vlan() { add_bridge_vlan "$@"; }
-}
-
-for port in $br_ports; do
-	br_vlan_trunk="${br_vlan_trunk:+$br_vlan_trunk }$port:t"
-done
-
-br_vlan_wan="$br_vlan_trunk"
+fi
 
 [ "$WAN_IS_TAGGED" = 1 ] && w_tag=t
 
 [ "$AP_MODE" != 1 ] && [ "$bridge_wan_port" = 1 ] && [ -n "$wan_port" ] && [ -z "$sw_wan_port" ] && {
 	br_ports="$br_ports $wan_port"
-	br_vlan_trunk="$br_vlan_trunk $wan_port:t"
-	br_vlan_wan="$br_vlan_wan $wan_port:${w_tag:-u*}"
-
-	[ -z "$swconfig" ] && {
-		lan_vlan_ports="$lan_vlan_ports $wan_port:t"
+	if [ -n "$swconfig" ]; then
+		br_vlan_trunk="$br_vlan_trunk $wan_port:t"
+		br_vlan_lan="$br_vlan_lan $wan_port:t"
+		br_vlan_wan="$br_vlan_wan $wan_port:${w_tag:-u*}"
+	else
 		trunk_ports="$trunk_ports $wan_port:t"
+		lan_vlan_ports="$lan_vlan_ports $wan_port:t"
 		wan_vlan_ports="$wan_vlan_ports $wan_port:${w_tag:-u*}"
-	}
+	fi
 }
 
 [ "$TAGGED_LAN_VLAN" = 1 ] && lan_vlan_ports="$trunk_ports"
