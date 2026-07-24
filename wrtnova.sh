@@ -26,6 +26,7 @@ DOT11R=1		# 1 = enable fast transition support (802.11r)
 DENSE_ENV=		# 1 = optimize roaming and steering for high-interference areas
 PSK_VLAN=		# 1 = one SSID; wifi password determines which VLAN the client joins
 BAND_SUFFIX=		# 1 = append band (2G/5G/6G) to the end of the SSID
+INDEX_SUFFIX=		# 1 = append AP_INDEX to the SSID in AP_MODE=1
 AP_DISABLE=		# 1 = disable all AP interfaces, useful for backhaul-only nodes
 
 LAN_WIFI_SSID=""	# Default: WrtNova
@@ -827,7 +828,8 @@ add_wifi_iface() {
 
 	[ "$net" = "$iot_if" ] && [ -n "$IOT_NO_DOT11R" ] && iot_plain=1
 
-	set -- device="$dev" mode="$mode" ssid="${ssid}${BAND_SUFFIX:+ ${band%g}G}" key="$key" network="$net" encryption="$enc"
+	set -- device="$dev" mode="$mode" key="$key" network="$net" encryption="$enc" \
+		ssid="${ssid}${INDEX_SUFFIX:+_$AP_INDEX}${BAND_SUFFIX:+ ${band%g}G}"
 
 	[ "$net" = "$guest_if" ] && [ -n "$GUEST_ISOLATE" ] && set -- "$@" isolate=1 bridge_isolate=1
 
