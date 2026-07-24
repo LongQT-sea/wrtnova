@@ -101,6 +101,7 @@ export function deriveConfig(raw) {
     WIRELESS_MESH_2G: v('WIRELESS_MESH_2G'),
     BRIDGE_STP:     meshOn ? (bothMesh ? '1' : v('BRIDGE_STP')) : '',
     BATMAN_ADV:     meshOn ? v('BATMAN_ADV')  : '',
+    BATMAN_ALL_VLAN: (meshOn && v('BATMAN_ADV') === '1') ? v('BATMAN_ALL_VLAN') : '',
     MESH_ID:        meshOn ? v('MESH_ID')     : '',
     MESH_PASSWD:    meshOn ? v('MESH_PASSWD') : '',
 

@@ -106,7 +106,7 @@ import './ui.js';
     });
 
     $('#device').disabled = false;
-    $('#device-info').textContent = ui.t ? ui.t('deviceRequirement') : 'Required: ≥16MB flash, ≥128MB RAM';
+    $('#device-info').textContent = ui.t ? ui.t('deviceRequirement') : 'Required: ≥8MB flash, ≥64MB RAM';
     state.selectedTitle = ''; state.selectedProfile = null; state.profileDetails = null;
     ui.notifyTargetChanged && ui.notifyTargetChanged();
   }

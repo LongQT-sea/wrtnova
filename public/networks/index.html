@@ -837,6 +837,20 @@
                     <p class="form-help" data-i18n="batmanAdvNote">Better multi-hop routing for wireless-only meshes.</p>
                   </div>
                 </div>
+                <div class="form-row batman-only hidden">
+                  <label class="form-label" data-i18n="batmanAllVlan">All VLANs over mesh</label>
+                  <div>
+                    <label class="toggle-label">
+                      <span class="toggle-wrap">
+                        <input type="checkbox" id="BATMAN_ALL_VLAN" name="BATMAN_ALL_VLAN" value="1" class="toggle-input">
+                        <span class="toggle-track"></span>
+                        <span class="toggle-thumb"></span>
+                      </span>
+                      <span class="toggle-text" data-i18n="batmanAllVlanHelp">Also trunk WAN-B and extra VLANs over batman-adv</span>
+                    </label>
+                    <p class="form-help" data-i18n="batmanAllVlanNote">By default, only LAN/Guest/IoT/VPN/WAN VLANs are carried over bat0.</p>
+                  </div>
+                </div>
                 <div class="form-row guest-isolate-only hidden">
                   <label class="form-label" data-i18n="guestIsolate">Guest isolation</label>
                   <label class="toggle-label">

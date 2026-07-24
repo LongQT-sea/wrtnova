@@ -76,7 +76,7 @@
         </div>
         <div class="form-row">
           <span class="form-label"></span>
-          <p id="device-info" class="form-help mt-0" data-i18n="deviceRequirement">Required: ≥16MB flash, ≥128MB RAM</p>
+          <p id="device-info" class="form-help mt-0" data-i18n="deviceRequirement">Required: ≥8MB flash, ≥64MB RAM</p>
         </div>
 
         <div class="form-row">
@@ -807,17 +807,6 @@
                 <p class="form-help" data-i18n="mesh2gNote">Longer range than 5GHz but requires tuning for higher throughput.</p>
               </div>
             </div>
-            <div class="form-row">
-              <label class="form-label" data-i18n="backhaulOnly">Backhaul-only</label>
-              <label class="toggle-label">
-                <span class="toggle-wrap">
-                  <input type="checkbox" id="AP_DISABLE" name="AP_DISABLE" value="1" class="toggle-input">
-                  <span class="toggle-track"></span>
-                  <span class="toggle-thumb"></span>
-                </span>
-                <span class="toggle-text" data-i18n="disableAllAps">Turn off all Access Point (AP) interfaces</span>
-              </label>
-            </div>
             <div class="form-row mesh-only hidden">
               <label class="form-label" data-i18n="batmanAdv">batman-adv</label>
               <div>
@@ -831,6 +820,31 @@
                 </label>
                 <p class="form-help" data-i18n="batmanAdvNote">Better multi-hop routing for wireless-only meshes.</p>
               </div>
+            </div>
+            <div class="form-row batman-only hidden">
+              <label class="form-label" data-i18n="batmanAllVlan">All VLANs over mesh</label>
+              <div>
+                <label class="toggle-label">
+                  <span class="toggle-wrap">
+                    <input type="checkbox" id="BATMAN_ALL_VLAN" name="BATMAN_ALL_VLAN" value="1" class="toggle-input">
+                    <span class="toggle-track"></span>
+                    <span class="toggle-thumb"></span>
+                  </span>
+                  <span class="toggle-text" data-i18n="batmanAllVlanHelp">Also trunk WAN-B and extra VLANs over batman-adv</span>
+                </label>
+                <p class="form-help" data-i18n="batmanAllVlanNote">By default, only LAN/Guest/IoT/VPN/WAN VLANs are carried over bat0.</p>
+              </div>
+            </div>
+            <div class="form-row">
+              <label class="form-label" data-i18n="backhaulOnly">Backhaul-only</label>
+              <label class="toggle-label">
+                <span class="toggle-wrap">
+                  <input type="checkbox" id="AP_DISABLE" name="AP_DISABLE" value="1" class="toggle-input">
+                  <span class="toggle-track"></span>
+                  <span class="toggle-thumb"></span>
+                </span>
+                <span class="toggle-text" data-i18n="disableAllAps">Turn off all Access Point (AP) interfaces</span>
+              </label>
             </div>
             <div class="form-row">
               <label for="CHANNEL_2G" class="form-label" data-i18n="channel2g">2.4 GHz channel</label>

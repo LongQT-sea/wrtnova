@@ -99,6 +99,8 @@ export function deriveVisibility(cfg) {
     'wg-help-router': ap,
     'ssh-pw-row': !hasKeys,
     'mesh-only': !(on(cfg, 'WIRELESS_MESH') || on(cfg, 'WIRELESS_MESH_2G')),
+    // BATMAN_ALL_VLAN only makes sense once batman-adv is on over an active mesh.
+    'batman-only': !(on(cfg, 'BATMAN_ADV') && (on(cfg, 'WIRELESS_MESH') || on(cfg, 'WIRELESS_MESH_2G'))),
     'dot11r-only': !on(cfg, 'DOT11R'),
     'dnsmasq-multi-only': !on(cfg, 'DNSMASQ_MULTI_INSTANCE'),
     'wan-tagged-only': !on(cfg, 'WAN_IS_TAGGED'),
