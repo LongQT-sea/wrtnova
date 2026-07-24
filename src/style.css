@@ -144,6 +144,12 @@
   }
   .toggle-label:hover { border-color: #d4d4d8; }
   .dark .toggle-label:hover { border-color: #3f3f46; }
+  /* The whole card is the click target, so the keyboard ring belongs on the
+     card - not on the switch, which is a small part of it. */
+  .toggle-label:has(:focus-visible) {
+    outline: 2px solid #f6821f;
+    outline-offset: 2px;
+  }
   .toggle-label > div { min-width: 0; }
   /* Radio options reuse the same card shell */
   .toggle-label > input[type="radio"] {
@@ -172,11 +178,15 @@
     position: absolute;
     inset: 0;
     border-radius: 9999px;
-    background-color: #a1a1aa; /* zinc-400 */
+    /* zinc-500 clears WCAG 1.4.11 (3:1 for non-text UI) against the card in
+       both themes - 4.63:1 on #fafafa, 3.51:1 on #1c1c20 - so one value does
+       for both. The inset ring keeps the switch outline discernible when the
+       track is filled with the accent, which is only 2.47:1 on a light card. */
+    background-color: #71717a;
+    box-shadow: inset 0 0 0 1px #71717a;
     transition: background-color 0.2s ease;
     pointer-events: none;
   }
-  .dark .toggle-track { background-color: #52525b; /* zinc-600 */ }
   .toggle-thumb {
     position: absolute;
     top: 0.1875rem; left: 0.1875rem;
@@ -189,13 +199,9 @@
   }
   .toggle-input:checked ~ .toggle-track { background-color: #f6821f; }
   .toggle-input:checked ~ .toggle-thumb { transform: translateX(1.375rem); }
-  .toggle-input:focus-visible ~ .toggle-track {
-    outline: 2px solid #f6821f;
-    outline-offset: 2px;
-  }
   .toggle-text {
     display: block;
-    font-size: 0.9375rem;
+    font-size: 0.8375rem;
     font-weight: 600;
     line-height: 1.35;
     margin-bottom: 0.125rem;
@@ -204,7 +210,7 @@
   }
   .dark .toggle-text { color: #fafafa; /* zinc-50 */ }
   .toggle-label .form-help {
-    font-size: 0.875rem;
+    font-size: 0.775rem;
     color: #52525b; /* zinc-600 */
   }
   .dark .toggle-label .form-help { color: #a1a1aa; /* zinc-400 */ }
