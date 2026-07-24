@@ -108,7 +108,7 @@
               <label class="opt-title" for="AP_INDEX" data-i18n="apIndex">AP index</label>
               <p class="form-help mt-0"><span data-i18n="apIndexHelp">Last octet 2–254. LAN IP becomes </span><span id="ap-index-preview">192.168.1.2</span></p>
             </div>
-            <input type="number" id="AP_INDEX" name="AP_INDEX" class="opt-control opt-field input-base" min="2" max="254" value="2" onblur="var v=Math.min(254,Math.max(2,parseInt(this.value)||2));this.value=v;this.dispatchEvent(new Event('input',{bubbles:true}))">
+            <input type="number" id="AP_INDEX" name="AP_INDEX" class="opt-control opt-field--narrow input-base" min="2" max="254" value="2" onblur="var v=Math.min(254,Math.max(2,parseInt(this.value)||2));this.value=v;this.dispatchEvent(new Event('input',{bubbles:true}))">
           </div>
         </div>
         <div class="info-note ap-only hidden" role="note">
@@ -658,7 +658,7 @@
             <div class="opt-text">
               <label class="opt-title" for="COUNTRY_CODE" data-i18n="countryCode">Country code</label>
             </div>
-            <input type="text" id="COUNTRY_CODE" name="COUNTRY_CODE" class="opt-control opt-field input-base" maxlength="2" placeholder="US" style="text-transform:uppercase">
+            <input type="text" id="COUNTRY_CODE" name="COUNTRY_CODE" class="opt-control opt-field--narrow input-base" maxlength="2" placeholder="US" style="text-transform:uppercase">
           </div>
         </div>
         <div class="form-row form-row--full dense-env-only">

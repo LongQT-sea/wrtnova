@@ -702,7 +702,7 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
         hostRow('WrtNova-' + esc(node.overrides.AP_INDEX || '2')) +
 
         cardRow('np-apidx-' + id, S.apIndex,
-          '<input type="number" class="opt-control opt-field input-base" id="np-apidx-' + id +
+          '<input type="number" class="opt-control opt-field--narrow input-base" id="np-apidx-' + id +
           '" min="2" max="19" value="' + esc(node.overrides.AP_INDEX || '2') + '">') +
 
         wifiRows;

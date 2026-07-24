@@ -174,6 +174,17 @@
     flex: 1 1 100%;
     margin-left: 0;
   }
+  /* A field with a hard, tiny content limit - a two-letter country code, a
+     two-digit index - reads as broken when it fills half the card: the box
+     promises far more input than it accepts. These size to their content and
+     keep the trailing edge at every width, including below the breakpoint
+     where a normal field goes full-width. Declared after both media queries
+     because it has the same specificity as the rules it overrides. */
+  .opt-card > .opt-field--narrow {
+    flex: 0 0 auto;
+    width: 6.5rem;
+    margin-left: auto;
+  }
 
   /* A toggle plus the field it governs, in one box. The toggle keeps its own
      <label> so clicking the row still flips it - a <label> binds to a single
