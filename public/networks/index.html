@@ -1132,10 +1132,12 @@
                       <span class="toggle-text"><span data-i18n="taggedWanVlan">Tagged WAN VLAN</span> <span class="text-zinc-500 dark:text-zinc-400" data-i18n="taggedWanVlanNote">(required by some ISPs)</span></span>
                     </div>
                   </label>
-                  <div class="opt-group-sub">
-                    <label class="opt-title" for="WAN_VLAN_ID" data-i18n="wanVlanId">WAN VLAN ID</label>
-                    <input type="number" id="WAN_VLAN_ID" name="WAN_VLAN_ID" class="input-base" min="1" max="4094" placeholder="20">
-                    <p class="form-help" data-i18n="wanVlanHint">802.1Q VLAN tag for the WAN interface.</p>
+                  <div class="opt-card">
+                    <div class="opt-text">
+                      <label class="opt-title" for="WAN_VLAN_ID" data-i18n="wanVlanId">WAN VLAN ID</label>
+                      <p class="form-help mt-0" data-i18n="wanVlanHint">802.1Q VLAN tag for the WAN interface.</p>
+                    </div>
+                    <input type="number" id="WAN_VLAN_ID" name="WAN_VLAN_ID" class="opt-control opt-field input-base" min="1" max="4094" placeholder="20">
                   </div>
                 </div>
                 <div class="opt-group">
@@ -1149,10 +1151,12 @@
                       <span class="toggle-text" data-i18n="enableSecondaryWan">Enable secondary WAN (WAN-B)</span>
                     </div>
                   </label>
-                  <div class="opt-group-sub">
-                    <label class="opt-title" for="WAN_B_VLAN_ID" data-i18n="wanBVlanId">WAN-B VLAN ID</label>
-                    <input type="number" id="WAN_B_VLAN_ID" name="WAN_B_VLAN_ID" class="input-base" min="1" max="4094" placeholder="21">
-                    <p class="form-help" data-i18n="wanBVlanHint">802.1Q VLAN tag for WAN-B.</p>
+                  <div class="opt-card">
+                    <div class="opt-text">
+                      <label class="opt-title" for="WAN_B_VLAN_ID" data-i18n="wanBVlanId">WAN-B VLAN ID</label>
+                      <p class="form-help mt-0" data-i18n="wanBVlanHint">802.1Q VLAN tag for WAN-B.</p>
+                    </div>
+                    <input type="number" id="WAN_B_VLAN_ID" name="WAN_B_VLAN_ID" class="opt-control opt-field input-base" min="1" max="4094" placeholder="21">
                   </div>
                 </div>
                 <div class="pt-2">

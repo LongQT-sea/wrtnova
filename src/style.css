@@ -178,10 +178,10 @@
   /* A toggle plus the field it governs, in one box. The toggle keeps its own
      <label> so clicking the row still flips it - a <label> binds to a single
      control, so the field cannot live inside it - and the border moves to the
-     group. The sub-row simply shares the card's own padding, so its left edge
-     lines up with the title above it - .wan-vid-row used to fake that with a
-     padding calc copied off the switch width, which went stale the moment the
-     switch was resized. */
+     group. Nested rows are ordinary .opt-card children, so they keep the same
+     half-width control and left rail as a standalone card - .wan-vid-row used
+     to fake that alignment with a padding calc copied off the switch width,
+     which went stale the moment the switch was resized. */
   .opt-group {
     border: 1px solid #e4e4e7; /* zinc-200 */
     border-radius: 0.75rem;
@@ -193,8 +193,7 @@
     background-color: #1c1c20;
   }
   /* Cards nested in a group give up their own shell and are separated by a
-     rule instead. Works for a compact .opt-group-sub (a VLAN id) and for full
-     rows alike (the PPPoE credentials under Connection type). */
+     rule instead. */
   .opt-group > .toggle-label,
   .opt-group .opt-card {
     border: 0;
@@ -206,19 +205,6 @@
   .dark .opt-group .opt-card { border-top-color: #303035; }
   .opt-group > .opt-card:first-child,
   .opt-group > .toggle-label:first-child { border-top: 0; }
-  .opt-group-sub {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.5rem 0.875rem;
-    margin: 0 1rem;
-    padding: 0.75rem 0 0.875rem;
-    border-top: 1px solid #e4e4e7;
-  }
-  .dark .opt-group-sub { border-top-color: #303035; }
-  .opt-group-sub > .opt-title { margin-bottom: 0; }
-  .opt-group-sub > .form-help { flex: 1 1 100%; margin-top: 0; }
-  .opt-group-sub > .input-base { width: auto; max-width: 6rem; }
   .toggle-label:hover { border-color: #d4d4d8; }
   .dark .toggle-label:hover { border-color: #3f3f46; }
   /* The whole card is the click target, so the keyboard ring belongs on the
@@ -982,10 +968,10 @@
   /* Suppress number spinners on compact VID inputs */
   .net-table [type="number"]::-webkit-inner-spin-button,
   .net-table [type="number"]::-webkit-outer-spin-button,
-  .opt-group-sub [type="number"]::-webkit-inner-spin-button,
-  .opt-group-sub [type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
+  .opt-group [type="number"]::-webkit-inner-spin-button,
+  .opt-group [type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
   .net-table [type="number"],
-  .opt-group-sub [type="number"] { -moz-appearance: textfield; }
+  .opt-group [type="number"] { -moz-appearance: textfield; }
   /* Make the hidden input a full-area transparent click target in the table */
   .net-table .toggle-input {
     position: absolute;
