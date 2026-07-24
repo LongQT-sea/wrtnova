@@ -46,6 +46,7 @@ LAN_WG_WIFI_PASSWD=""
 WIRELESS_MESH=		# 1 = use 5GHz wireless mesh backhaul (802.11s)
 WIRELESS_MESH_2G=	# 1 = use 2.4GHz wireless mesh backhaul (802.11s)
 BATMAN_ADV=		# 1 = use batman-adv on top of 802.11s meshpoint
+BATMAN_ALL_VLAN=	# 1 = also trunk wanb and ADDITIONAL_VLAN_LIST over bat0
 MESH_ID=
 MESH_PASSWD=""
 
@@ -1014,10 +1015,23 @@ fi
 	[ "$WIRELESS_MESH" = 1 ] && _uci network interface "$mesh0_if" proto=batadv_hardif mtu=2304 master=bat0
 	[ "$WIRELESS_MESH_2G" = 1 ] && _uci network interface "$mesh1_if" proto=batadv_hardif mtu=2304 master=bat0
 
-	for vid in "$lan_vid" ${GUEST_ENABLE:+$guest_vid} ${IOT_ENABLE:+$iot_vid} ${WG_ENABLE:+$wg_vid}; do
-		uci add_list "network.@device[0].ports=bat0.$vid"
-		uci add_list "network.vlan_$vid.ports=bat0.$vid:u*"
-	done
+	vlans="$lan_vid ${GUEST_ENABLE:+$guest_vid} ${IOT_ENABLE:+$iot_vid} ${WG_ENABLE:+$wg_vid} ${bridge_wan_port:+$wan_vid}"
+
+	[ "$BATMAN_ALL_VLAN" = 1 ] && vlans="$vlans ${WAN_B_ENABLE:+$wanb_vid} $(expand_vlan "$ADDITIONAL_VLAN_LIST")"
+
+	[ "$os_version" -le 23 ] && {
+		uci add_list "network.@device[0].ports=bat0"
+		for vid in $vlans; do
+			uci add_list "network.vlan_$vid.ports=bat0:t"
+		done
+	}
+
+	[ "$os_version" -ge 24 ] && {
+		for vid in $vlans; do
+			uci add_list "network.@device[0].ports=bat0.$vid"
+			uci add_list "network.vlan_$vid.ports=bat0.$vid:u*"
+		done
+	}
 }
 
 # === WED ===
