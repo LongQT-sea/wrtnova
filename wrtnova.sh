@@ -138,6 +138,7 @@ WG_IPV4=
 WG_IPV6=
 WG_DNS_V4=
 WG_DNS_V6=
+WG_MTU=
 PEER_PUBLIC_KEY=
 PRESHARED_KEY=
 ENDPOINT=
@@ -199,7 +200,7 @@ P_STEERING=
 
 LUCI_HTTPS=		# 1 = force LuCI HTTPS redirect
 
-NTP_IP=			# Last resort NTP server
+NTP_IP=			# Raw IP address for last-resort NTP server
 
 # 1 = log to /root/99-asu-defaults.log
 LOG=
@@ -399,8 +400,6 @@ _uci system timeserver ntp enable_server=1
 
 [ "$QUARTERLY_REBOOT" = 1 ] && \
 	echo "30 3 1 1,4,7,10 * sleep 70 && { touch /etc/banner; reboot; }" >> /etc/crontabs/root
-
-[ -x /etc/init.d/zram ] && echo vm.swappiness=70 > /etc/sysctl.d/13-zram.conf
 
 [ -n "$IRQBALANCE" ] && _uci irqbalance "" irqbalance enabled=1
 
@@ -609,7 +608,7 @@ _uci network interface wan6 device=@wan ~wan_6
 			private_key="${WG_PRIVATE_KEY:-$(wg genkey)}" \
 			+addresses="${WG_IPV4:-172.16.0.2/32}" \
 			+addresses="${WG_IPV6:-fd88::/128}" \
-			ip4table=20 ip6table=20
+			ip4table=20 ip6table=20 ${WG_MTU:+mtu=$WG_MTU}
 
 		if [ "$no_mwan3" = 1 ]; then
 			[ -n "$WG_DNS_V4" ] && _uci network rule  "" in="$lan_wg_if" dest="$WG_DNS_V4/32" lookup=20 priority=988
@@ -975,7 +974,7 @@ if [ "$WIRELESS_MESH" = 1 ] || [ "$WIRELESS_MESH_2G" = 1 ]; then
 		mesh1) bridge link set dev mesh1 cost 300 ;;
 	esac
 
-	$set_mesh_param mesh_rssi_threshold -78
+	$set_mesh_param mesh_rssi_threshold -73
 	$set_mesh_param mesh_max_peer_links 9
 	EOF
 
@@ -999,7 +998,7 @@ fi
 			signal_diff_threshold='6' \
 			band_steering_interval='30000' \
 			band_steering_min_snr='-50' \
-			roam_trigger_snr='-65' \
+			roam_trigger_snr='-67' \
 			roam_kick_delay='3000' \
 			min_snr='-80'
 	}
@@ -1298,7 +1297,8 @@ bootstrap_dns="${BOOTSTRAP_DNS:-
 		adguard_dns_port=53
 		dnsmasq_dns_port=54
 		adguard_upstream="'[/lan/]127.0.0.1:54'"
-		[ "$WG_ENABLE" = 1 ] && adguard_upstream="$adguard_upstream '[/vpn.lan/]$wg_net_pfx.1:54'"
+		[ "$WG_ENABLE" = 1 ] && [ "$DNSMASQ_SINGLE_INSTANCE" != 1 ] && \
+			adguard_upstream="$adguard_upstream '[/vpn.lan/]$wg_net_pfx.1:54'"
 	}
 
 	setup_dnsmasq_upstream
