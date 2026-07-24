@@ -1123,7 +1123,7 @@
                 <span data-i18n="advancedWan">Advanced WAN options</span>
               </summary>
               <div class="mt-2 pl-4 border-l-2 border-zinc-200 dark:border-zinc-700 space-y-1">
-                <div>
+                <div class="opt-group">
                   <label class="toggle-label">
                     <span class="toggle-wrap">
                       <input type="checkbox" id="WAN_IS_TAGGED" name="WAN_IS_TAGGED" value="1" class="toggle-input">
@@ -1134,13 +1134,13 @@
                       <span class="toggle-text"><span data-i18n="taggedWanVlan">Tagged WAN VLAN</span> <span class="text-zinc-500 dark:text-zinc-400" data-i18n="taggedWanVlanNote">(required by some ISPs)</span></span>
                     </div>
                   </label>
-                  <div class="wan-vid-row">
-                    <span class="wan-vid-label" data-i18n="wanVlanId">WAN VLAN ID</span>
-                    <input type="number" id="WAN_VLAN_ID" name="WAN_VLAN_ID" class="input-base wan-vid-inp" min="1" max="4094" placeholder="20">
-                    <span class="wan-vid-hint" data-i18n="wanVlanHint">802.1Q VLAN tag for the WAN interface.</span>
+                  <div class="opt-group-sub">
+                    <label class="opt-title" for="WAN_VLAN_ID" data-i18n="wanVlanId">WAN VLAN ID</label>
+                    <input type="number" id="WAN_VLAN_ID" name="WAN_VLAN_ID" class="input-base" min="1" max="4094" placeholder="20">
+                    <p class="form-help" data-i18n="wanVlanHint">802.1Q VLAN tag for the WAN interface.</p>
                   </div>
                 </div>
-                <div>
+                <div class="opt-group">
                   <label class="toggle-label">
                     <span class="toggle-wrap">
                       <input type="checkbox" id="WAN_B_ENABLE" name="WAN_B_ENABLE" value="1" class="toggle-input">
@@ -1151,10 +1151,10 @@
                       <span class="toggle-text" data-i18n="enableSecondaryWan">Enable secondary WAN (WAN-B)</span>
                     </div>
                   </label>
-                  <div class="wan-vid-row">
-                    <span class="wan-vid-label" data-i18n="wanBVlanId">WAN-B VLAN ID</span>
-                    <input type="number" id="WAN_B_VLAN_ID" name="WAN_B_VLAN_ID" class="input-base wan-vid-inp" min="1" max="4094" placeholder="21">
-                    <span class="wan-vid-hint" data-i18n="wanBVlanHint">802.1Q VLAN tag for WAN-B.</span>
+                  <div class="opt-group-sub">
+                    <label class="opt-title" for="WAN_B_VLAN_ID" data-i18n="wanBVlanId">WAN-B VLAN ID</label>
+                    <input type="number" id="WAN_B_VLAN_ID" name="WAN_B_VLAN_ID" class="input-base" min="1" max="4094" placeholder="21">
+                    <p class="form-help" data-i18n="wanBVlanHint">802.1Q VLAN tag for WAN-B.</p>
                   </div>
                 </div>
                 <div class="pt-2">
