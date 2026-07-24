@@ -1068,43 +1068,41 @@
           <div class="card-body-wrap">
           <div class="card-body">
             <div class="form-row form-row--full">
-              <div class="opt-card">
-                <div class="opt-text">
-                  <span class="opt-title" data-i18n="connectionType">Connection type</span>
-                </div>
-                <div class="opt-control radio-seg" role="radiogroup" aria-label="WAN connection type">
-                  <label>
-                    <input type="radio" name="wan_type" value="dhcp" checked>
-                    <span>DHCP</span>
-                  </label>
-                  <label>
-                    <input type="radio" name="wan_type" value="pppoe">
-                    <span>PPPoE</span>
-                  </label>
-                </div>
-              </div>
-            </div>
-            <div class="pppoe-only hidden">
-              <div class="form-row form-row--full">
+              <div class="opt-group">
                 <div class="opt-card">
                   <div class="opt-text">
-                    <label class="opt-title" for="PPPOE_USERNAME">PPPoE username</label>
+                    <span class="opt-title" data-i18n="connectionType">Connection type</span>
                   </div>
-                  <input type="text" id="PPPOE_USERNAME" name="PPPOE_USERNAME" class="opt-control opt-field input-base" autocomplete="username">
+                  <div class="opt-control radio-seg" role="radiogroup" aria-label="WAN connection type">
+                    <label>
+                      <input type="radio" name="wan_type" value="dhcp" checked>
+                      <span>DHCP</span>
+                    </label>
+                    <label>
+                      <input type="radio" name="wan_type" value="pppoe">
+                      <span>PPPoE</span>
+                    </label>
+                  </div>
                 </div>
-              </div>
-              <div class="form-row form-row--full">
-                <div class="opt-card">
-                  <div class="opt-text">
-                    <label class="opt-title" for="PPPOE_PASSWD">PPPoE password</label>
+                <div class="pppoe-only hidden">
+                  <div class="opt-card">
+                    <div class="opt-text">
+                      <label class="opt-title" for="PPPOE_USERNAME">PPPoE username</label>
+                    </div>
+                    <input type="text" id="PPPOE_USERNAME" name="PPPOE_USERNAME" class="opt-control opt-field input-base" autocomplete="username">
                   </div>
-                  <div class="opt-control opt-field relative">
-                    <input type="password" id="PPPOE_PASSWD" name="PPPOE_PASSWD" class="input-base" style="padding-right:2.5rem" autocomplete="current-password">
-                    <button type="button" id="toggle-pppoe-pw"
-                            class="btn btn-ghost btn-icon absolute right-1.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
-                            aria-label="Show password">
-                      <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
-                    </button>
+                  <div class="opt-card">
+                    <div class="opt-text">
+                      <label class="opt-title" for="PPPOE_PASSWD">PPPoE password</label>
+                    </div>
+                    <div class="opt-control opt-field relative">
+                      <input type="password" id="PPPOE_PASSWD" name="PPPOE_PASSWD" class="input-base" style="padding-right:2.5rem" autocomplete="current-password">
+                      <button type="button" id="toggle-pppoe-pw"
+                              class="btn btn-ghost btn-icon absolute right-1.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
+                              aria-label="Show password">
+                        <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
