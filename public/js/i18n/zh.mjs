@@ -173,7 +173,7 @@ export default {
   sshPublicKeys:      'SSH 公钥',
   oneKeyPerLine:      '每行一个密钥。',
   sshPasswordAuth:    'SSH 密码认证',
-  sshPasswordAuthHelp: '选择 Off 将完全拒绝密码登录，仅接受上方的密钥。',
+  sshPasswordAuthHelp: '设为关闭时将完全拒绝密码登录，仅接受上方的密钥。',
   sshAuthOn:          '开启（密钥 + 密码）',
   sshAuthOff:         '关闭（仅密钥）',
   timezone:           '时区',
