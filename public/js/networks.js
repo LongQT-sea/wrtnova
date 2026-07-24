@@ -609,47 +609,47 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
     const hasWifi = /\bwpad-?|\bhostapd|\bmac80211/.test(allPkgs.join(' '));
     const hasCt = allPkgs.some(p => /^ath10k-firmware-|^kmod-ath10k-ct/.test(p));
     const nonCtRow = hasCt
-      ? '<div class="form-row"><span class="form-label">' + S.nonCtAth10k + '</span>' +
-        '<label class="toggle-label"><span class="toggle-wrap">' +
+      ? '<div class="form-row form-row--full"><label class="toggle-label"><span class="toggle-wrap">' +
         '<input type="checkbox" class="toggle-input" id="np-nonct-' + id + '"' + (node.overrides.NON_CT_ATH10K === '1' ? ' checked' : '') + '>' +
         '<span class="toggle-track"></span><span class="toggle-thumb"></span></span>' +
-        '<span class="toggle-text text-xs">' + S.useNonCtAth10k + '</span></label></div>'
+        '<div><span class="toggle-text">' + S.nonCtAth10k + '</span>' +
+        '<p class="form-help mt-0">' + S.useNonCtAth10k + '</p></div></label></div>'
       : '';
     const wedCapable = allPkgs.some(p => /^kmod-mt7915e$/.test(p));
     const wedRow = wedCapable
-      ? '<div class="form-row"><span class="form-label">' + S.wedAccel + '</span>' +
-        '<label class="toggle-label"><span class="toggle-wrap">' +
+      ? '<div class="form-row form-row--full"><label class="toggle-label"><span class="toggle-wrap">' +
         '<input type="checkbox" class="toggle-input" id="np-wed-' + id + '"' + (node.overrides.WED_ENABLE === '1' ? ' checked' : '') + '>' +
         '<span class="toggle-track"></span><span class="toggle-thumb"></span></span>' +
-        '<span class="toggle-text text-xs">' + S.useWed + '</span></label></div>'
+        '<div><span class="toggle-text">' + S.wedAccel + '</span>' +
+        '<p class="form-help mt-0">' + S.useWed + '</p></div></label></div>'
       : '';
     const irqRow =
-      '<div class="form-row"><span class="form-label">' + S.irqbalance + '</span>' +
-      '<label class="toggle-label"><span class="toggle-wrap">' +
-      '<input type="checkbox" class="toggle-input" id="np-irq-' + id + '"' + (irqChecked ? ' checked' : '') + '>' +
-      '<span class="toggle-track"></span><span class="toggle-thumb"></span></span>' +
-      '<span class="toggle-text text-xs">' + S.useIrqbalance + '</span></label></div>';
+      '<div class="form-row form-row--full"><label class="toggle-label"><span class="toggle-wrap">' +
+        '<input type="checkbox" class="toggle-input" id="np-irq-' + id + '"' + (irqChecked ? ' checked' : '') + '>' +
+        '<span class="toggle-track"></span><span class="toggle-thumb"></span></span>' +
+        '<div><span class="toggle-text">' + S.irqbalance + '</span>' +
+        '<p class="form-help mt-0">' + S.useIrqbalance + '</p></div></label></div>';
 
     // Per-node 2.4GHz mesh override only where the network opts in (shared WIRELESS_MESH_2G).
     const mesh2gToggle = cfg.WIRELESS_MESH_2G === '1'
-      ? '<label class="toggle-label" style="margin-top:.4rem"><span class="toggle-wrap">' +
+      ? '<div class="form-row form-row--full"><label class="toggle-label"><span class="toggle-wrap">' +
         '<input type="checkbox" class="toggle-input" id="np-mesh2g-' + id + '"' + (meshChecked2g ? ' checked' : '') + '>' +
         '<span class="toggle-track"></span><span class="toggle-thumb"></span></span>' +
-        '<span class="toggle-text text-xs">' + S.enableMeshBackhaul2G + '</span></label>'
+        '<div><span class="toggle-text">' + S.enableMeshBackhaul2G + '</span></div></label></div>'
       : '';
 
     const wifiRows =
-      (hasWifi ? '<div class="form-row"><span class="form-label">' + S.wirelessMesh + '</span>' +
-      '<div><label class="toggle-label"><span class="toggle-wrap">' +
-      '<input type="checkbox" class="toggle-input" id="np-mesh-' + id + '"' + (meshChecked ? ' checked' : '') + '>' +
-      '<span class="toggle-track"></span><span class="toggle-thumb"></span></span>' +
-      '<span class="toggle-text text-xs">' + S.enableMeshBackhaul + '</span></label>' +
-      mesh2gToggle + '</div></div>' : '') +
-      (hasWifi ? '<div class="form-row"><span class="form-label">' + S.backhaulOnly + '</span>' +
-      '<label class="toggle-label"><span class="toggle-wrap">' +
-      '<input type="checkbox" class="toggle-input" id="np-apdisable-' + id + '"' + (apDisableChecked ? ' checked' : '') + '>' +
-      '<span class="toggle-track"></span><span class="toggle-thumb"></span></span>' +
-      '<span class="toggle-text text-xs">' + S.disableAllAps + '</span></label></div>' : '') +
+      (hasWifi ? '<div class="form-row form-row--full"><label class="toggle-label"><span class="toggle-wrap">' +
+        '<input type="checkbox" class="toggle-input" id="np-mesh-' + id + '"' + (meshChecked ? ' checked' : '') + '>' +
+        '<span class="toggle-track"></span><span class="toggle-thumb"></span></span>' +
+        '<div><span class="toggle-text">' + S.wirelessMesh + '</span>' +
+        '<p class="form-help mt-0">' + S.enableMeshBackhaul + '</p></div></label></div>' +
+      mesh2gToggle : '') +
+      (hasWifi ? '<div class="form-row form-row--full"><label class="toggle-label"><span class="toggle-wrap">' +
+        '<input type="checkbox" class="toggle-input" id="np-apdisable-' + id + '"' + (apDisableChecked ? ' checked' : '') + '>' +
+        '<span class="toggle-track"></span><span class="toggle-thumb"></span></span>' +
+        '<div><span class="toggle-text">' + S.backhaulOnly + '</span>' +
+        '<p class="form-help mt-0">' + S.disableAllAps + '</p></div></label></div>' : '') +
       nonCtRow + wedRow + irqRow;
 
     let fields;

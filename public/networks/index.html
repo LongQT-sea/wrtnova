@@ -239,18 +239,18 @@
                 </div>
               </div>
             </div>
-            <div class="form-row">
-              <label class="form-label" data-i18n="luciHttps">LuCI HTTPS</label>
-              <div>
-                <label class="toggle-label">
-                  <span class="toggle-wrap">
-                    <input type="checkbox" id="LUCI_HTTPS" name="LUCI_HTTPS" value="1" class="toggle-input">
-                    <span class="toggle-track"></span>
-                    <span class="toggle-thumb"></span>
-                  </span>
-                  <span class="toggle-text" data-i18n="luciHttpsHelp">Enable HTTP-to-HTTPS redirect for LuCI</span>
-                </label>
-              </div>
+            <div class="form-row form-row--full">
+              <label class="toggle-label">
+                <span class="toggle-wrap">
+                  <input type="checkbox" id="LUCI_HTTPS" name="LUCI_HTTPS" value="1" class="toggle-input">
+                  <span class="toggle-track"></span>
+                  <span class="toggle-thumb"></span>
+                </span>
+                <div>
+                  <span class="toggle-text" data-i18n="luciHttps">LuCI HTTPS</span>
+                  <p class="form-help mt-0" data-i18n="luciHttpsHelp">Enable HTTP-to-HTTPS redirect for LuCI</p>
+                </div>
+              </label>
             </div>
             <details class="mt-4">
               <summary class="text-xs text-zinc-500 dark:text-zinc-400 cursor-pointer hover:text-zinc-700 dark:hover:text-zinc-200 select-none flex items-center gap-1">
@@ -403,7 +403,9 @@
                     <span class="toggle-track"></span>
                     <span class="toggle-thumb"></span>
                   </span>
-                  <span class="toggle-text text-xs" data-i18n="enableIotInternet">Enable internet access for IoT devices</span>
+                  <div>
+                    <span class="toggle-text" data-i18n="enableIotInternet">Enable internet access for IoT devices</span>
+                  </div>
                 </label>
               </div>
 
@@ -414,7 +416,9 @@
                     <span class="toggle-track"></span>
                     <span class="toggle-thumb"></span>
                   </span>
-                  <span class="toggle-text text-xs" data-i18n="iotRouteViaWg">Route IoT internet traffic through WireGuard tunnel</span>
+                  <div>
+                    <span class="toggle-text" data-i18n="iotRouteViaWg">Route IoT internet traffic through WireGuard tunnel</span>
+                  </div>
                 </label>
               </div>
 
@@ -462,32 +466,32 @@
                       <p class="form-help" data-i18n="ulaPrefixHelp">Leave empty to auto-generate a random prefix on first boot.</p>
                     </div>
                   </div>
-                  <div class="form-row">
-                    <label class="form-label" data-i18n="dnsmasqMulti">Per-Network Dnsmasq</label>
-                    <div>
-                      <label class="toggle-label">
-                        <span class="toggle-wrap">
-                          <input type="checkbox" id="DNSMASQ_MULTI_INSTANCE" name="DNSMASQ_MULTI_INSTANCE" value="1" class="toggle-input">
-                          <span class="toggle-track"></span>
-                          <span class="toggle-thumb"></span>
-                        </span>
-                        <span class="toggle-text" data-i18n="dnsmasqMultiHelp">Enable multiple DHCP/DNS instances</span>
-                      </label>
-                    </div>
+                  <div class="form-row form-row--full">
+                    <label class="toggle-label">
+                      <span class="toggle-wrap">
+                        <input type="checkbox" id="DNSMASQ_MULTI_INSTANCE" name="DNSMASQ_MULTI_INSTANCE" value="1" class="toggle-input">
+                        <span class="toggle-track"></span>
+                        <span class="toggle-thumb"></span>
+                      </span>
+                      <div>
+                        <span class="toggle-text" data-i18n="dnsmasqMulti">Per-Network Dnsmasq</span>
+                        <p class="form-help mt-0" data-i18n="dnsmasqMultiHelp">Enable multiple DHCP/DNS instances</p>
+                      </div>
+                    </label>
                   </div>
                   <div class="info-note dnsmasq-multi-only" role="note" data-i18n-html="dnsmasqMultiNote">To add DHCP on a new interface, use the built-in <code>dhcp-instance-add</code> command.</div>
-                  <div class="form-row">
-                    <label class="form-label" data-i18n="tagLanVlan">Tag LAN VLAN</label>
-                    <div>
-                      <label class="toggle-label">
-                        <span class="toggle-wrap">
-                          <input type="checkbox" id="TAGGED_LAN_VLAN" name="TAGGED_LAN_VLAN" value="1" class="toggle-input">
-                          <span class="toggle-track"></span>
-                          <span class="toggle-thumb"></span>
-                        </span>
-                        <span class="toggle-text" data-i18n="tagLanVlanHelp">Turn all LAN ports into trunk-only ports</span>
-                      </label>
-                    </div>
+                  <div class="form-row form-row--full">
+                    <label class="toggle-label">
+                      <span class="toggle-wrap">
+                        <input type="checkbox" id="TAGGED_LAN_VLAN" name="TAGGED_LAN_VLAN" value="1" class="toggle-input">
+                        <span class="toggle-track"></span>
+                        <span class="toggle-thumb"></span>
+                      </span>
+                      <div>
+                        <span class="toggle-text" data-i18n="tagLanVlan">Tag LAN VLAN</span>
+                        <p class="form-help mt-0" data-i18n="tagLanVlanHelp">Turn all LAN ports into trunk-only ports</p>
+                      </div>
+                    </label>
                   </div>
                 </div>
               </details>
@@ -621,45 +625,47 @@
               <label for="COUNTRY_CODE" class="form-label" data-i18n="countryCode">Country code</label>
               <input type="text" id="COUNTRY_CODE" name="COUNTRY_CODE" class="input-base" maxlength="2" placeholder="US" style="max-width:80px;text-transform:uppercase">
             </div>
-            <div class="form-row dense-env-only">
-              <label class="form-label" data-i18n="denseEnvironment">Dense environment</label>
+            <div class="form-row form-row--full dense-env-only">
               <label class="toggle-label">
                 <span class="toggle-wrap">
                   <input type="checkbox" id="DENSE_ENV" name="DENSE_ENV" value="1" class="toggle-input">
                   <span class="toggle-track"></span>
                   <span class="toggle-thumb"></span>
                 </span>
-                <span class="toggle-text" data-i18n-html="tightenRoaming">Tighten <code>usteer</code> roaming/steering thresholds</span>
+                <div>
+                  <span class="toggle-text" data-i18n="denseEnvironment">Dense environment</span>
+                  <p class="form-help mt-0" data-i18n-html="tightenRoaming">Tighten <code>usteer</code> roaming/steering thresholds</p>
+                </div>
               </label>
             </div>
-            <div class="form-row">
-              <label class="form-label" data-i18n="wirelessMesh">Wireless mesh</label>
-              <div>
-                <label class="toggle-label">
-                  <span class="toggle-wrap">
-                    <input type="checkbox" id="WIRELESS_MESH" name="WIRELESS_MESH" value="1" class="toggle-input">
-                    <span class="toggle-track"></span>
-                    <span class="toggle-thumb"></span>
-                  </span>
-                  <span class="toggle-text" data-i18n="enableMeshBackhaulDefault">Enable 5GHz 802.11s mesh backhaul (overridable per node)</span>
-                </label>
-                <p class="form-help" data-i18n="wiredBackhaulNote">Tip: Prefer wired backhaul over wireless whenever feasible.</p>
-              </div>
+            <div class="form-row form-row--full">
+              <label class="toggle-label">
+                <span class="toggle-wrap">
+                  <input type="checkbox" id="WIRELESS_MESH" name="WIRELESS_MESH" value="1" class="toggle-input">
+                  <span class="toggle-track"></span>
+                  <span class="toggle-thumb"></span>
+                </span>
+                <div>
+                  <span class="toggle-text" data-i18n="wirelessMesh">Wireless mesh</span>
+                  <p class="form-help mt-0" data-i18n="enableMeshBackhaulDefault">Enable 5GHz 802.11s mesh backhaul (overridable per node)</p>
+                </div>
+              </label>
+              <p class="form-help" data-i18n="wiredBackhaulNote">Tip: Prefer wired backhaul over wireless whenever feasible.</p>
             </div>
 
-            <div class="form-row mesh-only hidden">
-              <label class="form-label" data-i18n="bridgeStp">Enable STP</label>
-              <div>
-                <label class="toggle-label">
-                  <span class="toggle-wrap">
-                    <input type="checkbox" id="BRIDGE_STP" name="BRIDGE_STP" value="1" class="toggle-input">
-                    <span class="toggle-track"></span>
-                    <span class="toggle-thumb"></span>
-                  </span>
-                  <span class="toggle-text" data-i18n="enableStp">Enable Spanning Tree Protocol for br-vlan</span>
-                </label>
-                <p class="form-help" data-i18n="stpNote">To prevent bridge loops when mixing wired and wireless backhaul.</p>
-              </div>
+            <div class="form-row form-row--full mesh-only hidden">
+              <label class="toggle-label">
+                <span class="toggle-wrap">
+                  <input type="checkbox" id="BRIDGE_STP" name="BRIDGE_STP" value="1" class="toggle-input">
+                  <span class="toggle-track"></span>
+                  <span class="toggle-thumb"></span>
+                </span>
+                <div>
+                  <span class="toggle-text" data-i18n="bridgeStp">Enable STP</span>
+                  <p class="form-help mt-0" data-i18n="enableStp">Enable Spanning Tree Protocol for br-vlan</p>
+                </div>
+              </label>
+              <p class="form-help" data-i18n="stpNote">To prevent bridge loops when mixing wired and wireless backhaul.</p>
             </div>
 
             <div class="mesh-only hidden">
@@ -754,37 +760,43 @@
                 <span data-i18n="advancedChannels">Advanced WiFi options</span>
               </summary>
               <div class="mt-2 pl-4 border-l-2 border-zinc-200 dark:border-zinc-700">
-                <div class="form-row">
-                  <label class="form-label" data-i18n="dot11kv">802.11k/v</label>
+                <div class="form-row form-row--full">
                   <label class="toggle-label">
                     <span class="toggle-wrap">
                       <input type="checkbox" id="DOT11KV" name="DOT11KV" class="toggle-input" checked>
                       <span class="toggle-track"></span>
                       <span class="toggle-thumb"></span>
                     </span>
-                    <span class="toggle-text" data-i18n="dot11kvHelp">Neighbor reports and assisted roaming</span>
+                    <div>
+                      <span class="toggle-text" data-i18n="dot11kv">802.11k/v</span>
+                      <p class="form-help mt-0" data-i18n="dot11kvHelp">Neighbor reports and assisted roaming</p>
+                    </div>
                   </label>
                 </div>
-                <div class="form-row">
-                  <label class="form-label" data-i18n="dot11r">802.11r</label>
+                <div class="form-row form-row--full">
                   <label class="toggle-label">
                     <span class="toggle-wrap">
                       <input type="checkbox" id="DOT11R" name="DOT11R" class="toggle-input" checked>
                       <span class="toggle-track"></span>
                       <span class="toggle-thumb"></span>
                     </span>
-                    <span class="toggle-text" data-i18n="dot11rHelp">Fast transition (fast roaming) support</span>
+                    <div>
+                      <span class="toggle-text" data-i18n="dot11r">802.11r</span>
+                      <p class="form-help mt-0" data-i18n="dot11rHelp">Fast transition (fast roaming) support</p>
+                    </div>
                   </label>
                 </div>
-                <div class="form-row wifi-iot hidden">
-                  <label class="form-label" data-i18n="iotNoDot11r">IoT: 802.11r</label>
+                <div class="form-row form-row--full wifi-iot hidden">
                   <label class="toggle-label">
                     <span class="toggle-wrap">
                       <input type="checkbox" id="IOT_NO_DOT11R" name="IOT_NO_DOT11R" class="toggle-input" checked>
                       <span class="toggle-track"></span>
                       <span class="toggle-thumb"></span>
                     </span>
-                    <span class="toggle-text" data-i18n="iotNoDot11rHelp">Fast transition for IoT; off keeps IoT on its own SSID</span>
+                    <div>
+                      <span class="toggle-text" data-i18n="iotNoDot11r">IoT: 802.11r</span>
+                      <p class="form-help mt-0" data-i18n="iotNoDot11rHelp">Fast transition for IoT; off keeps IoT on its own SSID</p>
+                    </div>
                   </label>
                 </div>
                 <div class="form-row" id="row-psk-vlan">
@@ -795,82 +807,90 @@
                       <span class="toggle-track"></span>
                       <span class="toggle-thumb"></span>
                     </span>
-                    <span class="toggle-text" data-i18n="pskVlanHelp">One SSID; password decides which VLAN a client joins</span>
+                    <div>
+                      <span class="toggle-text" data-i18n="pskVlanHelp">One SSID; password decides which VLAN a client joins</span>
+                    </div>
                   </label>
                 </div>
-                <div class="form-row">
-                  <label class="form-label" data-i18n="bandSuffix">Add band suffix</label>
+                <div class="form-row form-row--full">
                   <label class="toggle-label">
                     <span class="toggle-wrap">
                       <input type="checkbox" id="BAND_SUFFIX" name="BAND_SUFFIX" value="1" class="toggle-input">
                       <span class="toggle-track"></span>
                       <span class="toggle-thumb"></span>
                     </span>
-                    <span class="toggle-text" data-i18n="bandSuffixHelp">Add 2G/5G/6G to the end of each SSID</span>
+                    <div>
+                      <span class="toggle-text" data-i18n="bandSuffix">Add band suffix</span>
+                      <p class="form-help mt-0" data-i18n="bandSuffixHelp">Add 2G/5G/6G to the end of each SSID</p>
+                    </div>
                   </label>
                 </div>
-                <div class="form-row">
-                  <label class="form-label" data-i18n="indexSuffix">Add AP index suffix</label>
+                <div class="form-row form-row--full">
                   <label class="toggle-label">
                     <span class="toggle-wrap">
                       <input type="checkbox" id="INDEX_SUFFIX" name="INDEX_SUFFIX" value="1" class="toggle-input">
                       <span class="toggle-track"></span>
                       <span class="toggle-thumb"></span>
                     </span>
-                    <span class="toggle-text" data-i18n="indexSuffixHelp">Append the AP index to each SSID (AP mode only)</span>
+                    <div>
+                      <span class="toggle-text" data-i18n="indexSuffix">Add AP index suffix</span>
+                      <p class="form-help mt-0" data-i18n="indexSuffixHelp">Append the AP index to each SSID (AP mode only)</p>
+                    </div>
                   </label>
                 </div>
-                <div class="form-row">
-                  <label class="form-label" data-i18n="wirelessMesh2g">2.4 GHz mesh</label>
-                  <div>
-                    <label class="toggle-label">
-                      <span class="toggle-wrap">
-                        <input type="checkbox" id="WIRELESS_MESH_2G" name="WIRELESS_MESH_2G" value="1" class="toggle-input">
-                        <span class="toggle-track"></span>
-                        <span class="toggle-thumb"></span>
-                      </span>
-                      <span class="toggle-text" data-i18n="enableMeshBackhaul2GDefault">Enable 2.4 GHz 802.11s mesh backhaul (overridable per node)</span>
-                    </label>
-                    <p class="form-help" data-i18n="mesh2gNote">Longer range than 5GHz but requires tuning for higher throughput.</p>
-                  </div>
+                <div class="form-row form-row--full">
+                  <label class="toggle-label">
+                    <span class="toggle-wrap">
+                      <input type="checkbox" id="WIRELESS_MESH_2G" name="WIRELESS_MESH_2G" value="1" class="toggle-input">
+                      <span class="toggle-track"></span>
+                      <span class="toggle-thumb"></span>
+                    </span>
+                    <div>
+                      <span class="toggle-text" data-i18n="wirelessMesh2g">2.4 GHz mesh</span>
+                      <p class="form-help mt-0" data-i18n="enableMeshBackhaul2GDefault">Enable 2.4 GHz 802.11s mesh backhaul (overridable per node)</p>
+                    </div>
+                  </label>
+                  <p class="form-help" data-i18n="mesh2gNote">Longer range than 5GHz but requires tuning for higher throughput.</p>
                 </div>
-                <div class="form-row mesh-only hidden">
-                  <label class="form-label" data-i18n="batmanAdv">batman-adv</label>
-                  <div>
-                    <label class="toggle-label">
-                      <span class="toggle-wrap">
-                        <input type="checkbox" id="BATMAN_ADV" name="BATMAN_ADV" value="1" class="toggle-input">
-                        <span class="toggle-track"></span>
-                        <span class="toggle-thumb"></span>
-                      </span>
-                      <span class="toggle-text" data-i18n="batmanAdvHelp">Use batman-adv routing on top of the 802.11s mesh</span>
-                    </label>
-                    <p class="form-help" data-i18n="batmanAdvNote">Better multi-hop routing for wireless-only meshes.</p>
-                  </div>
+                <div class="form-row form-row--full mesh-only hidden">
+                  <label class="toggle-label">
+                    <span class="toggle-wrap">
+                      <input type="checkbox" id="BATMAN_ADV" name="BATMAN_ADV" value="1" class="toggle-input">
+                      <span class="toggle-track"></span>
+                      <span class="toggle-thumb"></span>
+                    </span>
+                    <div>
+                      <span class="toggle-text" data-i18n="batmanAdv">batman-adv</span>
+                      <p class="form-help mt-0" data-i18n="batmanAdvHelp">Use batman-adv routing on top of the 802.11s mesh</p>
+                    </div>
+                  </label>
+                  <p class="form-help" data-i18n="batmanAdvNote">Better multi-hop routing for wireless-only meshes.</p>
                 </div>
-                <div class="form-row batman-only hidden">
-                  <label class="form-label" data-i18n="batmanAllVlan">All VLANs over mesh</label>
-                  <div>
-                    <label class="toggle-label">
-                      <span class="toggle-wrap">
-                        <input type="checkbox" id="BATMAN_ALL_VLAN" name="BATMAN_ALL_VLAN" value="1" class="toggle-input">
-                        <span class="toggle-track"></span>
-                        <span class="toggle-thumb"></span>
-                      </span>
-                      <span class="toggle-text" data-i18n="batmanAllVlanHelp">Also trunk WAN-B and extra VLANs over batman-adv</span>
-                    </label>
-                    <p class="form-help" data-i18n="batmanAllVlanNote">By default, only LAN/Guest/IoT/VPN/WAN VLANs are carried over bat0.</p>
-                  </div>
+                <div class="form-row form-row--full batman-only hidden">
+                  <label class="toggle-label">
+                    <span class="toggle-wrap">
+                      <input type="checkbox" id="BATMAN_ALL_VLAN" name="BATMAN_ALL_VLAN" value="1" class="toggle-input">
+                      <span class="toggle-track"></span>
+                      <span class="toggle-thumb"></span>
+                    </span>
+                    <div>
+                      <span class="toggle-text" data-i18n="batmanAllVlan">All VLANs over mesh</span>
+                      <p class="form-help mt-0" data-i18n="batmanAllVlanHelp">Also trunk WAN-B and extra VLANs over batman-adv</p>
+                    </div>
+                  </label>
+                  <p class="form-help" data-i18n="batmanAllVlanNote">By default, only LAN/Guest/IoT/VPN/WAN VLANs are carried over bat0.</p>
                 </div>
-                <div class="form-row guest-isolate-only hidden">
-                  <label class="form-label" data-i18n="guestIsolate">Guest isolation</label>
+                <div class="form-row form-row--full guest-isolate-only hidden">
                   <label class="toggle-label">
                     <span class="toggle-wrap">
                       <input type="checkbox" id="GUEST_ISOLATE" name="GUEST_ISOLATE" value="1" class="toggle-input">
                       <span class="toggle-track"></span>
                       <span class="toggle-thumb"></span>
                     </span>
-                    <span class="toggle-text" data-i18n="guestIsolateHelp">Prevent communication between guest clients</span>
+                    <div>
+                      <span class="toggle-text" data-i18n="guestIsolate">Guest isolation</span>
+                      <p class="form-help mt-0" data-i18n="guestIsolateHelp">Prevent communication between guest clients</p>
+                    </div>
                   </label>
                 </div>
                 <div class="form-row">
@@ -973,7 +993,9 @@
                       <span class="toggle-track"></span>
                       <span class="toggle-thumb"></span>
                     </span>
-                    <span class="toggle-text"><span data-i18n="taggedWanVlan">Tagged WAN VLAN</span> <span class="text-zinc-500 dark:text-zinc-400" data-i18n="taggedWanVlanNote">(required by some ISPs)</span></span>
+                    <div>
+                      <span class="toggle-text"><span data-i18n="taggedWanVlan">Tagged WAN VLAN</span> <span class="text-zinc-500 dark:text-zinc-400" data-i18n="taggedWanVlanNote">(required by some ISPs)</span></span>
+                    </div>
                   </label>
                   <div class="wan-vid-row">
                     <span class="wan-vid-label" data-i18n="wanVlanId">WAN VLAN ID</span>
@@ -988,7 +1010,9 @@
                       <span class="toggle-track"></span>
                       <span class="toggle-thumb"></span>
                     </span>
-                    <span class="toggle-text" data-i18n="enableSecondaryWan">Enable secondary WAN (WAN-B)</span>
+                    <div>
+                      <span class="toggle-text" data-i18n="enableSecondaryWan">Enable secondary WAN (WAN-B)</span>
+                    </div>
                   </label>
                   <div class="wan-vid-row">
                     <span class="wan-vid-label" data-i18n="wanBVlanId">WAN-B VLAN ID</span>
@@ -1003,7 +1027,9 @@
                       <span class="toggle-track"></span>
                       <span class="toggle-thumb"></span>
                     </span>
-                    <span class="toggle-text" data-i18n="bridgeWanPort">Bridge WAN port</span>
+                    <div>
+                      <span class="toggle-text" data-i18n="bridgeWanPort">Bridge WAN port</span>
+                    </div>
                   </label>
                   <p class="form-help mt-1" data-i18n="bridgeWanPortNote">Add WAN port to br-vlan bridge, useful for IPTV, VoIP, and multi-PPPoE setups.</p>
                 </div>
@@ -1083,15 +1109,16 @@
           </div>
           <div class="card-body-wrap">
           <div class="card-body">
-            <div class="form-row">
-              <label class="form-label" data-i18n="enableDdns">Enable DDNS</label>
+            <div class="form-row form-row--full">
               <label class="toggle-label">
                 <span class="toggle-wrap">
                   <input type="checkbox" id="DDNS_ENABLE" name="DDNS_ENABLE" value="1" class="toggle-input">
                   <span class="toggle-track"></span>
                   <span class="toggle-thumb"></span>
                 </span>
-                <span class="sr-only" data-i18n="enableDdns">Enable DDNS</span>
+                <div>
+                  <span class="toggle-text" data-i18n="enableDdns">Enable DDNS</span>
+                </div>
               </label>
             </div>
             <div class="form-row">
@@ -1134,7 +1161,9 @@
                     <span class="toggle-track"></span>
                     <span class="toggle-thumb"></span>
                   </span>
-                  <span class="toggle-text"><span data-i18n="enableUsbTethering">Enable USB tethering</span> <span class="text-zinc-500 dark:text-zinc-400" data-i18n="usbTetheringDevice">(Android / iPhone, device usb0)</span></span>
+                  <div>
+                    <span class="toggle-text"><span data-i18n="enableUsbTethering">Enable USB tethering</span> <span class="text-zinc-500 dark:text-zinc-400" data-i18n="usbTetheringDevice">(Android / iPhone, device usb0)</span></span>
+                  </div>
                 </label>
               </div>
             </div>
@@ -1147,7 +1176,9 @@
                     <span class="toggle-track"></span>
                     <span class="toggle-thumb"></span>
                   </span>
-                  <span class="toggle-text" data-i18n="enableMbimFailover">Enable MBIM modem failover</span>
+                  <div>
+                    <span class="toggle-text" data-i18n="enableMbimFailover">Enable MBIM modem failover</span>
+                  </div>
                 </label>
               </div>
             </div>
@@ -1499,7 +1530,9 @@
         <span class="toggle-track"></span>
         <span class="toggle-thumb"></span>
       </span>
-      <span class="toggle-text" data-i18n="tagLanVlanConfirm">I understand this can lock me out of the router.</span>
+      <div>
+        <span class="toggle-text" data-i18n="tagLanVlanConfirm">I understand this can lock me out of the router.</span>
+      </div>
     </label>
     <div class="flex gap-2 justify-end">
       <button class="btn" id="btn-cancel-tag-lan" data-i18n="cancel">Cancel</button>
