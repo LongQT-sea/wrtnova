@@ -88,6 +88,29 @@ for (const page of PAGES) {
   test(`${page}: no size utility overrides the toggle title`, () => {
     assert.equal(read(page).includes('class="toggle-text text-xs"'), false);
   });
+
+  // Same rule for .opt-card, the non-<label> shell: a .form-row must not keep
+  // a title outside the card, which is what a half-finished conversion leaves.
+  test(`${page}: no form-row keeps a .form-label outside a card`, () => {
+    const lines = read(page).split('\n');
+    const offenders = [];
+    lines.forEach((line, i) => {
+      if (!line.includes('<div') || !line.includes('form-row')) return;
+      const body = block(lines, i, 'div');
+      if (body.includes('class="form-label')) offenders.push(`${page}:${i + 1} ${line.trim()}`);
+    });
+    assert.deepEqual(offenders, [], `form-row still using .form-label:\n${offenders.join('\n')}`);
+  });
+
+  // Every card needs a title; an empty one means a layout spacer from the old
+  // two-column form got converted into a card. Matches only a genuinely empty
+  // element - a title may legitimately open with a nested <span>, as the
+  // composite "Tagged WAN VLAN (required by some ISPs)" ones do.
+  test(`${page}: no card has an empty title`, () => {
+    const src = read(page);
+    assert.equal(/class="opt-title"[^>]*>\s*<\//.test(src), false, 'found an .opt-title with no text');
+    assert.equal(/class="toggle-text"[^>]*>\s*<\//.test(src), false, 'found a .toggle-text with no text');
+  });
 }
 
 // The per-node panels are built by string concatenation, so the same shape has

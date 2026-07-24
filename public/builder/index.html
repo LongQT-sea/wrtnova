@@ -61,28 +61,36 @@
       </div>
       <div class="card-body-wrap">
       <div class="card-body">
-        <div class="form-row">
-          <label for="version" class="form-label" data-i18n="openWrtVersion">OpenWrt version</label>
-          <select id="version" class="input-base">
-            <option value="">Loading…</option>
-          </select>
-        </div>
-        <div class="form-row">
-          <label for="device" class="form-label" data-i18n="device">Device</label>
-          <div class="combo">
-            <input type="text" id="device" class="input-base" placeholder="Type to search (e.g. Archer C7)" data-i18n-placeholder="deviceSearchPlaceholder" autocomplete="off" disabled aria-autocomplete="list" aria-controls="device-list">
-            <div class="combo-list hidden" id="device-list" role="listbox" aria-label="Device suggestions"></div>
+        <div class="form-row form-row--full">
+          <div class="opt-card">
+            <div class="opt-text">
+              <label class="opt-title" for="version" data-i18n="openWrtVersion">OpenWrt version</label>
+            </div>
+            <select id="version" class="opt-control opt-field input-base">
+              <option value="">Loading…</option>
+            </select>
           </div>
         </div>
-        <div class="form-row">
-          <span class="form-label"></span>
-          <p id="device-info" class="form-help mt-0" data-i18n="deviceRequirement">Required: ≥8MB flash, ≥64MB RAM</p>
+        <div class="form-row form-row--full">
+          <div class="opt-card">
+            <div class="opt-text">
+              <label class="opt-title" for="device" data-i18n="device">Device</label>
+              <p id="device-info" class="form-help mt-0" data-i18n="deviceRequirement">Required: ≥8MB flash, ≥64MB RAM</p>
+            </div>
+            <div class="opt-control opt-field combo">
+              <input type="text" id="device" class="input-base" placeholder="Type to search (e.g. Archer C7)" data-i18n-placeholder="deviceSearchPlaceholder" autocomplete="off" disabled aria-autocomplete="list" aria-controls="device-list">
+              <div class="combo-list hidden" id="device-list" role="listbox" aria-label="Device suggestions"></div>
+            </div>
+          </div>
         </div>
 
-        <div class="form-row">
-          <label class="form-label" data-i18n="mode">Mode</label>
-          <div>
-            <div class="radio-seg" role="radiogroup" aria-label="Device mode">
+        <div class="form-row form-row--full">
+          <div class="opt-card">
+            <div class="opt-text">
+              <span class="opt-title" data-i18n="mode">Mode</span>
+              <p class="form-help mt-0" data-i18n="apModeHelp">Disables DHCP — device acts as a wireless access point and managed switch, forwarding all traffic to the main router.</p>
+            </div>
+            <div class="opt-control radio-seg" role="radiogroup" aria-label="Device mode">
               <label>
                 <input type="radio" name="AP_MODE" value="" checked>
                 <span data-i18n="mainRouter">Main router</span>
@@ -92,14 +100,15 @@
                 <span data-i18n="accessPoint">Access point</span>
               </label>
             </div>
-            <p class="form-help ap-only hidden mt-1" data-i18n="apModeHelp">Disables DHCP — device acts as a wireless access point and managed switch, forwarding all traffic to the main router.</p>
           </div>
         </div>
-        <div class="form-row ap-only hidden">
-          <label for="AP_INDEX" class="form-label" data-i18n="apIndex">AP index</label>
-          <div>
-            <input type="number" id="AP_INDEX" name="AP_INDEX" class="input-base" min="2" max="254" value="2" style="max-width:120px" onblur="var v=Math.min(254,Math.max(2,parseInt(this.value)||2));this.value=v;this.dispatchEvent(new Event('input',{bubbles:true}))">
-            <p class="form-help"><span data-i18n="apIndexHelp">Last octet 2–254. LAN IP becomes </span><span id="ap-index-preview">192.168.1.2</span></p>
+        <div class="form-row form-row--full ap-only hidden">
+          <div class="opt-card">
+            <div class="opt-text">
+              <label class="opt-title" for="AP_INDEX" data-i18n="apIndex">AP index</label>
+              <p class="form-help mt-0"><span data-i18n="apIndexHelp">Last octet 2–254. LAN IP becomes </span><span id="ap-index-preview">192.168.1.2</span></p>
+            </div>
+            <input type="number" id="AP_INDEX" name="AP_INDEX" class="opt-control opt-field input-base" min="2" max="254" value="2" onblur="var v=Math.min(254,Math.max(2,parseInt(this.value)||2));this.value=v;this.dispatchEvent(new Event('input',{bubbles:true}))">
           </div>
         </div>
         <div class="info-note ap-only hidden" role="note">
@@ -117,14 +126,22 @@
       </div>
       <div class="card-body-wrap">
       <div class="card-body">
-        <div class="form-row">
-          <label for="HOST_NAME" class="form-label" data-i18n="hostname">Hostname</label>
-          <input type="text" id="HOST_NAME" name="HOST_NAME" class="input-base" placeholder="WrtNova">
+        <div class="form-row form-row--full">
+          <div class="opt-card">
+            <div class="opt-text">
+              <label class="opt-title" for="HOST_NAME" data-i18n="hostname">Hostname</label>
+              <p class="form-help mt-0" data-i18n="hostnameHelp">Defaults to WrtNova, plus the AP index in AP mode.</p>
+            </div>
+            <input type="text" id="HOST_NAME" name="HOST_NAME" class="input-base opt-control opt-field" placeholder="WrtNova">
+          </div>
         </div>
-        <div class="form-row">
-          <label for="ROOT_PASSWD" class="form-label" data-i18n="rootPassword">Root password</label>
-          <div>
-            <div class="relative">
+        <div class="form-row form-row--full">
+          <div class="opt-card">
+            <div class="opt-text">
+              <label class="opt-title" for="ROOT_PASSWD" data-i18n="rootPassword">Root password</label>
+              <p class="form-help mt-0" data-i18n="rootPasswordHelp">Used for SSH login and AdGuard Home admin.</p>
+            </div>
+            <div class="relative opt-control opt-field">
               <input type="password" id="ROOT_PASSWD" name="ROOT_PASSWD" class="input-base" style="padding-right:2.5rem" autocomplete="new-password">
               <button type="button" id="toggle-rootpw"
                       class="btn btn-ghost btn-icon absolute right-1.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
@@ -132,43 +149,54 @@
                 <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
               </button>
             </div>
-            <p class="form-help" data-i18n="rootPasswordHelp">Used for SSH login and AdGuard Home admin.</p>
           </div>
         </div>
-        <div class="form-row">
-          <label for="SSH_PUBLIC_KEY" class="form-label" data-i18n="sshPublicKeys">SSH public keys</label>
-          <div>
-            <textarea id="SSH_PUBLIC_KEY" name="SSH_PUBLIC_KEY" class="input-base" placeholder="ssh-ed25519 AAAA… user@host" rows="3"></textarea>
-            <p class="form-help" data-i18n="oneKeyPerLine">One key per line.</p>
+        <div class="form-row form-row--full">
+          <div class="opt-card">
+            <div class="opt-text">
+              <label class="opt-title" for="SSH_PUBLIC_KEY" data-i18n="sshPublicKeys">SSH public keys</label>
+              <p class="form-help mt-0" data-i18n="oneKeyPerLine">One key per line.</p>
+            </div>
+            <textarea id="SSH_PUBLIC_KEY" name="SSH_PUBLIC_KEY" class="input-base opt-control opt-stack" placeholder="ssh-ed25519 AAAA… user@host" rows="3"></textarea>
           </div>
         </div>
-        <div class="form-row ssh-pw-row hidden">
-          <label class="form-label" data-i18n="sshPasswordAuth">SSH password auth</label>
-          <div class="radio-seg" role="radiogroup" aria-label="SSH password auth">
-            <label>
-              <input type="radio" name="SSH_PASSWD_AUTH" value="" checked>
-              <span data-i18n="sshAuthOn">On (keys + password)</span>
-            </label>
-            <label>
-              <input type="radio" name="SSH_PASSWD_AUTH" value="off">
-              <span data-i18n="sshAuthOff">Off (keys only)</span>
-            </label>
+        <div class="form-row form-row--full ssh-pw-row hidden">
+          <div class="opt-card">
+            <div class="opt-text">
+              <span class="opt-title" data-i18n="sshPasswordAuth">SSH password auth</span>
+              <p class="form-help mt-0" data-i18n="sshPasswordAuthHelp">Off rejects password login entirely; only the keys above are accepted.</p>
+            </div>
+            <div class="radio-seg opt-control" role="radiogroup" aria-label="SSH password auth">
+              <label>
+                <input type="radio" name="SSH_PASSWD_AUTH" value="" checked>
+                <span data-i18n="sshAuthOn">On (keys + password)</span>
+              </label>
+              <label>
+                <input type="radio" name="SSH_PASSWD_AUTH" value="off">
+                <span data-i18n="sshAuthOff">Off (keys only)</span>
+              </label>
+            </div>
           </div>
         </div>
-        <div class="form-row">
-          <label for="timezone" class="form-label" data-i18n="timezone">Timezone</label>
-          <div>
-            <div class="combo">
+        <div class="form-row form-row--full">
+          <div class="opt-card">
+            <div class="opt-text">
+              <label class="opt-title" for="timezone" data-i18n="timezone">Timezone</label>
+              <p class="form-help mt-0" id="tz-help" data-i18n="timezoneHelp">Sets the system clock zone and DST rules.</p>
+            </div>
+            <div class="combo opt-control opt-field">
               <input type="text" id="timezone" class="input-base" placeholder="Type to search (e.g. New York)" data-i18n-placeholder="tzSearchPlaceholder" autocomplete="off" aria-autocomplete="list" aria-controls="tz-list">
               <div class="combo-list hidden" id="tz-list" role="listbox" aria-label="Timezone suggestions"></div>
             </div>
-            <p class="form-help" id="tz-help"></p>
           </div>
         </div>
-        <div class="form-row" id="row-time-format">
-          <label class="form-label" data-i18n="timeFormat">Time format</label>
-          <div>
-            <div class="radio-seg" role="radiogroup" aria-label="Time format">
+        <div class="form-row form-row--full" id="row-time-format">
+          <div class="opt-card">
+            <div class="opt-text">
+              <span class="opt-title" data-i18n="timeFormat">Time format</span>
+              <p class="form-help mt-0" data-i18n="timeFormatHelp">LuCI clock display. Ignored on OpenWrt 24 and older.</p>
+            </div>
+            <div class="radio-seg opt-control" role="radiogroup" aria-label="Time format">
               <label>
                 <input type="radio" name="TIME_FORMAT" value="" checked>
                 <span data-i18n="timeFormatDefault">Default</span>
@@ -203,11 +231,13 @@
             <span data-i18n="advancedSystem">Advanced System options</span>
           </summary>
           <div class="mt-2 pl-4 border-l-2 border-zinc-200 dark:border-zinc-700 space-y-3">
-            <div class="form-row">
-              <label for="NTP_IP" class="form-label" data-i18n="ntpServer">NTP server IP</label>
-              <div>
-                <input type="text" id="NTP_IP" name="NTP_IP" class="input-base" placeholder="162.159.200.1">
-                <p class="form-help" data-i18n="ntpServerHelp">Raw IP address for a last-resort NTP server.</p>
+            <div class="form-row form-row--full">
+              <div class="opt-card">
+                <div class="opt-text">
+                  <label class="opt-title" for="NTP_IP" data-i18n="ntpServer">NTP server IP</label>
+                  <p class="form-help mt-0" data-i18n="ntpServerHelp">Raw IP address for a last-resort NTP server.</p>
+                </div>
+                <input type="text" id="NTP_IP" name="NTP_IP" class="input-base opt-control opt-field" placeholder="162.159.200.1">
               </div>
             </div>
           </div>
@@ -224,17 +254,21 @@
       </div>
       <div class="card-body-wrap">
       <div class="card-body">
-        <div class="form-row">
-          <label for="BASE_NET_PREFIX" class="form-label" data-i18n="defaultIpPrefix">Default IP prefix</label>
-          <input type="text" id="BASE_NET_PREFIX" name="BASE_NET_PREFIX" class="input-base" placeholder="192.168" style="max-width:180px" list="prefix-options">
-          <datalist id="prefix-options">
-            <option value="192.168">
-            <option value="10.0">
-            <option value="10.10">
-            <option value="172.16">
-            <option value="172.20">
-            <option value="172.31">
-          </datalist>
+        <div class="form-row form-row--full">
+          <div class="opt-card">
+            <div class="opt-text">
+              <label class="opt-title" for="BASE_NET_PREFIX" data-i18n="defaultIpPrefix">Default IP prefix</label>
+            </div>
+            <input type="text" id="BASE_NET_PREFIX" name="BASE_NET_PREFIX" class="opt-control opt-field input-base" placeholder="192.168" list="prefix-options">
+            <datalist id="prefix-options">
+              <option value="192.168">
+              <option value="10.0">
+              <option value="10.10">
+              <option value="172.16">
+              <option value="172.20">
+              <option value="172.31">
+            </datalist>
+          </div>
         </div>
 
         <div class="sub-section">
@@ -370,12 +404,14 @@
           <p class="form-help mt-2 wg-help-router" data-i18n="wgNetworkDesc">VPN network is a dedicated network with its own WiFi SSID; all its traffic is routed through the WireGuard VPN client.</p>
           <p class="form-help mt-2 ap-only hidden" data-i18n="apModeNetworkNote">In AP mode, only L2 networks are created (VLAN and WiFi SSID) for Guest, IoT, and WireGuard VPN — L3 traffic is routed back to the main router.</p>
 
-          <div class="form-row" style="margin-top:1.25rem">
-            <label for="ADDITIONAL_VLAN_LIST" class="form-label" data-i18n="additionalTrunkVlans">Additional VLANs</label>
-            <div>
-              <input type="text" id="ADDITIONAL_VLAN_LIST" name="ADDITIONAL_VLAN_LIST" class="input-base" placeholder="e.g. 25 30 40  or  30-50">
-              <p class="form-help" data-i18n="additionalTrunkHelp">Extra VLAN IDs to trunk (tagged) through every port on this device. Space-separated; ranges as low-high.</p>
-              <p class="form-help mt-1 text-amber-600 dark:text-amber-400 hidden" id="vlan-trunc-note"></p>
+          <div class="form-row form-row--full" style="margin-top:1.25rem">
+            <div class="opt-card">
+              <div class="opt-text">
+                <label class="opt-title" for="ADDITIONAL_VLAN_LIST" data-i18n="additionalTrunkVlans">Additional VLANs</label>
+                <p class="form-help mt-0" data-i18n="additionalTrunkHelp">Extra VLAN IDs to trunk (tagged) through every port on this device. Space-separated; ranges as low-high.</p>
+                <p class="form-help mt-0" id="vlan-trunc-note"></p>
+              </div>
+              <input type="text" id="ADDITIONAL_VLAN_LIST" name="ADDITIONAL_VLAN_LIST" class="opt-control opt-stack input-base" placeholder="e.g. 25 30 40  or  30-50">
             </div>
           </div>
 
@@ -385,30 +421,38 @@
               <span data-i18n="advancedNetwork">Advanced Network options</span>
             </summary>
             <div class="mt-2 pl-4 border-l-2 border-zinc-200 dark:border-zinc-700 space-y-3">
-              <div class="form-row">
-                <label for="DEFAULT_SUBNET" class="form-label" data-i18n="defaultSubnet">Default subnet</label>
-                <select id="DEFAULT_SUBNET" name="DEFAULT_SUBNET" class="input-base" style="max-width:180px">
-                  <option value="" data-i18n="defaultSubnetOpt">/24 (default)</option>
-                  <option value="/23">/23</option>
-                  <option value="/22">/22</option>
-                </select>
+              <div class="form-row form-row--full">
+                <div class="opt-card">
+                  <div class="opt-text">
+                    <label class="opt-title" for="DEFAULT_SUBNET" data-i18n="defaultSubnet">Default subnet</label>
+                  </div>
+                  <select id="DEFAULT_SUBNET" name="DEFAULT_SUBNET" class="opt-control opt-field input-base">
+                    <option value="" data-i18n="defaultSubnetOpt">/24 (default)</option>
+                    <option value="/23">/23</option>
+                    <option value="/22">/22</option>
+                  </select>
+                </div>
               </div>
-              <div class="form-row">
-                <label for="P_STEERING" class="form-label" data-i18n="packetSteering">Packet steering</label>
-                <div>
-                  <select id="P_STEERING" name="P_STEERING" class="input-base" style="max-width:220px">
+              <div class="form-row form-row--full">
+                <div class="opt-card">
+                  <div class="opt-text">
+                    <label class="opt-title" for="P_STEERING" data-i18n="packetSteering">Packet steering</label>
+                    <p class="form-help mt-0" data-i18n="packetSteeringHelp">Enable packet steering across CPUs. May help or hinder network speed.</p>
+                  </div>
+                  <select id="P_STEERING" name="P_STEERING" class="opt-control opt-field input-base">
                     <option value="" data-i18n="packetSteeringDefault">Default</option>
                     <option value="1" data-i18n="packetSteeringOn">Enabled</option>
                     <option value="2" data-i18n="packetSteeringAll">Enabled (all CPUs)</option>
                   </select>
-                  <p class="form-help" data-i18n="packetSteeringHelp">Enable packet steering across CPUs. May help or hinder network speed.</p>
                 </div>
               </div>
-              <div class="form-row">
-                <label for="ULA_PREFIX" class="form-label" data-i18n="ulaPrefix">IPv6 ULA prefix</label>
-                <div>
-                  <input type="text" id="ULA_PREFIX" name="ULA_PREFIX" class="input-base" placeholder="fdXX:XXXX:XXXX::/48">
-                  <p class="form-help" data-i18n="ulaPrefixHelp">Leave empty to auto-generate a random prefix on first boot.</p>
+              <div class="form-row form-row--full">
+                <div class="opt-card">
+                  <div class="opt-text">
+                    <label class="opt-title" for="ULA_PREFIX" data-i18n="ulaPrefix">IPv6 ULA prefix</label>
+                    <p class="form-help mt-0" data-i18n="ulaPrefixHelp">Leave empty to auto-generate a random prefix on first boot.</p>
+                  </div>
+                  <input type="text" id="ULA_PREFIX" name="ULA_PREFIX" class="opt-control opt-field input-base" placeholder="fdXX:XXXX:XXXX::/48">
                 </div>
               </div>
               <div class="form-row form-row--full">
@@ -464,10 +508,12 @@
         </div>
         <div class="sub-section">
           <p class="sub-section-title" data-i18n="wgInterfaceSection">Interface</p>
-          <div class="form-row mt-2">
-            <label for="WG_PRIVATE_KEY" class="form-label" data-i18n="privateKey">Private key</label>
-            <div>
-              <div class="relative">
+          <div class="form-row form-row--full mt-2">
+            <div class="opt-card">
+              <div class="opt-text">
+                <label class="opt-title" for="WG_PRIVATE_KEY" data-i18n="privateKey">Private key</label>
+              </div>
+              <div class="opt-control opt-field relative">
                 <input type="password" id="WG_PRIVATE_KEY" name="WG_PRIVATE_KEY" class="input-base" style="padding-right:2.5rem" autocomplete="off" placeholder="">
                 <button type="button" id="toggle-wg-privkey"
                         class="btn btn-ghost btn-icon absolute right-1.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
@@ -477,55 +523,91 @@
               </div>
             </div>
           </div>
-          <div class="form-row">
-            <label for="WG_IPV4" class="form-label" data-i18n="clientIpv4">Client IPv4</label>
-            <input type="text" id="WG_IPV4" name="WG_IPV4" class="input-base" placeholder="e.g. 172.16.0.2/32">
+          <div class="form-row form-row--full">
+            <div class="opt-card">
+              <div class="opt-text">
+                <label class="opt-title" for="WG_IPV4" data-i18n="clientIpv4">Client IPv4</label>
+              </div>
+              <input type="text" id="WG_IPV4" name="WG_IPV4" class="opt-control opt-field input-base" placeholder="e.g. 172.16.0.2/32">
+            </div>
           </div>
-          <div class="form-row">
-            <label for="WG_IPV6" class="form-label" data-i18n="clientIpv6">Client IPv6</label>
-            <input type="text" id="WG_IPV6" name="WG_IPV6" class="input-base" placeholder="e.g. fd88::/128">
+          <div class="form-row form-row--full">
+            <div class="opt-card">
+              <div class="opt-text">
+                <label class="opt-title" for="WG_IPV6" data-i18n="clientIpv6">Client IPv6</label>
+              </div>
+              <input type="text" id="WG_IPV6" name="WG_IPV6" class="opt-control opt-field input-base" placeholder="e.g. fd88::/128">
+            </div>
           </div>
-          <div class="form-row">
-            <label for="WG_DNS_V4" class="form-label" data-i18n="dnsV4">DNS IPv4</label>
-            <input type="text" id="WG_DNS_V4" name="WG_DNS_V4" class="input-base" placeholder="e.g. 1.1.1.1 (optional)">
+          <div class="form-row form-row--full">
+            <div class="opt-card">
+              <div class="opt-text">
+                <label class="opt-title" for="WG_DNS_V4" data-i18n="dnsV4">DNS IPv4</label>
+              </div>
+              <input type="text" id="WG_DNS_V4" name="WG_DNS_V4" class="opt-control opt-field input-base" placeholder="e.g. 1.1.1.1 (optional)">
+            </div>
           </div>
-          <div class="form-row">
-            <label for="WG_DNS_V6" class="form-label" data-i18n="dnsV6">DNS IPv6</label>
-            <input type="text" id="WG_DNS_V6" name="WG_DNS_V6" class="input-base" placeholder="e.g. 2606:4700:4700::1111 (optional)">
+          <div class="form-row form-row--full">
+            <div class="opt-card">
+              <div class="opt-text">
+                <label class="opt-title" for="WG_DNS_V6" data-i18n="dnsV6">DNS IPv6</label>
+              </div>
+              <input type="text" id="WG_DNS_V6" name="WG_DNS_V6" class="opt-control opt-field input-base" placeholder="e.g. 2606:4700:4700::1111 (optional)">
+            </div>
           </div>
-          <div class="form-row">
-            <label for="WG_MTU" class="form-label" data-i18n="wgMtu">MTU</label>
-            <input type="text" id="WG_MTU" name="WG_MTU" class="input-base" inputmode="numeric" placeholder="e.g. 1420 (optional)">
+          <div class="form-row form-row--full">
+            <div class="opt-card">
+              <div class="opt-text">
+                <label class="opt-title" for="WG_MTU" data-i18n="wgMtu">MTU</label>
+              </div>
+              <input type="text" id="WG_MTU" name="WG_MTU" class="opt-control opt-field input-base" inputmode="numeric" placeholder="e.g. 1420 (optional)">
+            </div>
           </div>
         </div>
         <div class="sub-section">
           <p class="sub-section-title" data-i18n="wgPeerSection">Peer</p>
-          <div class="form-row mt-2">
-            <label for="PEER_PUBLIC_KEY" class="form-label" data-i18n="peerPublicKey">Peer public key</label>
-            <input type="text" id="PEER_PUBLIC_KEY" name="PEER_PUBLIC_KEY" class="input-base" placeholder="" autocomplete="off">
-          </div>
-          <div class="form-row">
-            <label for="PRESHARED_KEY" class="form-label" data-i18n="presharedKey">Preshared key</label>
-            <div class="relative">
-              <input type="password" id="PRESHARED_KEY" name="PRESHARED_KEY" class="input-base" style="padding-right:2.5rem" autocomplete="off" placeholder="optional">
-              <button type="button" id="toggle-wg-psk"
-                      class="btn btn-ghost btn-icon absolute right-1.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
-                      aria-label="Show preshared key">
-                <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
-              </button>
+          <div class="form-row form-row--full mt-2">
+            <div class="opt-card">
+              <div class="opt-text">
+                <label class="opt-title" for="PEER_PUBLIC_KEY" data-i18n="peerPublicKey">Peer public key</label>
+              </div>
+              <input type="text" id="PEER_PUBLIC_KEY" name="PEER_PUBLIC_KEY" class="opt-control opt-field input-base" placeholder="" autocomplete="off">
             </div>
           </div>
-          <div class="form-row">
-            <label for="ENDPOINT" class="form-label" data-i18n="endpoint">Endpoint</label>
-            <div style="display:flex;gap:0.5rem;align-items:center">
-              <input type="text" id="ENDPOINT" name="ENDPOINT" class="input-base" style="flex:1 1 auto;min-width:0" placeholder="engage.cloudflareclient.com" autocomplete="off">
-              <span aria-hidden="true" style="color:#a1a1aa">:</span>
-              <input type="number" id="ENDPOINT_PORT" name="ENDPOINT_PORT" class="input-base" style="flex:0 0 6rem;max-width:6rem" placeholder="51820" min="1" max="65535" aria-label="Endpoint port">
+          <div class="form-row form-row--full">
+            <div class="opt-card">
+              <div class="opt-text">
+                <label class="opt-title" for="PRESHARED_KEY" data-i18n="presharedKey">Preshared key</label>
+              </div>
+              <div class="opt-control opt-field relative">
+                <input type="password" id="PRESHARED_KEY" name="PRESHARED_KEY" class="input-base" style="padding-right:2.5rem" autocomplete="off" placeholder="optional">
+                <button type="button" id="toggle-wg-psk"
+                        class="btn btn-ghost btn-icon absolute right-1.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
+                        aria-label="Show preshared key">
+                  <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+              </div>
             </div>
           </div>
-          <div class="form-row">
-            <label for="ALLOWED_IPS" class="form-label" data-i18n="allowedIps">Allowed IPs</label>
-            <input type="text" id="ALLOWED_IPS" name="ALLOWED_IPS" class="input-base" placeholder="0.0.0.0/0 ::/0">
+          <div class="form-row form-row--full">
+            <div class="opt-card">
+              <div class="opt-text">
+                <label class="opt-title" for="ENDPOINT" data-i18n="endpoint">Endpoint</label>
+              </div>
+              <div class="opt-control opt-stack" style="display:flex;gap:0.5rem;align-items:center">
+                <input type="text" id="ENDPOINT" name="ENDPOINT" class="input-base" style="flex:1 1 auto;min-width:0" placeholder="engage.cloudflareclient.com" autocomplete="off">
+                <span aria-hidden="true" style="color:#a1a1aa">:</span>
+                <input type="number" id="ENDPOINT_PORT" name="ENDPOINT_PORT" class="input-base" style="flex:0 0 6rem;max-width:6rem" placeholder="51820" min="1" max="65535" aria-label="Endpoint port">
+              </div>
+            </div>
+          </div>
+          <div class="form-row form-row--full">
+            <div class="opt-card">
+              <div class="opt-text">
+                <label class="opt-title" for="ALLOWED_IPS" data-i18n="allowedIps">Allowed IPs</label>
+              </div>
+              <input type="text" id="ALLOWED_IPS" name="ALLOWED_IPS" class="opt-control opt-field input-base" placeholder="0.0.0.0/0 ::/0">
+            </div>
           </div>
         </div>
         <div class="info-note" role="note" data-i18n-html="wgConfigNote">
@@ -541,13 +623,21 @@
           <div class="mt-2 pl-4 border-l-2 border-zinc-200 dark:border-zinc-700">
             <p class="sub-section-title" data-i18n="wgSplitTunnelSection">Split tunnel</p>
             <p class="form-help mt-2" data-i18n="splitTunnelHelp">Destination IPs or subnets to bypass the tunnel. Traffic from VPN-network clients to these destinations uses the normal routing table instead of the tunnel.</p>
-            <div class="form-row mt-2">
-              <label for="SPLIT_TUNNEL_V4" class="form-label" data-i18n="splitTunnelV4">Exclude IPv4</label>
-              <input type="text" id="SPLIT_TUNNEL_V4" name="SPLIT_TUNNEL_V4" class="input-base" placeholder="e.g. 192.168.0.0/16 10.0.0.0/8 (optional)">
+            <div class="form-row form-row--full mt-2">
+              <div class="opt-card">
+                <div class="opt-text">
+                  <label class="opt-title" for="SPLIT_TUNNEL_V4" data-i18n="splitTunnelV4">Exclude IPv4</label>
+                </div>
+                <input type="text" id="SPLIT_TUNNEL_V4" name="SPLIT_TUNNEL_V4" class="opt-control opt-field input-base" placeholder="e.g. 192.168.0.0/16 10.0.0.0/8 (optional)">
+              </div>
             </div>
-            <div class="form-row">
-              <label for="SPLIT_TUNNEL_V6" class="form-label" data-i18n="splitTunnelV6">Exclude IPv6</label>
-              <input type="text" id="SPLIT_TUNNEL_V6" name="SPLIT_TUNNEL_V6" class="input-base" placeholder="e.g. fd00::/8 fc00::/7 (optional)">
+            <div class="form-row form-row--full">
+              <div class="opt-card">
+                <div class="opt-text">
+                  <label class="opt-title" for="SPLIT_TUNNEL_V6" data-i18n="splitTunnelV6">Exclude IPv6</label>
+                </div>
+                <input type="text" id="SPLIT_TUNNEL_V6" name="SPLIT_TUNNEL_V6" class="opt-control opt-field input-base" placeholder="e.g. fd00::/8 fc00::/7 (optional)">
+              </div>
             </div>
           </div>
         </details>
@@ -563,9 +653,13 @@
       </div>
       <div class="card-body-wrap">
       <div class="card-body">
-        <div class="form-row">
-          <label for="COUNTRY_CODE" class="form-label" data-i18n="countryCode">Country code</label>
-          <input type="text" id="COUNTRY_CODE" name="COUNTRY_CODE" class="input-base" maxlength="2" placeholder="US" style="max-width:80px;text-transform:uppercase">
+        <div class="form-row form-row--full">
+          <div class="opt-card">
+            <div class="opt-text">
+              <label class="opt-title" for="COUNTRY_CODE" data-i18n="countryCode">Country code</label>
+            </div>
+            <input type="text" id="COUNTRY_CODE" name="COUNTRY_CODE" class="opt-control opt-field input-base" maxlength="2" placeholder="US" style="text-transform:uppercase">
+          </div>
         </div>
         <div class="form-row form-row--full dense-env-only">
           <label class="toggle-label">
@@ -641,19 +735,27 @@
         </div>
 
         <div class="mesh-only hidden">
-          <div class="form-row">
-            <label for="MESH_ID" class="form-label" data-i18n="meshId">Mesh ID</label>
-            <input type="text" id="MESH_ID" name="MESH_ID" class="input-base" placeholder="mesh_trunk_backhaul">
+          <div class="form-row form-row--full">
+            <div class="opt-card">
+              <div class="opt-text">
+                <label class="opt-title" for="MESH_ID" data-i18n="meshId">Mesh ID</label>
+              </div>
+              <input type="text" id="MESH_ID" name="MESH_ID" class="opt-control opt-field input-base" placeholder="mesh_trunk_backhaul">
+            </div>
           </div>
-          <div class="form-row">
-            <label for="MESH_PASSWD" class="form-label" data-i18n="meshPassword">Mesh password</label>
-            <div class="relative">
-              <input type="password" id="MESH_PASSWD" name="MESH_PASSWD" class="input-base" style="padding-right:2.5rem" placeholder="password" autocomplete="new-password">
-              <button type="button" id="toggle-mesh-pw"
-                      class="btn btn-ghost btn-icon absolute right-1.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
-                      aria-label="Show password">
-                <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
-              </button>
+          <div class="form-row form-row--full">
+            <div class="opt-card">
+              <div class="opt-text">
+                <label class="opt-title" for="MESH_PASSWD" data-i18n="meshPassword">Mesh password</label>
+              </div>
+              <div class="opt-control opt-field relative">
+                <input type="password" id="MESH_PASSWD" name="MESH_PASSWD" class="input-base" style="padding-right:2.5rem" placeholder="password" autocomplete="new-password">
+                <button type="button" id="toggle-mesh-pw"
+                        class="btn btn-ghost btn-icon absolute right-1.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
+                        aria-label="Show password">
+                  <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -662,59 +764,75 @@
 
         <div class="sub-section">
           <p class="sub-section-title" data-i18n="networkSsids">Network SSIDs</p>
-          <div class="form-row wifi-lan mt-2">
-            <label class="form-label">LAN</label>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              <input type="text" id="LAN_WIFI_SSID" name="LAN_WIFI_SSID" class="input-base" placeholder="WrtNova">
-              <div class="relative">
-                <input type="password" id="LAN_WIFI_PASSWD" name="LAN_WIFI_PASSWD" class="input-base" style="padding-right:2.5rem" placeholder="password" autocomplete="new-password">
-                <button type="button" id="toggle-lan-wifi-pw"
-                        class="btn btn-ghost btn-icon absolute right-1.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
-                        aria-label="Show password">
-                  <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
-                </button>
+          <div class="form-row form-row--full wifi-lan mt-2">
+            <div class="opt-card">
+              <div class="opt-text">
+                <span class="opt-title">LAN</span>
+              </div>
+              <div class="opt-control opt-stack grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <input type="text" id="LAN_WIFI_SSID" name="LAN_WIFI_SSID" class="input-base" placeholder="WrtNova">
+                <div class="relative">
+                  <input type="password" id="LAN_WIFI_PASSWD" name="LAN_WIFI_PASSWD" class="input-base" style="padding-right:2.5rem" placeholder="password" autocomplete="new-password">
+                  <button type="button" id="toggle-lan-wifi-pw"
+                          class="btn btn-ghost btn-icon absolute right-1.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
+                          aria-label="Show password">
+                    <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
-          <div class="form-row wifi-guest hidden">
-            <label class="form-label">Guest</label>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              <input type="text" id="GUEST_WIFI_SSID" name="GUEST_WIFI_SSID" class="input-base" placeholder="WrtNova_Guest">
-              <div class="relative">
-                <input type="password" id="GUEST_WIFI_PASSWD" name="GUEST_WIFI_PASSWD" class="input-base" style="padding-right:2.5rem" placeholder="password" autocomplete="new-password">
-                <button type="button" id="toggle-guest-wifi-pw"
-                        class="btn btn-ghost btn-icon absolute right-1.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
-                        aria-label="Show password">
-                  <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
-                </button>
+          <div class="form-row form-row--full wifi-guest hidden">
+            <div class="opt-card">
+              <div class="opt-text">
+                <span class="opt-title">Guest</span>
+              </div>
+              <div class="opt-control opt-stack grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <input type="text" id="GUEST_WIFI_SSID" name="GUEST_WIFI_SSID" class="input-base" placeholder="WrtNova_Guest">
+                <div class="relative">
+                  <input type="password" id="GUEST_WIFI_PASSWD" name="GUEST_WIFI_PASSWD" class="input-base" style="padding-right:2.5rem" placeholder="password" autocomplete="new-password">
+                  <button type="button" id="toggle-guest-wifi-pw"
+                          class="btn btn-ghost btn-icon absolute right-1.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
+                          aria-label="Show password">
+                    <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
-          <div class="form-row wifi-iot hidden">
-            <label class="form-label">IoT</label>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              <input type="text" id="IOT_WIFI_SSID" name="IOT_WIFI_SSID" class="input-base" placeholder="WrtNova_IoT">
-              <div class="relative">
-                <input type="password" id="IOT_WIFI_PASSWD" name="IOT_WIFI_PASSWD" class="input-base" style="padding-right:2.5rem" placeholder="password" autocomplete="new-password">
-                <button type="button" id="toggle-iot-wifi-pw"
-                        class="btn btn-ghost btn-icon absolute right-1.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
-                        aria-label="Show password">
-                  <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
-                </button>
+          <div class="form-row form-row--full wifi-iot hidden">
+            <div class="opt-card">
+              <div class="opt-text">
+                <span class="opt-title">IoT</span>
+              </div>
+              <div class="opt-control opt-stack grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <input type="text" id="IOT_WIFI_SSID" name="IOT_WIFI_SSID" class="input-base" placeholder="WrtNova_IoT">
+                <div class="relative">
+                  <input type="password" id="IOT_WIFI_PASSWD" name="IOT_WIFI_PASSWD" class="input-base" style="padding-right:2.5rem" placeholder="password" autocomplete="new-password">
+                  <button type="button" id="toggle-iot-wifi-pw"
+                          class="btn btn-ghost btn-icon absolute right-1.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
+                          aria-label="Show password">
+                    <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
-          <div class="form-row wifi-wg hidden">
-            <label class="form-label">VPN</label>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              <input type="text" id="LAN_WG_WIFI_SSID" name="LAN_WG_WIFI_SSID" class="input-base" placeholder="WrtNova_VPN">
-              <div class="relative">
-                <input type="password" id="LAN_WG_WIFI_PASSWD" name="LAN_WG_WIFI_PASSWD" class="input-base" style="padding-right:2.5rem" placeholder="password" autocomplete="new-password">
-                <button type="button" id="toggle-wg-wifi-pw"
-                        class="btn btn-ghost btn-icon absolute right-1.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
-                        aria-label="Show password">
-                  <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
-                </button>
+          <div class="form-row form-row--full wifi-wg hidden">
+            <div class="opt-card">
+              <div class="opt-text">
+                <span class="opt-title">VPN</span>
+              </div>
+              <div class="opt-control opt-stack grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <input type="text" id="LAN_WG_WIFI_SSID" name="LAN_WG_WIFI_SSID" class="input-base" placeholder="WrtNova_VPN">
+                <div class="relative">
+                  <input type="password" id="LAN_WG_WIFI_PASSWD" name="LAN_WG_WIFI_PASSWD" class="input-base" style="padding-right:2.5rem" placeholder="password" autocomplete="new-password">
+                  <button type="button" id="toggle-wg-wifi-pw"
+                          class="btn btn-ghost btn-icon absolute right-1.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
+                          aria-label="Show password">
+                    <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -879,39 +997,59 @@
                 </div>
               </label>
             </div>
-            <div class="form-row">
-              <label for="CHANNEL_2G" class="form-label" data-i18n="channel2g">2.4 GHz channel</label>
-              <select id="CHANNEL_2G" name="CHANNEL_2G" class="input-base" style="max-width:120px">
-                <option value="">Default</option>
-              </select>
+            <div class="form-row form-row--full">
+              <div class="opt-card">
+                <div class="opt-text">
+                  <label class="opt-title" for="CHANNEL_2G" data-i18n="channel2g">2.4 GHz channel</label>
+                </div>
+                <select id="CHANNEL_2G" name="CHANNEL_2G" class="opt-control opt-field input-base">
+                  <option value="">Default</option>
+                </select>
+              </div>
             </div>
-            <div class="form-row">
-              <label for="CHANNEL_5G" class="form-label" data-i18n="channel5g">5 GHz channel</label>
-              <select id="CHANNEL_5G" name="CHANNEL_5G" class="input-base" style="max-width:120px">
-                <option value="">Default</option>
-              </select>
+            <div class="form-row form-row--full">
+              <div class="opt-card">
+                <div class="opt-text">
+                  <label class="opt-title" for="CHANNEL_5G" data-i18n="channel5g">5 GHz channel</label>
+                </div>
+                <select id="CHANNEL_5G" name="CHANNEL_5G" class="opt-control opt-field input-base">
+                  <option value="">Default</option>
+                </select>
+              </div>
             </div>
-            <div class="form-row">
-              <label for="CHANNEL_5G_2" class="form-label" data-i18n="channel5g2">5 GHz channel (second radio)</label>
-              <select id="CHANNEL_5G_2" name="CHANNEL_5G_2" class="input-base" style="max-width:120px">
-                <option value="">Default</option>
-              </select>
+            <div class="form-row form-row--full">
+              <div class="opt-card">
+                <div class="opt-text">
+                  <label class="opt-title" for="CHANNEL_5G_2" data-i18n="channel5g2">5 GHz channel (second radio)</label>
+                </div>
+                <select id="CHANNEL_5G_2" name="CHANNEL_5G_2" class="opt-control opt-field input-base">
+                  <option value="">Default</option>
+                </select>
+              </div>
             </div>
-            <div class="form-row">
-              <label for="CHANNEL_6G" class="form-label" data-i18n="channel6g">6 GHz channel</label>
-              <select id="CHANNEL_6G" name="CHANNEL_6G" class="input-base" style="max-width:120px">
-                <option value="">Default</option>
-              </select>
+            <div class="form-row form-row--full">
+              <div class="opt-card">
+                <div class="opt-text">
+                  <label class="opt-title" for="CHANNEL_6G" data-i18n="channel6g">6 GHz channel</label>
+                </div>
+                <select id="CHANNEL_6G" name="CHANNEL_6G" class="opt-control opt-field input-base">
+                  <option value="">Default</option>
+                </select>
+              </div>
             </div>
-            <div class="form-row">
-              <label for="WIFI_LOG_LVL" class="form-label" data-i18n="wifiLogLevel">WiFi log level</label>
-              <select id="WIFI_LOG_LVL" name="WIFI_LOG_LVL" class="input-base" style="max-width:120px">
-                <option value="">Default</option>
-                <option value="1">Debugging</option>
-                <option value="2">Informational</option>
-                <option value="3">Notification</option>
-                <option value="4">Warning</option>
-              </select>
+            <div class="form-row form-row--full">
+              <div class="opt-card">
+                <div class="opt-text">
+                  <label class="opt-title" for="WIFI_LOG_LVL" data-i18n="wifiLogLevel">WiFi log level</label>
+                </div>
+                <select id="WIFI_LOG_LVL" name="WIFI_LOG_LVL" class="opt-control opt-field input-base">
+                  <option value="">Default</option>
+                  <option value="1">Debugging</option>
+                  <option value="2">Informational</option>
+                  <option value="3">Notification</option>
+                  <option value="4">Warning</option>
+                </select>
+              </div>
             </div>
             <div class="info-note dot11r-only" role="note" data-i18n="dot11rBuggyNote">Note: 802.11r works well with most modern devices, but some older or low-cost devices may fail to connect. If a device can't connect, try disabling 802.11r. For IoT devices, use the IoT: 802.11r toggle above.</div>
           </div>
@@ -928,40 +1066,54 @@
       </div>
       <div class="card-body-wrap">
       <div class="card-body">
-        <div class="form-row">
-          <label class="form-label" data-i18n="connectionType">Connection type</label>
-          <div class="radio-seg" role="radiogroup" aria-label="WAN connection type">
-            <label>
-              <input type="radio" name="wan_type" value="dhcp" checked>
-              <span>DHCP</span>
-            </label>
-            <label>
-              <input type="radio" name="wan_type" value="pppoe">
-              <span>PPPoE</span>
-            </label>
-          </div>
-        </div>
-        <div class="pppoe-only hidden">
-          <div class="form-row">
-            <label for="PPPOE_USERNAME" class="form-label">PPPoE username</label>
-            <input type="text" id="PPPOE_USERNAME" name="PPPOE_USERNAME" class="input-base" autocomplete="username">
-          </div>
-          <div class="form-row">
-            <label for="PPPOE_PASSWD" class="form-label">PPPoE password</label>
-            <div class="relative">
-              <input type="password" id="PPPOE_PASSWD" name="PPPOE_PASSWD" class="input-base" style="padding-right:2.5rem" autocomplete="current-password">
-              <button type="button" id="toggle-pppoe-pw"
-                      class="btn btn-ghost btn-icon absolute right-1.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
-                      aria-label="Show password">
-                <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
-              </button>
+        <div class="form-row form-row--full">
+          <div class="opt-card">
+            <div class="opt-text">
+              <span class="opt-title" data-i18n="connectionType">Connection type</span>
+            </div>
+            <div class="opt-control radio-seg" role="radiogroup" aria-label="WAN connection type">
+              <label>
+                <input type="radio" name="wan_type" value="dhcp" checked>
+                <span>DHCP</span>
+              </label>
+              <label>
+                <input type="radio" name="wan_type" value="pppoe">
+                <span>PPPoE</span>
+              </label>
             </div>
           </div>
         </div>
-        <div class="form-row">
-          <label for="WAN_MAC_ADDR" class="form-label" data-i18n="wanMacAddress">WAN MAC address</label>
-          <div>
-            <input type="text" id="WAN_MAC_ADDR" name="WAN_MAC_ADDR" class="input-base" placeholder="aa:bb:cc:dd:ee:ff (optional)">
+        <div class="pppoe-only hidden">
+          <div class="form-row form-row--full">
+            <div class="opt-card">
+              <div class="opt-text">
+                <label class="opt-title" for="PPPOE_USERNAME">PPPoE username</label>
+              </div>
+              <input type="text" id="PPPOE_USERNAME" name="PPPOE_USERNAME" class="opt-control opt-field input-base" autocomplete="username">
+            </div>
+          </div>
+          <div class="form-row form-row--full">
+            <div class="opt-card">
+              <div class="opt-text">
+                <label class="opt-title" for="PPPOE_PASSWD">PPPoE password</label>
+              </div>
+              <div class="opt-control opt-field relative">
+                <input type="password" id="PPPOE_PASSWD" name="PPPOE_PASSWD" class="input-base" style="padding-right:2.5rem" autocomplete="current-password">
+                <button type="button" id="toggle-pppoe-pw"
+                        class="btn btn-ghost btn-icon absolute right-1.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
+                        aria-label="Show password">
+                  <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="form-row form-row--full">
+          <div class="opt-card">
+            <div class="opt-text">
+              <label class="opt-title" for="WAN_MAC_ADDR" data-i18n="wanMacAddress">WAN MAC address</label>
+            </div>
+            <input type="text" id="WAN_MAC_ADDR" name="WAN_MAC_ADDR" class="opt-control opt-field input-base" placeholder="aa:bb:cc:dd:ee:ff (optional)">
           </div>
         </div>
         <details class="mt-4">
@@ -1104,14 +1256,20 @@
             </div>
           </label>
         </div>
-        <div class="form-row">
-          <label for="LOOKUP_HOSTNAME" class="form-label" data-i18n="lookupHostname">Lookup hostname</label>
-          <input type="text" id="LOOKUP_HOSTNAME" name="LOOKUP_HOSTNAME" class="input-base" placeholder="ddns.example.com">
+        <div class="form-row form-row--full">
+          <div class="opt-card">
+            <div class="opt-text">
+              <label class="opt-title" for="LOOKUP_HOSTNAME" data-i18n="lookupHostname">Lookup hostname</label>
+            </div>
+            <input type="text" id="LOOKUP_HOSTNAME" name="LOOKUP_HOSTNAME" class="opt-control opt-field input-base" placeholder="ddns.example.com">
+          </div>
         </div>
-        <div class="form-row">
-          <label for="CLOUDFLARE_API_KEY" class="form-label" data-i18n="cloudflareApiToken">Cloudflare API token</label>
-          <div>
-            <div class="relative">
+        <div class="form-row form-row--full">
+          <div class="opt-card">
+            <div class="opt-text">
+              <label class="opt-title" for="CLOUDFLARE_API_KEY" data-i18n="cloudflareApiToken">Cloudflare API token</label>
+            </div>
+            <div class="opt-control opt-field relative">
               <input type="password" id="CLOUDFLARE_API_KEY" name="CLOUDFLARE_API_KEY" class="input-base" style="padding-right:2.5rem" autocomplete="off">
               <button type="button" id="toggle-cfkey"
                       class="btn btn-ghost btn-icon absolute right-1.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
@@ -1270,25 +1428,33 @@
             <span data-i18n="advancedDns">Advanced DNS options</span>
           </summary>
           <div class="mt-2 pl-4 border-l-2 border-zinc-200 dark:border-zinc-700">
-            <div class="form-row">
-              <label for="doh-preset" class="form-label" data-i18n="dohPreset">Add DoH preset</label>
-              <select id="doh-preset" class="input-base">
-                <!-- provider options are populated from ui.DOH_PROVIDERS (single source of truth) -->
-                <option value="" data-i18n="dohPresetPh">Pick a provider...</option>
-              </select>
-            </div>
             <div class="form-row form-row--full">
-              <label for="DOH_UPSTREAMS" class="form-label" data-i18n="dohUpstreams">DoH upstreams</label>
-              <div>
-                <textarea id="DOH_UPSTREAMS" name="DOH_UPSTREAMS" class="input-base" rows="3" data-i18n-placeholder="dohUpstreamsPh" placeholder="one URL per line; blank = built-in defaults"></textarea>
-                <p class="form-help" data-i18n="dohUpstreamsHelp">DoH resolver URLs, one per line. Blank uses Quad9 / Cloudflare / Google.</p>
+              <div class="opt-card">
+                <div class="opt-text">
+                  <label class="opt-title" for="doh-preset" data-i18n="dohPreset">Add DoH preset</label>
+                </div>
+                <select id="doh-preset" class="opt-control opt-field input-base">
+                  <!-- provider options are populated from ui.DOH_PROVIDERS (single source of truth) -->
+                  <option value="" data-i18n="dohPresetPh">Pick a provider...</option>
+                </select>
               </div>
             </div>
             <div class="form-row form-row--full">
-              <label for="BOOTSTRAP_DNS" class="form-label" data-i18n="bootstrapDns">Bootstrap DNS</label>
-              <div>
-                <textarea id="BOOTSTRAP_DNS" name="BOOTSTRAP_DNS" class="input-base" rows="2" data-i18n-placeholder="bootstrapDnsPh" placeholder="plain IPs, one per line; blank = defaults"></textarea>
-                <p class="form-help" data-i18n="bootstrapDnsHelp">Plain IPs to resolve upstream hostnames + fallback. Blank uses 1.0.0.1 / 9.9.9.9.</p>
+              <div class="opt-card">
+                <div class="opt-text">
+                  <label class="opt-title" for="DOH_UPSTREAMS" data-i18n="dohUpstreams">DoH upstreams</label>
+                  <p class="form-help mt-0" data-i18n="dohUpstreamsHelp">DoH resolver URLs, one per line. Blank uses Quad9 / Cloudflare / Google.</p>
+                </div>
+                <textarea id="DOH_UPSTREAMS" name="DOH_UPSTREAMS" class="opt-control opt-stack input-base" rows="3" data-i18n-placeholder="dohUpstreamsPh" placeholder="one URL per line; blank = built-in defaults"></textarea>
+              </div>
+            </div>
+            <div class="form-row form-row--full">
+              <div class="opt-card">
+                <div class="opt-text">
+                  <label class="opt-title" for="BOOTSTRAP_DNS" data-i18n="bootstrapDns">Bootstrap DNS</label>
+                  <p class="form-help mt-0" data-i18n="bootstrapDnsHelp">Plain IPs to resolve upstream hostnames + fallback. Blank uses 1.0.0.1 / 9.9.9.9.</p>
+                </div>
+                <textarea id="BOOTSTRAP_DNS" name="BOOTSTRAP_DNS" class="opt-control opt-stack input-base" rows="2" data-i18n-placeholder="bootstrapDnsPh" placeholder="plain IPs, one per line; blank = defaults"></textarea>
               </div>
             </div>
           </div>
@@ -1360,15 +1526,21 @@
       </div>
       <div class="card-body-wrap">
       <div class="card-body">
-        <div class="form-row">
-          <label class="form-label" data-i18n="finalPackages">Final packages</label>
-          <div id="auto-packages" class="flex flex-wrap gap-1 py-1 min-h-[1.75rem]"></div>
+        <div class="form-row form-row--full">
+          <div class="opt-card">
+            <div class="opt-text">
+              <span class="opt-title" data-i18n="finalPackages">Final packages</span>
+            </div>
+            <div id="auto-packages" class="opt-control opt-stack flex flex-wrap gap-1 py-1 min-h-[1.75rem]"></div>
+          </div>
         </div>
-        <div class="form-row">
-          <label for="additional_packages" class="form-label" data-i18n="extraPackages">Extra packages</label>
-          <div>
-            <textarea id="additional_packages" name="additional_packages" class="input-base" data-i18n-placeholder="packagesSeparatorPh" placeholder="space- or newline-separated, e.g. htop tcpdump" rows="3"></textarea>
-            <p class="form-help" data-i18n="extraPackagesHelp">Appended to the final list. Prefix with - to remove an auto-added package.</p>
+        <div class="form-row form-row--full">
+          <div class="opt-card">
+            <div class="opt-text">
+              <label class="opt-title" for="additional_packages" data-i18n="extraPackages">Extra packages</label>
+              <p class="form-help mt-0" data-i18n="extraPackagesHelp">Appended to the final list. Prefix with - to remove an auto-added package.</p>
+            </div>
+            <textarea id="additional_packages" name="additional_packages" class="opt-control opt-stack input-base" data-i18n-placeholder="packagesSeparatorPh" placeholder="space- or newline-separated, e.g. htop tcpdump" rows="3"></textarea>
           </div>
         </div>
       </div>
@@ -1440,9 +1612,13 @@
             </div>
           </label>
         </div>
-        <div class="form-row hidden" id="asu-server-row">
-          <label class="form-label" for="asu-server" data-i18n="asuEndpoint">ASU endpoint</label>
-          <select id="asu-server" class="input-base" style="max-width:320px"></select>
+        <div class="form-row form-row--full hidden" id="asu-server-row">
+          <div class="opt-card">
+            <div class="opt-text">
+              <label class="opt-title" for="asu-server" data-i18n="asuEndpoint">ASU endpoint</label>
+            </div>
+            <select id="asu-server" class="opt-control opt-field input-base"></select>
+          </div>
         </div>
       </div>
       </div>

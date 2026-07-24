@@ -119,11 +119,14 @@
      A radio option row is the same, with <input type="radio"> replacing the
      whole .toggle-wrap. Any trailing note goes after </label>, outside the card.
   */
-  .toggle-label {
+  /* .opt-card is the same shell around a control that is not a single input -
+     a radio group, say - so it cannot be a <label>. Chrome and type are shared
+     with .toggle-label so the two read as one component. */
+  .toggle-label,
+  .opt-card {
     display: flex;
     align-items: center;
     gap: 0.875rem;
-    cursor: pointer;
     min-height: 44px; /* WCAG touch target */
     padding: 0.875rem 1rem;
     border: 1px solid #e4e4e7; /* zinc-200 */
@@ -131,9 +134,45 @@
     background-color: #fafafa; /* zinc-50 */
     transition: border-color 0.15s, background-color 0.15s;
   }
-  .dark .toggle-label {
+  .toggle-label { cursor: pointer; }
+  /* Only .opt-card wraps. A switch is 48px and the text beside it can always
+     shrink, so a toggle keeps its control on the same line at any width -
+     letting it wrap drops the switch to the left of a line of its own. */
+  .opt-card { flex-wrap: wrap; }
+  .dark .toggle-label,
+  .dark .opt-card {
     border-color: #303035;
     background-color: #1c1c20;
+  }
+  /* text block takes the row, control sits on the trailing edge and drops to
+     its own line when there is not room for both */
+  .opt-card > .opt-text { flex: 1 1 12rem; min-width: 0; }
+  .opt-card > .opt-control { flex: 0 0 auto; margin-left: auto; }
+  /* Below the breakpoint every control drops to its own full-width line - a
+     segmented control or a text field floating on the right of a narrow card
+     reads as unanchored, and a field has no room to be usable there. */
+  @media (max-width: 767px) {
+    .opt-card > .opt-control {
+      flex: 1 1 100%;
+      margin-left: 0;
+    }
+    .opt-card > .radio-seg {
+      width: 100%;            /* overrides the fit-content that stops the */
+      display: flex;          /* control stretching inside a grid column */
+    }
+    .opt-card > .radio-seg label { flex: 1 1 0; }
+    .opt-card > .radio-seg input[type="radio"] + span { justify-content: center; }
+  }
+  /* A text field takes half the card, leaving the other half to the text. The
+     gap is split between them so the two halves stay equal. */
+  @media (min-width: 768px) {
+    .opt-card > .opt-field { flex: 0 0 calc(50% - 0.4375rem); min-width: 0; }
+  }
+  /* A control too tall to sit beside the text - a textarea - keeps its own
+     full-width line at every size instead. */
+  .opt-card > .opt-stack {
+    flex: 1 1 100%;
+    margin-left: 0;
   }
   .toggle-label:hover { border-color: #d4d4d8; }
   .dark .toggle-label:hover { border-color: #3f3f46; }
@@ -143,7 +182,11 @@
     outline: 2px solid #f6821f;
     outline-offset: 2px;
   }
-  .toggle-label > div { min-width: 0; }
+  /* Switch sits on the trailing edge; the text block takes the rest of the row.
+     Visual order only - the label still wraps the input, so the card remains a
+     single tab stop and the reading order is title, description, control. */
+  .toggle-label > .toggle-wrap { order: 2; margin-left: auto; }
+  .toggle-label > div { flex: 1 1 auto; min-width: 0; }
   /* Radio options reuse the same card shell */
   .toggle-label > input[type="radio"] {
     width: 1.125rem;
@@ -192,7 +235,8 @@
   }
   .toggle-input:checked ~ .toggle-track { background-color: #f6821f; }
   .toggle-input:checked ~ .toggle-thumb { transform: translateX(1.375rem); }
-  .toggle-text {
+  .toggle-text,
+  .opt-title {
     display: block;
     font-size: 0.8375rem;
     font-weight: 600;
@@ -201,12 +245,15 @@
     color: #18181b; /* zinc-900 */
     user-select: none;
   }
-  .dark .toggle-text { color: #fafafa; /* zinc-50 */ }
-  .toggle-label .form-help {
+  .dark .toggle-text,
+  .dark .opt-title { color: #fafafa; /* zinc-50 */ }
+  .toggle-label .form-help,
+  .opt-card .form-help {
     font-size: 0.775rem;
     color: #52525b; /* zinc-600 */
   }
-  .dark .toggle-label .form-help { color: #a1a1aa; /* zinc-400 */ }
+  .dark .toggle-label .form-help,
+  .dark .opt-card .form-help { color: #a1a1aa; /* zinc-400 */ }
 
   /* ── Buttons ──────────────────────────────────────────────────── */
   .btn {
