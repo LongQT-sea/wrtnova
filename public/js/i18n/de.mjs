@@ -287,6 +287,8 @@ export default {
   dot11rBuggyNote:    'Hinweis: 802.11r funktioniert gut mit den meisten modernen Geräten, aber einige ältere oder günstige Geräte können sich möglicherweise nicht verbinden. Wenn ein Gerät keine Verbindung herstellt, versuchen Sie, 802.11r zu deaktivieren. Für IoT-Geräte den Schalter IoT: 802.11r oben verwenden.',
   bandSuffix:         'Band-Suffix hinzufügen',
   bandSuffixHelp:     '2G/5G/6G ans Ende jeder SSID anhängen',
+  indexSuffix:        'AP-Index-Suffix hinzufügen',
+  indexSuffixHelp:    'AP-Index an jede SSID anhängen (nur im AP-Modus)',
   pskVlan:            'PSK pro VLAN',
   pskVlanHelp:        'Eine SSID mit getrenntem Zugriff je nach Passwort',
   guestIsolate:       'Gast-Isolierung',

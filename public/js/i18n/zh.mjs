@@ -287,6 +287,8 @@ export default {
   dot11rBuggyNote:    '注意：802.11r 与大多数现代设备配合良好，但一些较旧或低价设备可能无法连接。如果某个设备无法连接，请尝试禁用 802.11r。对于 IoT 设备，请使用上方的 IoT: 802.11r 开关。',
   bandSuffix:         '添加频段后缀',
   bandSuffixHelp:     '在每个 SSID 末尾添加 2G/5G/6G',
+  indexSuffix:        '添加 AP 索引后缀',
+  indexSuffixHelp:    '在每个 SSID 后附加 AP 索引（仅 AP 模式）',
   pskVlan:            '按 VLAN 分配 PSK',
   pskVlanHelp:        '单个 SSID，根据密码区分访问',
   guestIsolate:       '访客隔离',

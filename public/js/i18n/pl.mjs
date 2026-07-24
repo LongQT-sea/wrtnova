@@ -287,6 +287,8 @@ export default {
   dot11rBuggyNote:    'Uwaga: 802.11r działa dobrze z większością nowoczesnych urządzeń, ale niektóre starsze lub tanie urządzenia mogą nie nawiązać połączenia. Jeśli urządzenie nie może się połączyć, spróbuj wyłączyć 802.11r. Dla urządzeń IoT użyj przełącznika IoT: 802.11r powyżej.',
   bandSuffix:         'Dodaj sufiks pasma',
   bandSuffixHelp:     'Dodaj 2G/5G/6G na końcu każdego SSID',
+  indexSuffix:        'Dodaj sufiks indeksu AP',
+  indexSuffixHelp:    'Dodaj indeks AP do każdego SSID (tylko w trybie AP)',
   pskVlan:            'PSK na VLAN',
   pskVlanHelp:        'Jedno SSID z osobnym dostępem zależnym od hasła',
   guestIsolate:       'Izolacja gości',

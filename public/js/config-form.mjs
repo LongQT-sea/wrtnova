@@ -70,7 +70,7 @@ export const BASE_SCHEMA = /** @type {[string,string,(string|undefined)?,(string
   ['IOT_WIFI_SSID', 'text'], ['IOT_WIFI_PASSWD', 'text'], ['IOT_NO_DOT11R', 'checkbox-inv'],
   ['LAN_WG_WIFI_SSID', 'text'], ['LAN_WG_WIFI_PASSWD', 'text'],
   ['CHANNEL_2G', 'select'], ['CHANNEL_5G', 'select'], ['CHANNEL_5G_2', 'select'], ['CHANNEL_6G', 'select'], ['WIFI_LOG_LVL', 'select'],
-  ['DOT11KV', 'checkbox'], ['DOT11R', 'checkbox'], ['PSK_VLAN', 'checkbox'], ['BAND_SUFFIX', 'checkbox'],
+  ['DOT11KV', 'checkbox'], ['DOT11R', 'checkbox'], ['PSK_VLAN', 'checkbox'], ['BAND_SUFFIX', 'checkbox'], ['INDEX_SUFFIX', 'checkbox'],
   ['PORT_FORWARD_LIST', 'table', 'portfwd'], ['IPV6_SERVER_LIST', 'table', 'ipv6'],
   ['DDNS_ENABLE', 'checkbox'], ['LOOKUP_HOSTNAME', 'text'], ['CLOUDFLARE_API_KEY', 'text'],
   ['USB_TETHERING', 'checkbox'], ['CELLULAR_MODEM', 'checkbox'],
