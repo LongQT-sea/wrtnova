@@ -497,11 +497,28 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
       ).join('');
   }
 
+  // One .opt-card row - title (plus an optional description) on the left, the
+  // control on the trailing edge. Same shape the static markup in both pages
+  // uses, which is what the CSS in src/style.css targets; the control carries
+  // its own `.opt-control .opt-field` / `.opt-stack` classes so a caller can
+  // pick how wide it sits. `rowAttrs` is for the odd row that has to override
+  // the .form-row margin.
+  function cardRow(forId, title, control, help, rowAttrs) {
+    return '<div class="form-row form-row--full"' + (rowAttrs || '') + '>' +
+      '<div class="opt-card">' +
+        '<div class="opt-text">' +
+          '<label class="opt-title" for="' + forId + '">' + title + '</label>' +
+          (help ? '<p class="form-help mt-0">' + help + '</p>' : '') +
+        '</div>' +
+        control +
+      '</div></div>';
+  }
+
   function versionRow(id, currentOverride, sharedVersion) {
-    return '<div class="form-row"><label class="form-label" for="np-ver-' + id + '">' + S.openWrtVersion + '</label>' +
-      '<select class="input-base" id="np-ver-' + id + '" style="max-width:220px">' +
+    return cardRow('np-ver-' + id, S.openWrtVersion,
+      '<select class="opt-control opt-field input-base" id="np-ver-' + id + '">' +
       versionOpts(currentOverride, sharedVersion) +
-      '</select></div>';
+      '</select>');
   }
 
 
@@ -653,40 +670,40 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
       nonCtRow + wedRow + irqRow;
 
     let fields;
-    const deviceRow =
-      '<div class="form-row" style="margin-top:0">' +
-      '<label class="form-label">' + S.device + '</label>' +
-      '<div><div class="flex gap-2 items-center">' +
-      '<input class="input-base" id="np-device-' + id + '" value="' + devTitle + '" placeholder="' + S.noDeviceSelected + '" readonly style="cursor:pointer;max-width:280px">' +
-      '<button type="button" class="btn text-xs flex-shrink-0" data-pickdevice="' + id + '">' + S.change + '</button>' +
-      '</div>' +
-      '<p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1">' + S.deviceRequirement + '</p>' +
-      '</div></div>';
+    // The device control is a readonly field plus its picker button, so it is a
+    // wrapper rather than a bare input - the same thing /builder does for the
+    // device combobox.
+    const deviceRow = cardRow('np-device-' + id, S.device,
+      '<div class="opt-control opt-field flex gap-2 items-center">' +
+        '<input class="input-base" id="np-device-' + id + '" value="' + devTitle + '" placeholder="' + S.noDeviceSelected + '" readonly style="cursor:pointer">' +
+        '<button type="button" class="btn text-xs flex-shrink-0" data-pickdevice="' + id + '">' + S.change + '</button>' +
+      '</div>',
+      S.deviceRequirement, ' style="margin-top:0"');
+
+    const nameRow =
+      cardRow('np-name-' + id, S.nodeName,
+        '<input class="opt-control opt-field input-base" id="np-name-' + id + '" value="' + esc(node.name) + '">');
+
+    const hostRow = (placeholder) =>
+      cardRow('np-host-' + id, S.hostname,
+        '<input class="opt-control opt-field input-base" id="np-host-' + id + '" value="' +
+        esc(node.overrides.HOST_NAME || '') + '" placeholder="' + placeholder + '">');
 
     if (!isAp) {
       fields = deviceRow +
         versionRow(id, verOverride, cfg.shared_version) +
-
-        '<div class="form-row"><label class="form-label" for="np-name-' + id + '">' + S.nodeName + '</label>' +
-        '<input class="input-base" id="np-name-' + id + '" value="' + esc(node.name) + '" style="max-width:220px"></div>' +
-
-        '<div class="form-row"><label class="form-label" for="np-host-' + id + '">' + S.hostname + '</label>' +
-        '<input class="input-base" id="np-host-' + id + '" value="' + esc(node.overrides.HOST_NAME || '') + '" placeholder="WrtNova" style="max-width:220px"></div>' +
-
+        nameRow +
+        hostRow('WrtNova') +
         wifiRows;
     } else {
       fields = deviceRow +
         versionRow(id, verOverride, cfg.shared_version) +
+        nameRow +
+        hostRow('WrtNova-' + esc(node.overrides.AP_INDEX || '2')) +
 
-        '<div class="form-row"><label class="form-label" for="np-name-' + id + '">' + S.nodeName + '</label>' +
-        '<input class="input-base" id="np-name-' + id + '" value="' + esc(node.name) + '" style="max-width:220px"></div>' +
-
-        '<div class="form-row"><label class="form-label" for="np-host-' + id + '">' + S.hostname + '</label>' +
-        '<input class="input-base" id="np-host-' + id + '" value="' + esc(node.overrides.HOST_NAME || '') + '" placeholder="WrtNova-' + esc(node.overrides.AP_INDEX || '2') + '" style="max-width:220px"></div>' +
-
-        '<div class="form-row"><label class="form-label" for="np-apidx-' + id + '">' + S.apIndex + '</label>' +
-        '<div><input type="number" class="input-base" id="np-apidx-' + id + '" min="2" max="19" value="' + esc(node.overrides.AP_INDEX || '2') + '" style="max-width:90px">' +
-        '</div></div>' +
+        cardRow('np-apidx-' + id, S.apIndex,
+          '<input type="number" class="opt-control opt-field input-base" id="np-apidx-' + id +
+          '" min="2" max="19" value="' + esc(node.overrides.AP_INDEX || '2') + '">') +
 
         wifiRows;
     }
