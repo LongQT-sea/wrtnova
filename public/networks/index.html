@@ -1481,27 +1481,39 @@
             <div class="sub-section" style="margin-top:0;padding-top:0;border-top:none">
               <p class="sub-section-title" data-i18n="threatFeedsSection">Threat feeds</p>
               <p class="form-help" data-i18n="banipFeedsHelp">Pre-configured IP blocklist feeds for banIP.</p>
-              <label class="form-label" style="display:block;padding-top:0;margin-top:0.75rem" data-i18n="banipActiveFeeds">Active feeds</label>
-              <div class="picker" id="banip-feed-picker">
-                <div class="picker-control">
-                  <input type="text" id="banip-feed-search" class="picker-search" autocomplete="off" aria-label="Add feed" data-i18n-placeholder="banipAddFeedPh" placeholder="Type a feed name to add...">
-                  <button type="button" class="picker-toggle" aria-expanded="false" aria-controls="banip-feed-list" aria-label="Show feed list"><svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></button>
+              <div class="form-row form-row--full">
+                <div class="opt-card">
+                  <div class="opt-text">
+                    <label class="opt-title" for="banip-feed-search" data-i18n="banipActiveFeeds">Active feeds</label>
+                  </div>
+                <div class="picker opt-control opt-stack" id="banip-feed-picker">
+                  <div class="picker-control">
+                    <input type="text" id="banip-feed-search" class="picker-search" autocomplete="off" aria-label="Add feed" data-i18n-placeholder="banipAddFeedPh" placeholder="Type a feed name to add...">
+                    <button type="button" class="picker-toggle" aria-expanded="false" aria-controls="banip-feed-list" aria-label="Show feed list"><svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></button>
+                  </div>
+                  <div class="picker-list hidden" id="banip-feed-list" role="group" aria-label="Feed suggestions"></div>
+                  <input type="hidden" id="BANIP_FEEDS" name="BANIP_FEEDS">
                 </div>
-                <div class="picker-list hidden" id="banip-feed-list" role="group" aria-label="Feed suggestions"></div>
-                <input type="hidden" id="BANIP_FEEDS" name="BANIP_FEEDS">
+                </div>
               </div>
             </div>
             <div class="sub-section">
               <p class="sub-section-title" data-i18n="countryBlockingSection">Country blocking</p>
               <p class="form-help" data-i18n="banipCountryHelp">Drop WAN traffic from these countries via banIP.</p>
-              <label class="form-label" style="display:block;padding-top:0;margin-top:0.75rem" data-i18n="banipBlockedCountries">Blocked countries</label>
-              <div class="picker" id="banip-country-picker">
-                <div class="picker-control">
-                  <input type="text" id="banip-country-search" class="picker-search" autocomplete="off" aria-label="Add country" data-i18n-placeholder="banipAddCountryPh" placeholder="Type a country name or code to add...">
-                  <button type="button" class="picker-toggle" aria-expanded="false" aria-controls="banip-country-list" aria-label="Show country list"><svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></button>
+              <div class="form-row form-row--full">
+                <div class="opt-card">
+                  <div class="opt-text">
+                    <label class="opt-title" for="banip-country-search" data-i18n="banipBlockedCountries">Blocked countries</label>
+                  </div>
+                <div class="picker opt-control opt-stack" id="banip-country-picker">
+                  <div class="picker-control">
+                    <input type="text" id="banip-country-search" class="picker-search" autocomplete="off" aria-label="Add country" data-i18n-placeholder="banipAddCountryPh" placeholder="Type a country name or code to add...">
+                    <button type="button" class="picker-toggle" aria-expanded="false" aria-controls="banip-country-list" aria-label="Show country list"><svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></button>
+                  </div>
+                  <div class="picker-list hidden" id="banip-country-list" role="group" aria-label="Country suggestions"></div>
+                  <input type="hidden" id="BANIP_COUNTRY_LIST" name="BANIP_COUNTRY_LIST">
                 </div>
-                <div class="picker-list hidden" id="banip-country-list" role="group" aria-label="Country suggestions"></div>
-                <input type="hidden" id="BANIP_COUNTRY_LIST" name="BANIP_COUNTRY_LIST">
+                </div>
               </div>
             </div>
             <div class="warn-note banip-multi-feed hidden" role="note" data-i18n="banipMemoryNote">Each enabled feed increases memory usage. Enabling too many feeds can quickly exhaust RAM and may trigger the OOM killer.</div>

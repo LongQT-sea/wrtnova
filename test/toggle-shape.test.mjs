@@ -102,6 +102,19 @@ for (const page of PAGES) {
     assert.deepEqual(offenders, [], `form-row still using .form-label:\n${offenders.join('\n')}`);
   });
 
+  // The check above only looks inside a .form-row, which is how the two banIP
+  // picker rows kept a bare .form-label through the whole conversion - they sit
+  // directly in a .sub-section. Nothing on either page uses the class now, so
+  // the simpler rule is that it may not appear at all.
+  test(`${page}: .form-label is gone entirely`, () => {
+    const lines = read(page).split('\n');
+    const offenders = lines
+      .map((line, i) => [i + 1, line])
+      .filter(([, line]) => /class="form-label/.test(line))
+      .map(([n, line]) => `${page}:${n} ${line.trim()}`);
+    assert.deepEqual(offenders, [], `.form-label still in the markup:\n${offenders.join('\n')}`);
+  });
+
   // Every card needs a title; an empty one means a layout spacer from the old
   // two-column form got converted into a card. Matches only a genuinely empty
   // element - a title may legitimately open with a nested <span>, as the
