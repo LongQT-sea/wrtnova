@@ -802,19 +802,20 @@
   .dark .result-hash { color: #a1a1aa; }
 
   /* ── Info note (LuCI tips, etc.) ──────────────────────────────── */
+  /* A note is commentary on the setting above it, not another setting. It used
+     to carry the same 1px border and #fafafa fill that .opt-card now uses, so
+     it read as a peer card once the form became cards. A left rule and no
+     box tell them apart without shouting like .warn-note does. */
   .info-note {
-    margin-top: 1rem;
-    padding: 0.75rem 1rem;
-    border-radius: 0.375rem;
-    border: 1px solid #e4e4e7;
-    background-color: #fafafa;
+    margin-top: 0.5rem;
+    padding: 0.25rem 0 0.25rem 0.875rem;
+    border-left: 2px solid #d4d4d8; /* zinc-300 */
     font-size: 0.85rem;
     line-height: 1.6;
     color: #52525b;
   }
   .dark .info-note {
-    border-color: #27272a;
-    background-color: #18181b;
+    border-left-color: #3f3f46; /* zinc-700 */
     color: #a1a1aa;
   }
   /* Inline command / code chip inside an info note or toggle label */
