@@ -55,22 +55,27 @@
         <svg class="w-4 h-4 text-zinc-400 transition-transform duration-200 group-open:rotate-180 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
       </summary>
       <div class="card-body">
-        <div class="form-row">
-          <label for="version" class="form-label">OpenWrt version</label>
-          <select id="version" class="input-base">
-            <option value="">Loading…</option>
-          </select>
-        </div>
-        <div class="form-row">
-          <label for="device" class="form-label">Device</label>
-          <div class="combo">
-            <input type="text" id="device" class="input-base" placeholder="Type to search (e.g. Archer C7)" autocomplete="off" disabled aria-autocomplete="list" aria-controls="device-list">
-            <div class="combo-list hidden" id="device-list" role="listbox" aria-label="Device suggestions"></div>
+        <div class="form-row form-row--full">
+          <div class="opt-card">
+            <div class="opt-text">
+              <label for="version" class="opt-title">OpenWrt version</label>
+            </div>
+            <select id="version" class="opt-control opt-field input-base">
+              <option value="">Loading…</option>
+            </select>
           </div>
         </div>
-        <div class="form-row">
-          <span class="form-label"></span>
-          <p id="device-info" class="form-help mt-0" data-i18n="deviceRequirement">Required: ≥8MB flash, ≥64MB RAM</p>
+        <div class="form-row form-row--full">
+          <div class="opt-card">
+            <div class="opt-text">
+              <label for="device" class="opt-title">Device</label>
+              <p id="device-info" class="form-help mt-0" data-i18n="deviceRequirement">Required: ≥8MB flash, ≥64MB RAM</p>
+            </div>
+            <div class="opt-control opt-field combo">
+              <input type="text" id="device" class="input-base" placeholder="Type to search (e.g. Archer C7)" autocomplete="off" disabled aria-autocomplete="list" aria-controls="device-list">
+              <div class="combo-list hidden" id="device-list" role="listbox" aria-label="Device suggestions"></div>
+            </div>
+          </div>
         </div>
       </div>
     </details>
@@ -121,11 +126,13 @@
         <svg class="w-4 h-4 text-zinc-400 transition-transform duration-200 group-open:rotate-180 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
       </summary>
       <div class="card-body">
-        <div class="form-row">
-          <label for="asu-url" class="form-label">Build server URL</label>
-          <div>
-            <input type="url" id="asu-url" class="input-base" placeholder="https://sysupgrade.openwrt.org" autocomplete="off">
-            <p class="form-help">Leave blank to use the official OpenWrt ASU server. Point to a private instance if you run your own.</p>
+        <div class="form-row form-row--full">
+          <div class="opt-card">
+            <div class="opt-text">
+              <label for="asu-url" class="opt-title">Build server URL</label>
+              <p class="form-help mt-0">Leave blank to use the official OpenWrt ASU server. Point to a private instance if you run your own.</p>
+            </div>
+            <input type="url" id="asu-url" class="opt-control opt-field input-base" placeholder="https://sysupgrade.openwrt.org" autocomplete="off">
           </div>
         </div>
       </div>

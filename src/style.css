@@ -49,17 +49,6 @@
      visibly out of line with their neighbours. .form-row--full is kept as a
      no-op alias so existing markup does not have to change. */
 
-  /* A field label and a toggle title rank the same, so they read the same */
-  .form-label {
-    display: block;
-    font-size: 0.8375rem;
-    font-weight: 600;
-    line-height: 1.35;
-    color: #18181b; /* zinc-900 */
-    padding-top: 0;
-  }
-  .dark .form-label { color: #fafafa; /* zinc-50 */ }
-
   .form-help {
     margin-top: 0.25rem;
     font-size: 0.775rem;
@@ -837,7 +826,7 @@
   .info-note code,
   .toggle-text code,
   .toggle-label .form-help code,
-  .form-label code {
+  .opt-card .form-help code {
     padding: 0.0625rem 0.3125rem;
     border-radius: 0.25rem;
     background-color: #f4f4f5;
@@ -847,7 +836,7 @@
   .dark .info-note code,
   .dark .toggle-text code,
   .dark .toggle-label .form-help code,
-  .dark .form-label code {
+  .dark .opt-card .form-help code {
     background-color: #27272a;
     border-color: #3f3f46;
   }
