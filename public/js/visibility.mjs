@@ -103,7 +103,11 @@ export function deriveVisibility(cfg) {
     'batman-only': !(on(cfg, 'BATMAN_ADV') && (on(cfg, 'WIRELESS_MESH') || on(cfg, 'WIRELESS_MESH_2G'))),
     'dot11r-only': !on(cfg, 'DOT11R'),
     'dnsmasq-multi-only': !on(cfg, 'DNSMASQ_MULTI_INSTANCE'),
-    'wan-tagged-only': !on(cfg, 'WAN_IS_TAGGED'),
+    // No 'wan-tagged-only': the WAN VLAN id is NOT conditional on WAN_IS_TAGGED.
+    // wrtnova.sh takes wan_vid=${WAN_VLAN_ID:-20} unconditionally, and on a
+    // single-NIC board it forces WAN_IS_TAGGED=1 itself ([ -z "$wan_port" ]),
+    // so the field can matter even with the toggle off - hiding it would hide a
+    // value the user still has to set. Mirror vlanParticipates(), not the toggle.
     'wan-b-only': !on(cfg, 'WAN_B_ENABLE'),
   };
 }

@@ -4,6 +4,7 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 
 import { deriveVisibility, deriveNetRows, detectVlanConflict,
          resolveVlanAssignment, resolveVlanEmit,
@@ -55,12 +56,29 @@ test('deriveVisibility: wg-off-notice (config entered but VPN off)', () => {
   assert.equal(deriveVisibility({ AP_MODE: '1', WG_ENABLE: '', ENDPOINT: 'vpn.example.com' })['wg-off-notice'], true);
 });
 
-test('deriveVisibility: ssh-pw-row, mesh, wan-tagged, wan-b flags', () => {
+test('deriveVisibility: ssh-pw-row, mesh, wan-b flags', () => {
   assert.equal(deriveVisibility({ SSH_PUBLIC_KEY: 'ssh-ed25519 AAA' })['ssh-pw-row'], false);
   assert.equal(deriveVisibility({ SSH_PUBLIC_KEY: '   ' })['ssh-pw-row'], true);
   assert.equal(deriveVisibility({ WIRELESS_MESH: '1' })['mesh-only'], false);
-  assert.equal(deriveVisibility({ WAN_IS_TAGGED: '1' })['wan-tagged-only'], false);
   assert.equal(deriveVisibility({ WAN_B_ENABLE: '1' })['wan-b-only'], false);
+});
+
+// The WAN VLAN id has no visibility class on purpose, so nothing can start
+// hiding it again: wrtnova.sh reads wan_vid=${WAN_VLAN_ID:-20} unconditionally,
+// and forces WAN_IS_TAGGED=1 on a single-NIC board, so the field can be needed
+// while the toggle reads off.
+test('deriveVisibility: the WAN VLAN id is never conditional', () => {
+  for (const cfg of [{}, { WAN_IS_TAGGED: '1' }, { WAN_IS_TAGGED: '' }, { BRIDGE_WAN_PORT: '1' }]) {
+    assert.equal('wan-tagged-only' in deriveVisibility(cfg), false);
+  }
+});
+
+// Hiding the WAN-B id is safe only because it is cosmetic: with WAN_B_ENABLE
+// off the field emits '' whatever is typed in it, so a hidden value can never
+// reach the built config.
+test('WAN_B_VLAN_ID emits nothing while WAN-B is off, typed or not', () => {
+  assert.equal(resolveVlanEmit({ WAN_B_ENABLE: '', WAN_B_VLAN_ID: '25' }).WAN_B_VLAN_ID, '');
+  assert.equal(resolveVlanEmit({ WAN_B_ENABLE: '1', WAN_B_VLAN_ID: '25' }).WAN_B_VLAN_ID, '25');
 });
 
 // ---------------------------------------------------------------------------
@@ -277,4 +295,22 @@ test('truncateAdditionalVlans: dedupes and keeps first-typed VIDs before droppin
   assert.equal(r.truncated, true);
   // 16 tokens, one dupe (50) -> 15 unique; keep first 14, drop the 15th (190).
   assert.equal(r.dropped, '190');
+});
+
+// deriveVisibility is only half of a rule - the other half is an element that
+// actually carries the class. `wan-b-only` lost its element in June 2026
+// (0ec92a6, the WAN advanced-options collapse) and went on being computed every
+// render with nothing to apply it to; `wan-tagged-only` sat beside it encoding a
+// rule wrtnova.sh does not have. Neither failed anything, because a selector
+// with no subscriber is silent by construction. This is that missing check.
+test('every visibility class is used by at least one element', () => {
+  const sources = ['public/builder/index.html', 'public/networks/index.html', 'public/js/networks.js']
+    .map(p => readFileSync(new URL('../' + p, import.meta.url), 'utf8'));
+  const classes = Object.keys(deriveVisibility({}));
+  assert.ok(classes.length > 0);
+  // '-' is a word boundary for \\b, so the class is matched between explicit
+  // delimiters instead - otherwise 'ap-only' would match inside 'iot-wg-only'.
+  const orphans = classes.filter(cls =>
+    !sources.some(src => new RegExp(`[\\s"']${cls}[\\s"']`).test(src)));
+  assert.deepEqual(orphans, [], `visibility classes computed but never applied:\n${orphans.join('\n')}`);
 });
