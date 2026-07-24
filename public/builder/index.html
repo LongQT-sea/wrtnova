@@ -815,8 +815,22 @@
                   <span class="toggle-track"></span>
                   <span class="toggle-thumb"></span>
                 </span>
-                <span class="toggle-text" data-i18n="disableAllAps">Turn off AP interfaces (useful for backhaul-only nodes)</span>
+                <span class="toggle-text" data-i18n="disableAllAps">Turn off all Access Point (AP) interfaces</span>
               </label>
+            </div>
+            <div class="form-row mesh-only hidden">
+              <label class="form-label" data-i18n="batmanAdv">batman-adv</label>
+              <div>
+                <label class="toggle-label">
+                  <span class="toggle-wrap">
+                    <input type="checkbox" id="BATMAN_ADV" name="BATMAN_ADV" value="1" class="toggle-input">
+                    <span class="toggle-track"></span>
+                    <span class="toggle-thumb"></span>
+                  </span>
+                  <span class="toggle-text" data-i18n="batmanAdvHelp">Use batman-adv routing on top of the 802.11s mesh</span>
+                </label>
+                <p class="form-help" data-i18n="batmanAdvNote">Better multi-hop routing for wireless-only meshes.</p>
+              </div>
             </div>
             <div class="form-row">
               <label for="CHANNEL_2G" class="form-label" data-i18n="channel2g">2.4 GHz channel</label>

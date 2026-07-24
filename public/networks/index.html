@@ -823,6 +823,20 @@
                     <p class="form-help" data-i18n="mesh2gNote">Longer range than 5GHz but requires tuning for higher throughput.</p>
                   </div>
                 </div>
+                <div class="form-row mesh-only hidden">
+                  <label class="form-label" data-i18n="batmanAdv">batman-adv</label>
+                  <div>
+                    <label class="toggle-label">
+                      <span class="toggle-wrap">
+                        <input type="checkbox" id="BATMAN_ADV" name="BATMAN_ADV" value="1" class="toggle-input">
+                        <span class="toggle-track"></span>
+                        <span class="toggle-thumb"></span>
+                      </span>
+                      <span class="toggle-text" data-i18n="batmanAdvHelp">Use batman-adv routing on top of the 802.11s mesh</span>
+                    </label>
+                    <p class="form-help" data-i18n="batmanAdvNote">Better multi-hop routing for wireless-only meshes.</p>
+                  </div>
+                </div>
                 <div class="form-row guest-isolate-only hidden">
                   <label class="form-label" data-i18n="guestIsolate">Guest isolation</label>
                   <label class="toggle-label">

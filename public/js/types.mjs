@@ -74,6 +74,7 @@
  * @property {string} [WIRELESS_MESH]      flag (5GHz 802.11s backhaul)
  * @property {string} [WIRELESS_MESH_2G]   flag (2.4GHz 802.11s backhaul)
  * @property {string} [BRIDGE_STP]         flag
+ * @property {string} [BATMAN_ADV]         flag (batman-adv on top of 802.11s mesh; adds luci-proto-batman-adv)
  * @property {string} [MESH_ID]
  * @property {string} [MESH_PASSWD]        sensitive
  * @property {string} [LAN_WIFI_SSID]

@@ -100,6 +100,7 @@ export function deriveConfig(raw) {
     WIRELESS_MESH:    v('WIRELESS_MESH'),
     WIRELESS_MESH_2G: v('WIRELESS_MESH_2G'),
     BRIDGE_STP:     meshOn ? (bothMesh ? '1' : v('BRIDGE_STP')) : '',
+    BATMAN_ADV:     meshOn ? v('BATMAN_ADV')  : '',
     MESH_ID:        meshOn ? v('MESH_ID')     : '',
     MESH_PASSWD:    meshOn ? v('MESH_PASSWD') : '',
 

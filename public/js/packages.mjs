@@ -88,6 +88,9 @@ export function computeAdds({ base = [], device = [], config = {} }) {
   // irqbalance daemon (base pkg pulled in by the luci app)
   if (config.IRQBALANCE === '1') adds.push('luci-app-irqbalance');
 
+  // batman-adv mesh routing protocol (wrtnova.sh gates BATMAN_ADV on this package)
+  if (config.BATMAN_ADV === '1') adds.push('luci-proto-batman-adv');
+
   // TLS support for the LuCI web UI when HTTPS redirect is forced
   if (config.LUCI_HTTPS === '1') adds.push('luci-ssl');
 
