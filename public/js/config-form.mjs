@@ -57,7 +57,7 @@ export const BASE_SCHEMA = /** @type {[string,string,(string|undefined)?,(string
   ['P_STEERING', 'select'], ['ULA_PREFIX', 'text'],
   ['WG_PRIVATE_KEY', 'text'], ['PEER_PUBLIC_KEY', 'text'], ['ENDPOINT', 'text'], ['ENDPOINT_PORT', 'text'],
   ['PRESHARED_KEY', 'text'], ['WG_IPV4', 'text'], ['WG_IPV6', 'text'],
-  ['WG_DNS_V4', 'text'], ['WG_DNS_V6', 'text'], ['ALLOWED_IPS', 'text'],
+  ['WG_DNS_V4', 'text'], ['WG_DNS_V6', 'text'], ['WG_MTU', 'text'], ['ALLOWED_IPS', 'text'],
   ['SPLIT_TUNNEL_V4', 'text'], ['SPLIT_TUNNEL_V6', 'text'],
   ['wan_type', 'radio', undefined, 'dhcp'], ['PPPOE_USERNAME', 'text'], ['PPPOE_PASSWD', 'text'],
   ['WAN_MAC_ADDR', 'text'], ['WAN_IS_TAGGED', 'checkbox'], ['WAN_VLAN_ID', 'text'],
@@ -80,6 +80,7 @@ export const BASE_SCHEMA = /** @type {[string,string,(string|undefined)?,(string
   ['DENY_GUEST_NIGHT', 'checkbox'], ['QUARTERLY_REBOOT', 'checkbox'], ['LOG', 'checkbox'],
   ['SOFTWARE_OFFLOAD', 'checkbox'], ['HARDWARE_OFFLOAD', 'checkbox'], ['IRQBALANCE', 'checkbox'],
   ['LUCI_HTTPS', 'checkbox'],
+  ['NTP_IP', 'text'],
   ['CUSTOM_SCRIPT', 'text'],
   // Not a config key (deriveConfig never emits it); carried in the store as a raw
   // passthrough so editing extras re-renders the final package list.

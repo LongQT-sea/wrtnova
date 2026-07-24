@@ -100,6 +100,7 @@
  * @property {string} [WG_IPV6]            sensitive
  * @property {string} [WG_DNS_V4]
  * @property {string} [WG_DNS_V6]
+ * @property {string} [WG_MTU]             WireGuard tunnel MTU (empty = driver default)
  * @property {string} [ALLOWED_IPS]        sensitive
  * @property {string} [SPLIT_TUNNEL_V4]
  * @property {string} [SPLIT_TUNNEL_V6]
@@ -130,6 +131,7 @@
  * @property {string} [WED_ENABLE]         flag (MediaTek Filogic WED wireless offload)
  * @property {string} [IRQBALANCE]         BUILD-ONLY flag (adds luci-app-irqbalance)
  * @property {string} [LUCI_HTTPS]         flag (adds luci-ssl; forces LuCI HTTPS redirect)
+ * @property {string} [NTP_IP]             raw IP for last-resort NTP server
  * @property {string} [CUSTOM_SCRIPT]      custom script run after wrtnova (gzip+base64 -> /tmp/_user_script.sh)
  * @property {string} [ADGUARD_PASSWD]     sensitive; build-time bcrypt only
  */

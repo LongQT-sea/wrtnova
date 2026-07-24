@@ -73,6 +73,7 @@ export function mergeNodeConfig(sharedConfig, nodeOverrides) {
     WG_IPV6:         wgOn && !isAp ? (c.WG_IPV6          || '') : '',
     WG_DNS_V4:       wgOn && !isAp ? (c.WG_DNS_V4        || '') : '',
     WG_DNS_V6:       wgOn && !isAp ? (c.WG_DNS_V6        || '') : '',
+    WG_MTU:          wgOn && !isAp ? (c.WG_MTU           || '') : '',
     ALLOWED_IPS:     wgOn && !isAp ? ipList(c.ALLOWED_IPS)       : '',
     SPLIT_TUNNEL_V4: wgOn && !isAp ? ipList(c.SPLIT_TUNNEL_V4)   : '',
     SPLIT_TUNNEL_V6: wgOn && !isAp ? ipList(c.SPLIT_TUNNEL_V6)   : '',
@@ -104,6 +105,7 @@ export function mergeNodeConfig(sharedConfig, nodeOverrides) {
     WED_ENABLE:       flag(c.WED_ENABLE),
     IRQBALANCE:       flag(c.IRQBALANCE),
     LUCI_HTTPS:       flag(c.LUCI_HTTPS),
+    NTP_IP:           c.NTP_IP || '',
     CUSTOM_SCRIPT:         c.CUSTOM_SCRIPT || '',
   };
 }

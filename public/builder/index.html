@@ -197,6 +197,21 @@
             </label>
           </div>
         </div>
+        <details class="mt-4">
+          <summary class="text-xs text-zinc-500 dark:text-zinc-400 cursor-pointer hover:text-zinc-700 dark:hover:text-zinc-200 select-none flex items-center gap-1">
+            <svg class="w-3 h-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+            <span data-i18n="advancedSystem">Advanced System options</span>
+          </summary>
+          <div class="mt-2 pl-4 border-l-2 border-zinc-200 dark:border-zinc-700 space-y-3">
+            <div class="form-row">
+              <label for="NTP_IP" class="form-label" data-i18n="ntpServer">NTP server IP</label>
+              <div>
+                <input type="text" id="NTP_IP" name="NTP_IP" class="input-base" placeholder="162.159.200.1">
+                <p class="form-help" data-i18n="ntpServerHelp">Raw IP address for a last-resort NTP server.</p>
+              </div>
+            </div>
+          </div>
+        </details>
       </div>
       </div>
     </div>
@@ -473,6 +488,10 @@
           <div class="form-row">
             <label for="WG_DNS_V6" class="form-label" data-i18n="dnsV6">DNS IPv6</label>
             <input type="text" id="WG_DNS_V6" name="WG_DNS_V6" class="input-base" placeholder="e.g. 2606:4700:4700::1111 (optional)">
+          </div>
+          <div class="form-row">
+            <label for="WG_MTU" class="form-label" data-i18n="wgMtu">MTU</label>
+            <input type="text" id="WG_MTU" name="WG_MTU" class="input-base" inputmode="numeric" placeholder="e.g. 1420 (optional)">
           </div>
         </div>
         <div class="sub-section">

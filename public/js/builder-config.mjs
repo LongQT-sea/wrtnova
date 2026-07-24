@@ -128,6 +128,7 @@ export function deriveConfig(raw) {
     WG_IPV6:         wgOn && isRouter ? v('WG_IPV6')         : '',
     WG_DNS_V4:       wgOn && isRouter ? v('WG_DNS_V4')       : '',
     WG_DNS_V6:       wgOn && isRouter ? v('WG_DNS_V6')       : '',
+    WG_MTU:          wgOn && isRouter ? v('WG_MTU')          : '',
     ALLOWED_IPS:     wgOn && isRouter ? ipList('ALLOWED_IPS') : '',
     SPLIT_TUNNEL_V4: wgOn && isRouter ? ipList('SPLIT_TUNNEL_V4') : '',
     SPLIT_TUNNEL_V6: wgOn && isRouter ? ipList('SPLIT_TUNNEL_V6') : '',
@@ -166,6 +167,7 @@ export function deriveConfig(raw) {
     WED_ENABLE:       v('WED_ENABLE'),
     IRQBALANCE:       v('IRQBALANCE'),
     LUCI_HTTPS:       v('LUCI_HTTPS'),
+    NTP_IP:           v('NTP_IP'),
     CUSTOM_SCRIPT:    v('CUSTOM_SCRIPT'),
   };
 }
