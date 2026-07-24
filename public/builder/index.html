@@ -1247,37 +1247,35 @@
       <div class="card-body-wrap">
       <div class="card-body">
         <div class="form-row form-row--full">
-          <label class="toggle-label">
-            <span class="toggle-wrap">
-              <input type="checkbox" id="DDNS_ENABLE" name="DDNS_ENABLE" value="1" class="toggle-input">
-              <span class="toggle-track"></span>
-              <span class="toggle-thumb"></span>
-            </span>
-            <div>
-              <span class="toggle-text" data-i18n="enableDdns">Enable DDNS</span>
+          <div class="opt-group">
+            <label class="toggle-label">
+              <span class="toggle-wrap">
+                <input type="checkbox" id="DDNS_ENABLE" name="DDNS_ENABLE" value="1" class="toggle-input">
+                <span class="toggle-track"></span>
+                <span class="toggle-thumb"></span>
+              </span>
+              <div>
+                <span class="toggle-text" data-i18n="enableDdns">Enable DDNS</span>
+              </div>
+            </label>
+            <div class="opt-card">
+              <div class="opt-text">
+                <label class="opt-title" for="LOOKUP_HOSTNAME" data-i18n="lookupHostname">Lookup hostname</label>
+              </div>
+              <input type="text" id="LOOKUP_HOSTNAME" name="LOOKUP_HOSTNAME" class="opt-control opt-field input-base" placeholder="ddns.example.com">
             </div>
-          </label>
-        </div>
-        <div class="form-row form-row--full">
-          <div class="opt-card">
-            <div class="opt-text">
-              <label class="opt-title" for="LOOKUP_HOSTNAME" data-i18n="lookupHostname">Lookup hostname</label>
-            </div>
-            <input type="text" id="LOOKUP_HOSTNAME" name="LOOKUP_HOSTNAME" class="opt-control opt-field input-base" placeholder="ddns.example.com">
-          </div>
-        </div>
-        <div class="form-row form-row--full">
-          <div class="opt-card">
-            <div class="opt-text">
-              <label class="opt-title" for="CLOUDFLARE_API_KEY" data-i18n="cloudflareApiToken">Cloudflare API token</label>
-            </div>
-            <div class="opt-control opt-field relative">
-              <input type="password" id="CLOUDFLARE_API_KEY" name="CLOUDFLARE_API_KEY" class="input-base" style="padding-right:2.5rem" autocomplete="off">
-              <button type="button" id="toggle-cfkey"
-                      class="btn btn-ghost btn-icon absolute right-1.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
-                      aria-label="Show API token">
-                <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
-              </button>
+            <div class="opt-card">
+              <div class="opt-text">
+                <label class="opt-title" for="CLOUDFLARE_API_KEY" data-i18n="cloudflareApiToken">Cloudflare API token</label>
+              </div>
+              <div class="opt-control opt-field relative">
+                <input type="password" id="CLOUDFLARE_API_KEY" name="CLOUDFLARE_API_KEY" class="input-base" style="padding-right:2.5rem" autocomplete="off">
+                <button type="button" id="toggle-cfkey"
+                        class="btn btn-ghost btn-icon absolute right-1.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
+                        aria-label="Show API token">
+                  <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+              </div>
             </div>
           </div>
         </div>
