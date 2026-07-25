@@ -326,7 +326,7 @@ export default {
   dnsmasqMulti:       '按网络的 Dnsmasq',
   dnsmasqMultiHelp:   '运行多个 dnsmasq 实例，作为 DNS 转发器和 DHCPv4 服务器。',
   dnsmasqMultiNote:   '要为新接口添加 DHCP，请使用内置命令 <code>dhcp-instance-add</code>。',
-  bootstrapDnsPh:     '纯 IP，每行一个；留空 = 默认值',
+  bootstrapDnsPh:     '额外的纯 IP，每行一个',
   additionalPackages: '额外软件包',
   autoAdded:          '自动添加',
   extraPackages:      '额外软件包',

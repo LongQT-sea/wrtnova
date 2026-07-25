@@ -326,7 +326,7 @@ export default {
   dnsmasqMulti:       'Per-Network Dnsmasq',
   dnsmasqMultiHelp:   'Run multiple dnsmasq instances as DNS forwarder and DHCPv4 server.',
   dnsmasqMultiNote:   'To add DHCP on a new interface, use the built-in <code>dhcp-instance-add</code> command.',
-  bootstrapDnsPh:     'plain IPs, one per line; blank = defaults',
+  bootstrapDnsPh:     'extra plain IPs, one per line',
   additionalPackages: 'Additional packages',
   autoAdded:          'Auto-added',
   extraPackages:      'Extra packages',

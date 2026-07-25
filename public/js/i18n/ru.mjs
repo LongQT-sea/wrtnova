@@ -326,7 +326,7 @@ export default {
   dnsmasqMulti:       'Dnsmasq для каждой сети',
   dnsmasqMultiHelp:   'Запускать несколько экземпляров dnsmasq в роли DNS-форвардера и DHCPv4-сервера.',
   dnsmasqMultiNote:   'Чтобы добавить DHCP на новом интерфейсе, используйте встроенную команду <code>dhcp-instance-add</code>.',
-  bootstrapDnsPh:     'обычные IP, по одному в строке; пусто = по умолчанию',
+  bootstrapDnsPh:     'дополнительные обычные IP, по одному в строке',
   additionalPackages: 'Дополнительные пакеты',
   autoAdded:          'Добавлены автоматически',
   extraPackages:      'Дополнительные пакеты',

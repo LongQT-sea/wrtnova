@@ -326,7 +326,7 @@ export default {
   dnsmasqMulti:       'Dnsmasq por red',
   dnsmasqMultiHelp:   'Ejecutar varias instancias de dnsmasq como reenviador DNS y servidor DHCPv4.',
   dnsmasqMultiNote:   'Para añadir DHCP en una nueva interfaz, usa el comando integrado <code>dhcp-instance-add</code>.',
-  bootstrapDnsPh:     'IPs simples, una por línea; vacío = predeterminado',
+  bootstrapDnsPh:     'IPs simples adicionales, una por línea',
   additionalPackages: 'Paquetes adicionales',
   autoAdded:          'Añadido automáticamente',
   extraPackages:      'Paquetes adicionales',
