@@ -703,7 +703,7 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
 
         cardRow('np-apidx-' + id, S.apIndex,
           '<input type="number" class="opt-control opt-field--narrow input-base" id="np-apidx-' + id +
-          '" min="2" max="19" value="' + esc(node.overrides.AP_INDEX || '2') + '">') +
+          '" min="2" max="254" value="' + esc(node.overrides.AP_INDEX || '2') + '">') +
 
         wifiRows;
     }
@@ -750,11 +750,12 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
       const idxInp = panel.querySelector('#np-apidx-' + node.id);
       if (idxInp) {
         idxInp.addEventListener('change', () => {
-          let val = Math.max(2, parseInt(idxInp.value) || 2);
+          let val = Math.min(254, Math.max(2, parseInt(idxInp.value) || 2));
           const used = net.nodes
             .filter(n => n.id !== node.id && n.overrides.AP_MODE === '1')
             .map(n => parseInt(n.overrides.AP_INDEX) || 2);
-          while (used.includes(val)) val++;
+          // Bump off a taken index, but never past the last usable octet.
+          while (used.includes(val) && val < 254) val++;
           idxInp.value = String(val);
           panel.querySelector('#np-host-' + node.id)?.setAttribute('placeholder', 'WrtNova-' + val);
         });
