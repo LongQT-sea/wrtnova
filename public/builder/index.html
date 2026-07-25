@@ -1173,9 +1173,9 @@
           <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           <span data-i18n="addRow">Add row</span>
         </button>
-      </div>
-      <div class="info-note" role="note" data-i18n="portFwdNote">
-        Each row create a static DHCPv4 lease and add port forwarding from WAN. Ports must be unique.
+        <div class="info-note" role="note" data-i18n="portFwdNote">
+          Each row creates a static DHCPv4 lease and adds port forwarding from WAN. Ports must be unique.
+        </div>
       </div>
       </div>
     </div>
@@ -1203,10 +1203,9 @@
           <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           <span data-i18n="addRow">Add row</span>
         </button>
-      </div>
-      <div class="info-note" role="note" data-i18n="ipv6Note">
-        Each row create a static hostid (IPv6 Token) in DHCP leases, IPv6 firewall forward rule, and Cloudflare DDNS entry.
-        After boot, go to Network -> DHCP Leases and update the DUID for each host to match the actual client DUID.
+        <div class="info-note" role="note" data-i18n="ipv6Note">
+          Each row creates a static hostid (IPv6 Token) in DHCP leases, an IPv6 firewall forward rule, and a Cloudflare DDNS entry. After boot, go to Network -> DHCP Leases and update the DUID for each host to match the actual client DUID.
+        </div>
       </div>
       </div>
     </div>
@@ -1252,8 +1251,8 @@
             </div>
           </div>
         </div>
+        <div class="info-note" role="note" data-i18n="ddnsNote">DDNS entries for IPv6-exposed hosts are derived from the IPv6 server exposure table.</div>
       </div>
-      <div class="info-note" role="note" data-i18n="ddnsNote">DDNS entries for IPv6-exposed hosts are derived from the IPv6 server exposure table.</div>
       </div>
     </div>
 
