@@ -554,104 +554,92 @@
             <div class="sub-section">
               <p class="sub-section-title" data-i18n="wgInterfaceSection">Interface</p>
               <div class="form-row form-row--full mt-2">
-                <div class="opt-card">
-                  <div class="opt-text">
-                    <label class="opt-title" for="WG_PRIVATE_KEY" data-i18n="privateKey">Private key</label>
+                <div class="opt-group">
+                  <div class="opt-card">
+                    <div class="opt-text">
+                      <label class="opt-title" for="WG_PRIVATE_KEY" data-i18n="privateKey">Private key</label>
+                    </div>
+                    <div class="opt-control opt-field relative">
+                      <input type="password" id="WG_PRIVATE_KEY" name="WG_PRIVATE_KEY" class="input-base" style="padding-right:2.5rem" autocomplete="off">
+                      <button type="button" id="toggle-wg-privkey"
+                              class="btn btn-ghost btn-icon absolute right-1.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
+                              aria-label="Show private key">
+                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                      </button>
+                    </div>
                   </div>
-                  <div class="opt-control opt-field relative">
-                    <input type="password" id="WG_PRIVATE_KEY" name="WG_PRIVATE_KEY" class="input-base" style="padding-right:2.5rem" autocomplete="off">
-                    <button type="button" id="toggle-wg-privkey"
-                            class="btn btn-ghost btn-icon absolute right-1.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
-                            aria-label="Show private key">
-                      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
-                    </button>
+                  <div class="opt-card">
+                    <div class="opt-text">
+                      <label class="opt-title" for="WG_IPV4" data-i18n="clientIpv4">Client IPv4</label>
+                    </div>
+                    <input type="text" id="WG_IPV4" name="WG_IPV4" class="opt-control opt-field input-base" placeholder="e.g. 172.16.0.2/32">
                   </div>
-                </div>
-              </div>
-              <div class="form-row form-row--full">
-                <div class="opt-card">
-                  <div class="opt-text">
-                    <label class="opt-title" for="WG_IPV4" data-i18n="clientIpv4">Client IPv4</label>
+                  <div class="opt-card">
+                    <div class="opt-text">
+                      <label class="opt-title" for="WG_IPV6" data-i18n="clientIpv6">Client IPv6</label>
+                    </div>
+                    <input type="text" id="WG_IPV6" name="WG_IPV6" class="opt-control opt-field input-base" placeholder="e.g. fd88::/128">
                   </div>
-                  <input type="text" id="WG_IPV4" name="WG_IPV4" class="opt-control opt-field input-base" placeholder="e.g. 172.16.0.2/32">
-                </div>
-              </div>
-              <div class="form-row form-row--full">
-                <div class="opt-card">
-                  <div class="opt-text">
-                    <label class="opt-title" for="WG_IPV6" data-i18n="clientIpv6">Client IPv6</label>
+                  <div class="opt-card">
+                    <div class="opt-text">
+                      <label class="opt-title" for="WG_DNS_V4" data-i18n="dnsV4">DNS IPv4</label>
+                    </div>
+                    <input type="text" id="WG_DNS_V4" name="WG_DNS_V4" class="opt-control opt-field input-base" placeholder="e.g. 1.1.1.1 (optional)">
                   </div>
-                  <input type="text" id="WG_IPV6" name="WG_IPV6" class="opt-control opt-field input-base" placeholder="e.g. fd88::/128">
-                </div>
-              </div>
-              <div class="form-row form-row--full">
-                <div class="opt-card">
-                  <div class="opt-text">
-                    <label class="opt-title" for="WG_DNS_V4" data-i18n="dnsV4">DNS IPv4</label>
+                  <div class="opt-card">
+                    <div class="opt-text">
+                      <label class="opt-title" for="WG_DNS_V6" data-i18n="dnsV6">DNS IPv6</label>
+                    </div>
+                    <input type="text" id="WG_DNS_V6" name="WG_DNS_V6" class="opt-control opt-field input-base" placeholder="e.g. 2606:4700:4700::1111 (optional)">
                   </div>
-                  <input type="text" id="WG_DNS_V4" name="WG_DNS_V4" class="opt-control opt-field input-base" placeholder="e.g. 1.1.1.1 (optional)">
-                </div>
-              </div>
-              <div class="form-row form-row--full">
-                <div class="opt-card">
-                  <div class="opt-text">
-                    <label class="opt-title" for="WG_DNS_V6" data-i18n="dnsV6">DNS IPv6</label>
+                  <div class="opt-card">
+                    <div class="opt-text">
+                      <label class="opt-title" for="WG_MTU" data-i18n="wgMtu">MTU</label>
+                    </div>
+                    <input type="text" id="WG_MTU" name="WG_MTU" class="opt-control opt-field input-base" inputmode="numeric" placeholder="e.g. 1420 (optional)">
                   </div>
-                  <input type="text" id="WG_DNS_V6" name="WG_DNS_V6" class="opt-control opt-field input-base" placeholder="e.g. 2606:4700:4700::1111 (optional)">
-                </div>
-              </div>
-              <div class="form-row form-row--full">
-                <div class="opt-card">
-                  <div class="opt-text">
-                    <label class="opt-title" for="WG_MTU" data-i18n="wgMtu">MTU</label>
-                  </div>
-                  <input type="text" id="WG_MTU" name="WG_MTU" class="opt-control opt-field input-base" inputmode="numeric" placeholder="e.g. 1420 (optional)">
                 </div>
               </div>
             </div>
             <div class="sub-section">
               <p class="sub-section-title" data-i18n="wgPeerSection">Peer</p>
               <div class="form-row form-row--full mt-2">
-                <div class="opt-card">
-                  <div class="opt-text">
-                    <label class="opt-title" for="PEER_PUBLIC_KEY" data-i18n="peerPublicKey">Peer public key</label>
+                <div class="opt-group">
+                  <div class="opt-card">
+                    <div class="opt-text">
+                      <label class="opt-title" for="PEER_PUBLIC_KEY" data-i18n="peerPublicKey">Peer public key</label>
+                    </div>
+                    <input type="text" id="PEER_PUBLIC_KEY" name="PEER_PUBLIC_KEY" class="opt-control opt-field input-base" autocomplete="off">
                   </div>
-                  <input type="text" id="PEER_PUBLIC_KEY" name="PEER_PUBLIC_KEY" class="opt-control opt-field input-base" autocomplete="off">
-                </div>
-              </div>
-              <div class="form-row form-row--full">
-                <div class="opt-card">
-                  <div class="opt-text">
-                    <label class="opt-title" for="PRESHARED_KEY" data-i18n="presharedKey">Preshared key</label>
+                  <div class="opt-card">
+                    <div class="opt-text">
+                      <label class="opt-title" for="PRESHARED_KEY" data-i18n="presharedKey">Preshared key</label>
+                    </div>
+                    <div class="opt-control opt-field relative">
+                      <input type="password" id="PRESHARED_KEY" name="PRESHARED_KEY" class="input-base" style="padding-right:2.5rem" autocomplete="off" placeholder="optional">
+                      <button type="button" id="toggle-wg-psk"
+                              class="btn btn-ghost btn-icon absolute right-1.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
+                              aria-label="Show preshared key">
+                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                      </button>
+                    </div>
                   </div>
-                  <div class="opt-control opt-field relative">
-                    <input type="password" id="PRESHARED_KEY" name="PRESHARED_KEY" class="input-base" style="padding-right:2.5rem" autocomplete="off" placeholder="optional">
-                    <button type="button" id="toggle-wg-psk"
-                            class="btn btn-ghost btn-icon absolute right-1.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
-                            aria-label="Show preshared key">
-                      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
-                    </button>
+                  <div class="opt-card">
+                    <div class="opt-text">
+                      <label class="opt-title" for="ENDPOINT" data-i18n="endpoint">Endpoint</label>
+                    </div>
+                    <div class="opt-control opt-stack" style="display:flex;gap:0.5rem;align-items:center">
+                      <input type="text" id="ENDPOINT" name="ENDPOINT" class="input-base" style="flex:1 1 auto;min-width:0" placeholder="engage.cloudflareclient.com" autocomplete="off">
+                      <span aria-hidden="true" style="color:#a1a1aa">:</span>
+                      <input type="number" id="ENDPOINT_PORT" name="ENDPOINT_PORT" class="input-base" style="flex:0 0 6rem;max-width:6rem" placeholder="51820" min="1" max="65535" aria-label="Endpoint port">
+                    </div>
                   </div>
-                </div>
-              </div>
-              <div class="form-row form-row--full">
-                <div class="opt-card">
-                  <div class="opt-text">
-                    <label class="opt-title" for="ENDPOINT" data-i18n="endpoint">Endpoint</label>
+                  <div class="opt-card">
+                    <div class="opt-text">
+                      <label class="opt-title" for="ALLOWED_IPS" data-i18n="allowedIps">Allowed IPs</label>
+                    </div>
+                    <input type="text" id="ALLOWED_IPS" name="ALLOWED_IPS" class="opt-control opt-field input-base" placeholder="0.0.0.0/0 ::/0">
                   </div>
-                  <div class="opt-control opt-stack" style="display:flex;gap:0.5rem;align-items:center">
-                    <input type="text" id="ENDPOINT" name="ENDPOINT" class="input-base" style="flex:1 1 auto;min-width:0" placeholder="engage.cloudflareclient.com" autocomplete="off">
-                    <span aria-hidden="true" style="color:#a1a1aa">:</span>
-                    <input type="number" id="ENDPOINT_PORT" name="ENDPOINT_PORT" class="input-base" style="flex:0 0 6rem;max-width:6rem" placeholder="51820" min="1" max="65535" aria-label="Endpoint port">
-                  </div>
-                </div>
-              </div>
-              <div class="form-row form-row--full">
-                <div class="opt-card">
-                  <div class="opt-text">
-                    <label class="opt-title" for="ALLOWED_IPS" data-i18n="allowedIps">Allowed IPs</label>
-                  </div>
-                  <input type="text" id="ALLOWED_IPS" name="ALLOWED_IPS" class="opt-control opt-field input-base" placeholder="0.0.0.0/0 ::/0">
                 </div>
               </div>
             </div>
@@ -669,19 +657,19 @@
                 <p class="sub-section-title" data-i18n="wgSplitTunnelSection">Split tunnel</p>
                 <p class="form-help mt-2" data-i18n="splitTunnelHelp">Destination IPs or subnets to bypass the tunnel. Traffic from VPN-network clients to these destinations uses the normal routing table instead of the tunnel.</p>
                 <div class="form-row form-row--full mt-2">
-                  <div class="opt-card">
-                    <div class="opt-text">
-                      <label class="opt-title" for="SPLIT_TUNNEL_V4" data-i18n="splitTunnelV4">Exclude IPv4</label>
+                  <div class="opt-group">
+                    <div class="opt-card">
+                      <div class="opt-text">
+                        <label class="opt-title" for="SPLIT_TUNNEL_V4" data-i18n="splitTunnelV4">Exclude IPv4</label>
+                      </div>
+                      <input type="text" id="SPLIT_TUNNEL_V4" name="SPLIT_TUNNEL_V4" class="opt-control opt-field input-base" placeholder="e.g. 192.168.0.0/16 10.0.0.0/8 (optional)">
                     </div>
-                    <input type="text" id="SPLIT_TUNNEL_V4" name="SPLIT_TUNNEL_V4" class="opt-control opt-field input-base" placeholder="e.g. 192.168.0.0/16 10.0.0.0/8 (optional)">
-                  </div>
-                </div>
-                <div class="form-row form-row--full">
-                  <div class="opt-card">
-                    <div class="opt-text">
-                      <label class="opt-title" for="SPLIT_TUNNEL_V6" data-i18n="splitTunnelV6">Exclude IPv6</label>
+                    <div class="opt-card">
+                      <div class="opt-text">
+                        <label class="opt-title" for="SPLIT_TUNNEL_V6" data-i18n="splitTunnelV6">Exclude IPv6</label>
+                      </div>
+                      <input type="text" id="SPLIT_TUNNEL_V6" name="SPLIT_TUNNEL_V6" class="opt-control opt-field input-base" placeholder="e.g. fd00::/8 fc00::/7 (optional)">
                     </div>
-                    <input type="text" id="SPLIT_TUNNEL_V6" name="SPLIT_TUNNEL_V6" class="opt-control opt-field input-base" placeholder="e.g. fd00::/8 fc00::/7 (optional)">
                   </div>
                 </div>
               </div>

@@ -175,13 +175,21 @@
     margin-left: auto;
   }
 
-  /* A toggle plus the field it governs, in one box. The toggle keeps its own
-     <label> so clicking the row still flips it - a <label> binds to a single
-     control, so the field cannot live inside it - and the border moves to the
-     group. Nested rows are ordinary .opt-card children, so they keep the same
-     half-width control and left rail as a standalone card - .wan-vid-row used
-     to fake that alignment with a padding calc copied off the switch width,
-     which went stale the moment the switch was resized. */
+  /* Several cards merged into one box, separated by rules instead of gaps.
+     Two things use it:
+       - a control plus the fields it governs (the WAN VLAN toggles, Connection
+         type over the PPPoE credentials, Enable DDNS over its two fields), and
+       - a titled set of related fields with no governing control, where the
+         .sub-section-title is the only thing binding them (WireGuard's
+         Interface and Peer, six and four fields deep - as separate cards that
+         was a stack of ten boxes with nothing saying where one group ended).
+     A toggle inside a group keeps its own <label> so clicking the row still
+     flips it - a <label> binds to a single control, so a field cannot live
+     inside it - and the border moves to the group. Nested rows are ordinary
+     .opt-card children, so they keep the same half-width control and left rail
+     as a standalone card - .wan-vid-row used to fake that alignment with a
+     padding calc copied off the switch width, which went stale the moment the
+     switch was resized. */
   .opt-group {
     border: 1px solid #e4e4e7; /* zinc-200 */
     border-radius: 0.75rem;
