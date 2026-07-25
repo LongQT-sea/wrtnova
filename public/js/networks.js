@@ -652,7 +652,8 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
       ? '<div class="form-row form-row--full"><label class="toggle-label"><span class="toggle-wrap">' +
         '<input type="checkbox" class="toggle-input" id="np-mesh2g-' + id + '"' + (meshChecked2g ? ' checked' : '') + '>' +
         '<span class="toggle-track"></span><span class="toggle-thumb"></span></span>' +
-        '<div><span class="toggle-text">' + S.enableMeshBackhaul2G + '</span></div></label></div>'
+        '<div><span class="toggle-text">' + S.wirelessMesh2g + '</span>' +
+        '<p class="form-help mt-0">' + S.mesh2gNote + '</p></div></label></div>'
       : '';
 
     const wifiRows =
