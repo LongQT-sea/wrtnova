@@ -331,7 +331,7 @@ export default {
   bootstrapDns:       'Bootstrap DNS',
   bootstrapDnsHelp:   'Обычные IP для разрешения имён апстримов + запасной вариант. Пусто - 1.0.0.1 / 9.9.9.9.',
   dnsmasqMulti:       'Dnsmasq для каждой сети',
-  dnsmasqMultiHelp:   'Включить несколько экземпляров DHCP/DNS',
+  dnsmasqMultiHelp:   'Запускать несколько экземпляров dnsmasq в роли DNS-форвардера и DHCPv4-сервера.',
   dnsmasqMultiNote:   'Чтобы добавить DHCP на новом интерфейсе, используйте встроенную команду <code>dhcp-instance-add</code>.',
   bootstrapDnsPh:     'обычные IP, по одному в строке; пусто = по умолчанию',
   additionalPackages: 'Дополнительные пакеты',

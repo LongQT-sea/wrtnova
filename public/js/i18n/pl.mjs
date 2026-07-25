@@ -331,7 +331,7 @@ export default {
   bootstrapDns:       'Bootstrap DNS',
   bootstrapDnsHelp:   'Zwykłe adresy IP do rozwiązywania nazw upstreamów + zapasowe. Puste = 1.0.0.1 / 9.9.9.9.',
   dnsmasqMulti:       'Dnsmasq per sieć',
-  dnsmasqMultiHelp:   'Włącz wiele instancji DHCP/DNS',
+  dnsmasqMultiHelp:   'Uruchom wiele instancji dnsmasq jako forwarder DNS i serwer DHCPv4.',
   dnsmasqMultiNote:   'Aby dodać DHCP na nowym interfejsie, użyj wbudowanego polecenia <code>dhcp-instance-add</code>.',
   bootstrapDnsPh:     'zwykłe IP, jeden na linię; puste = domyślne',
   additionalPackages: 'Dodatkowe pakiety',

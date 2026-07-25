@@ -331,7 +331,7 @@ export default {
   bootstrapDns:       '引导 DNS',
   bootstrapDnsHelp:   '用于解析上游主机名的纯 IP + 回退。留空则使用 1.0.0.1 / 9.9.9.9。',
   dnsmasqMulti:       '按网络的 Dnsmasq',
-  dnsmasqMultiHelp:   '启用多个 DHCP/DNS 实例',
+  dnsmasqMultiHelp:   '运行多个 dnsmasq 实例，作为 DNS 转发器和 DHCPv4 服务器。',
   dnsmasqMultiNote:   '要为新接口添加 DHCP，请使用内置命令 <code>dhcp-instance-add</code>。',
   bootstrapDnsPh:     '纯 IP，每行一个；留空 = 默认值',
   additionalPackages: '额外软件包',
