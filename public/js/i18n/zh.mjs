@@ -340,7 +340,7 @@ export default {
   ntpServer:          'NTP 服务器 IP',
   ntpServerHelp:      '备用 NTP 服务器的原始 IP 地址。',
   customScript:       '自定义脚本',
-  customScriptPh:     'WrtNova 完成后运行一次的 Shell 脚本',
+  customScriptPh:     '在 wrtnova.sh 结尾运行一次的 Shell 脚本',
   useIrqbalance:      '建议用于具有 4 个及以上 CPU 核心的系统。',
 
   blockDotDoq:        '阻断基于 TLS/QUIC 的 DNS',

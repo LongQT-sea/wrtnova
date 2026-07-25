@@ -340,7 +340,7 @@ export default {
   ntpServer:          'IP serwera NTP',
   ntpServerHelp:      'Adres IP awaryjnego serwera NTP.',
   customScript:       'Skrypt niestandardowy',
-  customScriptPh:     'Skrypt powłoki do jednorazowego uruchomienia po zakończeniu WrtNova',
+  customScriptPh:     'Skrypt powłoki uruchamiany raz, na końcu wrtnova.sh',
   useIrqbalance:      'Zalecane dla systemów z ≥4 rdzeniami CPU.',
   blockDotDoq:        'Blokuj DNS przez TLS/QUIC',
   blockDotDoqHelp:    'Wymuszaj blokowanie reklam na upartych urządzeniach klienckich.',

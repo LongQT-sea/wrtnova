@@ -340,7 +340,7 @@ export default {
   ntpServer:          'IP NTP-сервера',
   ntpServerHelp:      'IP-адрес резервного NTP-сервера.',
   customScript:       'Пользовательский скрипт',
-  customScriptPh:     'Скрипт оболочки для однократного запуска после завершения WrtNova',
+  customScriptPh:     'Скрипт оболочки, запускаемый один раз в конце wrtnova.sh',
   useIrqbalance:      'Рекомендуется для систем с ≥4 ядрами CPU.',
   blockDotDoq:        'Блокировать DNS через TLS/QUIC',
   blockDotDoqHelp:    'Принудительная блокировка рекламы на упрямых клиентских устройствах.',

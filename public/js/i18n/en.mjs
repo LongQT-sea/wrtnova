@@ -340,7 +340,7 @@ export default {
   ntpServer:          'NTP server IP',
   ntpServerHelp:      'Raw IP address for a last-resort NTP server.',
   customScript:       'Custom script',
-  customScriptPh:     'Shell script to run once after WrtNova finishes',
+  customScriptPh:     'Shell script to run once, at the end of wrtnova.sh',
   useIrqbalance:      'Recommended for systems with ≥4 CPU cores.',
   blockDotDoq:        'Block DNS over TLS/QUIC',
   blockDotDoqHelp:    'Enforce ad blocking on stubborn client devices.',
