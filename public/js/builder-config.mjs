@@ -15,7 +15,7 @@
 // raw carries a few gating-only helpers (wan_type) that are NOT emitted, exactly
 // as the old collectConfig output omitted them.
 
-import { resolveVlanEmit, DNS_DEFAULT, isAdguard, isDohEngine } from './visibility.mjs';
+import { resolveVlanEmit, DNS_DEFAULT, isAdguard, isDohEngine, deriveBootstrapDns } from './visibility.mjs';
 import { normalizeEndpoint } from './list-grammar.mjs';
 import { assembleBanipFeeds } from './packages.mjs';
 
@@ -157,7 +157,7 @@ export function deriveConfig(raw) {
     // Encrypted-DNS upstreams apply only to the DoH engines, not the plain
     // dnsmasq modes ('none' and 'adblock-fast').
     DOH_UPSTREAMS:    isDohEngine(v('DNS_MODE')) ? v('DOH_UPSTREAMS') : '',
-    BOOTSTRAP_DNS:    isDohEngine(v('DNS_MODE')) ? v('BOOTSTRAP_DNS') : '',
+    BOOTSTRAP_DNS:    isDohEngine(v('DNS_MODE')) ? deriveBootstrapDns(r) : '',
     // UI toggle "Per-Network Dnsmasq" defaults off; emit the single-instance flag
     // unless the user turns multi on (applies in AP mode too).
     DNSMASQ_SINGLE_INSTANCE: v('DNSMASQ_MULTI_INSTANCE') !== '1' ? '1' : '',

@@ -8,7 +8,7 @@
 // Boolean flags use flag(v) so '0' never leaks through (Section 1 invariant:
 // off-state is '' never '0').
 
-import { resolveVlanEmit, DNS_DEFAULT, isAdguard, isDohEngine } from './visibility.mjs';
+import { resolveVlanEmit, DNS_DEFAULT, isAdguard, isDohEngine, deriveBootstrapDns } from './visibility.mjs';
 import { normalizeEndpoint } from './list-grammar.mjs';
 import { assembleBanipFeeds } from './packages.mjs';
 
@@ -95,7 +95,7 @@ export function mergeNodeConfig(sharedConfig, nodeOverrides) {
     // Encrypted-DNS upstreams apply only to the DoH engines, not the plain
     // dnsmasq modes ('none' and 'adblock-fast').
     DOH_UPSTREAMS:    isDohEngine(c.DNS_MODE) ? (c.DOH_UPSTREAMS || '') : '',
-    BOOTSTRAP_DNS:    isDohEngine(c.DNS_MODE) ? (c.BOOTSTRAP_DNS || '') : '',
+    BOOTSTRAP_DNS:    isDohEngine(c.DNS_MODE) ? deriveBootstrapDns(c) : '',
     DNSMASQ_SINGLE_INSTANCE: flag(c.DNSMASQ_MULTI_INSTANCE) !== '1' ? '1' : '',
     SOFTWARE_OFFLOAD: flag(c.SOFTWARE_OFFLOAD), HARDWARE_OFFLOAD: flag(c.HARDWARE_OFFLOAD),
     BLOCK_DOT_DOQ:    flag(c.BLOCK_DOT_DOQ),

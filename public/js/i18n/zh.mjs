@@ -322,7 +322,7 @@ export default {
   dohUpstreamsHelp:   'DoH 解析器 URL，每行一个。留空则使用 Quad9 / Cloudflare / Google。',
   dohUpstreamsPh:     '每行一个 URL；留空 = 内置默认值',
   bootstrapDns:       '引导 DNS',
-  bootstrapDnsHelp:   '用于解析上游主机名的纯 IP + 回退。留空则使用 1.0.0.1 / 9.9.9.9。',
+  bootstrapDnsHelp:   '额外的纯 IP，在上方预设自动添加的之外。',
   dnsmasqMulti:       '按网络的 Dnsmasq',
   dnsmasqMultiHelp:   '运行多个 dnsmasq 实例，作为 DNS 转发器和 DHCPv4 服务器。',
   dnsmasqMultiNote:   '要为新接口添加 DHCP，请使用内置命令 <code>dhcp-instance-add</code>。',

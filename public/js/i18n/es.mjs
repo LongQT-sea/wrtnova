@@ -322,7 +322,7 @@ export default {
   dohUpstreamsHelp:   'URLs de resolutores DoH, una por línea. Vacío = Quad9 / Cloudflare / Google.',
   dohUpstreamsPh:     'una URL por línea; vacío = valores predeterminados',
   bootstrapDns:       'DNS bootstrap',
-  bootstrapDnsHelp:   'IPs simples para resolver los nombres de upstreams + reserva. Vacío = 1.0.0.1 / 9.9.9.9.',
+  bootstrapDnsHelp:   'IPs simples adicionales, además de las añadidas automáticamente para los presets de arriba.',
   dnsmasqMulti:       'Dnsmasq por red',
   dnsmasqMultiHelp:   'Ejecutar varias instancias de dnsmasq como reenviador DNS y servidor DHCPv4.',
   dnsmasqMultiNote:   'Para añadir DHCP en una nueva interfaz, usa el comando integrado <code>dhcp-instance-add</code>.',

@@ -322,7 +322,7 @@ export default {
   dohUpstreamsHelp:   'DoH-Resolver-URLs, eine pro Zeile. Leer nutzt Quad9 / Cloudflare / Google.',
   dohUpstreamsPh:     'eine URL pro Zeile; leer = integrierte Standardwerte',
   bootstrapDns:       'Bootstrap-DNS',
-  bootstrapDnsHelp:   'Einfache IPs zum Auflösen der Upstream-Hostnamen + Fallback. Leer nutzt 1.0.0.1 / 9.9.9.9.',
+  bootstrapDnsHelp:   'Zusätzliche einfache IPs, über die für die Presets oben automatisch ergänzten hinaus.',
   dnsmasqMulti:       'Dnsmasq pro Netzwerk',
   dnsmasqMultiHelp:   'Mehrere dnsmasq-Instanzen als DNS-Forwarder und DHCPv4-Server betreiben.',
   dnsmasqMultiNote:   'Um DHCP auf einer neuen Schnittstelle hinzuzufügen, den eingebauten Befehl <code>dhcp-instance-add</code> verwenden.',

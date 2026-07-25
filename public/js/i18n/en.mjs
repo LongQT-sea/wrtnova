@@ -322,7 +322,7 @@ export default {
   dohUpstreamsHelp:   'DoH resolver URLs, one per line. Blank uses Quad9 / Cloudflare / Google.',
   dohUpstreamsPh:     'one URL per line; blank = built-in defaults',
   bootstrapDns:       'Bootstrap DNS',
-  bootstrapDnsHelp:   'Plain IPs to resolve upstream hostnames + fallback. Blank uses 1.0.0.1 / 9.9.9.9.',
+  bootstrapDnsHelp:   'Extra plain IPs, on top of the ones added automatically for the presets above.',
   dnsmasqMulti:       'Per-Network Dnsmasq',
   dnsmasqMultiHelp:   'Run multiple dnsmasq instances as DNS forwarder and DHCPv4 server.',
   dnsmasqMultiNote:   'To add DHCP on a new interface, use the built-in <code>dhcp-instance-add</code> command.',

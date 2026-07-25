@@ -31,6 +31,39 @@ export const dnsMode = m => m || DNS_DEFAULT;
 export const isAdguard = m => dnsMode(m) === 'adguardhome';
 export const isDohEngine = m => !['none', 'adblock-fast'].includes(dnsMode(m));
 
+// DoH presets, with the plain IPs needed to resolve their hostnames.
+export const DOH_PROVIDERS = [
+  { name: 'Cloudflare',          url: 'https://cloudflare-dns.com/dns-query',          bootstrap: '1.0.0.1 2606:4700:4700::1001' },
+  { name: 'Cloudflare Security', url: 'https://security.cloudflare-dns.com/dns-query', bootstrap: '1.0.0.2 2606:4700:4700::1002' },
+  { name: 'Google',              url: 'https://dns.google/dns-query',                  bootstrap: '8.8.8.8 2001:4860:4860::8888' },
+  { name: 'Quad9',               url: 'https://dns.quad9.net/dns-query',               bootstrap: '9.9.9.9 2620:fe::fe' },
+  { name: 'AdGuard',             url: 'https://dns.adguard-dns.com/dns-query',         bootstrap: '94.140.14.14 2a10:50c0::ad1:ff' },
+  { name: 'AdGuard Family',      url: 'https://family.adguard-dns.com/dns-query',      bootstrap: '94.140.14.15 2a10:50c0::bad1:ff' },
+  { name: 'Mullvad',             url: 'https://dns.mullvad.net/dns-query',             bootstrap: '194.242.2.2 2a07:e340::2' },
+  { name: 'Mullvad Adblock',     url: 'https://adblock.dns.mullvad.net/dns-query',     bootstrap: '194.242.2.3 2a07:e340::3' },
+  { name: 'DNS4EU',              url: 'https://protective.joindns4.eu/dns-query',      bootstrap: '86.54.11.1 2a13:1001::86:54:11:1' },
+  { name: 'OpenDNS',             url: 'https://doh.opendns.com/dns-query',             bootstrap: '208.67.222.222 2620:119:35::35' },
+  { name: 'Wikimedia',           url: 'https://wikimedia-dns.org/dns-query',           bootstrap: '185.71.138.138 2001:67c:930::1' },
+  { name: 'AliDNS',              url: 'https://dns.alidns.com/dns-query',              bootstrap: '223.5.5.5 2400:3200::1' },
+  { name: 'Tencent DNSPod',      url: 'https://doh.pub/dns-query',                     bootstrap: '119.29.29.29 2402:4e00::' },
+];
+
+// Bootstrap IPs to emit: those of every recognised provider in DOH_UPSTREAMS,
+// plus the user's own. Derived, not appended, so dropping a provider's URL drops
+// its IPs - wrtnova.sh feeds BOOTSTRAP_DNS to fallback_dns too, so a stale entry
+// stayed reachable as plaintext fallback for a resolver thought to be removed.
+/** @param {{ DOH_UPSTREAMS?: string, BOOTSTRAP_DNS?: string }} cfg @returns {string} */
+export function deriveBootstrapDns(cfg) {
+  const words = (s) => String(s || '').split(/\s+/).filter(Boolean);
+  const out = [];
+  for (const url of words(cfg.DOH_UPSTREAMS)) {
+    const p = DOH_PROVIDERS.find((x) => x.url === url);
+    if (p) out.push(...words(p.bootstrap));
+  }
+  out.push(...words(cfg.BOOTSTRAP_DNS));
+  return [...new Set(out)].join('\n');
+}
+
 // WG client config fields (Interface + Peer); drive the "config entered but VPN off" notice.
 const WG_CLIENT_FIELDS = [
   'WG_PRIVATE_KEY', 'WG_IPV4', 'WG_IPV6', 'WG_DNS_V4', 'WG_DNS_V6', 'WG_MTU',

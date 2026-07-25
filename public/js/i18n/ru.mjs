@@ -322,7 +322,7 @@ export default {
   dohUpstreamsHelp:   'URL DoH-резолверов, по одному в строке. Пусто - Quad9 / Cloudflare / Google.',
   dohUpstreamsPh:     'по одному URL в строке; пусто = значения по умолчанию',
   bootstrapDns:       'Bootstrap DNS',
-  bootstrapDnsHelp:   'Обычные IP для разрешения имён апстримов + запасной вариант. Пусто - 1.0.0.1 / 9.9.9.9.',
+  bootstrapDnsHelp:   'Дополнительные обычные IP, помимо добавляемых автоматически для пресетов выше.',
   dnsmasqMulti:       'Dnsmasq для каждой сети',
   dnsmasqMultiHelp:   'Запускать несколько экземпляров dnsmasq в роли DNS-форвардера и DHCPv4-сервера.',
   dnsmasqMultiNote:   'Чтобы добавить DHCP на новом интерфейсе, используйте встроенную команду <code>dhcp-instance-add</code>.',
