@@ -503,19 +503,26 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
   // its own `.opt-control .opt-field` / `.opt-stack` classes so a caller can
   // pick how wide it sits. `rowAttrs` is for the odd row that has to override
   // the .form-row margin.
-  function cardRow(forId, title, control, help, rowAttrs) {
-    return '<div class="form-row form-row--full"' + (rowAttrs || '') + '>' +
-      '<div class="opt-card">' +
-        '<div class="opt-text">' +
-          '<label class="opt-title" for="' + forId + '">' + title + '</label>' +
-          (help ? '<p class="form-help mt-0">' + help + '</p>' : '') +
-        '</div>' +
-        control +
-      '</div></div>';
+  function optCard(forId, title, control, help) {
+    return '<div class="opt-card">' +
+      '<div class="opt-text">' +
+        '<label class="opt-title" for="' + forId + '">' + title + '</label>' +
+        (help ? '<p class="form-help mt-0">' + help + '</p>' : '') +
+      '</div>' +
+      control +
+    '</div>';
   }
 
-  function versionRow(id, currentOverride, sharedVersion) {
-    return cardRow('np-ver-' + id, S.openWrtVersion,
+  // One bordered box around a run of opt-cards, the shape the DDNS card uses:
+  // .opt-group drops each nested card's own shell and separates them with a
+  // rule, so a set of related fields reads as one control rather than five.
+  function cardGroup(cards) {
+    return '<div class="form-row form-row--full" style="margin-top:0">' +
+      '<div class="opt-group">' + cards + '</div></div>';
+  }
+
+  function versionCard(id, currentOverride, sharedVersion) {
+    return optCard('np-ver-' + id, S.openWrtVersion,
       '<select class="opt-control opt-field input-base" id="np-ver-' + id + '">' +
       versionOpts(currentOverride, sharedVersion) +
       '</select>');
@@ -674,39 +681,39 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
     // The device control is a readonly field plus its picker button, so it is a
     // wrapper rather than a bare input - the same thing /builder does for the
     // device combobox.
-    const deviceRow = cardRow('np-device-' + id, S.device,
+    const deviceRow = optCard('np-device-' + id, S.device,
       '<div class="opt-control opt-field flex gap-2 items-center">' +
         '<input class="input-base" id="np-device-' + id + '" value="' + devTitle + '" placeholder="' + S.noDeviceSelected + '" readonly style="cursor:pointer">' +
         '<button type="button" class="btn text-xs flex-shrink-0" data-pickdevice="' + id + '">' + S.change + '</button>' +
       '</div>',
-      S.deviceRequirement, ' style="margin-top:0"');
+      S.deviceRequirement);
 
     const nameRow =
-      cardRow('np-name-' + id, S.nodeName,
+      optCard('np-name-' + id, S.nodeName,
         '<input class="opt-control opt-field input-base" id="np-name-' + id + '" value="' + esc(node.name) + '">');
 
     const hostRow = (placeholder) =>
-      cardRow('np-host-' + id, S.hostname,
+      optCard('np-host-' + id, S.hostname,
         '<input class="opt-control opt-field input-base" id="np-host-' + id + '" value="' +
         esc(node.overrides.HOST_NAME || '') + '" placeholder="' + placeholder + '">');
 
     if (!isAp) {
-      fields = deviceRow +
-        versionRow(id, verOverride, cfg.shared_version) +
+      fields = cardGroup(
+        deviceRow +
+        versionCard(id, verOverride, cfg.shared_version) +
         nameRow +
-        hostRow('WrtNova') +
-        wifiRows;
+        hostRow('WrtNova')
+      ) + wifiRows;
     } else {
-      fields = deviceRow +
-        versionRow(id, verOverride, cfg.shared_version) +
+      fields = cardGroup(
+        deviceRow +
+        versionCard(id, verOverride, cfg.shared_version) +
         nameRow +
         hostRow('WrtNova-' + esc(node.overrides.AP_INDEX || '2')) +
-
-        cardRow('np-apidx-' + id, S.apIndex,
+        optCard('np-apidx-' + id, S.apIndex,
           '<input type="number" class="opt-control opt-field--narrow input-base" id="np-apidx-' + id +
-          '" min="2" max="254" value="' + esc(node.overrides.AP_INDEX || '2') + '">') +
-
-        wifiRows;
+          '" min="2" max="254" value="' + esc(node.overrides.AP_INDEX || '2') + '">')
+      ) + wifiRows;
     }
 
     return (

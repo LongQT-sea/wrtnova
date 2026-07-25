@@ -148,7 +148,7 @@ test('networks.js: no generated row still uses .form-label', () => {
   assert.deepEqual(offenders, [], `generated row still using .form-label:\n${offenders.join('\n')}`);
 });
 
-// The generated rows go through the single `cardRow` helper, so the card shell
+// The generated rows go through the single `optCard` helper, so the card shell
 // and its title are emitted once and only the control varies per call site.
 // That is what makes these two counts meaningful: one control per call, and each
 // control carrying a width modifier.
@@ -156,13 +156,13 @@ test('networks.js: every generated card has a title and a control', () => {
   const src = read('public/js/networks.js');
   assert.equal((src.match(/class="opt-card"/g) || []).length,
     (src.match(/class="opt-title"/g) || []).length,
-    'the card shell and its title should be emitted together by cardRow');
+    'the card shell and its title should be emitted together by optCard');
 
-  // Every `cardRow(...)` call must hand it exactly one control.
-  const calls = (src.match(/\bcardRow\(/g) || []).length - 1;  // minus the definition
+  // Every `optCard(...)` call must hand it exactly one control.
+  const calls = (src.match(/\boptCard\(/g) || []).length - 1;  // minus the definition
   const controls = (src.match(/class="opt-control /g) || []).length;
   assert.ok(calls > 0, 'expected the per-node panel to emit .opt-card rows');
-  assert.equal(controls, calls, `${calls} cardRow() calls but ${controls} .opt-control controls`);
+  assert.equal(controls, calls, `${calls} optCard() calls but ${controls} .opt-control controls`);
 });
 
 // `.opt-control` alone only pins the control to the trailing edge; the width
