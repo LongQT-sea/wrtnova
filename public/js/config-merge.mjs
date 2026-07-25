@@ -8,7 +8,8 @@
 // Boolean flags use flag(v) so '0' never leaks through (Section 1 invariant:
 // off-state is '' never '0').
 
-import { resolveVlanEmit, DNS_DEFAULT, isAdguard, isDohEngine } from './visibility.mjs';
+import { resolveVlanEmit, DNS_DEFAULT, isAdguard, isDohEngine, deriveBootstrapDns } from './visibility.mjs';
+import { normalizeEndpoint } from './list-grammar.mjs';
 import { assembleBanipFeeds } from './packages.mjs';
 
 /**
@@ -20,6 +21,7 @@ export function mergeNodeConfig(sharedConfig, nodeOverrides) {
   const c = Object.assign({}, sharedConfig, nodeOverrides);
   const isAp    = c.AP_MODE       === '1';
   const wgOn    = c.WG_ENABLE     === '1';
+  const endpoint = normalizeEndpoint(c.ENDPOINT);
   const meshOn  = c.WIRELESS_MESH === '1' || c.WIRELESS_MESH_2G === '1';
   const bothMesh = c.WIRELESS_MESH === '1' && c.WIRELESS_MESH_2G === '1';
   const guestOn = c.GUEST_ENABLE  === '1';
@@ -68,8 +70,9 @@ export function mergeNodeConfig(sharedConfig, nodeOverrides) {
     WIFI_LOG_LVL: c.WIFI_LOG_LVL || '',
     WG_PRIVATE_KEY:  wgOn && !isAp ? (c.WG_PRIVATE_KEY  || '') : '',
     PEER_PUBLIC_KEY: wgOn && !isAp ? (c.PEER_PUBLIC_KEY  || '') : '',
-    ENDPOINT:        wgOn && !isAp ? (c.ENDPOINT         || '') : '',
-    ENDPOINT_PORT:   wgOn && !isAp ? (c.ENDPOINT_PORT    || '') : '',
+    // One "host:port" field in the form, two variables in wrtnova.sh - split here.
+    ENDPOINT:        wgOn && !isAp ? endpoint.host : '',
+    ENDPOINT_PORT:   wgOn && !isAp ? endpoint.port : '',
     PRESHARED_KEY:   wgOn && !isAp ? (c.PRESHARED_KEY    || '') : '',
     WG_IPV4:         wgOn && !isAp ? (c.WG_IPV4          || '') : '',
     WG_IPV6:         wgOn && !isAp ? (c.WG_IPV6          || '') : '',
@@ -92,7 +95,7 @@ export function mergeNodeConfig(sharedConfig, nodeOverrides) {
     // Encrypted-DNS upstreams apply only to the DoH engines, not the plain
     // dnsmasq modes ('none' and 'adblock-fast').
     DOH_UPSTREAMS:    isDohEngine(c.DNS_MODE) ? (c.DOH_UPSTREAMS || '') : '',
-    BOOTSTRAP_DNS:    isDohEngine(c.DNS_MODE) ? (c.BOOTSTRAP_DNS || '') : '',
+    BOOTSTRAP_DNS:    isDohEngine(c.DNS_MODE) ? deriveBootstrapDns(c) : '',
     DNSMASQ_SINGLE_INSTANCE: flag(c.DNSMASQ_MULTI_INSTANCE) !== '1' ? '1' : '',
     SOFTWARE_OFFLOAD: flag(c.SOFTWARE_OFFLOAD), HARDWARE_OFFLOAD: flag(c.HARDWARE_OFFLOAD),
     BLOCK_DOT_DOQ:    flag(c.BLOCK_DOT_DOQ),

@@ -8,13 +8,13 @@
 import { ui } from './ui-ns.mjs';
 import './ui.js';
 import './i18n/core.mjs';
-import { BUILDER_SCHEMA, readForm, keySets, textVal, SUBNET_KEYS, writeSubnet, IFACE_FIELDS, ifaceValid, PREFIX_FIELDS, prefixValid, WIFI_TEXT_FIELDS, wifiTextValid, pskVlanPassIssue } from './config-form.mjs';
+import { BUILDER_SCHEMA, readForm, keySets, SUBNET_KEYS, writeSubnet, IFACE_FIELDS, ifaceValid, PREFIX_FIELDS, prefixValid, WIFI_TEXT_FIELDS, wifiTextValid, pskVlanPassIssue } from './config-form.mjs';
 import { deriveConfig } from './builder-config.mjs';
 import { deriveNetRows, truncateAdditionalVlans, SWCONFIG_VLAN_MAX, isSwconfigTarget } from './visibility.mjs';
 import { createStore } from './store.mjs';
 import { renderConfigBlock } from './render-config.mjs';
 import { parseAdditionalPackages } from './packages.mjs';
-import { ipv6OctetValid, hostnameValid, ddnsHostnameValid, macValid, portListValid, normalizeEndpoint } from './list-grammar.mjs';
+import { ipv6OctetValid, hostnameValid, ddnsHostnameValid, macValid, portListValid, joinEndpoint } from './list-grammar.mjs';
 import { collectTarget, devicesState } from './devices.js';
 
   const $  = ui.$, $$ = ui.$$;
@@ -427,7 +427,6 @@ import { collectTarget, devicesState } from './devices.js';
   const RANGE_NOUN = {
     LAN_VLAN_ID:    'LAN VLAN', GUEST_VLAN_ID: 'Guest VLAN', IOT_VLAN_ID:   'IoT VLAN',
     LAN_WG_VLAN_ID: 'VLAN', WAN_VLAN_ID:   'VLAN', WAN_B_VLAN_ID: 'VLAN',
-    ENDPOINT_PORT:  'Port',
   };
 
   // Refresh one field's custom validity from its native range state. Clearing
@@ -585,23 +584,6 @@ import { collectTarget, devicesState } from './devices.js';
     return first;
   }
 
-  // Mutating value in JS fires no input/change, so dispatch one on each mutated
-  // input to re-sync the store (same trick as ui.js's ADGUARD reset).
-  function normalizeEndpointField() {
-    const epEl = $('#ENDPOINT');
-    if (!epEl) return;
-    const { host, port } = normalizeEndpoint(epEl.value);
-    if (host !== epEl.value) {
-      epEl.value = host;
-      epEl.dispatchEvent(new Event('change', { bubbles: true }));
-    }
-    const portEl = $('#ENDPOINT_PORT');
-    if (port && portEl) {
-      portEl.value = port;
-      portEl.dispatchEvent(new Event('change', { bubbles: true }));
-    }
-  }
-
   // Live feedback: when the user leaves a range/iface/prefix field with a bad
   // value, set the message and show the bubble immediately rather than waiting
   // for Build.
@@ -612,7 +594,6 @@ import { collectTarget, devicesState } from './devices.js';
     else if (IFACE_SET.has(el.id) && refreshIfaceValidity(el)) el.reportValidity();
     else if (PREFIX_SET.has(el.id) && refreshPrefixValidity(el)) el.reportValidity();
     else if (WIFI_TEXT_SET.has(el.id) && refreshWifiTextValidity(el)) el.reportValidity();
-    else if (el.id === 'ENDPOINT') normalizeEndpointField();
     else if (el.id === 'LOOKUP_HOSTNAME') { if (refreshDdnsValidity(el)) el.reportValidity(); }
     else if (el.id === 'WAN_MAC_ADDR') { if (refreshMacValidity(el)) el.reportValidity(); }
     else if (el.id === 'HOST_NAME' || (el.matches && el.matches('[data-col="host"]'))) { if (refreshHostnameValidity(el)) el.reportValidity(); }
@@ -688,9 +669,6 @@ import { collectTarget, devicesState } from './devices.js';
     // IPv6 host IDs: 1-4 hex digits, not 0. Pop the first visible offender.
     const badOctet = checkOctetV6Fields();
     if (badOctet) { badOctet.reportValidity(); return; }
-
-    // Normalize the endpoint first so its cleaned value is what gets built.
-    normalizeEndpointField();
 
     // Hostname / DDNS / port formats: a bad value corrupts the emitted config.
     // Pop the first visible offender's bubble.
@@ -884,7 +862,7 @@ import { collectTarget, devicesState } from './devices.js';
     wrap.innerHTML = html;
   }
 
-  // Scoped to page lifetime — cleared on reload so each new page load gets a fresh reg.
+  // Scoped to page lifetime - cleared on reload so each new page load gets a fresh reg.
   let _warpSessionToken = '';
   ui.setWarpSessionToken = function (t) { _warpSessionToken = t || ''; };
 
@@ -925,8 +903,8 @@ import { collectTarget, devicesState } from './devices.js';
           WG_ENABLE:       '1',
           WG_PRIVATE_KEY:  data.WG_PRIVATE_KEY  || '',
           PEER_PUBLIC_KEY: data.PEER_PUBLIC_KEY || '',
-          ENDPOINT:        data.ENDPOINT        || '',
-          ENDPOINT_PORT:   data.ENDPOINT_PORT   || '',
+          // WARP hands back host and port apart; the form shows them joined.
+          ENDPOINT:        joinEndpoint(data.ENDPOINT, data.ENDPOINT_PORT),
           WG_IPV4:         data.WG_IPV4         || '',
           WG_IPV6:         data.WG_IPV6         || '',
           ALLOWED_IPS:     data.ALLOWED_IPS     || '',

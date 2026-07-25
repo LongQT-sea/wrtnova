@@ -1,7 +1,7 @@
 // Build history panel (lazy-loaded via dynamic import()). Dual-mode ES module:
 // publishes ui.loadHistory/restoreFromHistory onto the shared namespace.
 import { ui } from './ui-ns.mjs';
-import { parseList } from './list-grammar.mjs';
+import { parseList, joinEndpoint } from './list-grammar.mjs';
 import { BUILDER_SCHEMA, writeForm } from './config-form.mjs';
 import { selectDevice, loadOverview, devicesState } from './devices.js';
 
@@ -120,12 +120,14 @@ import { selectDevice, loadOverview, devicesState } from './devices.js';
   }
 
   function restoreConfig(cfg) {
-    // wan_type and DNSMASQ_MULTI_INSTANCE are UI-only keys: saved configs carry
-    // the emitted shape (PPPOE_*, DNSMASQ_SINGLE_INSTANCE), so reconstruct them.
+    // wan_type, DNSMASQ_MULTI_INSTANCE and ENDPOINT are UI-only shapes: saved
+    // configs carry the emitted one (PPPOE_*, DNSMASQ_SINGLE_INSTANCE, and the
+    // endpoint host and port apart), so reconstruct them.
     writeForm(BUILDER_SCHEMA, {
       ...cfg,
       wan_type: cfg.PPPOE_USERNAME ? 'pppoe' : 'dhcp',
       DNSMASQ_MULTI_INSTANCE: cfg.DNSMASQ_SINGLE_INSTANCE === '1' ? '' : '1',
+      ENDPOINT: joinEndpoint(cfg.ENDPOINT, cfg.ENDPOINT_PORT),
     });
     if (cfg.ZONE_NAME) {
       if (!ui.setTimezone(cfg.ZONE_NAME)) {

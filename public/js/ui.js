@@ -6,7 +6,7 @@ import { ui } from './ui-ns.mjs';
 import { renderConfigBlock } from './render-config.mjs';
 import { resolvePackages } from './packages.mjs';
 import { serializeList, clampOctet4, ipv6OctetValid } from './list-grammar.mjs';
-import { deriveVisibility, deriveNetRows, detectVlanConflict, resolveVlanAssignment } from './visibility.mjs';
+import { deriveVisibility, deriveNetRows, detectVlanConflict, resolveVlanAssignment, DOH_PROVIDERS } from './visibility.mjs';
 
   ui.$  = (sel, root) => (root || document).querySelector(sel);
   ui.$$ = (sel, root) => Array.from((root || document).querySelectorAll(sel));
@@ -297,7 +297,7 @@ import { deriveVisibility, deriveNetRows, detectVlanConflict, resolveVlanAssignm
 
       // batman-adv runs over one mesh radio: with it on, the two bands are radio
       // buttons - the band just toggled on wins, the other is forced off (bubbling
-      // change re-syncs each store). Any other trigger drops 2.4GHz, keeps 5GHz.
+      // change re-syncs each store). Any other trigger drops 2.4 GHz, keeps 5 GHz.
       // Before the BRIDGE_STP block so that block sees the settled single band.
       const batman = ui.$('#BATMAN_ADV');
       if (batman && mesh5 && mesh2g && batman.checked && mesh5.checked && mesh2g.checked) {
@@ -306,7 +306,7 @@ import { deriveVisibility, deriveNetRows, detectVlanConflict, resolveVlanAssignm
         drop.dispatchEvent(new Event('change', { bubbles: true }));
       }
 
-      // When both 2.4GHz and 5GHz mesh backhauls are on, two 802.11s meshpoints
+      // When both 2.4 GHz and 5 GHz mesh backhauls are on, two 802.11s meshpoints
       // are bridged into br-vlan and can form an L2 loop; force BRIDGE_STP checked
       // and disabled so the toggle reflects the built config (same disable/force/dispatch pattern).
       const stp = ui.$('#BRIDGE_STP');
@@ -399,21 +399,6 @@ import { deriveVisibility, deriveNetRows, detectVlanConflict, resolveVlanAssignm
 
   // DoH presets: one plain-IP bootstrap resolver per family (v4 + v6), from each
   // variant's current published resolvers.
-  ui.DOH_PROVIDERS = [
-    { name: 'Cloudflare',          url: 'https://cloudflare-dns.com/dns-query',          bootstrap: '1.0.0.1 2606:4700:4700::1001' },
-    { name: 'Cloudflare Security', url: 'https://security.cloudflare-dns.com/dns-query', bootstrap: '1.0.0.2 2606:4700:4700::1002' },
-    { name: 'Google',              url: 'https://dns.google/dns-query',                  bootstrap: '8.8.8.8 2001:4860:4860::8888' },
-    { name: 'Quad9',               url: 'https://dns.quad9.net/dns-query',               bootstrap: '9.9.9.9 2620:fe::fe' },
-    { name: 'AdGuard',             url: 'https://dns.adguard-dns.com/dns-query',         bootstrap: '94.140.14.14 2a10:50c0::ad1:ff' },
-    { name: 'AdGuard Family',      url: 'https://family.adguard-dns.com/dns-query',      bootstrap: '94.140.14.15 2a10:50c0::bad1:ff' },
-    { name: 'Mullvad',             url: 'https://dns.mullvad.net/dns-query',             bootstrap: '194.242.2.2 2a07:e340::2' },
-    { name: 'Mullvad Adblock',     url: 'https://adblock.dns.mullvad.net/dns-query',     bootstrap: '194.242.2.3 2a07:e340::3' },
-    { name: 'DNS4EU',              url: 'https://protective.joindns4.eu/dns-query',      bootstrap: '86.54.11.1 2a13:1001::86:54:11:1' },
-    { name: 'OpenDNS',             url: 'https://doh.opendns.com/dns-query',             bootstrap: '208.67.222.222 2620:119:35::35' },
-    { name: 'Wikimedia',           url: 'https://wikimedia-dns.org/dns-query',           bootstrap: '185.71.138.138 2001:67c:930::1' },
-    { name: 'AliDNS',              url: 'https://dns.alidns.com/dns-query',              bootstrap: '223.5.5.5 2400:3200::1' },
-    { name: 'Tencent DNSPod',      url: 'https://doh.pub/dns-query',                     bootstrap: '119.29.29.29 2402:4e00::' },
-  ];
 
   // The Advanced DNS "Add DoH preset" <select> is a UI helper, not a config field.
   // It writes the textareas programmatically, so each append dispatches a bubbling
@@ -421,31 +406,24 @@ import { deriveVisibility, deriveNetRows, detectVlanConflict, resolveVlanAssignm
   ui.initDohPreset = function () {
     const sel = ui.$('#doh-preset');
     const ta = ui.$('#DOH_UPSTREAMS');
-    const bootTa = ui.$('#BOOTSTRAP_DNS');
     if (!sel || !ta) return;                       // page without the control
     if (sel.childElementCount <= 1) {              // only the placeholder: build options
-      ui.DOH_PROVIDERS.forEach(function (p) {
+      DOH_PROVIDERS.forEach(function (p) {
         const opt = document.createElement('option');
         opt.value = p.url;
         opt.textContent = p.name;
         sel.appendChild(opt);
       });
     }
-    function appendLines(el, values) {
-      if (!el) return;
-      const list = el.value.split(/\s+/).filter(Boolean);
-      const added = values.filter(function (v) { return !list.includes(v); });
-      if (!added.length) return;
-      el.value = list.concat(added).join('\n');
-      el.dispatchEvent(new Event('input', { bubbles: true }));
-    }
+    // Appends the URL only. Its bootstrap IPs are derived from this list at emit
+    // time (deriveBootstrapDns), so removing the URL removes them with it.
     sel.addEventListener('change', function () {
       const url = sel.value;
       sel.value = '';                              // reset to placeholder
-      if (!url) return;
-      const provider = ui.DOH_PROVIDERS.find(function (p) { return p.url === url; });
-      appendLines(ta, [url]);
-      if (provider) appendLines(bootTa, provider.bootstrap.split(/\s+/));
+      const list = ta.value.split(/\s+/).filter(Boolean);
+      if (!url || list.includes(url)) return;
+      ta.value = list.concat(url).join('\n');
+      ta.dispatchEvent(new Event('input', { bubbles: true }));   // JS sets fire none
     });
   };
 

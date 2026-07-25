@@ -8,7 +8,7 @@ import assert from 'node:assert/strict';
 
 import { parseList, serializeList, clampOctet4, ipv6OctetValid, firstInvalidIpv6Octet,
   hostnameValid, ddnsHostnameValid, macValid, portListValid, firstInvalidHost, firstInvalidPort,
-  normalizeEndpoint } from '../public/js/list-grammar.mjs';
+  normalizeEndpoint, joinEndpoint } from '../public/js/list-grammar.mjs';
 
 // ---------------------------------------------------------------------------
 // parseList
@@ -248,4 +248,40 @@ test('round-trip: serialize(parse(str)) is stable (idempotent re-serialize)', ()
   const once = serializeList(parseList(str));
   assert.equal(serializeList(parseList(once)), once);
   assert.equal(once, str);
+});
+
+// ---------------------------------------------------------------------------
+// joinEndpoint - the inverse, for the two paths that arrive pre-split
+// ---------------------------------------------------------------------------
+
+test('joinEndpoint: puts host and port back into one field value', () => {
+  assert.equal(joinEndpoint('engage.cloudflareclient.com', '2408'), 'engage.cloudflareclient.com:2408');
+  assert.equal(joinEndpoint('162.159.192.3', '2408'), '162.159.192.3:2408');
+});
+
+test('joinEndpoint: brackets a bare IPv6 so it can be split again', () => {
+  assert.equal(joinEndpoint('2606:4700:d0::a29f:c006', '2408'), '[2606:4700:d0::a29f:c006]:2408');
+  // already bracketed - do not double up
+  assert.equal(joinEndpoint('[2606:4700:d0::a29f:c006]', '2408'), '[2606:4700:d0::a29f:c006]:2408');
+});
+
+test('joinEndpoint: a missing half yields the host alone, never a stray colon', () => {
+  assert.equal(joinEndpoint('host.example', ''), 'host.example');
+  assert.equal(joinEndpoint('host.example', undefined), 'host.example');
+  assert.equal(joinEndpoint('', '2408'), '');
+  assert.equal(joinEndpoint(undefined, undefined), '');
+});
+
+// The form shows one field and wrtnova.sh wants two, so every WARP prefill and
+// every restored build makes this trip. Losing the port here would silently
+// build a tunnel against the default 51820.
+test('joinEndpoint -> normalizeEndpoint round-trips, IPv6 included', () => {
+  for (const [host, port] of [
+    ['engage.cloudflareclient.com', '2408'],
+    ['162.159.192.3', '51820'],
+    ['2606:4700:d0::a29f:c006', '2408'],
+  ]) {
+    assert.deepEqual(normalizeEndpoint(joinEndpoint(host, port)), { host, port },
+      `round trip failed for ${host}:${port}`);
+  }
 });

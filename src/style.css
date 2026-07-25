@@ -30,9 +30,19 @@
   /* .hidden must always win — JS toggles this class */
   .hidden { display: none !important; }
 
-  /* Remove native <details> disclosure triangle */
+  /* Remove native <details> disclosure triangle - the small text summaries
+     supply their own chevron SVG instead. */
   summary { list-style: none; }
   summary::-webkit-details-marker { display: none; }
+
+  /* That chevron points down when the section is open and right when it is
+     shut, so a closed row reads as "there is more here". Card headers are
+     excluded: they carry their own rotation (group-open:rotate-180) and would
+     otherwise turn twice. */
+  summary:not(.card-header) > svg:first-child { transition: transform 0.2s ease; }
+  details:not([open]) > summary:not(.card-header) > svg:first-child {
+    transform: rotate(-90deg);
+  }
 }
 
 @layer components {
@@ -43,35 +53,17 @@
     gap: 0.375rem;
     margin-top: 1rem;
   }
-  @media (min-width: 768px) {
-    .form-row {
-      display: grid;
-      grid-template-columns: 150px 1fr;
-      column-gap: 1.5rem;
-      row-gap: 0;
-      align-items: start;
-    }
-    .form-row--full {
-      grid-template-columns: 1fr;
-    }
-  }
-
-  .form-label {
-    font-size: 0.8125rem;
-    font-weight: 500;
-    color: #71717a; /* zinc-500 */
-    padding-top: 0;
-  }
-  .dark .form-label { color: #a1a1aa; /* zinc-400 */ }
-  @media (min-width: 768px) {
-    .form-label { padding-top: 0.625rem; }
-  }
+  /* Every row stacks label over control at every width - the same shape the
+     toggle cards use, so one left rail runs down the whole form. There used to
+     be a 150px label column above 768px, which is what put the toggle cards
+     visibly out of line with their neighbours. .form-row--full is kept as a
+     no-op alias so existing markup does not have to change. */
 
   .form-help {
     margin-top: 0.25rem;
-    font-size: 0.75rem;
+    font-size: 0.775rem;
     line-height: 1.4;
-    color: #71717a;
+    color: #52525b; /* zinc-600 */
   }
   .dark .form-help { color: #a1a1aa; /* zinc-400: 6.91:1 on zinc-900, passes WCAG AA */ }
 
@@ -109,28 +101,153 @@
   select.input-base { cursor: pointer; }
 
   /* ── Toggle switch ────────────────────────────────────────────── */
-  /* Usage:
+  /* Every toggle uses this exact shape - a card holding the switch, a title
+     and an optional description. The <div> is required even when there is no
+     description, so one rule set covers every toggle on both pages:
      <label class="toggle-label">
        <span class="toggle-wrap">
          <input type="checkbox" class="toggle-input" id="X" name="X" value="1">
          <span class="toggle-track"></span>
          <span class="toggle-thumb"></span>
        </span>
-       <span class="toggle-text">Description</span>
+       <div>
+         <span class="toggle-text">Title</span>
+         <p class="form-help mt-0">Description</p>
+       </div>
      </label>
+     A radio option row is the same, with <input type="radio"> replacing the
+     whole .toggle-wrap. Any trailing note goes after </label>, outside the card.
   */
-  .toggle-label {
+  /* .opt-card is the same shell around a control that is not a single input -
+     a radio group, say - so it cannot be a <label>. Chrome and type are shared
+     with .toggle-label so the two read as one component. */
+  .toggle-label,
+  .opt-card {
     display: flex;
     align-items: center;
-    gap: 0.625rem;
-    cursor: pointer;
+    gap: 0.875rem;
     min-height: 44px; /* WCAG touch target */
+    padding: 0.875rem 1rem;
+    border: 1px solid #e4e4e7; /* zinc-200 */
+    border-radius: 0.75rem;
+    background-color: #fafafa; /* zinc-50 */
+    transition: border-color 0.15s, background-color 0.15s;
+  }
+  .toggle-label { cursor: pointer; }
+  /* Only .opt-card wraps. A switch is 48px and the text beside it can always
+     shrink, so a toggle keeps its control on the same line at any width -
+     letting it wrap drops the switch to the left of a line of its own. */
+  .opt-card { flex-wrap: wrap; }
+  .dark .toggle-label,
+  .dark .opt-card {
+    border-color: #303035;
+    background-color: #1c1c20;
+  }
+  /* text block takes the row, control sits on the trailing edge and drops to
+     its own line when there is not room for both */
+  .opt-card > .opt-text { flex: 1 1 12rem; min-width: 0; }
+  .opt-card > .opt-control { flex: 0 0 auto; margin-left: auto; }
+  /* Below the breakpoint every control drops to its own full-width line - a
+     segmented control or a text field floating on the right of a narrow card
+     reads as unanchored, and a field has no room to be usable there. */
+  @media (max-width: 767px) {
+    .opt-card > .opt-control {
+      flex: 1 1 100%;
+      margin-left: 0;
+    }
+    .opt-card > .radio-seg {
+      width: 100%;            /* overrides the fit-content that stops the */
+      display: flex;          /* control stretching inside a grid column */
+    }
+    .opt-card > .radio-seg label { flex: 1 1 0; }
+    .opt-card > .radio-seg input[type="radio"] + span { justify-content: center; }
+  }
+  /* A text field takes half the card, leaving the other half to the text. The
+     gap is split between them so the two halves stay equal. */
+  @media (min-width: 768px) {
+    .opt-card > .opt-field { flex: 0 0 calc(50% - 0.4375rem); min-width: 0; }
+  }
+  /* A control too tall to sit beside the text - a textarea - keeps its own
+     full-width line at every size instead. */
+  .opt-card > .opt-stack {
+    flex: 1 1 100%;
+    margin-left: 0;
+  }
+  /* A field with a hard, tiny content limit - a two-letter country code, a
+     two-digit index - reads as broken when it fills half the card: the box
+     promises far more input than it accepts. These size to their content and
+     keep the trailing edge at every width, including below the breakpoint
+     where a normal field goes full-width. Declared after both media queries
+     because it has the same specificity as the rules it overrides. */
+  .opt-card > .opt-field--narrow {
+    flex: 0 0 auto;
+    width: 6.5rem;
+    margin-left: auto;
+  }
+
+  /* Several cards merged into one box, separated by rules instead of gaps.
+     Two things use it:
+       - a control plus the fields it governs (the WAN VLAN toggles, Connection
+         type over the PPPoE credentials, Enable DDNS over its two fields), and
+       - a titled set of related fields with no governing control, where the
+         .sub-section-title is the only thing binding them (WireGuard's
+         Interface and Peer, six and four fields deep - as separate cards that
+         was a stack of ten boxes with nothing saying where one group ended).
+     A toggle inside a group keeps its own <label> so clicking the row still
+     flips it - a <label> binds to a single control, so a field cannot live
+     inside it - and the border moves to the group. Nested rows are ordinary
+     .opt-card children, so they keep the same half-width control and left rail
+     as a standalone card - .wan-vid-row used to fake that alignment with a
+     padding calc copied off the switch width, which went stale the moment the
+     switch was resized. */
+  .opt-group {
+    border: 1px solid #e4e4e7; /* zinc-200 */
+    border-radius: 0.75rem;
+    background-color: #fafafa; /* zinc-50 */
+    overflow: hidden;
+  }
+  .dark .opt-group {
+    border-color: #303035;
+    background-color: #1c1c20;
+  }
+  /* Cards nested in a group give up their own shell and are separated by a
+     rule instead. */
+  .opt-group > .toggle-label,
+  .opt-group .opt-card {
+    border: 0;
+    border-radius: 0;
+    background: none;
+  }
+  .opt-group > .toggle-label:hover { border-color: transparent; }
+  .opt-group .opt-card { border-top: 1px solid #e4e4e7; }
+  .dark .opt-group .opt-card { border-top-color: #303035; }
+  .opt-group > .opt-card:first-child,
+  .opt-group > .toggle-label:first-child { border-top: 0; }
+  .toggle-label:hover { border-color: #d4d4d8; }
+  .dark .toggle-label:hover { border-color: #3f3f46; }
+  /* The whole card is the click target, so the keyboard ring belongs on the
+     card - not on the switch, which is a small part of it. */
+  .toggle-label:has(:focus-visible) {
+    outline: 2px solid #f6821f;
+    outline-offset: 2px;
+  }
+  /* Switch sits on the trailing edge; the text block takes the rest of the row.
+     Visual order only - the label still wraps the input, so the card remains a
+     single tab stop and the reading order is title, description, control. */
+  .toggle-label > .toggle-wrap { order: 2; margin-left: auto; }
+  .toggle-label > div { flex: 1 1 auto; min-width: 0; }
+  /* Radio options reuse the same card shell */
+  .toggle-label > input[type="radio"] {
+    width: 1.125rem;
+    height: 1.125rem;
+    accent-color: #f6821f;
+    cursor: pointer;
   }
   .toggle-wrap {
     position: relative;
     display: inline-flex;
-    width: 2.25rem;  /* 36px */
-    height: 1.25rem; /* 20px */
+    width: 3rem;      /* 48px */
+    height: 1.625rem; /* 26px */
     flex-shrink: 0;
   }
   .toggle-input {
@@ -146,15 +263,19 @@
     position: absolute;
     inset: 0;
     border-radius: 9999px;
-    background-color: #52525b; /* zinc-600 */
+    /* zinc-500 clears WCAG 1.4.11 (3:1 for non-text UI) against the card in
+       both themes - 4.63:1 on #fafafa, 3.51:1 on #1c1c20 - so one value does
+       for both. The inset ring keeps the switch outline discernible when the
+       track is filled with the accent, which is only 2.47:1 on a light card. */
+    background-color: #71717a;
+    box-shadow: inset 0 0 0 1px #71717a;
     transition: background-color 0.2s ease;
     pointer-events: none;
   }
-  .dark .toggle-track { background-color: #3f3f46; /* zinc-700 */ }
   .toggle-thumb {
     position: absolute;
-    top: 0.125rem; left: 0.125rem;
-    width: 1rem; height: 1rem;
+    top: 0.1875rem; left: 0.1875rem;
+    width: 1.25rem; height: 1.25rem;
     border-radius: 9999px;
     background-color: #ffffff;
     box-shadow: 0 1px 3px rgba(0,0,0,0.3);
@@ -162,17 +283,26 @@
     pointer-events: none;
   }
   .toggle-input:checked ~ .toggle-track { background-color: #f6821f; }
-  .toggle-input:checked ~ .toggle-thumb { transform: translateX(1rem); }
-  .toggle-input:focus-visible ~ .toggle-track {
-    outline: 2px solid #f6821f;
-    outline-offset: 2px;
-  }
-  .toggle-text {
-    font-size: 0.8125rem;
-    color: #3f3f46; /* zinc-700 */
+  .toggle-input:checked ~ .toggle-thumb { transform: translateX(1.375rem); }
+  .toggle-text,
+  .opt-title {
+    display: block;
+    font-size: 0.8375rem;
+    font-weight: 600;
+    line-height: 1.35;
+    margin-bottom: 0.125rem;
+    color: #18181b; /* zinc-900 */
     user-select: none;
   }
-  .dark .toggle-text { color: #d4d4d8; /* zinc-300 */ }
+  .dark .toggle-text,
+  .dark .opt-title { color: #fafafa; /* zinc-50 */ }
+  .toggle-label .form-help,
+  .opt-card .form-help {
+    font-size: 0.775rem;
+    color: #52525b; /* zinc-600 */
+  }
+  .dark .toggle-label .form-help,
+  .dark .opt-card .form-help { color: #a1a1aa; /* zinc-400 */ }
 
   /* ── Buttons ──────────────────────────────────────────────────── */
   .btn {
@@ -388,6 +518,130 @@
     background-color: #3f3f46;
   }
 
+  /* ── Multi-select picker ──────────────────────────────────────────
+     Chips live inside the control next to a filter input; the option list
+     opens in place below it rather than as an overlay, so it pushes the
+     rest of the card down instead of covering it. The options are real
+     checkboxes in labels - no faked listbox roles - so a selection can be
+     cleared from either the chip or the row. */
+  .picker { margin-top: 0.375rem; }
+  /* Inside a card the gap between the title and the control is the card's own,
+     the same as for the textarea rows - the standalone margin would stack on
+     top of it. */
+  .opt-card > .picker { margin-top: 0; }
+  .picker-control {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.4375rem 2.25rem 0.4375rem 0.5rem;
+    border: 1px solid #d4d4d8; /* zinc-300 */
+    border-radius: 0.5rem;
+    background-color: #ffffff;
+    cursor: text;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .dark .picker-control {
+    border-color: #3f3f46;
+    background-color: #27272a;
+  }
+  .picker.open > .picker-control,
+  .picker-control:focus-within {
+    border-color: #f6821f;
+    box-shadow: 0 0 0 2px rgba(246,130,31,0.25);
+  }
+  .picker-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.1875rem 0.5rem;
+    border-radius: 0.375rem;
+    border: 1px solid rgba(246,130,31,0.35);
+    background-color: rgba(246,130,31,0.08);
+    color: #9a4c07;
+    font-size: 0.775rem;
+    line-height: 1.3;
+    max-width: 100%;
+  }
+  .dark .picker-chip { color: #f6a95f; }
+  .picker-chip[data-auto] { opacity: 0.65; }
+  .picker-chip-x {
+    border: 0;
+    padding: 0;
+    background: none;
+    color: inherit;
+    opacity: 0.7;
+    cursor: pointer;
+    font-family: inherit;
+    line-height: 1;
+  }
+  .picker-chip-x:hover { opacity: 1; color: #dc2626; }
+  .picker-search {
+    flex: 1 1 6rem;
+    min-width: 6rem;
+    border: 0;
+    outline: none;
+    padding: 0.1875rem 0;
+    background: transparent;
+    color: inherit;
+    font-family: inherit;
+    font-size: 1rem; /* >=16px prevents iOS focus-zoom */
+  }
+  .picker-search::placeholder { color: #a1a1aa; }
+  .picker-toggle {
+    position: absolute;
+    top: 0.375rem; right: 0.375rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.5rem; height: 1.5rem;
+    border: 0;
+    border-radius: 0.25rem;
+    background: none;
+    color: #71717a;
+    cursor: pointer;
+  }
+  .picker-toggle:hover { color: #18181b; }
+  .dark .picker-toggle:hover { color: #fafafa; }
+  .picker-toggle svg { transition: transform 0.2s ease; }
+  .picker.open .picker-toggle svg { transform: rotate(180deg); }
+
+  .picker-list {
+    margin-top: 0.375rem;
+    max-height: 17rem;
+    overflow-y: auto;
+    border: 1px solid #e4e4e7;
+    border-radius: 0.5rem;
+    background-color: #ffffff;
+  }
+  .dark .picker-list {
+    border-color: #303035;
+    background-color: #1c1c20;
+  }
+  .picker-opt {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8125rem;
+    cursor: pointer;
+  }
+  .picker-opt:hover, .picker-opt:focus-within { background-color: #f4f4f5; }
+  .dark .picker-opt:hover, .dark .picker-opt:focus-within { background-color: #27272a; }
+  .picker-opt input {
+    width: 1.0625rem;
+    height: 1.0625rem;
+    flex-shrink: 0;
+    accent-color: #f6821f;
+    cursor: pointer;
+  }
+  .picker-empty {
+    padding: 0.75rem;
+    font-size: 0.8125rem;
+    color: #71717a;
+  }
+
   /* ── Progress bar ─────────────────────────────────────────────── */
   .progress-bar {
     height: 0.25rem;
@@ -570,25 +824,27 @@
   .dark .result-hash { color: #a1a1aa; }
 
   /* ── Info note (LuCI tips, etc.) ──────────────────────────────── */
+  /* A note is commentary on the setting above it, not another setting. It used
+     to carry the same 1px border and #fafafa fill that .opt-card now uses, so
+     it read as a peer card once the form became cards. A left rule and no
+     box tell them apart without shouting like .warn-note does. */
   .info-note {
-    margin-top: 1rem;
-    padding: 0.75rem 1rem;
-    border-radius: 0.375rem;
-    border: 1px solid #e4e4e7;
-    background-color: #fafafa;
+    margin-top: 0.5rem;
+    padding: 0.25rem 0 0.25rem 0.875rem;
+    border-left: 2px solid #d4d4d8; /* zinc-300 */
     font-size: 0.85rem;
     line-height: 1.6;
     color: #52525b;
   }
   .dark .info-note {
-    border-color: #27272a;
-    background-color: #18181b;
+    border-left-color: #3f3f46; /* zinc-700 */
     color: #a1a1aa;
   }
   /* Inline command / code chip inside an info note or toggle label */
   .info-note code,
   .toggle-text code,
-  .form-label code {
+  .toggle-label .form-help code,
+  .opt-card .form-help code {
     padding: 0.0625rem 0.3125rem;
     border-radius: 0.25rem;
     background-color: #f4f4f5;
@@ -597,7 +853,8 @@
   }
   .dark .info-note code,
   .dark .toggle-text code,
-  .dark .form-label code {
+  .dark .toggle-label .form-help code,
+  .dark .opt-card .form-help code {
     background-color: #27272a;
     border-color: #3f3f46;
   }
@@ -734,41 +991,10 @@
   /* Suppress number spinners on compact VID inputs */
   .net-table [type="number"]::-webkit-inner-spin-button,
   .net-table [type="number"]::-webkit-outer-spin-button,
-  .wan-vid-inp::-webkit-inner-spin-button,
-  .wan-vid-inp::-webkit-outer-spin-button { -webkit-appearance: none; }
+  .opt-group [type="number"]::-webkit-inner-spin-button,
+  .opt-group [type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
   .net-table [type="number"],
-  .wan-vid-inp { -moz-appearance: textfield; }
-  /* WAN VLAN ID rows — compact, indented, matching net-table row style */
-  .wan-vid-row {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 0.75rem;
-    padding: 0.35rem 0.5rem 0.35rem calc(2.25rem + 0.625rem + 0.5rem);
-    border-bottom: 1px solid #f4f4f5;
-    margin-bottom: 0.25rem;
-  }
-  @media (max-width: 767px) {
-    .wan-vid-hint { flex-basis: 100%; margin-top: -0.25rem; }
-  }
-  .dark .wan-vid-row { border-bottom-color: #1f1f23; }
-  .wan-vid-label {
-    font-size: 0.8125rem;
-    font-weight: 500;
-    white-space: nowrap;
-    min-width: 7rem;
-  }
-  .wan-vid-hint {
-    font-size: 0.75rem;
-    color: #71717a;
-  }
-  .dark .wan-vid-hint { color: #a1a1aa; }
-  .wan-vid-inp {
-    font-size: 0.8125rem;
-    padding: 0.35rem 0.5rem;
-    max-width: 3.9rem;
-    flex-shrink: 0;
-  }
+  .opt-group [type="number"] { -moz-appearance: textfield; }
   /* Make the hidden input a full-area transparent click target in the table */
   .net-table .toggle-input {
     position: absolute;

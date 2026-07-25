@@ -8,7 +8,7 @@
 // the initial graph - that roughly halved the worst page. The remaining gap to 30
 // is dominated by networks.js; tighten JS_CEILING_KB further as it is slimmed.
 
-import { readFileSync, existsSync, globSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 import { gzipSync } from 'node:zlib';
@@ -18,11 +18,12 @@ const root = resolve(here, '..', '..');
 
 const CSS_NFR_KB = 15;       // hard NFR - enforced
 const JS_TARGET_KB = 30;     // SPEC NFR target - documented, not yet met
-const JS_CEILING_KB = 67;    // hold the line here; raising it is a last resort - only a
+const JS_CEILING_KB = 68;    // hold the line here; raising it is a last resort - only a
                              // small bump, and only with explicit user confirmation
                              // (64 -> 65: WAN MAC address validation on /networks;
                              //  65 -> 66: Per-VLAN PSK shared-SSID mirroring + note;
-                             //  66 -> 67: INDEX_SUFFIX AP-index SSID suffix)
+                             //  66 -> 67: INDEX_SUFFIX AP-index SSID suffix;
+                             //  67 -> 68: BOOTSTRAP_DNS derived from the DoH presets)
 
 const PAGES = {
   builder: 'public/builder/index.html',

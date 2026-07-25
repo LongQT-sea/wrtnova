@@ -89,8 +89,10 @@ export function firstInvalidPort(listStr) {
   return bad ? bad.ports : null;
 }
 
-// Endpoint is host-only, so split off any pasted port; a bracketed [ipv6] keeps
-// brackets that UCI rejects. [ipv6]:port -> strip + port; a lone ':' -> host:port.
+// The form has one "host:port" endpoint field; wrtnova.sh wants the two apart
+// (endpoint_host= / endpoint_port=), so the emit paths split it here. A
+// bracketed [ipv6] loses the brackets, which UCI rejects; a bare IPv6 has more
+// than one ':' and is left whole rather than sliced at the wrong colon.
 /** @param {string} raw @returns {{ host: string, port: string }} */
 export function normalizeEndpoint(raw) {
   const s = String(raw == null ? '' : raw).trim();
@@ -98,6 +100,19 @@ export function normalizeEndpoint(raw) {
   if (b) return { host: b[1], port: b[2] || '' };
   if ((s.match(/:/g) || []).length === 1) { const [host, port] = s.split(':'); return { host, port }; }
   return { host: s, port: '' };
+}
+
+// The inverse, for the two directions that arrive pre-split: a WARP
+// registration and a restored build. A bare IPv6 host must be bracketed on the
+// way back in, or normalizeEndpoint would see many colons and refuse to split
+// it again - the port would be silently lost on the next build.
+/** @param {string} [host] @param {string} [port] @returns {string} */
+export function joinEndpoint(host, port) {
+  const h = String(host == null ? '' : host).trim();
+  const p = String(port == null ? '' : port).trim();
+  if (!h || !p) return h;
+  const bare6 = !h.startsWith('[') && (h.match(/:/g) || []).length > 1;
+  return (bare6 ? `[${h}]` : h) + ':' + p;
 }
 
 /**

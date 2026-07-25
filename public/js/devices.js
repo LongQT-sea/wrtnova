@@ -370,7 +370,6 @@ import './ui.js';
       prof.target + ' • ' + defs + ' default + ' + devs + ' device pkgs • ' + (data.version_code || '');
     if (ui.renderAutoPackages) ui.renderAutoPackages();
     const allPkgs = (data.default_packages || []).concat((dev.device_packages || []));
-    const hasWifi = /\bwpad[-\w]|\bhostapd|\bmac80211/.test(allPkgs.join(' '));
     const hasCt   = allPkgs.some(p => /^ath10k-firmware-|^kmod-ath10k-ct/.test(p));
     if (ui.updateAth10kVisibility) ui.updateAth10kVisibility(hasCt);
     // WED needs the mt7915e MediaTek Filogic wireless driver (MT7622/7981/7986);

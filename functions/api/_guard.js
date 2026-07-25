@@ -2,12 +2,12 @@
 //
 // What these guards actually provide:
 //
-//   originAllowed  — stops browser-based cross-origin fetch (CORS enforcement
+//   originAllowed  - stops browser-based cross-origin fetch (CORS enforcement
 //     by the browser). Any non-browser client (curl, scripts) can spoof the
 //     Origin header trivially, so this is not a server-side security boundary.
 //     Still worth having: stops lazy/accidental abuse from other web apps.
 //
-//   sessionPresent — adds one extra step for a scripter (they must call
+//   sessionPresent - adds one extra step for a scripter (they must call
 //     /api/session first to obtain a valid cookie). /api/session is open to
 //     anyone, so this is friction, not a lock. A determined caller can always
 //     get a real session and replay it.
@@ -35,11 +35,6 @@ export function originAllowed(request, env) {
     const re = new RegExp('^' + pat.replace(/[.+^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '[^.]+') + '$');
     return re.test(origin);
   });
-}
-
-export function getSid(request) {
-  const cookies = parseCookies(request.headers.get('cookie') || '');
-  return cookies.wrtnova_sid || null;
 }
 
 export function sessionPresent(request) {

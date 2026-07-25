@@ -15,7 +15,8 @@
 // raw carries a few gating-only helpers (wan_type) that are NOT emitted, exactly
 // as the old collectConfig output omitted them.
 
-import { resolveVlanEmit, DNS_DEFAULT, isAdguard, isDohEngine } from './visibility.mjs';
+import { resolveVlanEmit, DNS_DEFAULT, isAdguard, isDohEngine, deriveBootstrapDns } from './visibility.mjs';
+import { normalizeEndpoint } from './list-grammar.mjs';
 import { assembleBanipFeeds } from './packages.mjs';
 
 /**
@@ -34,6 +35,7 @@ export function deriveConfig(raw) {
   const wanType  = v('wan_type') || 'dhcp';
   const isRouter = apMode !== '1';
   const wgOn     = r.WG_ENABLE     === '1';
+  const endpoint = normalizeEndpoint(v('ENDPOINT'));
   const meshOn   = r.WIRELESS_MESH === '1' || r.WIRELESS_MESH_2G === '1';
   // Two meshpoints bridged into br-vlan can loop;
   const bothMesh = r.WIRELESS_MESH === '1' && r.WIRELESS_MESH_2G === '1';
@@ -124,8 +126,11 @@ export function deriveConfig(raw) {
 
     WG_PRIVATE_KEY:  wgOn && isRouter ? v('WG_PRIVATE_KEY')  : '',
     PEER_PUBLIC_KEY: wgOn && isRouter ? v('PEER_PUBLIC_KEY') : '',
-    ENDPOINT:        wgOn && isRouter ? v('ENDPOINT')        : '',
-    ENDPOINT_PORT:   wgOn && isRouter ? v('ENDPOINT_PORT')   : '',
+    // The form shows one "host:port" field; wrtnova.sh wants the two apart
+    // (endpoint_host=/endpoint_port=), so the split happens here, at the same
+    // layer wan_type becomes PPPOE_* and DNSMASQ_MULTI_INSTANCE inverts.
+    ENDPOINT:        wgOn && isRouter ? endpoint.host : '',
+    ENDPOINT_PORT:   wgOn && isRouter ? endpoint.port : '',
     PRESHARED_KEY:   wgOn && isRouter ? v('PRESHARED_KEY')   : '',
     WG_IPV4:         wgOn && isRouter ? v('WG_IPV4')         : '',
     WG_IPV6:         wgOn && isRouter ? v('WG_IPV6')         : '',
@@ -152,7 +157,7 @@ export function deriveConfig(raw) {
     // Encrypted-DNS upstreams apply only to the DoH engines, not the plain
     // dnsmasq modes ('none' and 'adblock-fast').
     DOH_UPSTREAMS:    isDohEngine(v('DNS_MODE')) ? v('DOH_UPSTREAMS') : '',
-    BOOTSTRAP_DNS:    isDohEngine(v('DNS_MODE')) ? v('BOOTSTRAP_DNS') : '',
+    BOOTSTRAP_DNS:    isDohEngine(v('DNS_MODE')) ? deriveBootstrapDns(r) : '',
     // UI toggle "Per-Network Dnsmasq" defaults off; emit the single-instance flag
     // unless the user turns multi on (applies in AP mode too).
     DNSMASQ_SINGLE_INSTANCE: v('DNSMASQ_MULTI_INSTANCE') !== '1' ? '1' : '',

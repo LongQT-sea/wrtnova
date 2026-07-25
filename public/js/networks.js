@@ -14,7 +14,7 @@ import { mergeNodeConfig } from './config-merge.mjs';
 import { IFACE_FIELDS, ifaceValid, PREFIX_FIELDS, prefixValid, WIFI_TEXT_FIELDS, wifiTextValid, pskVlanPassIssue } from './config-form.mjs';
 import { detectVlanConflict, truncateAdditionalVlans, SWCONFIG_VLAN_MAX } from './visibility.mjs';
 import { renderConfigBlock } from './render-config.mjs';
-import { parseList, firstInvalidIpv6Octet, hostnameValid, ddnsHostnameValid, macValid, firstInvalidHost, firstInvalidPort, portListValid, normalizeEndpoint } from './list-grammar.mjs';
+import { parseList, firstInvalidIpv6Octet, hostnameValid, ddnsHostnameValid, macValid, firstInvalidHost, firstInvalidPort, portListValid, joinEndpoint } from './list-grammar.mjs';
 import { parseAdditionalPackages } from './packages.mjs';
 import { createStore } from './store.mjs';
 
@@ -99,7 +99,7 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
       ADDITIONAL_VLAN_LIST: '', TAGGED_LAN_VLAN: '',
       P_STEERING: '', ULA_PREFIX: '',
       WG_PRIVATE_KEY: '', PEER_PUBLIC_KEY: '', ENDPOINT: '',
-      ENDPOINT_PORT: '', PRESHARED_KEY: '', WG_IPV4: '', WG_IPV6: '',
+      PRESHARED_KEY: '', WG_IPV4: '', WG_IPV6: '',
       WG_DNS_V4: '', WG_DNS_V6: '', WG_MTU: '', ALLOWED_IPS: '',
       SPLIT_TUNNEL_V4: '', SPLIT_TUNNEL_V6: '',
       wan_type: 'dhcp', PPPOE_USERNAME: '', PPPOE_PASSWD: '',
@@ -289,7 +289,7 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
     });
   }
 
-  function showPanelDone(net, node, actEl, firmwareUrl, images, bin_dir, asuBase, onDone) {
+  function showPanelDone(net, node, actEl, images, bin_dir, asuBase, onDone) {
     if (!actEl) return;
     const id = 'buildbtn-' + uid();
     const isAp = node.overrides.AP_MODE === '1';
@@ -497,11 +497,35 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
       ).join('');
   }
 
-  function versionRow(id, currentOverride, sharedVersion) {
-    return '<div class="form-row"><label class="form-label" for="np-ver-' + id + '">' + S.openWrtVersion + '</label>' +
-      '<select class="input-base" id="np-ver-' + id + '" style="max-width:220px">' +
+  // One .opt-card row - title (plus an optional description) on the left, the
+  // control on the trailing edge. Same shape the static markup in both pages
+  // uses, which is what the CSS in src/style.css targets; the control carries
+  // its own `.opt-control .opt-field` / `.opt-stack` classes so a caller can
+  // pick how wide it sits. `rowAttrs` is for the odd row that has to override
+  // the .form-row margin.
+  function optCard(forId, title, control, help) {
+    return '<div class="opt-card">' +
+      '<div class="opt-text">' +
+        '<label class="opt-title" for="' + forId + '">' + title + '</label>' +
+        (help ? '<p class="form-help mt-0">' + help + '</p>' : '') +
+      '</div>' +
+      control +
+    '</div>';
+  }
+
+  // One bordered box around a run of opt-cards, the shape the DDNS card uses:
+  // .opt-group drops each nested card's own shell and separates them with a
+  // rule, so a set of related fields reads as one control rather than five.
+  function cardGroup(cards) {
+    return '<div class="form-row form-row--full" style="margin-top:0">' +
+      '<div class="opt-group">' + cards + '</div></div>';
+  }
+
+  function versionCard(id, currentOverride, sharedVersion) {
+    return optCard('np-ver-' + id, S.openWrtVersion,
+      '<select class="opt-control opt-field input-base" id="np-ver-' + id + '">' +
       versionOpts(currentOverride, sharedVersion) +
-      '</select></div>';
+      '</select>');
   }
 
 
@@ -511,18 +535,20 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
   function nodeExtrasHTML(id, hasDevice) {
     if (!hasDevice) return '';
     const sid = esc(id);
-    const sumCls = 'text-xs text-zinc-500 dark:text-zinc-400 cursor-pointer hover:text-zinc-700 dark:hover:text-zinc-200 select-none';
+    const sumCls = 'text-xs text-zinc-500 dark:text-zinc-400 cursor-pointer hover:text-zinc-700 dark:hover:text-zinc-200 select-none flex items-center gap-1';
+    // Same disclosure chevron the static <summary> rows use; CSS rotates it shut.
+    const chev = '<svg class="w-3 h-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>';
     return (
       '<div class="mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-800">' +
         '<details>' +
-          '<summary class="' + sumCls + '">' + S.advancedOptions + '</summary>' +
+          '<summary class="' + sumCls + '">' + chev + '<span>' + S.advancedOptions + '</span></summary>' +
           '<div class="mt-2 pl-1 space-y-2">' +
             '<details open>' +
-              '<summary class="' + sumCls + '">' + S.finalPackages + '</summary>' +
+              '<summary class="' + sumCls + '">' + chev + '<span>' + S.finalPackages + '</span></summary>' +
               '<div id="np-pkgs-' + sid + '" class="flex flex-wrap gap-1 py-1 mt-2 min-h-[1.75rem]"></div>' +
             '</details>' +
             '<details open>' +
-              '<summary class="' + sumCls + '">' + S.configPreview + '</summary>' +
+              '<summary class="' + sumCls + '">' + chev + '<span>' + S.configPreview + '</span></summary>' +
               '<div class="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2">' +
                 '<label class="flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400 cursor-pointer select-none">' +
                   '<input type="checkbox" id="np-reveal-' + sid + '" class="align-middle"><span>' + S.revealSecrets + '</span></label>' +
@@ -602,93 +628,92 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
     const id = esc(node.id);
     const devTitle = esc(node.device_target.title || '');
     const verOverride = node.overrides.version || '';
-    const effectiveVer = verOverride || node.device_target.version || cfg.shared_version || '';
-    const devVer = esc(effectiveVer);
     const hasDevice = !!node.device_target.profile;
     const allPkgs = [...(node.device_target.default_packages || []), ...(node.device_target.device_packages || [])];
     const hasWifi = /\bwpad-?|\bhostapd|\bmac80211/.test(allPkgs.join(' '));
     const hasCt = allPkgs.some(p => /^ath10k-firmware-|^kmod-ath10k-ct/.test(p));
     const nonCtRow = hasCt
-      ? '<div class="form-row"><span class="form-label">' + S.nonCtAth10k + '</span>' +
-        '<label class="toggle-label"><span class="toggle-wrap">' +
+      ? '<div class="form-row form-row--full"><label class="toggle-label"><span class="toggle-wrap">' +
         '<input type="checkbox" class="toggle-input" id="np-nonct-' + id + '"' + (node.overrides.NON_CT_ATH10K === '1' ? ' checked' : '') + '>' +
         '<span class="toggle-track"></span><span class="toggle-thumb"></span></span>' +
-        '<span class="toggle-text text-xs">' + S.useNonCtAth10k + '</span></label></div>'
+        '<div><span class="toggle-text">' + S.nonCtAth10k + '</span>' +
+        '<p class="form-help mt-0">' + S.useNonCtAth10k + '</p></div></label></div>'
       : '';
     const wedCapable = allPkgs.some(p => /^kmod-mt7915e$/.test(p));
     const wedRow = wedCapable
-      ? '<div class="form-row"><span class="form-label">' + S.wedAccel + '</span>' +
-        '<label class="toggle-label"><span class="toggle-wrap">' +
+      ? '<div class="form-row form-row--full"><label class="toggle-label"><span class="toggle-wrap">' +
         '<input type="checkbox" class="toggle-input" id="np-wed-' + id + '"' + (node.overrides.WED_ENABLE === '1' ? ' checked' : '') + '>' +
         '<span class="toggle-track"></span><span class="toggle-thumb"></span></span>' +
-        '<span class="toggle-text text-xs">' + S.useWed + '</span></label></div>'
+        '<div><span class="toggle-text">' + S.wedAccel + '</span>' +
+        '<p class="form-help mt-0">' + S.useWed + '</p></div></label></div>'
       : '';
     const irqRow =
-      '<div class="form-row"><span class="form-label">' + S.irqbalance + '</span>' +
-      '<label class="toggle-label"><span class="toggle-wrap">' +
-      '<input type="checkbox" class="toggle-input" id="np-irq-' + id + '"' + (irqChecked ? ' checked' : '') + '>' +
-      '<span class="toggle-track"></span><span class="toggle-thumb"></span></span>' +
-      '<span class="toggle-text text-xs">' + S.useIrqbalance + '</span></label></div>';
+      '<div class="form-row form-row--full"><label class="toggle-label"><span class="toggle-wrap">' +
+        '<input type="checkbox" class="toggle-input" id="np-irq-' + id + '"' + (irqChecked ? ' checked' : '') + '>' +
+        '<span class="toggle-track"></span><span class="toggle-thumb"></span></span>' +
+        '<div><span class="toggle-text">' + S.irqbalance + '</span>' +
+        '<p class="form-help mt-0">' + S.useIrqbalance + '</p></div></label></div>';
 
-    // Per-node 2.4GHz mesh override only where the network opts in (shared WIRELESS_MESH_2G).
+    // Per-node 2.4 GHz mesh override only where the network opts in (shared WIRELESS_MESH_2G).
     const mesh2gToggle = cfg.WIRELESS_MESH_2G === '1'
-      ? '<label class="toggle-label" style="margin-top:.4rem"><span class="toggle-wrap">' +
+      ? '<div class="form-row form-row--full"><label class="toggle-label"><span class="toggle-wrap">' +
         '<input type="checkbox" class="toggle-input" id="np-mesh2g-' + id + '"' + (meshChecked2g ? ' checked' : '') + '>' +
         '<span class="toggle-track"></span><span class="toggle-thumb"></span></span>' +
-        '<span class="toggle-text text-xs">' + S.enableMeshBackhaul2G + '</span></label>'
+        '<div><span class="toggle-text">' + S.wirelessMesh2g + '</span>' +
+        '<p class="form-help mt-0">' + S.mesh2gNote + '</p></div></label></div>'
       : '';
 
     const wifiRows =
-      (hasWifi ? '<div class="form-row"><span class="form-label">' + S.wirelessMesh + '</span>' +
-      '<div><label class="toggle-label"><span class="toggle-wrap">' +
-      '<input type="checkbox" class="toggle-input" id="np-mesh-' + id + '"' + (meshChecked ? ' checked' : '') + '>' +
-      '<span class="toggle-track"></span><span class="toggle-thumb"></span></span>' +
-      '<span class="toggle-text text-xs">' + S.enableMeshBackhaul + '</span></label>' +
-      mesh2gToggle + '</div></div>' : '') +
-      (hasWifi ? '<div class="form-row"><span class="form-label">' + S.backhaulOnly + '</span>' +
-      '<label class="toggle-label"><span class="toggle-wrap">' +
-      '<input type="checkbox" class="toggle-input" id="np-apdisable-' + id + '"' + (apDisableChecked ? ' checked' : '') + '>' +
-      '<span class="toggle-track"></span><span class="toggle-thumb"></span></span>' +
-      '<span class="toggle-text text-xs">' + S.disableAllAps + '</span></label></div>' : '') +
+      (hasWifi ? '<div class="form-row form-row--full"><label class="toggle-label"><span class="toggle-wrap">' +
+        '<input type="checkbox" class="toggle-input" id="np-mesh-' + id + '"' + (meshChecked ? ' checked' : '') + '>' +
+        '<span class="toggle-track"></span><span class="toggle-thumb"></span></span>' +
+        '<div><span class="toggle-text">' + S.wirelessMesh + '</span>' +
+        '<p class="form-help mt-0">' + S.wiredBackhaulNote + '</p></div></label></div>' +
+      mesh2gToggle : '') +
+      (hasWifi ? '<div class="form-row form-row--full"><label class="toggle-label"><span class="toggle-wrap">' +
+        '<input type="checkbox" class="toggle-input" id="np-apdisable-' + id + '"' + (apDisableChecked ? ' checked' : '') + '>' +
+        '<span class="toggle-track"></span><span class="toggle-thumb"></span></span>' +
+        '<div><span class="toggle-text">' + S.backhaulOnly + '</span>' +
+        '<p class="form-help mt-0">' + S.disableAllAps + '</p></div></label></div>' : '') +
       nonCtRow + wedRow + irqRow;
 
     let fields;
-    const deviceRow =
-      '<div class="form-row" style="margin-top:0">' +
-      '<label class="form-label">' + S.device + '</label>' +
-      '<div><div class="flex gap-2 items-center">' +
-      '<input class="input-base" id="np-device-' + id + '" value="' + devTitle + '" placeholder="' + S.noDeviceSelected + '" readonly style="cursor:pointer;max-width:280px">' +
-      '<button type="button" class="btn text-xs flex-shrink-0" data-pickdevice="' + id + '">' + S.change + '</button>' +
-      '</div>' +
-      '<p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1">' + S.deviceRequirement + '</p>' +
-      '</div></div>';
+    // The device control is a readonly field plus its picker button, so it is a
+    // wrapper rather than a bare input - the same thing /builder does for the
+    // device combobox.
+    const deviceRow = optCard('np-device-' + id, S.device,
+      '<div class="opt-control opt-field flex gap-2 items-center">' +
+        '<input class="input-base" id="np-device-' + id + '" value="' + devTitle + '" placeholder="' + S.noDeviceSelected + '" readonly style="cursor:pointer">' +
+        '<button type="button" class="btn text-xs flex-shrink-0" data-pickdevice="' + id + '">' + S.change + '</button>' +
+      '</div>',
+      S.deviceRequirement);
+
+    const nameRow =
+      optCard('np-name-' + id, S.nodeName,
+        '<input class="opt-control opt-field input-base" id="np-name-' + id + '" value="' + esc(node.name) + '">');
+
+    const hostRow = (placeholder) =>
+      optCard('np-host-' + id, S.hostname,
+        '<input class="opt-control opt-field input-base" id="np-host-' + id + '" value="' +
+        esc(node.overrides.HOST_NAME || '') + '" placeholder="' + placeholder + '">');
 
     if (!isAp) {
-      fields = deviceRow +
-        versionRow(id, verOverride, cfg.shared_version) +
-
-        '<div class="form-row"><label class="form-label" for="np-name-' + id + '">' + S.nodeName + '</label>' +
-        '<input class="input-base" id="np-name-' + id + '" value="' + esc(node.name) + '" style="max-width:220px"></div>' +
-
-        '<div class="form-row"><label class="form-label" for="np-host-' + id + '">' + S.hostname + '</label>' +
-        '<input class="input-base" id="np-host-' + id + '" value="' + esc(node.overrides.HOST_NAME || '') + '" placeholder="WrtNova" style="max-width:220px"></div>' +
-
-        wifiRows;
+      fields = cardGroup(
+        deviceRow +
+        versionCard(id, verOverride, cfg.shared_version) +
+        nameRow +
+        hostRow('WrtNova')
+      ) + wifiRows;
     } else {
-      fields = deviceRow +
-        versionRow(id, verOverride, cfg.shared_version) +
-
-        '<div class="form-row"><label class="form-label" for="np-name-' + id + '">' + S.nodeName + '</label>' +
-        '<input class="input-base" id="np-name-' + id + '" value="' + esc(node.name) + '" style="max-width:220px"></div>' +
-
-        '<div class="form-row"><label class="form-label" for="np-host-' + id + '">' + S.hostname + '</label>' +
-        '<input class="input-base" id="np-host-' + id + '" value="' + esc(node.overrides.HOST_NAME || '') + '" placeholder="WrtNova-' + esc(node.overrides.AP_INDEX || '2') + '" style="max-width:220px"></div>' +
-
-        '<div class="form-row"><label class="form-label" for="np-apidx-' + id + '">' + S.apIndex + '</label>' +
-        '<div><input type="number" class="input-base" id="np-apidx-' + id + '" min="2" max="19" value="' + esc(node.overrides.AP_INDEX || '2') + '" style="max-width:90px">' +
-        '</div></div>' +
-
-        wifiRows;
+      fields = cardGroup(
+        deviceRow +
+        versionCard(id, verOverride, cfg.shared_version) +
+        nameRow +
+        hostRow('WrtNova-' + esc(node.overrides.AP_INDEX || '2')) +
+        optCard('np-apidx-' + id, S.apIndex,
+          '<input type="number" class="opt-control opt-field--narrow input-base" id="np-apidx-' + id +
+          '" min="2" max="254" value="' + esc(node.overrides.AP_INDEX || '2') + '">')
+      ) + wifiRows;
     }
 
     return (
@@ -733,11 +758,12 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
       const idxInp = panel.querySelector('#np-apidx-' + node.id);
       if (idxInp) {
         idxInp.addEventListener('change', () => {
-          let val = Math.max(2, parseInt(idxInp.value) || 2);
+          let val = Math.min(254, Math.max(2, parseInt(idxInp.value) || 2));
           const used = net.nodes
             .filter(n => n.id !== node.id && n.overrides.AP_MODE === '1')
             .map(n => parseInt(n.overrides.AP_INDEX) || 2);
-          while (used.includes(val)) val++;
+          // Bump off a taken index, but never past the last usable octet.
+          while (used.includes(val) && val < 254) val++;
           idxInp.value = String(val);
           panel.querySelector('#np-host-' + node.id)?.setAttribute('placeholder', 'WrtNova-' + val);
         });
@@ -897,14 +923,6 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
       if (!el) return;
       if (PREFIX_FIELDS.includes(el.id)) {
         el.setCustomValidity(prefixValid(el.value) ? '' : t('prefixInvalid', { field: el.value }));
-      } else if (el.id === 'ENDPOINT') {
-        // Dispatch change after mutating so the store re-syncs (JS value sets
-        // fire no input/change on their own).
-        const { host, port } = normalizeEndpoint(el.value);
-        if (host !== el.value) { el.value = host; el.dispatchEvent(new Event('change', { bubbles: true })); }
-        const portEl = document.getElementById('ENDPOINT_PORT');
-        if (port && portEl) { portEl.value = port; portEl.dispatchEvent(new Event('change', { bubbles: true })); }
-        return;
       } else if (el.id === 'LOOKUP_HOSTNAME') {
         el.setCustomValidity(ddnsHostnameValid(el.value) ? '' : t('ddnsHostnameInvalid', { field: el.value }));
       } else if (el.id === 'WAN_MAC_ADDR') {
@@ -1488,7 +1506,7 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
           ' · ' + t('builtAgo', { ago: timeAgo(node.last_build.timestamp) });
       }
     }
-    showPanelDone(net, node, actEl, firmwareUrl, images, data.bin_dir || '', base, () => buildNode(net, node));
+    showPanelDone(net, node, actEl, images, data.bin_dir || '', base, () => buildNode(net, node));
     updateBuildAllRow(node.id, firmwareUrl, null);
   }
 
@@ -1532,15 +1550,19 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
       '<div class="card p-4 mt-4">' +
       '<p class="ba-title text-xs font-semibold mb-3 text-zinc-500 dark:text-zinc-400">' +
         t(ready.length > 1 ? 'buildingNodesPlural' : 'buildingNodes', { n: ready.length }) + '</p>' +
-      '<div class="space-y-3">' +
+      // Name and status share a text line, the bar spans the full width below
+      // it. Keeping the bar out of the text row is what makes this line up: a
+      // 6px bar can never sit on the same baseline as 12px type, and the old
+      // three-column row left it floating above both labels.
+      '<div class="space-y-4">' +
       ready.map(n =>
-        '<div id="ba-row-' + esc(n.id) + '" class="flex items-center gap-3">' +
-        '<span class="text-xs font-medium w-28 truncate flex-shrink-0 leading-none">' + esc(n.name) + '</span>' +
-        '<div class="flex-1 min-w-0 flex items-center">' +
+        '<div id="ba-row-' + esc(n.id) + '" class="space-y-1.5">' +
+        '<div class="flex items-baseline gap-3">' +
+        '<span class="text-xs font-medium truncate flex-1 min-w-0">' + esc(n.name) + '</span>' +
+        '<span class="ba-status text-xs text-zinc-500 dark:text-zinc-400 truncate flex-none max-w-[60%] text-right"></span>' +
+        '</div>' +
         '<div class="w-full h-1.5 bg-zinc-200 dark:bg-zinc-700 rounded overflow-hidden">' +
         '<div class="ba-bar h-full bg-blue-500 transition-all duration-500" style="width:2%"></div></div>' +
-        '</div>' +
-        '<div class="ba-link flex-shrink-0 w-20 text-right leading-none"></div>' +
         '</div>'
       ).join('') +
       '</div></div>';
@@ -1560,27 +1582,38 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
     });
   }
 
+  // The status slot carries the running text (queue position, "Building…", the
+  // DNS auto-retry note) and is then replaced in place by the download link or
+  // the error, so a finished row reads the same as a running one.
   function updateBuildAllRow(nodeId, firmwareUrl, errMsg) {
     const row = document.getElementById('ba-row-' + nodeId);
     if (!row) return;
     const bar = row.querySelector('.ba-bar');
-    const label = row.querySelector('.ba-label');
-    const link = row.querySelector('.ba-link');
+    const status = row.querySelector('.ba-status');
+    if (status) status.removeAttribute('title');
     if (errMsg) {
       if (bar) { bar.style.width = '100%'; bar.style.background = '#ef4444'; }
-      if (link) link.innerHTML = '<span class="text-xs text-red-500 dark:text-red-400" title="' + esc(errMsg) + '">' + S.error + '</span>';
+      if (status) status.innerHTML = '<span class="text-red-500 dark:text-red-400" title="' + esc(errMsg) + '">' + S.error + '</span>';
     } else {
       if (bar) { bar.style.width = '100%'; bar.style.background = '#22c55e'; }
-      if (link && firmwareUrl)
-        link.innerHTML = '<a href="' + esc(firmwareUrl) + '" target="_blank" class="text-xs text-blue-500 hover:underline">' + S.download + '</a>';
+      if (status)
+        status.innerHTML = firmwareUrl
+          ? '<a href="' + esc(firmwareUrl) + '" target="_blank" class="text-blue-500 hover:underline">' + S.download + '</a>'
+          : '';
     }
   }
 
-  function updateBuildAllProgress(nodeId, pct) {
+  function updateBuildAllProgress(nodeId, pct, label) {
     const row = document.getElementById('ba-row-' + nodeId);
     if (!row) return;
     const bar = row.querySelector('.ba-bar');
     if (bar) bar.style.width = pct + '%';
+    if (label != null) {
+      const status = row.querySelector('.ba-status');
+      // The DNS auto-retry note is wider than the slot, so it truncates - the
+      // title is the only way to read the rest of it.
+      if (status) { status.textContent = label; status.title = label; }
+    }
   }
 
   async function startBuildAllNode(net, node, onComplete) {
@@ -1642,8 +1675,9 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
         asuData.detail || ('ASU HTTP ' + asuR.status)
       );
     } catch (e) {
-      if (planDnsAutoRetry(net, node, builtDns, e.message)) {
-        updateBuildAllProgress(node.id, 5);
+      const retryMode = planDnsAutoRetry(net, node, builtDns, e.message);
+      if (retryMode) {
+        updateBuildAllProgress(node.id, 5, dnsAutoRetryNote(retryMode));
         setTimeout(() => startBuildAllNode(net, node, onComplete), 2000);
       } else {
         updateBuildAllRow(node.id, null, t('buildFailed', { msg: e.message }));
@@ -1693,8 +1727,9 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
           finishBuildAllNode(net, node, data, base);
         } else {
           const errMsg = data.detail || 'HTTP ' + r.status;
-          if (planDnsAutoRetry(net, node, builtDns, errMsg)) {
-            updateBuildAllProgress(node.id, 5);
+          const retryMode = planDnsAutoRetry(net, node, builtDns, errMsg);
+          if (retryMode) {
+            updateBuildAllProgress(node.id, 5, dnsAutoRetryNote(retryMode));
             setTimeout(() => startBuildAllNode(net, node, onComplete), 2000);
             return;   // the rebuild owns onComplete()
           }
@@ -1937,7 +1972,7 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
   }
 
   // -- WARP prefill -------------------------------------------------
-  // Scoped to page lifetime — cleared on reload so each new page load gets a fresh reg.
+  // Scoped to page lifetime - cleared on reload so each new page load gets a fresh reg.
   let _warpSessionToken = '';
 
   async function prefillWarp() {
@@ -1965,8 +2000,8 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
       const f = (id, v) => { const el = document.getElementById(id); if (el) el.value = v || ''; };
       f('WG_PRIVATE_KEY',  data.WG_PRIVATE_KEY);
       f('PEER_PUBLIC_KEY', data.PEER_PUBLIC_KEY);
-      f('ENDPOINT',        data.ENDPOINT);
-      f('ENDPOINT_PORT',   data.ENDPOINT_PORT);
+      // WARP hands back host and port apart; the form shows them joined.
+      f('ENDPOINT',        joinEndpoint(data.ENDPOINT, data.ENDPOINT_PORT));
       f('WG_IPV4',         data.WG_IPV4);
       f('WG_IPV6',         data.WG_IPV6);
       f('ALLOWED_IPS',     data.ALLOWED_IPS);
@@ -2070,9 +2105,6 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
       if (e.key === 'Enter') { e.preventDefault(); if (net) exitRenameMode(net, true); }
       if (e.key === 'Escape') exitRenameMode(net, false);
     });
-
-
-    // Add AP cancel
 
     // Delete cancel
     document.getElementById('btn-cancel-delete')?.addEventListener('click', () => document.getElementById('modal-delete').close());

@@ -4,11 +4,12 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 
 import { deriveVisibility, deriveNetRows, detectVlanConflict,
          resolveVlanAssignment, resolveVlanEmit,
          isSwconfigTarget, countBaseVlanSlots, truncateAdditionalVlans,
-         SWCONFIG_VLAN_MAX } from '../public/js/visibility.mjs';
+         SWCONFIG_VLAN_MAX, deriveBootstrapDns, DOH_PROVIDERS } from '../public/js/visibility.mjs';
 
 // ---------------------------------------------------------------------------
 // deriveVisibility
@@ -55,12 +56,29 @@ test('deriveVisibility: wg-off-notice (config entered but VPN off)', () => {
   assert.equal(deriveVisibility({ AP_MODE: '1', WG_ENABLE: '', ENDPOINT: 'vpn.example.com' })['wg-off-notice'], true);
 });
 
-test('deriveVisibility: ssh-pw-row, mesh, wan-tagged, wan-b flags', () => {
+test('deriveVisibility: ssh-pw-row, mesh, wan-b flags', () => {
   assert.equal(deriveVisibility({ SSH_PUBLIC_KEY: 'ssh-ed25519 AAA' })['ssh-pw-row'], false);
   assert.equal(deriveVisibility({ SSH_PUBLIC_KEY: '   ' })['ssh-pw-row'], true);
   assert.equal(deriveVisibility({ WIRELESS_MESH: '1' })['mesh-only'], false);
-  assert.equal(deriveVisibility({ WAN_IS_TAGGED: '1' })['wan-tagged-only'], false);
   assert.equal(deriveVisibility({ WAN_B_ENABLE: '1' })['wan-b-only'], false);
+});
+
+// The WAN VLAN id has no visibility class on purpose, so nothing can start
+// hiding it again: wrtnova.sh reads wan_vid=${WAN_VLAN_ID:-20} unconditionally,
+// and forces WAN_IS_TAGGED=1 on a single-NIC board, so the field can be needed
+// while the toggle reads off.
+test('deriveVisibility: the WAN VLAN id is never conditional', () => {
+  for (const cfg of [{}, { WAN_IS_TAGGED: '1' }, { WAN_IS_TAGGED: '' }, { BRIDGE_WAN_PORT: '1' }]) {
+    assert.equal('wan-tagged-only' in deriveVisibility(cfg), false);
+  }
+});
+
+// Hiding the WAN-B id is safe only because it is cosmetic: with WAN_B_ENABLE
+// off the field emits '' whatever is typed in it, so a hidden value can never
+// reach the built config.
+test('WAN_B_VLAN_ID emits nothing while WAN-B is off, typed or not', () => {
+  assert.equal(resolveVlanEmit({ WAN_B_ENABLE: '', WAN_B_VLAN_ID: '25' }).WAN_B_VLAN_ID, '');
+  assert.equal(resolveVlanEmit({ WAN_B_ENABLE: '1', WAN_B_VLAN_ID: '25' }).WAN_B_VLAN_ID, '25');
 });
 
 // ---------------------------------------------------------------------------
@@ -277,4 +295,78 @@ test('truncateAdditionalVlans: dedupes and keeps first-typed VIDs before droppin
   assert.equal(r.truncated, true);
   // 16 tokens, one dupe (50) -> 15 unique; keep first 14, drop the 15th (190).
   assert.equal(r.dropped, '190');
+});
+
+// deriveVisibility is only half of a rule - the other half is an element that
+// actually carries the class. `wan-b-only` lost its element in June 2026
+// (0ec92a6, the WAN advanced-options collapse) and went on being computed every
+// render with nothing to apply it to; `wan-tagged-only` sat beside it encoding a
+// rule wrtnova.sh does not have. Neither failed anything, because a selector
+// with no subscriber is silent by construction. This is that missing check.
+test('every visibility class is used by at least one element', () => {
+  const sources = ['public/builder/index.html', 'public/networks/index.html', 'public/js/networks.js']
+    .map(p => readFileSync(new URL('../' + p, import.meta.url), 'utf8'));
+  const classes = Object.keys(deriveVisibility({}));
+  assert.ok(classes.length > 0);
+  // '-' is a word boundary for \\b, so the class is matched between explicit
+  // delimiters instead - otherwise 'ap-only' would match inside 'iot-wg-only'.
+  const orphans = classes.filter(cls =>
+    !sources.some(src => new RegExp(`[\\s"']${cls}[\\s"']`).test(src)));
+  assert.deepEqual(orphans, [], `visibility classes computed but never applied:\n${orphans.join('\n')}`);
+});
+
+// ---------------------------------------------------------------------------
+// deriveBootstrapDns
+// ---------------------------------------------------------------------------
+// The "Add DoH preset" control used to append a provider's plain-DNS IPs into
+// the BOOTSTRAP_DNS textarea. Nothing removed them again, and wrtnova.sh feeds
+// BOOTSTRAP_DNS to fallback_dns as well as bootstrap_dns - so dropping a
+// provider left its plaintext resolver reachable as a fallback. Deriving from
+// the upstream list instead is what makes removal work.
+
+const CF = 'https://cloudflare-dns.com/dns-query';
+const GOOG = 'https://dns.google/dns-query';
+
+test('deriveBootstrapDns: a listed provider contributes its bootstrap IPs', () => {
+  assert.equal(deriveBootstrapDns({ DOH_UPSTREAMS: CF }),
+    '1.0.0.1\n2606:4700:4700::1001');
+});
+
+test('deriveBootstrapDns: removing the URL removes its IPs - the whole point', () => {
+  const withCf = deriveBootstrapDns({ DOH_UPSTREAMS: `${CF}\n${GOOG}` });
+  assert.ok(withCf.includes('1.0.0.1'));
+  const without = deriveBootstrapDns({ DOH_UPSTREAMS: GOOG });
+  assert.equal(without.includes('1.0.0.1'), false);
+  assert.equal(without.includes('2606:4700:4700::1001'), false);
+  assert.equal(without, '8.8.8.8\n2001:4860:4860::8888');
+});
+
+test('deriveBootstrapDns: the user\'s own entries survive alongside derived ones', () => {
+  const out = deriveBootstrapDns({ DOH_UPSTREAMS: CF, BOOTSTRAP_DNS: '192.0.2.1' });
+  assert.deepEqual(out.split('\n'), ['1.0.0.1', '2606:4700:4700::1001', '192.0.2.1']);
+});
+
+test('deriveBootstrapDns: no duplicates when the user typed a derived IP too', () => {
+  const out = deriveBootstrapDns({ DOH_UPSTREAMS: CF, BOOTSTRAP_DNS: '1.0.0.1' });
+  assert.deepEqual(out.split('\n'), ['1.0.0.1', '2606:4700:4700::1001']);
+});
+
+test('deriveBootstrapDns: an unknown custom resolver contributes nothing', () => {
+  assert.equal(deriveBootstrapDns({ DOH_UPSTREAMS: 'https://doh.example.com/dns-query' }), '');
+  // ...but the user can still supply its bootstrap by hand
+  assert.equal(deriveBootstrapDns({
+    DOH_UPSTREAMS: 'https://doh.example.com/dns-query', BOOTSTRAP_DNS: '198.51.100.1',
+  }), '198.51.100.1');
+});
+
+test('deriveBootstrapDns: empty config emits nothing, so no redundant default', () => {
+  assert.equal(deriveBootstrapDns({}), '');
+});
+
+test('every DoH provider has a url and at least one bootstrap IP', () => {
+  assert.ok(DOH_PROVIDERS.length > 0);
+  for (const p of DOH_PROVIDERS) {
+    assert.match(p.url, /^https:\/\/\S+$/, `${p.name} url`);
+    assert.ok(p.bootstrap.split(/\s+/).filter(Boolean).length >= 1, `${p.name} bootstrap`);
+  }
 });

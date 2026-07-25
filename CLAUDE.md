@@ -47,8 +47,13 @@ This repo implements the WrtNova firmware builder per docs/SPEC.md.
 
 ## What to check before declaring a task done
 - `npm run ci` passes. This is the gate — run it before every commit (and re-run
-  before `--amend`). It chains: typecheck, tests, check:no-zero, check:marker,
-  check:no-dupes, check:budget, check:i18n.
+  before `--amend`). It chains: typecheck, check:no-undef, tests, check:no-zero,
+  check:marker, check:no-dupes, check:budget, check:i18n, check:i18n-locales,
+  check:i18n-diacritics.
+- check:no-undef is the safety net for the files jsconfig.json excludes (ui.js,
+  build.js, networks.js). It reports only TS2304 "Cannot find name", so deleting
+  a function while leaving a call site behind fails CI instead of shipping a
+  ReferenceError. Fix the call site; do not extend the allowlist.
 - Any new config key added to a build path (builder-config.mjs / config-merge.mjs)
   must also be declared on the `Config` typedef in public/js/types.mjs, or
   typecheck fails (TS2353/TS2339).

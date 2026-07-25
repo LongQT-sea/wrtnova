@@ -72,8 +72,8 @@
  * @property {string} [BAND_SUFFIX]        flag (append band to SSID)
  * @property {string} [INDEX_SUFFIX]       flag (append AP index to SSID in AP mode)
  * @property {string} [AP_DISABLE]         flag (disable all AP ifaces; backhaul-only node)
- * @property {string} [WIRELESS_MESH]      flag (5GHz 802.11s backhaul)
- * @property {string} [WIRELESS_MESH_2G]   flag (2.4GHz 802.11s backhaul)
+ * @property {string} [WIRELESS_MESH]      flag (5 GHz 802.11s backhaul)
+ * @property {string} [WIRELESS_MESH_2G]   flag (2.4 GHz 802.11s backhaul)
  * @property {string} [BRIDGE_STP]         flag
  * @property {string} [BATMAN_ADV]         flag (batman-adv on top of 802.11s mesh; adds luci-proto-batman-adv)
  * @property {string} [BATMAN_ALL_VLAN]    flag (also trunk WAN-B + ADDITIONAL_VLAN_LIST over bat0)
@@ -96,8 +96,8 @@
  * @property {string} [WIFI_LOG_LVL]
  * @property {string} [WG_PRIVATE_KEY]     sensitive
  * @property {string} [PEER_PUBLIC_KEY]    sensitive
- * @property {string} [ENDPOINT]           sensitive
- * @property {string} [ENDPOINT_PORT]      sensitive
+ * @property {string} [ENDPOINT]           sensitive (form holds "host:port"; emitted host-only)
+ * @property {string} [ENDPOINT_PORT]      sensitive (emitted only; split out of ENDPOINT)
  * @property {string} [PRESHARED_KEY]      sensitive
  * @property {string} [WG_IPV4]            sensitive
  * @property {string} [WG_IPV6]            sensitive
