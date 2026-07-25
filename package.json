@@ -22,6 +22,7 @@
     "embed": "node scripts/embed-wrtnova.mjs",
     "test": "node --test",
     "typecheck": "tsc -p jsconfig.json",
+    "check:no-undef": "node scripts/ci/check-no-undef.mjs",
     "check:no-zero": "node scripts/ci/check-no-zero.mjs",
     "check:marker": "node scripts/ci/check-marker.mjs",
     "check:no-dupes": "node scripts/ci/check-no-dupes.mjs",
@@ -29,7 +30,7 @@
     "check:i18n": "node scripts/ci/check-i18n-html.mjs",
     "check:i18n-locales": "node scripts/ci/check-i18n-locales.mjs",
     "check:i18n-diacritics": "node scripts/ci/check-i18n-diacritics.mjs",
-    "ci": "npm run typecheck && npm test && npm run check:no-zero && npm run check:marker && npm run check:no-dupes && npm run check:budget && npm run check:i18n && npm run check:i18n-locales && npm run check:i18n-diacritics"
+    "ci": "npm run typecheck && npm run check:no-undef && npm test && npm run check:no-zero && npm run check:marker && npm run check:no-dupes && npm run check:budget && npm run check:i18n && npm run check:i18n-locales && npm run check:i18n-diacritics"
   },
   "devDependencies": {
     "playwright": "^1.60.0",
