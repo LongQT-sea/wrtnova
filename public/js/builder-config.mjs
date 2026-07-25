@@ -16,6 +16,7 @@
 // as the old collectConfig output omitted them.
 
 import { resolveVlanEmit, DNS_DEFAULT, isAdguard, isDohEngine } from './visibility.mjs';
+import { normalizeEndpoint } from './list-grammar.mjs';
 import { assembleBanipFeeds } from './packages.mjs';
 
 /**
@@ -34,6 +35,7 @@ export function deriveConfig(raw) {
   const wanType  = v('wan_type') || 'dhcp';
   const isRouter = apMode !== '1';
   const wgOn     = r.WG_ENABLE     === '1';
+  const endpoint = normalizeEndpoint(v('ENDPOINT'));
   const meshOn   = r.WIRELESS_MESH === '1' || r.WIRELESS_MESH_2G === '1';
   // Two meshpoints bridged into br-vlan can loop;
   const bothMesh = r.WIRELESS_MESH === '1' && r.WIRELESS_MESH_2G === '1';
@@ -124,8 +126,11 @@ export function deriveConfig(raw) {
 
     WG_PRIVATE_KEY:  wgOn && isRouter ? v('WG_PRIVATE_KEY')  : '',
     PEER_PUBLIC_KEY: wgOn && isRouter ? v('PEER_PUBLIC_KEY') : '',
-    ENDPOINT:        wgOn && isRouter ? v('ENDPOINT')        : '',
-    ENDPOINT_PORT:   wgOn && isRouter ? v('ENDPOINT_PORT')   : '',
+    // The form shows one "host:port" field; wrtnova.sh wants the two apart
+    // (endpoint_host=/endpoint_port=), so the split happens here, at the same
+    // layer wan_type becomes PPPOE_* and DNSMASQ_MULTI_INSTANCE inverts.
+    ENDPOINT:        wgOn && isRouter ? endpoint.host : '',
+    ENDPOINT_PORT:   wgOn && isRouter ? endpoint.port : '',
     PRESHARED_KEY:   wgOn && isRouter ? v('PRESHARED_KEY')   : '',
     WG_IPV4:         wgOn && isRouter ? v('WG_IPV4')         : '',
     WG_IPV6:         wgOn && isRouter ? v('WG_IPV6')         : '',

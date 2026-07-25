@@ -55,7 +55,7 @@ export const BASE_SCHEMA = /** @type {[string,string,(string|undefined)?,(string
   ['WG_ENABLE', 'checkbox'], ['LAN_WG_BASE_PREFIX', 'text'], ['LAN_WG_IFACE', 'text'], ['LAN_WG_VLAN_ID', 'text'], ['LAN_WG_SUBNET', 'subnet'],
   ['ADDITIONAL_VLAN_LIST', 'text'], ['TAGGED_LAN_VLAN', 'checkbox'],
   ['P_STEERING', 'select'], ['ULA_PREFIX', 'text'],
-  ['WG_PRIVATE_KEY', 'text'], ['PEER_PUBLIC_KEY', 'text'], ['ENDPOINT', 'text'], ['ENDPOINT_PORT', 'text'],
+  ['WG_PRIVATE_KEY', 'text'], ['PEER_PUBLIC_KEY', 'text'], ['ENDPOINT', 'text'],
   ['PRESHARED_KEY', 'text'], ['WG_IPV4', 'text'], ['WG_IPV6', 'text'],
   ['WG_DNS_V4', 'text'], ['WG_DNS_V6', 'text'], ['WG_MTU', 'text'], ['ALLOWED_IPS', 'text'],
   ['SPLIT_TUNNEL_V4', 'text'], ['SPLIT_TUNNEL_V6', 'text'],

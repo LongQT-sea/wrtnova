@@ -214,7 +214,6 @@ export default {
   privateKey:         'Clave privada',
   peerPublicKey:      'Clave pública del par',
   endpoint:           'Punto de conexión',
-  endpointPort:       'Puerto del punto de conexión',
   presharedKey:       'Clave precompartida',
   clientIpv4:         'IPv4 del cliente',
   clientIpv6:         'IPv6 del cliente',

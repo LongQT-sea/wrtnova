@@ -14,7 +14,7 @@ import { mergeNodeConfig } from './config-merge.mjs';
 import { IFACE_FIELDS, ifaceValid, PREFIX_FIELDS, prefixValid, WIFI_TEXT_FIELDS, wifiTextValid, pskVlanPassIssue } from './config-form.mjs';
 import { detectVlanConflict, truncateAdditionalVlans, SWCONFIG_VLAN_MAX } from './visibility.mjs';
 import { renderConfigBlock } from './render-config.mjs';
-import { parseList, firstInvalidIpv6Octet, hostnameValid, ddnsHostnameValid, macValid, firstInvalidHost, firstInvalidPort, portListValid, normalizeEndpoint } from './list-grammar.mjs';
+import { parseList, firstInvalidIpv6Octet, hostnameValid, ddnsHostnameValid, macValid, firstInvalidHost, firstInvalidPort, portListValid, joinEndpoint } from './list-grammar.mjs';
 import { parseAdditionalPackages } from './packages.mjs';
 import { createStore } from './store.mjs';
 
@@ -99,7 +99,7 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
       ADDITIONAL_VLAN_LIST: '', TAGGED_LAN_VLAN: '',
       P_STEERING: '', ULA_PREFIX: '',
       WG_PRIVATE_KEY: '', PEER_PUBLIC_KEY: '', ENDPOINT: '',
-      ENDPOINT_PORT: '', PRESHARED_KEY: '', WG_IPV4: '', WG_IPV6: '',
+      PRESHARED_KEY: '', WG_IPV4: '', WG_IPV6: '',
       WG_DNS_V4: '', WG_DNS_V6: '', WG_MTU: '', ALLOWED_IPS: '',
       SPLIT_TUNNEL_V4: '', SPLIT_TUNNEL_V6: '',
       wan_type: 'dhcp', PPPOE_USERNAME: '', PPPOE_PASSWD: '',
@@ -915,14 +915,6 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
       if (!el) return;
       if (PREFIX_FIELDS.includes(el.id)) {
         el.setCustomValidity(prefixValid(el.value) ? '' : t('prefixInvalid', { field: el.value }));
-      } else if (el.id === 'ENDPOINT') {
-        // Dispatch change after mutating so the store re-syncs (JS value sets
-        // fire no input/change on their own).
-        const { host, port } = normalizeEndpoint(el.value);
-        if (host !== el.value) { el.value = host; el.dispatchEvent(new Event('change', { bubbles: true })); }
-        const portEl = document.getElementById('ENDPOINT_PORT');
-        if (port && portEl) { portEl.value = port; portEl.dispatchEvent(new Event('change', { bubbles: true })); }
-        return;
       } else if (el.id === 'LOOKUP_HOSTNAME') {
         el.setCustomValidity(ddnsHostnameValid(el.value) ? '' : t('ddnsHostnameInvalid', { field: el.value }));
       } else if (el.id === 'WAN_MAC_ADDR') {
@@ -1983,8 +1975,8 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
       const f = (id, v) => { const el = document.getElementById(id); if (el) el.value = v || ''; };
       f('WG_PRIVATE_KEY',  data.WG_PRIVATE_KEY);
       f('PEER_PUBLIC_KEY', data.PEER_PUBLIC_KEY);
-      f('ENDPOINT',        data.ENDPOINT);
-      f('ENDPOINT_PORT',   data.ENDPOINT_PORT);
+      // WARP hands back host and port apart; the form shows them joined.
+      f('ENDPOINT',        joinEndpoint(data.ENDPOINT, data.ENDPOINT_PORT));
       f('WG_IPV4',         data.WG_IPV4);
       f('WG_IPV6',         data.WG_IPV6);
       f('ALLOWED_IPS',     data.ALLOWED_IPS);

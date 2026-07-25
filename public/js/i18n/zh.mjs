@@ -214,7 +214,6 @@ export default {
   privateKey:         '私钥',
   peerPublicKey:      '对端公钥',
   endpoint:           '端点',
-  endpointPort:       '端点端口',
   presharedKey:       '预共享密钥',
   clientIpv4:         '客户端 IPv4',
   clientIpv6:         '客户端 IPv6',

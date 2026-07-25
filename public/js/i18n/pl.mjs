@@ -214,7 +214,6 @@ export default {
   privateKey:         'Klucz prywatny',
   peerPublicKey:      'Publiczny klucz peera',
   endpoint:           'Punkt końcowy',
-  endpointPort:       'Port punktu końcowego',
   presharedKey:       'Klucz wstępnie współdzielony',
   clientIpv4:         'IPv4 klienta',
   clientIpv6:         'IPv6 klienta',

@@ -302,3 +302,37 @@ test('BUILD_ONLY_KEYS contents', () => {
   assert.ok(BUILD_ONLY_KEYS.has('DNS_MODE'));
   assert.ok(BUILD_ONLY_KEYS.has('NON_CT_ATH10K'));
 });
+
+// ---------------------------------------------------------------------------
+// Endpoint: one form field, two emitted variables
+// ---------------------------------------------------------------------------
+// The Endpoint card holds "host:port" as typed; wrtnova.sh reads
+// endpoint_host="${ENDPOINT:-1.2.3.4}" and endpoint_port="${ENDPOINT_PORT:-51820}"
+// separately, so mergeNodeConfig has to break it apart on the way out.
+
+test('mergeNodeConfig: splits the endpoint field into host and port', () => {
+  const out = mergeNodeConfig(
+    { WG_ENABLE: '1', ENDPOINT: 'engage.cloudflareclient.com:2408' }, {});
+  assert.equal(out.ENDPOINT, 'engage.cloudflareclient.com');
+  assert.equal(out.ENDPOINT_PORT, '2408');
+});
+
+test('mergeNodeConfig: endpoint with no port emits an empty port, not a default', () => {
+  const out = mergeNodeConfig({ WG_ENABLE: '1', ENDPOINT: 'vpn.example.com' }, {});
+  assert.equal(out.ENDPOINT, 'vpn.example.com');
+  assert.equal(out.ENDPOINT_PORT, '');   // wrtnova.sh supplies 51820 itself
+});
+
+test('mergeNodeConfig: a bracketed IPv6 endpoint loses its brackets, keeps its port', () => {
+  const out = mergeNodeConfig(
+    { WG_ENABLE: '1', ENDPOINT: '[2606:4700:d0::a29f:c006]:2408' }, {});
+  assert.equal(out.ENDPOINT, '2606:4700:d0::a29f:c006');   // UCI rejects brackets
+  assert.equal(out.ENDPOINT_PORT, '2408');
+});
+
+test('mergeNodeConfig: AP mode still drops both halves', () => {
+  const out = mergeNodeConfig(
+    { WG_ENABLE: '1', ENDPOINT: 'vpn.example.com:2408' }, { AP_MODE: '1' });
+  assert.equal(out.ENDPOINT, '');
+  assert.equal(out.ENDPOINT_PORT, '');
+});

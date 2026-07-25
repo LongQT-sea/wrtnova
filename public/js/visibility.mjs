@@ -34,7 +34,7 @@ export const isDohEngine = m => !['none', 'adblock-fast'].includes(dnsMode(m));
 // WG client config fields (Interface + Peer); drive the "config entered but VPN off" notice.
 const WG_CLIENT_FIELDS = [
   'WG_PRIVATE_KEY', 'WG_IPV4', 'WG_IPV6', 'WG_DNS_V4', 'WG_DNS_V6', 'WG_MTU',
-  'PEER_PUBLIC_KEY', 'PRESHARED_KEY', 'ENDPOINT', 'ENDPOINT_PORT', 'ALLOWED_IPS',
+  'PEER_PUBLIC_KEY', 'PRESHARED_KEY', 'ENDPOINT', 'ALLOWED_IPS',
 ];
 
 // Full VLAN table in resolve priority order, mirroring wrtnova.sh resolve_vlans

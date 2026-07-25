@@ -214,7 +214,6 @@ export default {
   privateKey:         'Приватный ключ',
   peerPublicKey:      'Открытый ключ пира',
   endpoint:           'Конечная точка',
-  endpointPort:       'Порт конечной точки',
   presharedKey:       'Предварительно распределённый ключ',
   clientIpv4:         'IPv4 клиента',
   clientIpv6:         'IPv6 клиента',

@@ -96,8 +96,8 @@
  * @property {string} [WIFI_LOG_LVL]
  * @property {string} [WG_PRIVATE_KEY]     sensitive
  * @property {string} [PEER_PUBLIC_KEY]    sensitive
- * @property {string} [ENDPOINT]           sensitive
- * @property {string} [ENDPOINT_PORT]      sensitive
+ * @property {string} [ENDPOINT]           sensitive (form holds "host:port"; emitted host-only)
+ * @property {string} [ENDPOINT_PORT]      sensitive (emitted only; split out of ENDPOINT)
  * @property {string} [PRESHARED_KEY]      sensitive
  * @property {string} [WG_IPV4]            sensitive
  * @property {string} [WG_IPV6]            sensitive
