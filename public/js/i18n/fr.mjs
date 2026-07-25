@@ -294,7 +294,7 @@ export default {
   tablePortsSeparated: 'Ports (séparés par des espaces)',
   tablePortsEmptyAll: 'Ports (vide = tous)',
   addRow:             'Ajouter une ligne',
-  portFwdNote:        'Crée un bail DHCPv4 statique et une redirection de port NAT. Les ports doivent être uniques.',
+  portFwdNote:        'Chaque ligne crée un bail DHCPv4 statique et une redirection de port NAT. Les ports doivent être uniques.',
   ipv6Exposure:       'Exposition serveur IPv6',
   ipv6Note:           'Chaque ligne crée un identifiant d\'hôte statique (jeton IPv6) dans les baux DHCP, une règle de transfert pare-feu IPv6 et une entrée DDNS Cloudflare. Après le démarrage, allez dans Réseau -> Baux DHCP et mettez à jour le DUID pour chaque hôte.',
   enableDdns:         'Activer DDNS',

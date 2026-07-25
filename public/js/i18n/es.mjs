@@ -294,7 +294,7 @@ export default {
   tablePortsSeparated: 'Puertos (separados por espacios)',
   tablePortsEmptyAll: 'Puertos (vacío = todos)',
   addRow:             'Agregar fila',
-  portFwdNote:        'Crea un arrendamiento DHCPv4 estático y redirección de puertos NAT. Los puertos deben ser únicos.',
+  portFwdNote:        'Cada fila crea un arrendamiento DHCPv4 estático y redirección de puertos NAT. Los puertos deben ser únicos.',
   ipv6Exposure:       'Exposición del servidor IPv6',
   ipv6Note:           'Cada fila crea un ID de host estático (token IPv6) en los arrendamientos DHCP, una regla de reenvío de firewall IPv6 y una entrada DDNS de Cloudflare. Después del arranque, ve a Red -> Arrendamientos DHCP y actualiza el DUID para cada host.',
   enableDdns:         'Activar DDNS',
