@@ -14,11 +14,7 @@ export default {
   wireGuardVpn:     'WireGuard VPN',
   guestNetwork:     'Гостевая сеть',
   iotNetwork:       'Сеть IoT',
-  vpnSsid:          'VPN SSID',
   rootPassword:     'Пароль root',
-  sshKey:           'SSH-ключ',
-  vlansTrunked:     'VLAN транки',
-  wanBVlan:         'WAN-B VLAN',
 
   // -- Navigation / breadcrumbs --------------------------------------
   networks:  'Сети',
@@ -190,8 +186,6 @@ export default {
   tableVlanId:        'VLAN ID',
   tableSubnet:        'Подсеть',
   tableRouterIp:      'IP роутера',
-  defaultSubnetShort:   'По умолчанию (/24)',
-  defaultSubnetDynamic: 'По умолчанию ({sub})',
   enableIotInternet:  'Включить доступ к интернету для устройств IoT',
   iotRouteViaWg:      'Маршрутизировать интернет-трафик IoT через туннель WireGuard',
   vlanDupWarn:        '⚠ Двум сетям назначен одинаковый VLAN ID, или VLAN ID пересекается с транковым VLAN - устраните перед сборкой.',
@@ -225,7 +219,6 @@ export default {
   wan:                'WAN',
   connectionType:     'Тип соединения',
   wanMacAddress:      'MAC-адрес WAN',
-  wanOptions:         'Параметры WAN',
   taggedWanVlan:      'Тегированный WAN VLAN',
   taggedWanVlanNote:  '(требуется некоторыми провайдерами)',
   wanVlanId:          'WAN VLAN ID',
@@ -374,7 +367,6 @@ export default {
   advancedOptions:    'Расширенные параметры',
   finalPackages:      'Итоговые пакеты',
   copy:               'Копировать',
-  copied:             'Скопировано',
   revealSecrets:      'Показать секреты',
   fullScript:         'Полный скрипт',
 

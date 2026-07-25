@@ -14,11 +14,7 @@ export default {
   wireGuardVpn:     'WireGuard VPN',
   guestNetwork:     '访客网络',
   iotNetwork:       '物联网网络',
-  vpnSsid:          'VPN SSID',
   rootPassword:     'Root 密码',
-  sshKey:           'SSH 密钥',
-  vlansTrunked:     'VLAN 干道',
-  wanBVlan:         'WAN-B VLAN',
 
   // -- Navigation / breadcrumbs --------------------------------------
   networks:  '网络',
@@ -190,8 +186,6 @@ export default {
   tableVlanId:        'VLAN ID',
   tableSubnet:        '子网',
   tableRouterIp:      '路由器 IP',
-  defaultSubnetShort:   '默认 (/24)',
-  defaultSubnetDynamic: '默认 ({sub})',
   enableIotInternet:  '启用物联网设备的互联网访问',
   iotRouteViaWg:      '通过 WireGuard 隧道路由物联网互联网流量',
   vlanDupWarn:        '⚠ 两个网络设置了相同的 VLAN ID，或某个 VLAN ID 与中继 VLAN 重叠 - 构建前请修复。',
@@ -225,7 +219,6 @@ export default {
   wan:                'WAN',
   connectionType:     '连接类型',
   wanMacAddress:      'WAN MAC 地址',
-  wanOptions:         'WAN 选项',
   taggedWanVlan:      '带标记的 WAN VLAN',
   taggedWanVlanNote:  '（部分 ISP 需要）',
   wanVlanId:          'WAN VLAN ID',
@@ -375,7 +368,6 @@ export default {
   advancedOptions:    '高级选项',
   finalPackages:      '最终软件包',
   copy:               '复制',
-  copied:             '已复制',
   revealSecrets:      '显示机密',
   fullScript:         '完整脚本',
 

@@ -14,11 +14,7 @@ export default {
   wireGuardVpn:     'WireGuard VPN',
   guestNetwork:     'Guest network',
   iotNetwork:       'IoT network',
-  vpnSsid:          'VPN SSID',
   rootPassword:     'Root password',
-  sshKey:           'SSH key',
-  vlansTrunked:     'VLANs trunked',
-  wanBVlan:         'WAN-B VLAN',
 
   // -- Navigation / breadcrumbs --------------------------------------
   networks:  'Networks',
@@ -190,8 +186,6 @@ export default {
   tableVlanId:        'VLAN ID',
   tableSubnet:        'Subnet',
   tableRouterIp:      'Router IP',
-  defaultSubnetShort:   'Default (/24)',
-  defaultSubnetDynamic: 'Default ({sub})',
   enableIotInternet:  'Enable internet access for IoT devices',
   iotRouteViaWg:      'Route IoT internet traffic through WireGuard tunnel',
   vlanDupWarn:        '⚠ Two networks are set to the same VLAN ID, or a VLAN ID overlaps a trunk VLAN - fix it before building.',
@@ -225,7 +219,6 @@ export default {
   wan:                'WAN',
   connectionType:     'Connection type',
   wanMacAddress:      'WAN MAC address',
-  wanOptions:         'WAN options',
   taggedWanVlan:      'Tagged WAN VLAN',
   taggedWanVlanNote:  '(required by some ISPs)',
   wanVlanId:          'WAN VLAN ID',
@@ -374,7 +367,6 @@ export default {
   advancedOptions:    'Advanced options',
   finalPackages:      'Final packages',
   copy:               'Copy',
-  copied:             'Copied',
   revealSecrets:      'Reveal secrets',
   fullScript:         'Full script',
 
