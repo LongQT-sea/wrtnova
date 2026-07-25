@@ -739,23 +739,18 @@
               <div class="form-row form-row--full">
                 <div class="opt-card">
                   <div class="opt-text">
-                    <label class="opt-title" for="MESH_ID" data-i18n="meshId">Mesh ID</label>
+                    <span class="opt-title" data-i18n="meshCredentials">Mesh ID and password</span>
                   </div>
-                  <input type="text" id="MESH_ID" name="MESH_ID" class="opt-control opt-field input-base" placeholder="mesh_trunk_backhaul">
-                </div>
-              </div>
-              <div class="form-row form-row--full">
-                <div class="opt-card">
-                  <div class="opt-text">
-                    <label class="opt-title" for="MESH_PASSWD" data-i18n="meshPassword">Mesh password</label>
-                  </div>
-                  <div class="opt-control opt-field relative">
-                    <input type="password" id="MESH_PASSWD" name="MESH_PASSWD" class="input-base" style="padding-right:2.5rem" placeholder="password" autocomplete="new-password">
-                    <button type="button" id="toggle-mesh-pw"
-                            class="btn btn-ghost btn-icon absolute right-1.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
-                            aria-label="Show password">
-                      <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
-                    </button>
+                  <div class="opt-control opt-stack grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <input type="text" id="MESH_ID" name="MESH_ID" class="input-base" placeholder="mesh_trunk_backhaul" aria-label="Mesh ID">
+                    <div class="relative">
+                      <input type="password" id="MESH_PASSWD" name="MESH_PASSWD" class="input-base" style="padding-right:2.5rem" placeholder="password" autocomplete="new-password" aria-label="Mesh password">
+                      <button type="button" id="toggle-mesh-pw"
+                              class="btn btn-ghost btn-icon absolute right-1.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
+                              aria-label="Show password">
+                        <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
