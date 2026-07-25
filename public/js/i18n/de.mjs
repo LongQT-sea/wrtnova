@@ -294,7 +294,7 @@ export default {
   tablePortsSeparated: 'Ports (leerzeichen-getrennt)',
   tablePortsEmptyAll: 'Ports (leer = alle)',
   addRow:             'Zeile hinzufügen',
-  portFwdNote:        'Jede Zeile erstellt einen statischen DHCPv4-Lease und fügt eine Portweiterleitung vom WAN hinzu. Ports müssen eindeutig sein.',
+  portFwdNote:        'Erstellt einen statischen DHCPv4-Lease und NAT-Portweiterleitung. Ports müssen eindeutig sein.',
   ipv6Exposure:       'IPv6-Server-Exposition',
   ipv6Note:           'Jede Zeile erstellt eine statische Host-ID (IPv6-Token) in DHCP-Leases, eine IPv6-Firewall-Weiterleitungsregel und einen Cloudflare-DDNS-Eintrag. Gehen Sie nach dem Start zu Netzwerk -> DHCP-Leases und aktualisieren Sie die DUID für jeden Host.',
   enableDdns:         'DDNS aktivieren',

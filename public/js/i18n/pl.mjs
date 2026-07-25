@@ -294,7 +294,7 @@ export default {
   tablePortsSeparated: 'Porty (rozdzielone spacjami)',
   tablePortsEmptyAll: 'Porty (puste = wszystkie)',
   addRow:             'Dodaj wiersz',
-  portFwdNote:        'Każdy wiersz tworzy statyczną dzierżawę DHCPv4 i dodaje przekierowanie portów z WAN. Porty muszą być unikalne.',
+  portFwdNote:        'Tworzy statyczną dzierżawę DHCPv4 i przekierowanie portów NAT. Porty muszą być unikalne.',
   ipv6Exposure:       'Ekspozycja serwera IPv6',
   ipv6Note:           'Każdy wiersz tworzy statyczny identyfikator hosta (token IPv6) w dzierżawach DHCP, regułę przekierowania zapory IPv6 i wpis Cloudflare DDNS. Po uruchomieniu przejdź do Sieć -> Dzierżawy DHCP i zaktualizuj DUID dla każdego hosta.',
   enableDdns:         'Włącz DDNS',

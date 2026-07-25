@@ -294,7 +294,7 @@ export default {
   tablePortsSeparated: 'Ports (space-separated)',
   tablePortsEmptyAll: 'Ports (empty = all)',
   addRow:             'Add row',
-  portFwdNote:        'Each row creates a static DHCPv4 lease and adds port forwarding from WAN. Ports must be unique.',
+  portFwdNote:        'Creates a static DHCPv4 lease and NAT port forward. Ports must be unique.',
   ipv6Exposure:       'IPv6 server exposure',
   ipv6Note:           'Each row creates a static hostid (IPv6 Token) in DHCP leases, an IPv6 firewall forward rule, and a Cloudflare DDNS entry. After boot, go to Network -> DHCP Leases and update the DUID for each host to match the actual client DUID.',
   enableDdns:         'Enable DDNS',

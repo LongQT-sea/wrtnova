@@ -294,7 +294,7 @@ export default {
   tablePortsSeparated: '端口（空格分隔）',
   tablePortsEmptyAll: '端口（留空 = 全部）',
   addRow:             '添加行',
-  portFwdNote:        '每行创建一个静态 DHCPv4 租约并从 WAN 添加端口转发。端口必须唯一。',
+  portFwdNote:        '创建一个静态 DHCPv4 租约和 NAT 端口转发。端口必须唯一。',
   ipv6Exposure:       'IPv6 服务器暴露',
   ipv6Note:           '每行在 DHCP 租约中创建静态主机 ID（IPv6 令牌）、IPv6 防火墙转发规则和 Cloudflare DDNS 条目。启动后，前往网络 -> DHCP 租约，为每台主机更新 DUID 以匹配实际客户端 DUID。',
   enableDdns:         '启用 DDNS',
