@@ -1096,7 +1096,7 @@
             <svg class="w-3 h-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
             <span data-i18n="advancedWan">Advanced WAN options</span>
           </summary>
-          <div class="mt-2 pl-4 border-l-2 border-zinc-200 dark:border-zinc-700 space-y-1">
+          <div class="mt-2 pl-4 border-l-2 border-zinc-200 dark:border-zinc-700 space-y-3">
             <div class="opt-group">
               <label class="toggle-label">
                 <span class="toggle-wrap">
@@ -1135,19 +1135,17 @@
                 <input type="number" id="WAN_B_VLAN_ID" name="WAN_B_VLAN_ID" class="opt-control opt-field input-base" min="1" max="4094" placeholder="21">
               </div>
             </div>
-            <div class="pt-2">
-              <label class="toggle-label">
-                <span class="toggle-wrap">
-                  <input type="checkbox" id="BRIDGE_WAN_PORT" name="BRIDGE_WAN_PORT" value="1" class="toggle-input">
-                  <span class="toggle-track"></span>
-                  <span class="toggle-thumb"></span>
-                </span>
-                <div>
-                  <span class="toggle-text" data-i18n="bridgeWanPort">Bridge WAN port</span>
-                  <p class="form-help mt-0" data-i18n="bridgeWanPortNote">Add WAN port to br-vlan bridge, useful for IPTV, VoIP, and multi-PPPoE setups.</p>
-                </div>
-              </label>
-            </div>
+            <label class="toggle-label">
+              <span class="toggle-wrap">
+                <input type="checkbox" id="BRIDGE_WAN_PORT" name="BRIDGE_WAN_PORT" value="1" class="toggle-input">
+                <span class="toggle-track"></span>
+                <span class="toggle-thumb"></span>
+              </span>
+              <div>
+                <span class="toggle-text" data-i18n="bridgeWanPort">Bridge WAN port</span>
+                <p class="form-help mt-0" data-i18n="bridgeWanPortNote">Add WAN port to br-vlan bridge, useful for IPTV, VoIP, and multi-PPPoE setups.</p>
+              </div>
+            </label>
           </div>
         </details>
       </div>
