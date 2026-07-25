@@ -181,7 +181,9 @@
           <div class="opt-card">
             <div class="opt-text">
               <label class="opt-title" for="timezone" data-i18n="timezone">Timezone</label>
-              <p class="form-help mt-0" id="tz-help" data-i18n="timezoneHelp">Sets the system clock zone and DST rules.</p>
+              <!-- Filled in by tzdata.js on pick: ZONE_NAME/TIME_ZONE readout.
+                   Empty until then - keep the element, it is written unguarded. -->
+              <p class="form-help mt-0" id="tz-help"></p>
             </div>
             <div class="combo opt-control opt-field">
               <input type="text" id="timezone" class="input-base" placeholder="Type to search (e.g. New York)" data-i18n-placeholder="tzSearchPlaceholder" autocomplete="off" aria-autocomplete="list" aria-controls="tz-list">
@@ -193,7 +195,7 @@
           <div class="opt-card">
             <div class="opt-text">
               <span class="opt-title" data-i18n="timeFormat">Time format</span>
-              <p class="form-help mt-0" data-i18n="timeFormatHelp">LuCI clock display. Ignored on OpenWrt 24 and older.</p>
+              <p class="form-help mt-0" data-i18n="timeFormatHelp">LuCI clock display. Requires OpenWrt 25 or newer.</p>
             </div>
             <div class="radio-seg opt-control" role="radiogroup" aria-label="Time format">
               <label>
@@ -220,7 +222,7 @@
             </span>
             <div>
               <span class="toggle-text" data-i18n="luciHttps">LuCI HTTPS</span>
-              <p class="form-help mt-0" data-i18n="luciHttpsHelp">Enable HTTP-to-HTTPS redirect for LuCI</p>
+              <p class="form-help mt-0" data-i18n="luciHttpsHelp">Enable HTTP-to-HTTPS redirect</p>
             </div>
           </label>
         </div>
