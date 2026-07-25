@@ -61,7 +61,7 @@ export default {
   batmanAllVlanHelp: 'Trunkuj także WAN-B i dodatkowe VLAN-y przez batman-adv.',
   batmanAllVlanNote: 'Domyślnie przez bat0 przenoszone są tylko VLAN-y LAN/gość/IoT/VPN/WAN.',
   backhaulOnly: 'Węzeł tylko router/backhaul',
-  disableAllAps: 'Wyłącz wszystkie interfejsy AP (punkt dostępowy), przydatne dla węzłów tylko router lub backhaul.',
+  disableAllAps: 'Wyłącz wszystkie interfejsy punktu dostępowego, przydatne dla węzłów tylko router lub backhaul.',
   bridgeStp:          'Włącz Spanning Tree Protocol dla br-vlan',
   stpNote:            'Aby zapobiec pętlom mostu przy mieszaniu przewodowego i bezprzewodowego backhaulu.',
   nonCtAth10k:        'Non-CT ath10k',

@@ -61,7 +61,7 @@ export default {
   batmanAllVlanHelp: '同时将 WAN-B 和额外 VLAN 经 batman-adv 中继。',
   batmanAllVlanNote: '默认仅 LAN/访客/IoT/VPN/WAN VLAN 经 bat0 传输。',
   backhaulOnly: '仅路由/回程节点',
-  disableAllAps: '关闭所有 AP（接入点）接口，适用于仅路由或仅回程的节点。',
+  disableAllAps: '关闭所有接入点接口，适用于仅路由或仅回程的节点。',
   bridgeStp:          '为 br-vlan 启用生成树协议',
   stpNote:            '用于在混合有线和无线回程时防止桥接环路。',
   nonCtAth10k:        '非 CT ath10k',
