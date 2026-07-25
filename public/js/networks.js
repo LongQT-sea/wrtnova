@@ -1543,16 +1543,19 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
       '<div class="card p-4 mt-4">' +
       '<p class="ba-title text-xs font-semibold mb-3 text-zinc-500 dark:text-zinc-400">' +
         t(ready.length > 1 ? 'buildingNodesPlural' : 'buildingNodes', { n: ready.length }) + '</p>' +
-      '<div class="space-y-3">' +
+      // Name and status share a text line, the bar spans the full width below
+      // it. Keeping the bar out of the text row is what makes this line up: a
+      // 6px bar can never sit on the same baseline as 12px type, and the old
+      // three-column row left it floating above both labels.
+      '<div class="space-y-4">' +
       ready.map(n =>
-        '<div id="ba-row-' + esc(n.id) + '" class="flex items-center gap-3">' +
-        '<span class="text-xs font-medium w-28 truncate flex-shrink-0 leading-none">' + esc(n.name) + '</span>' +
-        '<div class="flex-1 min-w-0">' +
+        '<div id="ba-row-' + esc(n.id) + '" class="space-y-1.5">' +
+        '<div class="flex items-baseline gap-3">' +
+        '<span class="text-xs font-medium truncate flex-1 min-w-0">' + esc(n.name) + '</span>' +
+        '<span class="ba-status text-xs text-zinc-500 dark:text-zinc-400 truncate flex-none max-w-[60%] text-right"></span>' +
+        '</div>' +
         '<div class="w-full h-1.5 bg-zinc-200 dark:bg-zinc-700 rounded overflow-hidden">' +
         '<div class="ba-bar h-full bg-blue-500 transition-all duration-500" style="width:2%"></div></div>' +
-        '<p class="ba-label text-xs text-zinc-500 dark:text-zinc-400 truncate mt-1 leading-none"></p>' +
-        '</div>' +
-        '<div class="ba-link flex-shrink-0 w-20 text-right leading-none"></div>' +
         '</div>'
       ).join('') +
       '</div></div>';
@@ -1572,20 +1575,24 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
     });
   }
 
+  // The status slot carries the running text (queue position, "Building…", the
+  // DNS auto-retry note) and is then replaced in place by the download link or
+  // the error, so a finished row reads the same as a running one.
   function updateBuildAllRow(nodeId, firmwareUrl, errMsg) {
     const row = document.getElementById('ba-row-' + nodeId);
     if (!row) return;
     const bar = row.querySelector('.ba-bar');
-    const label = row.querySelector('.ba-label');
-    const link = row.querySelector('.ba-link');
-    if (label) label.textContent = '';
+    const status = row.querySelector('.ba-status');
+    if (status) status.removeAttribute('title');
     if (errMsg) {
       if (bar) { bar.style.width = '100%'; bar.style.background = '#ef4444'; }
-      if (link) link.innerHTML = '<span class="text-xs text-red-500 dark:text-red-400" title="' + esc(errMsg) + '">' + S.error + '</span>';
+      if (status) status.innerHTML = '<span class="text-red-500 dark:text-red-400" title="' + esc(errMsg) + '">' + S.error + '</span>';
     } else {
       if (bar) { bar.style.width = '100%'; bar.style.background = '#22c55e'; }
-      if (link && firmwareUrl)
-        link.innerHTML = '<a href="' + esc(firmwareUrl) + '" target="_blank" class="text-xs text-blue-500 hover:underline">' + S.download + '</a>';
+      if (status)
+        status.innerHTML = firmwareUrl
+          ? '<a href="' + esc(firmwareUrl) + '" target="_blank" class="text-blue-500 hover:underline">' + S.download + '</a>'
+          : '';
     }
   }
 
@@ -1595,8 +1602,10 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
     const bar = row.querySelector('.ba-bar');
     if (bar) bar.style.width = pct + '%';
     if (label != null) {
-      const labelEl = row.querySelector('.ba-label');
-      if (labelEl) labelEl.textContent = label;
+      const status = row.querySelector('.ba-status');
+      // The DNS auto-retry note is wider than the slot, so it truncates - the
+      // title is the only way to read the rest of it.
+      if (status) { status.textContent = label; status.title = label; }
     }
   }
 
