@@ -87,7 +87,8 @@
         <div class="form-row form-row--full">
           <div class="opt-card">
             <div class="opt-text">
-              <p class="form-help mt-0" data-i18n="apModeHelp">In AP mode, DHCP is disabled and the device acts as a wireless access point and managed switch.</p>
+              <span class="opt-title" data-i18n="deviceMode">Mode</span>
+              <p class="form-help mt-0" data-i18n="apModeHelp">In Access Point mode, DHCP is disabled and the device acts as a wireless access point and managed switch.</p>
             </div>
             <div class="opt-control radio-seg" role="radiogroup" aria-label="Device mode">
               <label>
@@ -132,49 +133,6 @@
               <p class="form-help mt-0" data-i18n="hostnameHelp">Defaults to WrtNova, plus the AP index in AP mode.</p>
             </div>
             <input type="text" id="HOST_NAME" name="HOST_NAME" class="input-base opt-control opt-field" placeholder="WrtNova">
-          </div>
-        </div>
-        <div class="form-row form-row--full">
-          <div class="opt-card">
-            <div class="opt-text">
-              <label class="opt-title" for="ROOT_PASSWD" data-i18n="rootPassword">Root password</label>
-              <p class="form-help mt-0" data-i18n="rootPasswordHelp">Used for SSH login and AdGuard Home admin.</p>
-            </div>
-            <div class="relative opt-control opt-field">
-              <input type="password" id="ROOT_PASSWD" name="ROOT_PASSWD" class="input-base" style="padding-right:2.5rem" autocomplete="new-password">
-              <button type="button" id="toggle-rootpw"
-                      class="btn btn-ghost btn-icon absolute right-1.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
-                      aria-label="Show password">
-                <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
-              </button>
-            </div>
-          </div>
-        </div>
-        <div class="form-row form-row--full">
-          <div class="opt-card">
-            <div class="opt-text">
-              <label class="opt-title" for="SSH_PUBLIC_KEY" data-i18n="sshPublicKeys">SSH public keys</label>
-              <p class="form-help mt-0" data-i18n="oneKeyPerLine">One key per line.</p>
-            </div>
-            <textarea id="SSH_PUBLIC_KEY" name="SSH_PUBLIC_KEY" class="input-base opt-control opt-stack" placeholder="ssh-ed25519 AAAA… user@host" rows="3"></textarea>
-          </div>
-        </div>
-        <div class="form-row form-row--full ssh-pw-row hidden">
-          <div class="opt-card">
-            <div class="opt-text">
-              <span class="opt-title" data-i18n="sshPasswordAuth">SSH password auth</span>
-              <p class="form-help mt-0" data-i18n="sshPasswordAuthHelp">Off rejects password login entirely; only the keys above are accepted.</p>
-            </div>
-            <div class="radio-seg opt-control" role="radiogroup" aria-label="SSH password auth">
-              <label>
-                <input type="radio" name="SSH_PASSWD_AUTH" value="" checked>
-                <span data-i18n="sshAuthOn">On (keys + password)</span>
-              </label>
-              <label>
-                <input type="radio" name="SSH_PASSWD_AUTH" value="off">
-                <span data-i18n="sshAuthOff">Off (keys only)</span>
-              </label>
-            </div>
           </div>
         </div>
         <div class="form-row form-row--full">
@@ -226,6 +184,49 @@
             </div>
           </label>
         </div>
+        <div class="form-row form-row--full">
+          <div class="opt-card">
+            <div class="opt-text">
+              <label class="opt-title" for="ROOT_PASSWD" data-i18n="rootPassword">Root password</label>
+              <p class="form-help mt-0" data-i18n="rootPasswordHelp">Used for SSH login and AdGuard Home admin.</p>
+            </div>
+            <div class="relative opt-control opt-field">
+              <input type="password" id="ROOT_PASSWD" name="ROOT_PASSWD" class="input-base" style="padding-right:2.5rem" autocomplete="new-password">
+              <button type="button" id="toggle-rootpw"
+                      class="btn btn-ghost btn-icon absolute right-1.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
+                      aria-label="Show password">
+                <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="form-row form-row--full">
+          <div class="opt-card">
+            <div class="opt-text">
+              <label class="opt-title" for="SSH_PUBLIC_KEY" data-i18n="sshPublicKeys">SSH public keys</label>
+              <p class="form-help mt-0" data-i18n="oneKeyPerLine">One key per line.</p>
+            </div>
+            <textarea id="SSH_PUBLIC_KEY" name="SSH_PUBLIC_KEY" class="input-base opt-control opt-stack" placeholder="ssh-ed25519 AAAA… user@host" rows="3"></textarea>
+          </div>
+        </div>
+        <div class="form-row form-row--full ssh-pw-row hidden">
+          <div class="opt-card">
+            <div class="opt-text">
+              <span class="opt-title" data-i18n="sshPasswordAuth">SSH password auth</span>
+              <p class="form-help mt-0" data-i18n="sshPasswordAuthHelp">Off rejects password login entirely; only the keys above are accepted.</p>
+            </div>
+            <div class="radio-seg opt-control" role="radiogroup" aria-label="SSH password auth">
+              <label>
+                <input type="radio" name="SSH_PASSWD_AUTH" value="" checked>
+                <span data-i18n="sshAuthOn">On (keys + password)</span>
+              </label>
+              <label>
+                <input type="radio" name="SSH_PASSWD_AUTH" value="off">
+                <span data-i18n="sshAuthOff">Off (keys only)</span>
+              </label>
+            </div>
+          </div>
+        </div>
         <details class="mt-4">
           <summary class="text-xs text-zinc-500 dark:text-zinc-400 cursor-pointer hover:text-zinc-700 dark:hover:text-zinc-200 select-none flex items-center gap-1">
             <svg class="w-3 h-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
@@ -236,7 +237,7 @@
               <div class="opt-card">
                 <div class="opt-text">
                   <label class="opt-title" for="NTP_IP" data-i18n="ntpServer">NTP server IP</label>
-                  <p class="form-help mt-0" data-i18n="ntpServerHelp">Raw IP address for a last-resort NTP server.</p>
+                  <p class="form-help mt-0" data-i18n="ntpServerHelp">Raw NTP server IP to sync the clock every time a WAN interface comes up.</p>
                 </div>
                 <input type="text" id="NTP_IP" name="NTP_IP" class="input-base opt-control opt-field" placeholder="162.159.200.1">
               </div>
@@ -820,7 +821,6 @@
         <div class="info-note" role="note">
           <p data-i18n="wifiDefaultNote">Leave password blank to use the default: 12345678</p>
           <p data-i18n="wifiRoamingNote">SSID and password must match between nodes for seamless roaming to work.</p>
-          <p class="psk-vlan-only hidden" data-i18n="wifiPskVlanNote">Per-VLAN PSK needs a unique password per enabled network to steer clients.</p>
         </div>
 
         <details class="mt-4">
@@ -881,6 +881,7 @@
                 </div>
               </label>
             </div>
+            <div class="info-note psk-vlan-only hidden" role="note" data-i18n="wifiPskVlanNote">Per-VLAN PSK needs a unique password per enabled network to steer clients.</div>
             <div class="form-row form-row--full">
               <label class="toggle-label">
                 <span class="toggle-wrap">
@@ -1026,7 +1027,7 @@
                 </select>
               </div>
             </div>
-            <div class="info-note dot11r-only" role="note" data-i18n="dot11rBuggyNote">Note: 802.11r works well with most modern devices, but some older or low-cost devices may fail to connect. If a device can't connect, try disabling 802.11r. For IoT devices, use the IoT: 802.11r toggle above.</div>
+            <div class="info-note dot11r-only" role="note" data-i18n-html="dot11rBuggyNote">Note: Most modern devices support 802.11r, but some older or low-cost devices may not. If a device can't connect, try disabling 802.11r. For IoT devices, use the dedicated <strong>IoT: 802.11r</strong> toggle.</div>
           </div>
         </details>
       </div>
