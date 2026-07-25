@@ -522,7 +522,7 @@
                       </span>
                       <div>
                         <span class="toggle-text" data-i18n="tagLanVlan">Tag LAN VLAN</span>
-                        <p class="form-help mt-0" data-i18n="tagLanVlanHelp">Turn all LAN ports into trunk-only ports</p>
+                        <p class="form-help mt-0" data-i18n="tagLanVlanHelp">Turn all LAN ports into trunk-only ports.</p>
                       </div>
                     </label>
                   </div>
@@ -701,7 +701,7 @@
                 </span>
                 <div>
                   <span class="toggle-text" data-i18n="denseEnvironment">Dense environment</span>
-                  <p class="form-help mt-0" data-i18n-html="tightenRoaming">Tighten <code>usteer</code> roaming/steering thresholds</p>
+                  <p class="form-help mt-0" data-i18n-html="tightenRoaming">Tighten <code>usteer</code> roaming/steering thresholds.</p>
                 </div>
               </label>
             </div>
@@ -713,11 +713,10 @@
                   <span class="toggle-thumb"></span>
                 </span>
                 <div>
-                  <span class="toggle-text" data-i18n="wirelessMesh">Wireless mesh</span>
-                  <p class="form-help mt-0" data-i18n="enableMeshBackhaulDefault">Enable 5GHz 802.11s mesh backhaul (overridable per node)</p>
+                  <span class="toggle-text" data-i18n="wirelessMesh">5GHz 802.11s mesh backhaul</span>
+                  <p class="form-help mt-0" data-i18n="enableMeshBackhaulDefault">Tip: Prefer wired backhaul over wireless whenever feasible. Overridable per node.</p>
                 </div>
               </label>
-              <p class="form-help" data-i18n="wiredBackhaulNote">Tip: Prefer wired backhaul over wireless whenever feasible.</p>
             </div>
 
             <div class="form-row form-row--full mesh-only hidden">
@@ -728,11 +727,10 @@
                   <span class="toggle-thumb"></span>
                 </span>
                 <div>
-                  <span class="toggle-text" data-i18n="bridgeStp">Enable STP</span>
-                  <p class="form-help mt-0" data-i18n="enableStp">Enable Spanning Tree Protocol for br-vlan</p>
+                  <span class="toggle-text" data-i18n="bridgeStp">Enable Spanning Tree Protocol for br-vlan</span>
+                  <p class="form-help mt-0" data-i18n="stpNote">To prevent bridge loops when mixing wired and wireless backhaul.</p>
                 </div>
               </label>
-              <p class="form-help" data-i18n="stpNote">To prevent bridge loops when mixing wired and wireless backhaul.</p>
             </div>
 
             <div class="mesh-only hidden">

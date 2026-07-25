@@ -660,7 +660,7 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
         '<input type="checkbox" class="toggle-input" id="np-mesh-' + id + '"' + (meshChecked ? ' checked' : '') + '>' +
         '<span class="toggle-track"></span><span class="toggle-thumb"></span></span>' +
         '<div><span class="toggle-text">' + S.wirelessMesh + '</span>' +
-        '<p class="form-help mt-0">' + S.enableMeshBackhaul + '</p></div></label></div>' +
+        '<p class="form-help mt-0">' + S.wiredBackhaulNote + '</p></div></label></div>' +
       mesh2gToggle : '') +
       (hasWifi ? '<div class="form-row form-row--full"><label class="toggle-label"><span class="toggle-wrap">' +
         '<input type="checkbox" class="toggle-input" id="np-apdisable-' + id + '"' + (apDisableChecked ? ' checked' : '') + '>' +
