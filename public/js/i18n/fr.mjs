@@ -48,7 +48,7 @@ export default {
   nodeName:           'Nom du nœud',
   apIndex:            'Index AP',
   apIndexHelp:        "Dernier octet 2–254. L'IP LAN devient ",
-  wirelessMesh:       'Backhaul mesh 5GHz 802.11s',
+  wirelessMesh:       'Backhaul mesh 5 GHz 802.11s',
   wirelessMesh2g: 'Backhaul mesh 2.4 GHz 802.11s',
   mesh2gNote: 'Plus de portée que le 5 GHz ; peut nécessiter un réglage pour un débit plus élevé.',
   batmanAdv: 'BATMAN-adv sur maillage 802.11s',

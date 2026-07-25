@@ -48,7 +48,7 @@ export default {
   nodeName:           '节点名称',
   apIndex:            'AP 索引',
   apIndexHelp:        '末段 2–254。LAN IP 为 ',
-  wirelessMesh:       '5GHz 802.11s 网状回程',
+  wirelessMesh:       '5 GHz 802.11s 网状回程',
   wirelessMesh2g: '2.4 GHz 802.11s 网状回程',
   mesh2gNote: '覆盖比 5 GHz 更广；可能需要调优以获得更高吞吐量。',
   batmanAdv: 'BATMAN-adv 叠加于 802.11s 网状网络',

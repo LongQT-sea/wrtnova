@@ -48,7 +48,7 @@ export default {
   nodeName:           'Nombre del nodo',
   apIndex:            'Índice AP',
   apIndexHelp:        'Último octeto 2–254. La IP LAN se convierte en ',
-  wirelessMesh:       'Backhaul mesh 5GHz 802.11s',
+  wirelessMesh:       'Backhaul mesh 5 GHz 802.11s',
   wirelessMesh2g: 'Backhaul mesh 2.4 GHz 802.11s',
   mesh2gNote: 'Mayor alcance que 5 GHz; puede requerir ajustes para un mayor rendimiento.',
   batmanAdv: 'BATMAN-adv sobre malla 802.11s',

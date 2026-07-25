@@ -48,7 +48,7 @@ export default {
   nodeName:           'Knotenname',
   apIndex:            'AP-Index',
   apIndexHelp:        'Letztes Oktett 2–254. LAN-IP wird ',
-  wirelessMesh:       '5GHz 802.11s Mesh-Backhaul',
+  wirelessMesh:       '5 GHz 802.11s Mesh-Backhaul',
   wirelessMesh2g: '2.4 GHz 802.11s Mesh-Backhaul',
   mesh2gNote: 'Größere Reichweite als 5 GHz; für höheren Durchsatz eventuell Optimierung nötig.',
   batmanAdv: 'BATMAN-adv über 802.11s-Mesh',

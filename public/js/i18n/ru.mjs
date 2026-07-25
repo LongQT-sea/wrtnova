@@ -48,7 +48,7 @@ export default {
   nodeName:           'Имя узла',
   apIndex:            'Индекс AP',
   apIndexHelp:        'Последний октет 2–254. LAN IP будет ',
-  wirelessMesh:       '5GHz 802.11s mesh backhaul',
+  wirelessMesh:       '5 GHz 802.11s mesh backhaul',
   wirelessMesh2g: '2.4 GHz 802.11s mesh backhaul',
   mesh2gNote: 'Больше дальность, чем у 5 GHz; для более высокой скорости может потребоваться настройка.',
   batmanAdv: 'BATMAN-adv поверх сети 802.11s',

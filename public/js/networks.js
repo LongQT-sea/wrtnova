@@ -654,7 +654,7 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
         '<div><span class="toggle-text">' + S.irqbalance + '</span>' +
         '<p class="form-help mt-0">' + S.useIrqbalance + '</p></div></label></div>';
 
-    // Per-node 2.4GHz mesh override only where the network opts in (shared WIRELESS_MESH_2G).
+    // Per-node 2.4 GHz mesh override only where the network opts in (shared WIRELESS_MESH_2G).
     const mesh2gToggle = cfg.WIRELESS_MESH_2G === '1'
       ? '<div class="form-row form-row--full"><label class="toggle-label"><span class="toggle-wrap">' +
         '<input type="checkbox" class="toggle-input" id="np-mesh2g-' + id + '"' + (meshChecked2g ? ' checked' : '') + '>' +

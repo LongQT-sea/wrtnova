@@ -297,7 +297,7 @@ import { deriveVisibility, deriveNetRows, detectVlanConflict, resolveVlanAssignm
 
       // batman-adv runs over one mesh radio: with it on, the two bands are radio
       // buttons - the band just toggled on wins, the other is forced off (bubbling
-      // change re-syncs each store). Any other trigger drops 2.4GHz, keeps 5GHz.
+      // change re-syncs each store). Any other trigger drops 2.4 GHz, keeps 5 GHz.
       // Before the BRIDGE_STP block so that block sees the settled single band.
       const batman = ui.$('#BATMAN_ADV');
       if (batman && mesh5 && mesh2g && batman.checked && mesh5.checked && mesh2g.checked) {
@@ -306,7 +306,7 @@ import { deriveVisibility, deriveNetRows, detectVlanConflict, resolveVlanAssignm
         drop.dispatchEvent(new Event('change', { bubbles: true }));
       }
 
-      // When both 2.4GHz and 5GHz mesh backhauls are on, two 802.11s meshpoints
+      // When both 2.4 GHz and 5 GHz mesh backhauls are on, two 802.11s meshpoints
       // are bridged into br-vlan and can form an L2 loop; force BRIDGE_STP checked
       // and disabled so the toggle reflects the built config (same disable/force/dispatch pattern).
       const stp = ui.$('#BRIDGE_STP');

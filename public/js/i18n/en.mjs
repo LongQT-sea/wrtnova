@@ -48,7 +48,7 @@ export default {
   nodeName:           'Node name',
   apIndex:            'AP index',
   apIndexHelp:        'Last octet 2–254. LAN IP becomes ',
-  wirelessMesh:       '5GHz 802.11s mesh backhaul',
+  wirelessMesh:       '5 GHz 802.11s mesh backhaul',
   wirelessMesh2g: '2.4 GHz 802.11s mesh backhaul',
   mesh2gNote: 'Longer range than 5 GHz; may need tuning for higher throughput.',
   batmanAdv: 'BATMAN-adv over 802.11s mesh',

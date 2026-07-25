@@ -48,7 +48,7 @@ export default {
   nodeName:           'Nazwa węzła',
   apIndex:            'Indeks AP',
   apIndexHelp:        'Ostatni oktet 2–254. LAN IP staje się ',
-  wirelessMesh:       'Backhaul 5GHz 802.11s mesh',
+  wirelessMesh:       'Backhaul 5 GHz 802.11s mesh',
   wirelessMesh2g: 'Backhaul 2.4 GHz 802.11s mesh',
   mesh2gNote: 'Większy zasięg niż 5 GHz; może wymagać dostrojenia dla wyższej przepustowości.',
   batmanAdv: 'BATMAN-adv na sieci mesh 802.11s',
