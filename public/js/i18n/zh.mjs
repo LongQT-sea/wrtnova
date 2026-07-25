@@ -316,7 +316,6 @@ export default {
   adguardMainDns:     '将 AdGuard Home 作为主 DNS 解析器',
   adguardMainDnsHelp: '将 AdGuard Home 绑定到 53 端口，作为主 DNS 解析器。',
   advancedDns:        '高级 DNS 选项',
-  dohPreset:          '添加 DoH 预设',
   dohPresetPh:        '选择提供商...',
   dohUpstreams:       'DoH 上游',
   dohUpstreamsHelp:   'DoH 解析器 URL，每行一个。留空则使用 Quad9 / Cloudflare / Google。',

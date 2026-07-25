@@ -316,7 +316,6 @@ export default {
   adguardMainDns:     'AdGuard Home как основной DNS-резолвер',
   adguardMainDnsHelp: 'Привязать AdGuard Home к порту 53 и использовать как основной DNS-резолвер.',
   advancedDns:        'Дополнительные параметры DNS',
-  dohPreset:          'Добавить DoH-провайдера',
   dohPresetPh:        'Выберите провайдера...',
   dohUpstreams:       'DoH-апстримы',
   dohUpstreamsHelp:   'URL DoH-резолверов, по одному в строке. Пусто - Quad9 / Cloudflare / Google.',

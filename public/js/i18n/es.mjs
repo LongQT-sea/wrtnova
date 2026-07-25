@@ -316,7 +316,6 @@ export default {
   adguardMainDns:     'AdGuard Home como resolutor DNS principal',
   adguardMainDnsHelp: 'Vincular AdGuard Home al puerto 53 y usarlo como resolutor DNS principal.',
   advancedDns:        'Opciones DNS avanzadas',
-  dohPreset:          'Añadir preajuste DoH',
   dohPresetPh:        'Elige un proveedor...',
   dohUpstreams:       'Upstreams DoH',
   dohUpstreamsHelp:   'URLs de resolutores DoH, una por línea. Vacío = Quad9 / Cloudflare / Google.',

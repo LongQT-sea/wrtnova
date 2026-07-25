@@ -316,7 +316,6 @@ export default {
   adguardMainDns:     'AdGuard Home as main DNS resolver',
   adguardMainDnsHelp: 'Bind AdGuard Home to port 53, use as the primary DNS resolver.',
   advancedDns:        'Advanced DNS options',
-  dohPreset:          'Add DoH preset',
   dohPresetPh:        'Pick a provider...',
   dohUpstreams:       'DoH upstreams',
   dohUpstreamsHelp:   'DoH resolver URLs, one per line. Blank uses Quad9 / Cloudflare / Google.',

@@ -1398,21 +1398,16 @@
             <div class="form-row form-row--full">
               <div class="opt-card">
                 <div class="opt-text">
-                  <label class="opt-title" for="doh-preset" data-i18n="dohPreset">Add DoH preset</label>
-                </div>
-                <select id="doh-preset" class="opt-control opt-field input-base">
-                  <!-- provider options are populated from ui.DOH_PROVIDERS (single source of truth) -->
-                  <option value="" data-i18n="dohPresetPh">Pick a provider...</option>
-                </select>
-              </div>
-            </div>
-            <div class="form-row form-row--full">
-              <div class="opt-card">
-                <div class="opt-text">
                   <label class="opt-title" for="DOH_UPSTREAMS" data-i18n="dohUpstreams">DoH upstreams</label>
                   <p class="form-help mt-0" data-i18n="dohUpstreamsHelp">DoH resolver URLs, one per line. Blank uses Quad9 / Cloudflare / Google.</p>
                 </div>
-                <textarea id="DOH_UPSTREAMS" name="DOH_UPSTREAMS" class="opt-control opt-stack input-base" rows="3" data-i18n-placeholder="dohUpstreamsPh" placeholder="one URL per line; blank = built-in defaults"></textarea>
+                <div class="opt-control opt-stack space-y-2">
+                  <select id="doh-preset" class="input-base" aria-label="Add DoH preset">
+                    <!-- options are populated from DOH_PROVIDERS (single source of truth) -->
+                    <option value="" data-i18n="dohPresetPh">Pick a provider...</option>
+                  </select>
+                  <textarea id="DOH_UPSTREAMS" name="DOH_UPSTREAMS" class="input-base" rows="3" data-i18n-placeholder="dohUpstreamsPh" placeholder="one URL per line; blank = built-in defaults"></textarea>
+                </div>
               </div>
             </div>
             <div class="form-row form-row--full">

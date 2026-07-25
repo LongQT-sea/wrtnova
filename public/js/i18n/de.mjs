@@ -316,7 +316,6 @@ export default {
   adguardMainDns:     'AdGuard Home als primärer DNS-Resolver',
   adguardMainDnsHelp: 'AdGuard Home an Port 53 binden und als primären DNS-Resolver verwenden.',
   advancedDns:        'Erweiterte DNS-Optionen',
-  dohPreset:          'DoH-Voreinstellung hinzufügen',
   dohPresetPh:        'Anbieter auswählen...',
   dohUpstreams:       'DoH-Upstreams',
   dohUpstreamsHelp:   'DoH-Resolver-URLs, eine pro Zeile. Leer nutzt Quad9 / Cloudflare / Google.',
