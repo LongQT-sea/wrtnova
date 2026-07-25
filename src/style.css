@@ -30,9 +30,19 @@
   /* .hidden must always win — JS toggles this class */
   .hidden { display: none !important; }
 
-  /* Remove native <details> disclosure triangle */
+  /* Remove native <details> disclosure triangle - the small text summaries
+     supply their own chevron SVG instead. */
   summary { list-style: none; }
   summary::-webkit-details-marker { display: none; }
+
+  /* That chevron points down when the section is open and right when it is
+     shut, so a closed row reads as "there is more here". Card headers are
+     excluded: they carry their own rotation (group-open:rotate-180) and would
+     otherwise turn twice. */
+  summary:not(.card-header) > svg:first-child { transition: transform 0.2s ease; }
+  details:not([open]) > summary:not(.card-header) > svg:first-child {
+    transform: rotate(-90deg);
+  }
 }
 
 @layer components {

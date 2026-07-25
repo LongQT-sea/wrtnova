@@ -528,18 +528,20 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
   function nodeExtrasHTML(id, hasDevice) {
     if (!hasDevice) return '';
     const sid = esc(id);
-    const sumCls = 'text-xs text-zinc-500 dark:text-zinc-400 cursor-pointer hover:text-zinc-700 dark:hover:text-zinc-200 select-none';
+    const sumCls = 'text-xs text-zinc-500 dark:text-zinc-400 cursor-pointer hover:text-zinc-700 dark:hover:text-zinc-200 select-none flex items-center gap-1';
+    // Same disclosure chevron the static <summary> rows use; CSS rotates it shut.
+    const chev = '<svg class="w-3 h-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>';
     return (
       '<div class="mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-800">' +
         '<details>' +
-          '<summary class="' + sumCls + '">' + S.advancedOptions + '</summary>' +
+          '<summary class="' + sumCls + '">' + chev + '<span>' + S.advancedOptions + '</span></summary>' +
           '<div class="mt-2 pl-1 space-y-2">' +
             '<details open>' +
-              '<summary class="' + sumCls + '">' + S.finalPackages + '</summary>' +
+              '<summary class="' + sumCls + '">' + chev + '<span>' + S.finalPackages + '</span></summary>' +
               '<div id="np-pkgs-' + sid + '" class="flex flex-wrap gap-1 py-1 mt-2 min-h-[1.75rem]"></div>' +
             '</details>' +
             '<details open>' +
-              '<summary class="' + sumCls + '">' + S.configPreview + '</summary>' +
+              '<summary class="' + sumCls + '">' + chev + '<span>' + S.configPreview + '</span></summary>' +
               '<div class="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2">' +
                 '<label class="flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400 cursor-pointer select-none">' +
                   '<input type="checkbox" id="np-reveal-' + sid + '" class="align-middle"><span>' + S.revealSecrets + '</span></label>' +
