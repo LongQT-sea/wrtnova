@@ -670,9 +670,6 @@ import { collectTarget, devicesState } from './devices.js';
     const badOctet = checkOctetV6Fields();
     if (badOctet) { badOctet.reportValidity(); return; }
 
-    // Normalize the endpoint first so its cleaned value is what gets built.
-    normalizeEndpointField();
-
     // Hostname / DDNS / port formats: a bad value corrupts the emitted config.
     // Pop the first visible offender's bubble.
     const badHostname = checkHostnameFields();

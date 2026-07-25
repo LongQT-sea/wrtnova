@@ -1549,9 +1549,10 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
       ready.map(n =>
         '<div id="ba-row-' + esc(n.id) + '" class="flex items-center gap-3">' +
         '<span class="text-xs font-medium w-28 truncate flex-shrink-0 leading-none">' + esc(n.name) + '</span>' +
-        '<div class="flex-1 min-w-0 flex items-center">' +
+        '<div class="flex-1 min-w-0">' +
         '<div class="w-full h-1.5 bg-zinc-200 dark:bg-zinc-700 rounded overflow-hidden">' +
         '<div class="ba-bar h-full bg-blue-500 transition-all duration-500" style="width:2%"></div></div>' +
+        '<p class="ba-label text-xs text-zinc-500 dark:text-zinc-400 truncate mt-1 leading-none"></p>' +
         '</div>' +
         '<div class="ba-link flex-shrink-0 w-20 text-right leading-none"></div>' +
         '</div>'
@@ -1579,6 +1580,7 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
     const bar = row.querySelector('.ba-bar');
     const label = row.querySelector('.ba-label');
     const link = row.querySelector('.ba-link');
+    if (label) label.textContent = '';
     if (errMsg) {
       if (bar) { bar.style.width = '100%'; bar.style.background = '#ef4444'; }
       if (link) link.innerHTML = '<span class="text-xs text-red-500 dark:text-red-400" title="' + esc(errMsg) + '">' + S.error + '</span>';
@@ -1589,11 +1591,15 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
     }
   }
 
-  function updateBuildAllProgress(nodeId, pct) {
+  function updateBuildAllProgress(nodeId, pct, label) {
     const row = document.getElementById('ba-row-' + nodeId);
     if (!row) return;
     const bar = row.querySelector('.ba-bar');
     if (bar) bar.style.width = pct + '%';
+    if (label != null) {
+      const labelEl = row.querySelector('.ba-label');
+      if (labelEl) labelEl.textContent = label;
+    }
   }
 
   async function startBuildAllNode(net, node, onComplete) {
@@ -1655,8 +1661,9 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
         asuData.detail || ('ASU HTTP ' + asuR.status)
       );
     } catch (e) {
-      if (planDnsAutoRetry(net, node, builtDns, e.message)) {
-        updateBuildAllProgress(node.id, 5);
+      const retryMode = planDnsAutoRetry(net, node, builtDns, e.message);
+      if (retryMode) {
+        updateBuildAllProgress(node.id, 5, dnsAutoRetryNote(retryMode));
         setTimeout(() => startBuildAllNode(net, node, onComplete), 2000);
       } else {
         updateBuildAllRow(node.id, null, t('buildFailed', { msg: e.message }));
@@ -1706,8 +1713,9 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
           finishBuildAllNode(net, node, data, base);
         } else {
           const errMsg = data.detail || 'HTTP ' + r.status;
-          if (planDnsAutoRetry(net, node, builtDns, errMsg)) {
-            updateBuildAllProgress(node.id, 5);
+          const retryMode = planDnsAutoRetry(net, node, builtDns, errMsg);
+          if (retryMode) {
+            updateBuildAllProgress(node.id, 5, dnsAutoRetryNote(retryMode));
             setTimeout(() => startBuildAllNode(net, node, onComplete), 2000);
             return;   // the rebuild owns onComplete()
           }
