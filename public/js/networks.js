@@ -2090,9 +2090,6 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
       if (e.key === 'Escape') exitRenameMode(net, false);
     });
 
-
-    // Add AP cancel
-
     // Delete cancel
     document.getElementById('btn-cancel-delete')?.addEventListener('click', () => document.getElementById('modal-delete').close());
     document.getElementById('btn-cancel-delete-node')?.addEventListener('click', () => document.getElementById('modal-delete-node').close());
