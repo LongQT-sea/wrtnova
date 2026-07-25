@@ -44,8 +44,8 @@ LAN_WG_WIFI_SSID=""	# Default: WrtNova_VPN
 LAN_WG_WIFI_PASSWD=""
 
 # NOTE: Wired backhaul is always better when feasible
-WIRELESS_MESH=		# 1 = use 5GHz wireless mesh backhaul (802.11s)
-WIRELESS_MESH_2G=	# 1 = use 2.4GHz wireless mesh backhaul (802.11s)
+WIRELESS_MESH=		# 1 = use 5 GHz wireless mesh backhaul (802.11s)
+WIRELESS_MESH_2G=	# 1 = use 2.4 GHz wireless mesh backhaul (802.11s)
 BATMAN_ADV=		# 1 = use batman-adv on top of 802.11s meshpoint
 BATMAN_ALL_VLAN=	# 1 = also trunk wanb and ADDITIONAL_VLAN_LIST over bat0
 MESH_ID=
@@ -177,7 +177,7 @@ BOOTSTRAP_DNS=
 # === Misc ===
 # NOTE: AP nodes flash the same config as the main router, only changing:
 AP_MODE=		# 1 = enable AP mode (disable DHCP, device acts as access point + managed switch)
-AP_INDEX=		# AP management IP last octet (2-19)
+AP_INDEX=		# AP management IP last octet (2-254)
 
 # 1 = enable Routing/NAT Offloading
 HARDWARE_OFFLOAD=	# NOTE: Do not set if using QoS/SQM
@@ -193,6 +193,7 @@ BLOCK_DOH=
 
 # List of country codes (lower case) to block with banip
 BANIP_COUNTRY_LIST=''	# e.g. Sri Lanka, India: 'lk in'
+BANIP_FEEDS=
 
 # 1 = Block guest internet access at night
 DENY_GUEST_NIGHT=
