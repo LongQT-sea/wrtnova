@@ -1956,7 +1956,7 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
   }
 
   // -- WARP prefill -------------------------------------------------
-  // Scoped to page lifetime — cleared on reload so each new page load gets a fresh reg.
+  // Scoped to page lifetime - cleared on reload so each new page load gets a fresh reg.
   let _warpSessionToken = '';
 
   async function prefillWarp() {

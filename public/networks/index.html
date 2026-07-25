@@ -42,7 +42,7 @@
 
   <main class="max-w-3xl mx-auto px-4 py-6">
 
-    <!-- ═══════════════════════ VIEW: List ═══════════════════════ -->
+    <!-- ======================= VIEW: List ======================= -->
     <div id="view-list" class="view">
 
       <div class="flex items-center justify-between mb-5">
@@ -62,7 +62,7 @@
     </div>
 
 
-    <!-- ═══════════════════════ VIEW: Detail ══════════════════════ -->
+    <!-- ======================= VIEW: Detail ====================== -->
     <div id="view-detail" class="view hidden">
 
       <div class="flex items-start justify-between gap-4 mb-5">
@@ -113,7 +113,7 @@
     </div>
 
 
-    <!-- ═══════════════════════ VIEW: Config ══════════════════════ -->
+    <!-- ======================= VIEW: Config ====================== -->
     <div id="view-config" class="view hidden">
 
       <div class="mb-5">
@@ -144,7 +144,7 @@
         <input type="radio" name="AP_MODE" value="" checked class="sr-only" aria-hidden="true">
         <input type="number" id="AP_INDEX" name="AP_INDEX" value="2" class="hidden" aria-hidden="true">
 
-        <!-- ── OpenWrt version (shared across fleet) ──────────────── -->
+        <!-- -- OpenWrt version (shared across fleet) ---------------- -->
         <div class="group card card-anim open" id="card-target">
           <div class="card-header">
             <span class="dot" aria-hidden="true"></span>
@@ -291,7 +291,7 @@
           </div>
         </div>
 
-        <!-- ── Network ── copied from /builder verbatim ───────────── -->
+        <!-- -- Network -- copied from /builder verbatim ------------- -->
         <div class="group card card-anim" id="card-network" data-section="network">
           <div class="card-header">
             <span class="dot" aria-label="Not started"></span>
@@ -533,7 +533,7 @@
           </div>
         </div>
 
-        <!-- ── WireGuard VPN client ── copied from /builder ────────── -->
+        <!-- -- WireGuard VPN client -- copied from /builder ---------- -->
         <div class="group card card-anim router-only" id="card-wg" data-section="wg">
           <div class="card-header">
             <span class="dot" aria-label="Not started"></span>
@@ -674,8 +674,8 @@
           </div>
         </div>
 
-        <!-- ── WAN ── copied from /builder, note router-only context ─ -->
-        <!-- ── WiFi ── copied from /builder verbatim ──────────────── -->
+        <!-- -- WAN -- copied from /builder, note router-only context - -->
+        <!-- -- WiFi -- copied from /builder verbatim ---------------- -->
         <div class="group card card-anim" id="card-wifi" data-section="wifi">
           <div class="card-header">
             <span class="dot" aria-label="Not started"></span>
@@ -1152,7 +1152,7 @@
           </div>
         </div>
 
-        <!-- ── Port Forwarding ── copied from /builder ─────────────── -->
+        <!-- -- Port Forwarding -- copied from /builder --------------- -->
         <div class="group card card-anim" id="card-portfwd" data-section="portfwd">
           <div class="card-header">
             <span class="dot" aria-label="Not started"></span>
@@ -1181,7 +1181,7 @@
           </div>
         </div>
 
-        <!-- ── IPv6 Exposure ── copied from /builder ───────────────── -->
+        <!-- -- IPv6 Exposure -- copied from /builder ----------------- -->
         <div class="group card card-anim" id="card-ipv6" data-section="ipv6">
           <div class="card-header">
             <span class="dot" aria-label="Not started"></span>
@@ -1212,7 +1212,7 @@
           </div>
         </div>
 
-        <!-- ── DDNS ── copied from /builder ────────────────────────── -->
+        <!-- -- DDNS -- copied from /builder -------------------------- -->
         <div class="group card card-anim" id="card-ddns" data-section="ddns">
           <div class="card-header">
             <span class="dot" aria-label="Not started"></span>
@@ -1259,7 +1259,7 @@
           </div>
         </div>
 
-        <!-- ── Failover ── copied from /builder ────────────────────── -->
+        <!-- -- Failover -- copied from /builder ---------------------- -->
         <div class="group card card-anim" id="card-failover" data-section="failover">
           <div class="card-header">
             <span class="dot" aria-label="Not started"></span>
@@ -1296,7 +1296,7 @@
           </div>
         </div>
 
-        <!-- ── DNS & adblock ── copied from /builder ───────────────── -->
+        <!-- -- DNS & adblock -- copied from /builder ----------------- -->
         <div class="group card card-anim" id="card-dns" data-section="dns">
           <div class="card-header">
             <span class="dot" aria-label="Not started"></span>
@@ -1497,7 +1497,7 @@
           </div>
         </div>
 
-        <!-- ── Additional packages ── copied from /builder ─────────── -->
+        <!-- -- Additional packages -- copied from /builder ----------- -->
         <div class="group card card-anim" id="card-pkgs" data-section="pkgs">
           <div class="card-header">
             <span class="dot" aria-label="Not started"></span>
@@ -1519,7 +1519,7 @@
           </div>
         </div>
 
-        <!-- ── Performance & misc ── copied from /builder ──────────── -->
+        <!-- -- Performance & misc -- copied from /builder ------------ -->
         <div class="group card card-anim" id="card-misc" data-section="misc">
           <div class="card-header">
             <span class="dot" aria-label="Not started"></span>

@@ -862,7 +862,7 @@ import { collectTarget, devicesState } from './devices.js';
     wrap.innerHTML = html;
   }
 
-  // Scoped to page lifetime — cleared on reload so each new page load gets a fresh reg.
+  // Scoped to page lifetime - cleared on reload so each new page load gets a fresh reg.
   let _warpSessionToken = '';
   ui.setWarpSessionToken = function (t) { _warpSessionToken = t || ''; };
 

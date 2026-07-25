@@ -1,4 +1,4 @@
-// /api/session — issue a session cookie (wrtnova_sid) if not present.
+// /api/session - issue a session cookie (wrtnova_sid) if not present.
 //
 // All client state (saved config, WARP refresh token) is scoped to this SID
 // in browser localStorage. Designed so we can later attach KV-backed server
