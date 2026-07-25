@@ -37,11 +37,6 @@ export function originAllowed(request, env) {
   });
 }
 
-export function getSid(request) {
-  const cookies = parseCookies(request.headers.get('cookie') || '');
-  return cookies.wrtnova_sid || null;
-}
-
 export function sessionPresent(request) {
   const sid = parseCookies(request.headers.get('cookie') || '').wrtnova_sid || '';
   return /^[0-9a-f]{32}$/.test(sid);

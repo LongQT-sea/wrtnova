@@ -8,7 +8,7 @@
 // the initial graph - that roughly halved the worst page. The remaining gap to 30
 // is dominated by networks.js; tighten JS_CEILING_KB further as it is slimmed.
 
-import { readFileSync, existsSync, globSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 import { gzipSync } from 'node:zlib';

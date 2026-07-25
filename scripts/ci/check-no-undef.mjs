@@ -14,7 +14,7 @@
 // discarded, so the files stay untyped and the SPEC Section 0 typing policy is
 // unchanged; a typo'd or deleted function is all this can fail on.
 
-import { readFileSync, globSync } from 'node:fs';
+import { globSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve, relative } from 'node:path';
 import ts from 'typescript';

@@ -289,7 +289,7 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
     });
   }
 
-  function showPanelDone(net, node, actEl, firmwareUrl, images, bin_dir, asuBase, onDone) {
+  function showPanelDone(net, node, actEl, images, bin_dir, asuBase, onDone) {
     if (!actEl) return;
     const id = 'buildbtn-' + uid();
     const isAp = node.overrides.AP_MODE === '1';
@@ -621,8 +621,6 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
     const id = esc(node.id);
     const devTitle = esc(node.device_target.title || '');
     const verOverride = node.overrides.version || '';
-    const effectiveVer = verOverride || node.device_target.version || cfg.shared_version || '';
-    const devVer = esc(effectiveVer);
     const hasDevice = !!node.device_target.profile;
     const allPkgs = [...(node.device_target.default_packages || []), ...(node.device_target.device_packages || [])];
     const hasWifi = /\bwpad-?|\bhostapd|\bmac80211/.test(allPkgs.join(' '));
@@ -1501,7 +1499,7 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
           ' · ' + t('builtAgo', { ago: timeAgo(node.last_build.timestamp) });
       }
     }
-    showPanelDone(net, node, actEl, firmwareUrl, images, data.bin_dir || '', base, () => buildNode(net, node));
+    showPanelDone(net, node, actEl, images, data.bin_dir || '', base, () => buildNode(net, node));
     updateBuildAllRow(node.id, firmwareUrl, null);
   }
 

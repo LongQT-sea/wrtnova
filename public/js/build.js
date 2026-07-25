@@ -8,7 +8,7 @@
 import { ui } from './ui-ns.mjs';
 import './ui.js';
 import './i18n/core.mjs';
-import { BUILDER_SCHEMA, readForm, keySets, textVal, SUBNET_KEYS, writeSubnet, IFACE_FIELDS, ifaceValid, PREFIX_FIELDS, prefixValid, WIFI_TEXT_FIELDS, wifiTextValid, pskVlanPassIssue } from './config-form.mjs';
+import { BUILDER_SCHEMA, readForm, keySets, SUBNET_KEYS, writeSubnet, IFACE_FIELDS, ifaceValid, PREFIX_FIELDS, prefixValid, WIFI_TEXT_FIELDS, wifiTextValid, pskVlanPassIssue } from './config-form.mjs';
 import { deriveConfig } from './builder-config.mjs';
 import { deriveNetRows, truncateAdditionalVlans, SWCONFIG_VLAN_MAX, isSwconfigTarget } from './visibility.mjs';
 import { createStore } from './store.mjs';

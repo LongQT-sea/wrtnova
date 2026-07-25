@@ -11,7 +11,7 @@
 
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { dirname, resolve, relative } from 'node:path';
+import { dirname, resolve } from 'node:path';
 import { globSync } from 'node:fs';
 
 const here = dirname(fileURLToPath(import.meta.url));
