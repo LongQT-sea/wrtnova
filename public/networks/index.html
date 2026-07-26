@@ -254,18 +254,17 @@
             <div class="form-row form-row--full ssh-pw-row hidden">
               <div class="opt-card">
                 <div class="opt-text">
-                  <span class="opt-title" data-i18n="sshPasswordAuth">SSH password auth</span>
-                  <p class="form-help mt-0" data-i18n="sshPasswordAuthHelp">Off rejects password login entirely; only the keys above are accepted.</p>
+                  <span class="opt-title" id="ssh-auth-title" data-i18n="sshPasswordAuth">SSH authentication</span>
+                  <p class="form-help mt-0" data-i18n="sshPasswordAuthHelp">Keys only rejects SSH password login. Does not affect LuCI web login.</p>
                 </div>
-                <!-- NOTE: aria-label="SSH password auth" on radiogroup needs JS translation -->
-                <div class="radio-seg opt-control" role="radiogroup" aria-label="SSH password auth">
+                <div class="radio-seg opt-control" role="radiogroup" aria-labelledby="ssh-auth-title">
                   <label>
                     <input type="radio" name="SSH_PASSWD_AUTH" value="" checked>
-                    <span data-i18n="sshAuthOn">On (keys + password)</span>
+                    <span data-i18n="sshAuthOn">Keys + password</span>
                   </label>
                   <label>
                     <input type="radio" name="SSH_PASSWD_AUTH" value="off">
-                    <span data-i18n="sshAuthOff">Off (keys only)</span>
+                    <span data-i18n="sshAuthOff">Keys only</span>
                   </label>
                 </div>
               </div>
@@ -905,7 +904,7 @@
                     </span>
                     <div>
                       <span class="toggle-text" data-i18n="bandSuffix">Add band suffix</span>
-                      <p class="form-help mt-0" data-i18n="bandSuffixHelp">Add 2G/5G/6G to the end of each SSID.</p>
+                      <p class="form-help mt-0" data-i18n-html="bandSuffixHelp">Add 2G/5G/6G to the end of each SSID. This may cause <code>usteer</code> band steering between 2G/5G/6G to stop working; same-band roaming between APs still works.</p>
                     </div>
                   </label>
                 </div>
@@ -918,7 +917,7 @@
                     </span>
                     <div>
                       <span class="toggle-text" data-i18n="indexSuffix">Add AP index suffix</span>
-                      <p class="form-help mt-0" data-i18n="indexSuffixHelp">Append the AP index to each SSID (AP mode only).</p>
+                      <p class="form-help mt-0" data-i18n="indexSuffixHelp">Append the AP index to each SSID (AP mode only). This may cause fast transition, neighbor reports and assisted roaming between APs to stop working.</p>
                     </div>
                   </label>
                 </div>
