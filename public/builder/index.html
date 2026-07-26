@@ -383,7 +383,7 @@
                 <span class="toggle-thumb"></span>
               </span>
               <div>
-                <span class="toggle-text" data-i18n="enableIotInternet">Enable internet access for IoT devices</span>
+                <span class="toggle-text" data-i18n="enableIotInternet">Internet access for the IoT network</span>
               </div>
             </label>
           </div>
@@ -669,7 +669,7 @@
             </span>
             <div>
               <span class="toggle-text" data-i18n="wirelessMesh">5 GHz 802.11s mesh backhaul</span>
-              <p class="form-help mt-0" data-i18n="wiredBackhaulNote">Tip: Prefer wired backhaul over wireless whenever feasible.</p>
+              <p class="form-help mt-0" data-i18n="wiredBackhaulNote">Tip: Wired backhaul is always better than wireless when feasible.</p>
             </div>
           </label>
         </div>
@@ -683,7 +683,7 @@
             </span>
             <div>
               <span class="toggle-text" data-i18n="bridgeStp">Enable Spanning Tree Protocol for br-vlan</span>
-              <p class="form-help mt-0" data-i18n="stpNote">To prevent bridge loops when mixing wired and wireless backhaul.</p>
+              <p class="form-help mt-0" data-i18n="stpNote">Prevents bridge loops when mixing wired and wireless backhaul.</p>
             </div>
           </label>
         </div>
@@ -968,8 +968,8 @@
                   <span class="toggle-thumb"></span>
                 </span>
                 <div>
-                  <span class="toggle-text" data-i18n="backhaulOnly">Router/backhaul-only node</span>
-                  <p class="form-help mt-0" data-i18n="disableAllAps">Turn off all Access Point interfaces, useful for router or backhaul-only nodes.</p>
+                  <span class="toggle-text" data-i18n="backhaulOnly">Disable all APs</span>
+                  <p class="form-help mt-0" data-i18n="disableAllAps">Turn off every Access Point interface. For router-only or mesh-backhaul-only nodes.</p>
                 </div>
               </label>
             </div>
@@ -1335,7 +1335,7 @@
               <input type="radio" name="DNS_MODE" value="none" class="mt-0.5 flex-shrink-0">
               <div>
                 <span class="toggle-text" data-i18n="dnsNone">None</span>
-                <p class="form-help mt-0" data-i18n="dnsNoneHelp">Plain dnsmasq only. No encrypted DNS, smallest footprint.</p>
+                <p class="form-help mt-0" data-i18n="dnsNoneHelp">Plain dnsmasq only. No ad blocking or encrypted DNS, smallest footprint.</p>
               </div>
             </label>
           </div>
@@ -1350,7 +1350,7 @@
               </span>
               <div>
                 <span class="toggle-text" data-i18n="blockDotDoq">Block DNS over TLS/QUIC</span>
-                <p class="form-help mt-0" data-i18n="blockDotDoqHelp">Enforce ad blocking on stubborn client devices.</p>
+                <p class="form-help mt-0" data-i18n="blockDotDoqHelp">Prevent clients from using DoT/DoQ to bypass ad blocking and filtering.</p>
               </div>
             </label>
             <label class="toggle-label">
@@ -1361,7 +1361,7 @@
               </span>
               <div>
                 <span class="toggle-text" data-i18n="blockDoh">Block public DNS over HTTPS servers</span>
-                <p class="form-help mt-0" data-i18n="blockDohHelp">Block known DoH resolvers via banIP so clients cannot bypass filtering.</p>
+                <p class="form-help mt-0" data-i18n="blockDohHelp">Block known DoH resolvers via banIP, making it harder for clients to bypass ad blocking and filtering.</p>
               </div>
             </label>
             <label class="toggle-label">
@@ -1372,7 +1372,7 @@
               </span>
               <div>
                 <span class="toggle-text" data-i18n="forceDns">Force DNS to router</span>
-                <p class="form-help mt-0" data-i18n="forceDnsHelp">Redirect all DNS queries (TCP/UDP port 53) from LAN, Guest, and IoT networks to the router.</p>
+                <p class="form-help mt-0" data-i18n="forceDnsHelp">Redirect all DNS queries (TCP/UDP port 53) from LAN, Guest, and IoT clients to this router&#39;s DNS. Clients pointed at 8.8.8.8 or 1.1.1.1 are transparently served by the router instead.</p>
               </div>
             </label>
             <label class="toggle-label adguard-main-only hidden">
@@ -1495,7 +1495,7 @@
     <div class="group card card-anim" id="card-pkgs" data-section="pkgs">
       <div class="card-header">
         <span class="dot" aria-label="Not started"></span>
-        <h2 class="flex-1 text-sm font-semibold" data-i18n="additionalPackages">Additional packages</h2>
+        <h2 class="flex-1 text-sm font-semibold" data-i18n="additionalPackages">Packages</h2>
         <svg class="w-4 h-4 text-zinc-400 card-chev transition-transform duration-200 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
       </div>
       <div class="card-body-wrap">
