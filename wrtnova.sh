@@ -1112,33 +1112,14 @@ _uci mwan3 policy "${BASE_IFACE:0:10}_only" ^use_member="$NAME" +use_member="$NA
 /etc/init.d/log status | grep -q running && uci commit mwan3
 EOF
 
-[ -z "$no_mwan3" ] && cat > /etc/config/mwan3 << EOF
-
-config globals 'globals'
-	option mmx_mask '0x3F00'
-	option logging '1'
-	option loglevel 'error'
-
-config policy 'balanced'
-
-config rule 'https'
-	option sticky '1'
-	option dest_port '443'
-	option proto 'tcp'
-	option use_policy 'balanced'
-
-config rule 'default_rule_v4'
-	option dest_ip '0.0.0.0/0'
-	option use_policy 'balanced'
-	option family 'ipv4'
-
-config rule 'default_rule_v6'
-	option dest_ip '::/0'
-	option use_policy 'balanced'
-	option family 'ipv6'
-EOF
-
 [ -z "$no_mwan3" ] && {
+	:> /etc/config/mwan3
+	_uci mwan3 globals globals mmx_mask=0x3F00 logging=1 loglevel=error
+	_uci mwan3 policy balanced
+	_uci mwan3 rule https sticky=1 dest_port=443 proto=tcp use_policy=balanced
+	_uci mwan3 rule default_rule_v4 dest_ip=0.0.0.0/0 use_policy=balanced family=ipv4
+	_uci mwan3 rule default_rule_v6 dest_ip=::/0 use_policy=balanced family=ipv6
+
 	mwan3-iface-add wan
 	mwan3-iface-add wan_6 ipv6
 
@@ -1165,9 +1146,9 @@ EOF
 				src_ip="$iot_net_pfx.0$iot_subnet" use_policy="${wg_if}_only" @4
 		}
 	}
-}
 
-[ "$AP_MODE" = 1 ] && [ -z "$no_mwan3" ] && /etc/init.d/mwan3 disable
+	[ "$AP_MODE" = 1 ] && /etc/init.d/mwan3 disable
+}
 
 # === DHCP/DNS ===
 write_script /sbin/dhcp-instance-add <<'EOF'
