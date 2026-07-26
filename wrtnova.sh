@@ -233,10 +233,10 @@ cat > /usr/share/wrtnova/functions.sh <<'EOF'
 _uci() {
 	local config="$1"
 	local type="${2:-$1}"
-	local name arg
+	local name arg key val op
 	case "$3" in
 		@*) name="$3" ;;
-		*)  name="${3//-/_}" ;;
+		*) name="${3//-/_}" ;;
 	esac
 	shift 3
 
@@ -248,15 +248,19 @@ _uci() {
 	fi
 
 	for arg; do
-		[ -z "$arg" ] && continue
 		case "$arg" in
-			+*) uci add_list "$config.$name.${arg#+}" ;;
-			-*) uci -q del "$config.$name.${arg#-}" ;;
-			^*) uci -q del_list "$config.$name.${arg#^}" ;;
-			~*) uci rename "$config.$name=${arg#\~}" ;;
-			@*) uci reorder "$config.$name=${arg#@}" ;;
-			*) uci set "$config.$name.$arg" ;;
+			'') continue ;;
+			+*) op=add_list ;;
+			^*) op="-q del_list" ;;
+			-*) uci -q del "$config.$name.${arg#-}"; continue ;;
+			~*) uci rename "$config.$name=${arg#\~}"; continue ;;
+			@*) uci reorder "$config.$name=${arg#@}"; continue ;;
+			*)  uci set "$config.$name.$arg"; continue ;;
 		esac
+		key="${arg#?}"; key="${key%%=*}"
+		for val in ${arg#*=}; do
+			uci $op "$config.$name.$key=$val"
+		done
 	done
 }
 
@@ -701,17 +705,17 @@ fi
 
 # === Network ===
 add_bridge_vlan() {
-	local vlan_id="$1" ports="$2" iface="$3"
-
-	_uci network bridge-vlan "vlan_$vlan_id" \
-		device=br-vlan vlan="$vlan_id" local=0 "${iface:+-local}"
+	local vlan_id="$1" ports="$2" iface="$3" p list=
 
 	for p in $ports; do
 		case "$p" in
 			mesh*:u*) p="${p%u*}t" ;;
 		esac
-		uci add_list "network.vlan_$vlan_id.ports=$p"
+		list="$list $p"
 	done
+
+	_uci network bridge-vlan "vlan_$vlan_id" \
+		device=br-vlan vlan="$vlan_id" local=0 "${iface:+-local}" +ports="$list"
 
 	[ -n "$iface" ] && uci set "network.$iface.device=br-vlan.$vlan_id"
 }
@@ -795,8 +799,7 @@ _uci network interface wan6 device=@wan ~wan_6
 		_uci network interface "$wg_if" proto=wireguard \
 			disabled=1 ${PEER_PUBLIC_KEY:+-disabled} \
 			private_key="${WG_PRIVATE_KEY:-$(wg genkey)}" \
-			+addresses="${WG_IPV4:-172.16.0.2/32}" \
-			+addresses="${WG_IPV6:-fd88::/128}" \
+			+addresses="${WG_IPV4:-172.16.0.2/32} ${WG_IPV6:-fd88::/128}" \
 			ip4table=20 ip6table=20 ${WG_MTU:+mtu=$WG_MTU}
 
 		if [ "$no_mwan3" = 1 ]; then
@@ -951,10 +954,7 @@ fi
 
 [ "$TAGGED_LAN_VLAN" = 1 ] && lan_vlan_ports="$trunk_ports"
 
-_uci network device @device[0] name=br-vlan -ports ${BRIDGE_STP:+stp=1}
-for p in $br_ports; do
-	uci add_list network.@device[0].ports="$p"
-done
+_uci network device @device[0] name=br-vlan -ports ${BRIDGE_STP:+stp=1} +ports="$br_ports"
 
 add_vlan "$lan_vid" "$lan_vlan_ports" "$lan_if"
 [ "$GUEST_ENABLE" = 1 ] && add_vlan "$guest_vid" "$trunk_ports" "$guest_if"
@@ -1047,13 +1047,8 @@ done >/dev/null
 		esac
 	done
 
-	for f in $BANIP_FEEDS ${BLOCK_DOH:+doh}; do
-		_uci banip "" global +ban_feed="$f"
-	done
-
-	for c in $BANIP_COUNTRY_LIST; do
-		_uci banip "" global +ban_country="$c"
-	done
+	_uci banip "" global +ban_feed="${BLOCK_DOH:+doh} $BANIP_FEEDS"
+	_uci banip "" global +ban_country="$BANIP_COUNTRY_LIST"
 }
 
 # === mwan3 ===
@@ -1203,7 +1198,7 @@ _uci dhcp "" "$IFACE" dhcpv4=server \
 [ "$IPV6" = 1 ] && \
 	_uci dhcp "" "$IFACE" \
 		ra=server dhcpv6=server \
-		+ra_flags=managed-config +ra_flags=other-config
+		+ra_flags="managed-config other-config"
 
 /etc/init.d/log status | grep -q running && uci commit dhcp
 EOF
@@ -1211,7 +1206,7 @@ EOF
 setup_dnsmasq_upstream() {
 	for iface in $ifaces_lan; do
 		_uci dhcp dnsmasq "${iface}_dns" \
-			noresolv=1 cachesize=0 +server=127.0.0.1#5354 +server=::1#5354 ${adguard_main:+port=54}
+			noresolv=1 cachesize=0 +server="127.0.0.1#5354 ::1#5354" ${adguard_main:+port=54}
 	done
 }
 
@@ -1338,15 +1333,8 @@ doh_upstreams="${DOH_UPSTREAMS:-https://dns.adguard-dns.com/dns-query}"
 
 	_uci dnsproxy edns edns enabled=1
 
-	_uci dnsproxy servers servers -upstream -bootstrap -fallback
-
-	for u in $doh_upstreams; do
-		_uci dnsproxy servers servers +upstream="$u"
-	done
-
-	for u in $bootstrap_dns; do
-		_uci dnsproxy servers servers +bootstrap="$u" +fallback="$u"
-	done
+	_uci dnsproxy servers servers -upstream -bootstrap -fallback \
+		+upstream="$doh_upstreams" +bootstrap="$bootstrap_dns" +fallback="$bootstrap_dns"
 
 	echo "sleep 5; /etc/init.d/dnsproxy restart &" >> "$hplug_ifup_wan"
 }
@@ -1392,18 +1380,15 @@ fw_add_base_rules() {
 	_uci firewall rule "" \
 		name="$1 Allow-MLD" src="$1" \
 		target=ACCEPT proto=icmp family=ipv6 src_ip=fe80::/10 \
-		+icmp_type=130/0 +icmp_type=131/0 \
-		+icmp_type=132/0 +icmp_type=143/0
+		+icmp_type="130/0 131/0 132/0 143/0"
 
 	_uci firewall rule "" \
 		name="$1 Allow-ICMPv6-Input" src="$1" \
 		target=ACCEPT proto=icmp family=ipv6 limit=1000/sec \
-		+icmp_type=bad-header +icmp_type=destination-unreachable \
-		+icmp_type=echo-reply +icmp_type=echo-request \
-		+icmp_type=neighbour-advertisement +icmp_type=neighbour-solicitation \
-		+icmp_type=packet-too-big +icmp_type=router-advertisement \
-		+icmp_type=router-solicitation +icmp_type=time-exceeded \
-		+icmp_type=unknown-header-type
+		+icmp_type="bad-header destination-unreachable \
+		echo-reply echo-request neighbour-advertisement \
+		neighbour-solicitation packet-too-big router-advertisement \
+		router-solicitation time-exceeded unknown-header-type"
 }
 
 fw_accept_to_lan() {
@@ -1461,10 +1446,7 @@ _uci firewall zone @zone[0] -network +network="$lan_if" ~lan
 	}
 }
 
-_uci firewall zone @zone[1] -network ~wan
-for i in $ifaces_wan; do
-	_uci firewall zone wan +network="$i"
-done
+_uci firewall zone @zone[1] -network +network="$ifaces_wan" ~wan
 
 [ "$HARDWARE_OFFLOAD" = 1 ] && SOFTWARE_OFFLOAD=1
 _uci firewall defaults @defaults[0] \
