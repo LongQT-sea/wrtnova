@@ -184,6 +184,15 @@
     width: 6.5rem;
     margin-left: auto;
   }
+  /* The mirror of --narrow: a 44-char base64 key is unreadable in half a card,
+     and a key you cannot read is one you cannot check against what you pasted.
+     The text block gives up its 12rem basis because the card wraps before it
+     shrinks - at 12rem + 75% the field drops to a line of its own instead. Same
+     reason for the placement as --narrow above. */
+  @media (min-width: 768px) {
+    .opt-card > .opt-field--wide { flex: 0 0 calc(75% - 0.4375rem); min-width: 0; }
+    .opt-card:has(> .opt-field--wide) > .opt-text { flex-basis: calc(25% - 0.4375rem); }
+  }
 
   /* Several cards merged into one box, separated by rules instead of gaps.
      Two things use it:

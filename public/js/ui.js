@@ -295,11 +295,20 @@ import { deriveVisibility, deriveNetRows, detectVlanConflict, resolveVlanAssignm
       const mesh5 = ui.$('#WIRELESS_MESH');
       const mesh2g = ui.$('#WIRELESS_MESH_2G');
 
+      const batman = ui.$('#BATMAN_ADV');
+
+      // batman-adv needs a radio to run over and its toggle no longer hides when
+      // both bands are off. Direct toggle only - a saved "batman on, mesh off" stays.
+      if (batman && mesh5 && mesh2g && batman.checked && !mesh5.checked && !mesh2g.checked &&
+          e && e.target && e.target.id === 'BATMAN_ADV') {
+        mesh5.checked = true;
+        mesh5.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+
       // batman-adv runs over one mesh radio: with it on, the two bands are radio
       // buttons - the band just toggled on wins, the other is forced off (bubbling
       // change re-syncs each store). Any other trigger drops 2.4 GHz, keeps 5 GHz.
       // Before the BRIDGE_STP block so that block sees the settled single band.
-      const batman = ui.$('#BATMAN_ADV');
       if (batman && mesh5 && mesh2g && batman.checked && mesh5.checked && mesh2g.checked) {
         const drop = (e && e.target && e.target.id === 'WIRELESS_MESH_2G') ? mesh5 : mesh2g;
         drop.checked = false;

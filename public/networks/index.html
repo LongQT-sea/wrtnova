@@ -195,7 +195,7 @@
               <div class="opt-card">
                 <div class="opt-text">
                   <span class="opt-title" data-i18n="timeFormat">Time format</span>
-                  <p class="form-help mt-0" data-i18n="timeFormatHelp">LuCI clock display. Requires OpenWrt 25 or newer.</p>
+                  <p class="form-help mt-0" data-i18n="timeFormatHelp">Requires OpenWrt 25 or newer.</p>
                 </div>
                 <div class="radio-seg opt-control" role="radiogroup" aria-label="Time format">
                   <label>
@@ -558,7 +558,7 @@
                     <div class="opt-text">
                       <label class="opt-title" for="WG_PRIVATE_KEY" data-i18n="privateKey">Private key</label>
                     </div>
-                    <div class="opt-control opt-field relative">
+                    <div class="opt-control opt-field--wide relative">
                       <input type="password" id="WG_PRIVATE_KEY" name="WG_PRIVATE_KEY" class="input-base" style="padding-right:2.5rem" autocomplete="off">
                       <button type="button" id="toggle-wg-privkey"
                               class="btn btn-ghost btn-icon absolute right-1.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
@@ -571,31 +571,31 @@
                     <div class="opt-text">
                       <label class="opt-title" for="WG_IPV4" data-i18n="clientIpv4">Client IPv4</label>
                     </div>
-                    <input type="text" id="WG_IPV4" name="WG_IPV4" class="opt-control opt-field input-base" placeholder="e.g. 172.16.0.2/32">
+                    <input type="text" id="WG_IPV4" name="WG_IPV4" class="opt-control opt-field--wide input-base" placeholder="e.g. 172.16.0.2/32">
                   </div>
                   <div class="opt-card">
                     <div class="opt-text">
                       <label class="opt-title" for="WG_IPV6" data-i18n="clientIpv6">Client IPv6</label>
                     </div>
-                    <input type="text" id="WG_IPV6" name="WG_IPV6" class="opt-control opt-field input-base" placeholder="e.g. fd88::/128">
+                    <input type="text" id="WG_IPV6" name="WG_IPV6" class="opt-control opt-field--wide input-base" placeholder="e.g. fd88::/128">
                   </div>
                   <div class="opt-card">
                     <div class="opt-text">
                       <label class="opt-title" for="WG_DNS_V4" data-i18n="dnsV4">DNS IPv4</label>
                     </div>
-                    <input type="text" id="WG_DNS_V4" name="WG_DNS_V4" class="opt-control opt-field input-base" placeholder="e.g. 1.1.1.1 (optional)">
+                    <input type="text" id="WG_DNS_V4" name="WG_DNS_V4" class="opt-control opt-field--wide input-base" placeholder="e.g. 1.1.1.1 (optional)">
                   </div>
                   <div class="opt-card">
                     <div class="opt-text">
                       <label class="opt-title" for="WG_DNS_V6" data-i18n="dnsV6">DNS IPv6</label>
                     </div>
-                    <input type="text" id="WG_DNS_V6" name="WG_DNS_V6" class="opt-control opt-field input-base" placeholder="e.g. 2606:4700:4700::1111 (optional)">
+                    <input type="text" id="WG_DNS_V6" name="WG_DNS_V6" class="opt-control opt-field--wide input-base" placeholder="e.g. 2606:4700:4700::1111 (optional)">
                   </div>
                   <div class="opt-card">
                     <div class="opt-text">
                       <label class="opt-title" for="WG_MTU" data-i18n="wgMtu">MTU</label>
                     </div>
-                    <input type="text" id="WG_MTU" name="WG_MTU" class="opt-control opt-field input-base" inputmode="numeric" placeholder="e.g. 1420 (optional)">
+                    <input type="text" id="WG_MTU" name="WG_MTU" class="opt-control opt-field--wide input-base" inputmode="numeric" placeholder="e.g. 1420 (optional)">
                   </div>
                 </div>
               </div>
@@ -608,13 +608,13 @@
                     <div class="opt-text">
                       <label class="opt-title" for="PEER_PUBLIC_KEY" data-i18n="peerPublicKey">Peer public key</label>
                     </div>
-                    <input type="text" id="PEER_PUBLIC_KEY" name="PEER_PUBLIC_KEY" class="opt-control opt-field input-base" autocomplete="off">
+                    <input type="text" id="PEER_PUBLIC_KEY" name="PEER_PUBLIC_KEY" class="opt-control opt-field--wide input-base" autocomplete="off">
                   </div>
                   <div class="opt-card">
                     <div class="opt-text">
                       <label class="opt-title" for="PRESHARED_KEY" data-i18n="presharedKey">Preshared key</label>
                     </div>
-                    <div class="opt-control opt-field relative">
+                    <div class="opt-control opt-field--wide relative">
                       <input type="password" id="PRESHARED_KEY" name="PRESHARED_KEY" class="input-base" style="padding-right:2.5rem" autocomplete="off" placeholder="optional">
                       <button type="button" id="toggle-wg-psk"
                               class="btn btn-ghost btn-icon absolute right-1.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
@@ -627,13 +627,13 @@
                     <div class="opt-text">
                       <label class="opt-title" for="ENDPOINT" data-i18n="endpoint">Endpoint</label>
                     </div>
-                    <input type="text" id="ENDPOINT" name="ENDPOINT" class="opt-control opt-field input-base" placeholder="engage.cloudflareclient.com:2408" autocomplete="off">
+                    <input type="text" id="ENDPOINT" name="ENDPOINT" class="opt-control opt-field--wide input-base" placeholder="engage.cloudflareclient.com:2408" autocomplete="off">
                   </div>
                   <div class="opt-card">
                     <div class="opt-text">
                       <label class="opt-title" for="ALLOWED_IPS" data-i18n="allowedIps">Allowed IPs</label>
                     </div>
-                    <input type="text" id="ALLOWED_IPS" name="ALLOWED_IPS" class="opt-control opt-field input-base" placeholder="0.0.0.0/0 ::/0">
+                    <input type="text" id="ALLOWED_IPS" name="ALLOWED_IPS" class="opt-control opt-field--wide input-base" placeholder="0.0.0.0/0 ::/0">
                   </div>
                 </div>
               </div>
@@ -657,13 +657,13 @@
                       <div class="opt-text">
                         <label class="opt-title" for="SPLIT_TUNNEL_V4" data-i18n="splitTunnelV4">Exclude IPv4</label>
                       </div>
-                      <input type="text" id="SPLIT_TUNNEL_V4" name="SPLIT_TUNNEL_V4" class="opt-control opt-field input-base" placeholder="e.g. 192.168.0.0/16 10.0.0.0/8 (optional)">
+                      <input type="text" id="SPLIT_TUNNEL_V4" name="SPLIT_TUNNEL_V4" class="opt-control opt-field--wide input-base" placeholder="e.g. 192.168.0.0/16 10.0.0.0/8 (optional)">
                     </div>
                     <div class="opt-card">
                       <div class="opt-text">
                         <label class="opt-title" for="SPLIT_TUNNEL_V6" data-i18n="splitTunnelV6">Exclude IPv6</label>
                       </div>
-                      <input type="text" id="SPLIT_TUNNEL_V6" name="SPLIT_TUNNEL_V6" class="opt-control opt-field input-base" placeholder="e.g. fd00::/8 fc00::/7 (optional)">
+                      <input type="text" id="SPLIT_TUNNEL_V6" name="SPLIT_TUNNEL_V6" class="opt-control opt-field--wide input-base" placeholder="e.g. fd00::/8 fc00::/7 (optional)">
                     </div>
                   </div>
                 </div>
@@ -683,84 +683,11 @@
           </div>
           <div class="card-body-wrap">
           <div class="card-body">
-            <div class="form-row form-row--full">
-              <div class="opt-card">
-                <div class="opt-text">
-                  <label class="opt-title" for="COUNTRY_CODE" data-i18n="countryCode">Country code</label>
-                </div>
-                <input type="text" id="COUNTRY_CODE" name="COUNTRY_CODE" class="opt-control opt-field--narrow input-base" maxlength="2" placeholder="US" style="text-transform:uppercase">
-              </div>
-            </div>
-            <div class="form-row form-row--full dense-env-only">
-              <label class="toggle-label">
-                <span class="toggle-wrap">
-                  <input type="checkbox" id="DENSE_ENV" name="DENSE_ENV" value="1" class="toggle-input">
-                  <span class="toggle-track"></span>
-                  <span class="toggle-thumb"></span>
-                </span>
-                <div>
-                  <span class="toggle-text" data-i18n="denseEnvironment">Dense environment</span>
-                  <p class="form-help mt-0" data-i18n-html="tightenRoaming">Tighten <code>usteer</code> roaming/steering thresholds.</p>
-                </div>
-              </label>
-            </div>
-            <div class="form-row form-row--full">
-              <label class="toggle-label">
-                <span class="toggle-wrap">
-                  <input type="checkbox" id="WIRELESS_MESH" name="WIRELESS_MESH" value="1" class="toggle-input">
-                  <span class="toggle-track"></span>
-                  <span class="toggle-thumb"></span>
-                </span>
-                <div>
-                  <span class="toggle-text" data-i18n="wirelessMesh">5 GHz 802.11s mesh backhaul</span>
-                  <p class="form-help mt-0" data-i18n="enableMeshBackhaulDefault">Tip: Wired backhaul is always better than wireless when feasible. Overridable per node.</p>
-                </div>
-              </label>
-            </div>
-
-            <div class="form-row form-row--full mesh-only hidden">
-              <label class="toggle-label">
-                <span class="toggle-wrap">
-                  <input type="checkbox" id="BRIDGE_STP" name="BRIDGE_STP" value="1" class="toggle-input">
-                  <span class="toggle-track"></span>
-                  <span class="toggle-thumb"></span>
-                </span>
-                <div>
-                  <span class="toggle-text" data-i18n="bridgeStp">Enable Spanning Tree Protocol for br-vlan</span>
-                  <p class="form-help mt-0" data-i18n="stpNote">Prevents bridge loops when mixing wired and wireless backhaul.</p>
-                </div>
-              </label>
-            </div>
-
-            <div class="mesh-only hidden">
-              <div class="form-row form-row--full">
+            <div>
+              <div class="form-row form-row--full wifi-lan">
                 <div class="opt-card">
                   <div class="opt-text">
-                    <span class="opt-title" data-i18n="meshCredentials">Mesh ID and password</span>
-                  </div>
-                  <div class="opt-control opt-stack grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    <input type="text" id="MESH_ID" name="MESH_ID" class="input-base" placeholder="mesh_trunk_backhaul" aria-label="Mesh ID">
-                    <div class="relative">
-                      <input type="password" id="MESH_PASSWD" name="MESH_PASSWD" class="input-base" style="padding-right:2.5rem" placeholder="password" autocomplete="new-password" aria-label="Mesh password">
-                      <button type="button" id="toggle-mesh-pw"
-                              class="btn btn-ghost btn-icon absolute right-1.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
-                              aria-label="Show password">
-                        <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="info-note mesh-only hidden" role="note" data-i18n="meshTrunkNote">Note: All configured VLANs are automatically trunked over the mesh backhaul.</div>
-
-            <div class="sub-section">
-              <p class="sub-section-title" data-i18n="networkSsids">Network SSIDs</p>
-              <div class="form-row form-row--full wifi-lan mt-2">
-                <div class="opt-card">
-                  <div class="opt-text">
-                    <span class="opt-title">LAN</span>
+                    <span class="opt-title">LAN SSID</span>
                   </div>
                   <div class="opt-control opt-stack grid grid-cols-1 sm:grid-cols-2 gap-2">
                     <input type="text" id="LAN_WIFI_SSID" name="LAN_WIFI_SSID" class="input-base" placeholder="WrtNova">
@@ -778,7 +705,7 @@
               <div class="form-row form-row--full wifi-guest hidden">
                 <div class="opt-card">
                   <div class="opt-text">
-                    <span class="opt-title">Guest</span>
+                    <span class="opt-title">Guest SSID</span>
                   </div>
                   <div class="opt-control opt-stack grid grid-cols-1 sm:grid-cols-2 gap-2">
                     <input type="text" id="GUEST_WIFI_SSID" name="GUEST_WIFI_SSID" class="input-base" placeholder="WrtNova_Guest">
@@ -796,7 +723,7 @@
               <div class="form-row form-row--full wifi-iot hidden">
                 <div class="opt-card">
                   <div class="opt-text">
-                    <span class="opt-title">IoT</span>
+                    <span class="opt-title">IoT SSID</span>
                   </div>
                   <div class="opt-control opt-stack grid grid-cols-1 sm:grid-cols-2 gap-2">
                     <input type="text" id="IOT_WIFI_SSID" name="IOT_WIFI_SSID" class="input-base" placeholder="WrtNova_IoT">
@@ -814,7 +741,7 @@
               <div class="form-row form-row--full wifi-wg hidden">
                 <div class="opt-card">
                   <div class="opt-text">
-                    <span class="opt-title">VPN</span>
+                    <span class="opt-title">VPN SSID</span>
                   </div>
                   <div class="opt-control opt-stack grid grid-cols-1 sm:grid-cols-2 gap-2">
                     <input type="text" id="LAN_VPN_WIFI_SSID" name="LAN_VPN_WIFI_SSID" class="input-base" placeholder="WrtNova_VPN">
@@ -834,6 +761,80 @@
 
             <div class="info-note" role="note">
               <p data-i18n="wifiDefaultBlank">Leave password blank to use the default: 12345678</p>
+            </div>
+
+            <div class="sub-section">
+              <div class="form-row form-row--full mt-0">
+                <div class="opt-card">
+                  <div class="opt-text">
+                    <label class="opt-title" for="COUNTRY_CODE" data-i18n="countryCode">Country code</label>
+                  </div>
+                  <input type="text" id="COUNTRY_CODE" name="COUNTRY_CODE" class="opt-control opt-field--narrow input-base" maxlength="2" placeholder="US" style="text-transform:uppercase">
+                </div>
+              </div>
+              <div class="form-row form-row--full dense-env-only">
+                <label class="toggle-label">
+                  <span class="toggle-wrap">
+                    <input type="checkbox" id="DENSE_ENV" name="DENSE_ENV" value="1" class="toggle-input">
+                    <span class="toggle-track"></span>
+                    <span class="toggle-thumb"></span>
+                  </span>
+                  <div>
+                    <span class="toggle-text" data-i18n="denseEnvironment">Dense environment</span>
+                    <p class="form-help mt-0" data-i18n-html="tightenRoaming">Tighten <code>usteer</code> roaming/steering thresholds.</p>
+                  </div>
+                </label>
+              </div>
+              <div class="form-row form-row--full">
+                <label class="toggle-label">
+                  <span class="toggle-wrap">
+                    <input type="checkbox" id="WIRELESS_MESH" name="WIRELESS_MESH" value="1" class="toggle-input">
+                    <span class="toggle-track"></span>
+                    <span class="toggle-thumb"></span>
+                  </span>
+                  <div>
+                    <span class="toggle-text" data-i18n="wirelessMesh">5 GHz 802.11s mesh backhaul</span>
+                    <p class="form-help mt-0" data-i18n="enableMeshBackhaulDefault">Tip: Wired backhaul is always better than wireless when feasible. Overridable per node.</p>
+                  </div>
+                </label>
+              </div>
+
+              <div class="form-row form-row--full mesh-only hidden">
+                <label class="toggle-label">
+                  <span class="toggle-wrap">
+                    <input type="checkbox" id="BRIDGE_STP" name="BRIDGE_STP" value="1" class="toggle-input">
+                    <span class="toggle-track"></span>
+                    <span class="toggle-thumb"></span>
+                  </span>
+                  <div>
+                    <span class="toggle-text" data-i18n="bridgeStp">Enable Spanning Tree Protocol for br-vlan</span>
+                    <p class="form-help mt-0" data-i18n="stpNote">Prevents bridge loops when mixing wired and wireless backhaul.</p>
+                  </div>
+                </label>
+              </div>
+
+              <div class="mesh-only hidden">
+                <div class="form-row form-row--full">
+                  <div class="opt-card">
+                    <div class="opt-text">
+                      <span class="opt-title" data-i18n="meshCredentials">Mesh ID and password</span>
+                    </div>
+                    <div class="opt-control opt-stack grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      <input type="text" id="MESH_ID" name="MESH_ID" class="input-base" placeholder="mesh_trunk_backhaul" aria-label="Mesh ID">
+                      <div class="relative">
+                        <input type="password" id="MESH_PASSWD" name="MESH_PASSWD" class="input-base" style="padding-right:2.5rem" placeholder="password" autocomplete="new-password" aria-label="Mesh password">
+                        <button type="button" id="toggle-mesh-pw"
+                                class="btn btn-ghost btn-icon absolute right-1.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
+                                aria-label="Show password">
+                          <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="info-note mesh-only hidden" role="note" data-i18n="meshTrunkNote">Note: All configured VLANs are automatically trunked over the mesh backhaul.</div>
             </div>
 
             <details class="mt-4">
@@ -934,7 +935,7 @@
                     </div>
                   </label>
                 </div>
-                <div class="form-row form-row--full mesh-only hidden">
+                <div class="form-row form-row--full">
                   <label class="toggle-label">
                     <span class="toggle-wrap">
                       <input type="checkbox" id="BATMAN_ADV" name="BATMAN_ADV" value="1" class="toggle-input">
@@ -943,7 +944,7 @@
                     </span>
                     <div>
                       <span class="toggle-text" data-i18n="batmanAdv">BATMAN-adv over 802.11s mesh</span>
-                      <p class="form-help mt-0" data-i18n="batmanAdvHelp">Better multi-hop routing for wireless-only meshes.</p>
+                      <p class="form-help mt-0" data-i18n="batmanAdvHelp">Better multi-hop routing for wireless-only meshes. With only a few hops, or a mix of wired and wireless links, plain 802.11s with STP is better.</p>
                     </div>
                   </label>
                 </div>
