@@ -230,8 +230,8 @@ default" is what the body substitutes when the variable is blank.
 | GUEST_ISOLATE | boolean-flag | `""` | n/a | Adds `isolate=1` to the guest AP iface. |
 | IOT_WIFI_SSID | string | `""` | `HOST_NAME_IoT` | IoT SSID. |
 | IOT_WIFI_PASSWD | string | `""` | `DEFAULT_WIFI_PASSWD` | IoT passphrase. |
-| LAN_WG_WIFI_SSID | string | `""` | `HOST_NAME_VPN` | WireGuard-VLAN SSID. |
-| LAN_WG_WIFI_PASSWD | string | `""` | `DEFAULT_WIFI_PASSWD` | WireGuard-VLAN passphrase. |
+| LAN_VPN_WIFI_SSID | string | `""` | `HOST_NAME_VPN` | WireGuard-VLAN SSID. |
+| LAN_VPN_WIFI_PASSWD | string | `""` | `DEFAULT_WIFI_PASSWD` | WireGuard-VLAN passphrase. |
 | WIRELESS_MESH | boolean-flag | `""` | n/a | 802.11s wireless backhaul. Force-cleared if no wifi or no wpad-mesh package. |
 | BATMAN_ADV | boolean-flag | `""` | n/a | batman-adv over 802.11s. Force-cleared if `luci-proto-batman-adv` absent. Not surfaced in the guided form. |
 | MESH_ID | string | empty | `mesh0_5ghz` | 802.11s mesh id. |
@@ -249,12 +249,12 @@ default" is what the body substitutes when the variable is blank.
 | IOT_ENABLE | boolean-flag | `""` | n/a | IoT network + VLAN + SSID + zone. |
 | IOT_INTERNET | boolean-flag | `""` | n/a | Adds `iot -> wan` forwarding. |
 | IOT_ROUTE_VIA_WG | boolean-flag | `""` | n/a | Routes IoT egress over the WG client. Only meaningful with IoT + WG both on. |
-| LAN/GUEST/IOT/LAN_WG _BASE_PREFIX | string | empty | `BASE_NET_PREFIX` | Per-network prefix override. |
-| LAN/GUEST/IOT/LAN_WG _SUBNET | string | empty | `DEFAULT_SUBNET` | Per-network CIDR override. Forced /24 on swconfig-without-vid hardware. |
+| LAN/GUEST/IOT/LAN_VPN _BASE_PREFIX | string | empty | `BASE_NET_PREFIX` | Per-network prefix override. |
+| LAN/GUEST/IOT/LAN_VPN _SUBNET | string | empty | `DEFAULT_SUBNET` | Per-network CIDR override. Forced /24 on swconfig-without-vid hardware. |
 | LAN_VLAN_ID | int | empty | `1` (max 255) | Clamped 1..255; conflict-bumped by +4. |
 | GUEST_VLAN_ID | int | empty | `5` (max 255) | Clamped 1..255. |
 | IOT_VLAN_ID | int | empty | `10` (max 255) | Clamped 1..255. |
-| LAN_WG_VLAN_ID | int | empty | `15` (max 255) | Clamped 1..255. |
+| LAN_VPN_VLAN_ID | int | empty | `15` (max 255) | Clamped 1..255. |
 | WAN_VLAN_ID | int | empty | `20` (max 4094) | Clamped 1..4094. |
 | WAN_B_VLAN_ID | int | empty | `21` (max 4094) | Clamped 1..4094. |
 | ADDITIONAL_VLAN_LIST | list | `""` | none | Extra trunked VLANs; tokens are ints or `low-high` ranges, expanded and added as tagged trunk VLANs. |

@@ -360,11 +360,11 @@
                   </span>
                 </td>
                 <td data-label="Network"><span class="net-name">VPN</span></td>
-                <td class="col-if" data-label="Interface name"><input type="text" id="LAN_WG_IFACE" name="LAN_WG_IFACE" class="input-base" maxlength="15" pattern="[A-Za-z0-9_]+" placeholder="lan_vpn"></td>
-                <td class="col-pfx" data-label="Prefix"><input type="text" id="LAN_WG_BASE_PREFIX" name="LAN_WG_BASE_PREFIX" class="input-base" placeholder="192.168" list="prefix-options"></td>
-                <td class="col-vid" data-label="VLAN"><input type="number" id="LAN_WG_VLAN_ID" name="LAN_WG_VLAN_ID" class="input-base" min="1" max="255" placeholder="15"></td>
+                <td class="col-if" data-label="Interface name"><input type="text" id="LAN_VPN_IFACE" name="LAN_VPN_IFACE" class="input-base" maxlength="15" pattern="[A-Za-z0-9_]+" placeholder="lan_vpn"></td>
+                <td class="col-pfx" data-label="Prefix"><input type="text" id="LAN_VPN_BASE_PREFIX" name="LAN_VPN_BASE_PREFIX" class="input-base" placeholder="192.168" list="prefix-options"></td>
+                <td class="col-vid" data-label="VLAN"><input type="number" id="LAN_VPN_VLAN_ID" name="LAN_VPN_VLAN_ID" class="input-base" min="1" max="255" placeholder="15"></td>
                 <td class="col-sub" data-label="Subnet">
-                  <select id="LAN_WG_SUBNET" name="LAN_WG_SUBNET" class="input-base net-sub" aria-label="VPN subnet">
+                  <select id="LAN_VPN_SUBNET" name="LAN_VPN_SUBNET" class="input-base net-sub" aria-label="VPN subnet">
                     <option value="/24">/24</option>
                     <option value="/23">/23</option>
                     <option value="/22">/22</option>
@@ -803,9 +803,9 @@
                 <span class="opt-title">VPN</span>
               </div>
               <div class="opt-control opt-stack grid grid-cols-1 sm:grid-cols-2 gap-2">
-                <input type="text" id="LAN_WG_WIFI_SSID" name="LAN_WG_WIFI_SSID" class="input-base" placeholder="WrtNova_VPN">
+                <input type="text" id="LAN_VPN_WIFI_SSID" name="LAN_VPN_WIFI_SSID" class="input-base" placeholder="WrtNova_VPN">
                 <div class="relative">
-                  <input type="password" id="LAN_WG_WIFI_PASSWD" name="LAN_WG_WIFI_PASSWD" class="input-base" style="padding-right:2.5rem" placeholder="password" autocomplete="new-password">
+                  <input type="password" id="LAN_VPN_WIFI_PASSWD" name="LAN_VPN_WIFI_PASSWD" class="input-base" style="padding-right:2.5rem" placeholder="password" autocomplete="new-password">
                   <button type="button" id="toggle-wg-wifi-pw"
                           class="btn btn-ghost btn-icon absolute right-1.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
                           aria-label="Show password">

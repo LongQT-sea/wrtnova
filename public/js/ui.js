@@ -180,7 +180,7 @@ import { deriveVisibility, deriveNetRows, detectVlanConflict, resolveVlanAssignm
     // the four net-table inputs plus the advanced WAN/WAN-B inputs.
     const vlanByKey = resolveVlanAssignment(cfg).byKey;
     [['lan', 'LAN_VLAN_ID'], ['guest', 'GUEST_VLAN_ID'], ['iot', 'IOT_VLAN_ID'],
-     ['wg', 'LAN_WG_VLAN_ID'], ['wan', 'WAN_VLAN_ID'], ['wanb', 'WAN_B_VLAN_ID']
+     ['wg', 'LAN_VPN_VLAN_ID'], ['wan', 'WAN_VLAN_ID'], ['wanb', 'WAN_B_VLAN_ID']
     ].forEach(([key, id]) => {
       const el = ui.$('#' + id);
       const a = vlanByKey[key];
@@ -281,7 +281,7 @@ import { deriveVisibility, deriveNetRows, detectVlanConflict, resolveVlanAssignm
         const lan = ui.$('#LAN_WIFI_SSID');
         const s = (lan || {}).value;
         const lanPh = lan ? (lan.value || lan.placeholder) : '';   // what the shared SSID resolves to
-        [['GUEST_WIFI_SSID', true], ['LAN_WG_WIFI_SSID', true], ['IOT_WIFI_SSID', !iotFt || iotFt.checked]].forEach(function (p) {
+        [['GUEST_WIFI_SSID', true], ['LAN_VPN_WIFI_SSID', true], ['IOT_WIFI_SSID', !iotFt || iotFt.checked]].forEach(function (p) {
           const el = ui.$('#' + p[0]);
           if (!el) return;
           if (el.dataset.ph == null) el.dataset.ph = el.placeholder;  // stash own placeholder once
@@ -460,7 +460,7 @@ import { deriveVisibility, deriveNetRows, detectVlanConflict, resolveVlanAssignm
       ['toggle-lan-wifi-pw',  'LAN_WIFI_PASSWD'],
       ['toggle-guest-wifi-pw','GUEST_WIFI_PASSWD'],
       ['toggle-iot-wifi-pw',  'IOT_WIFI_PASSWD'],
-      ['toggle-wg-wifi-pw',   'LAN_WG_WIFI_PASSWD'],
+      ['toggle-wg-wifi-pw',   'LAN_VPN_WIFI_PASSWD'],
     ].forEach(([btnId, inpId]) => {
       const b = document.getElementById(btnId);
       const i = document.getElementById(inpId);
@@ -482,7 +482,7 @@ import { deriveVisibility, deriveNetRows, detectVlanConflict, resolveVlanAssignm
   /** @type {ReadonlySet<string>} */
   ui.SENSITIVE_FIELDS = new Set([
     'ROOT_PASSWD', 'PPPOE_PASSWD',
-    'LAN_WIFI_PASSWD', 'GUEST_WIFI_PASSWD', 'IOT_WIFI_PASSWD', 'LAN_WG_WIFI_PASSWD',
+    'LAN_WIFI_PASSWD', 'GUEST_WIFI_PASSWD', 'IOT_WIFI_PASSWD', 'LAN_VPN_WIFI_PASSWD',
     'MESH_PASSWD',
     'WG_PRIVATE_KEY', 'PEER_PUBLIC_KEY', 'PRESHARED_KEY',
     'ENDPOINT', 'ENDPOINT_PORT', 'WG_IPV4', 'WG_IPV6', 'ALLOWED_IPS',

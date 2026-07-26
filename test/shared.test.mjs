@@ -83,12 +83,12 @@ test('mergeNodeConfig: sub-fields gated on their parent flag', () => {
   const off = mergeNodeConfig({
     GUEST_ENABLE: '', GUEST_WIFI_SSID: 'g', GUEST_VLAN_ID: '5', GUEST_ISOLATE: '1',
     IOT_ENABLE: '', IOT_WIFI_SSID: 'i', IOT_VLAN_ID: '10', IOT_INTERNET: '1', IOT_ROUTE_VIA_WG: '1',
-    WG_ENABLE: '', LAN_WG_WIFI_SSID: 'v', LAN_WG_VLAN_ID: '15', WG_PRIVATE_KEY: 'p',
+    WG_ENABLE: '', LAN_VPN_WIFI_SSID: 'v', LAN_VPN_VLAN_ID: '15', WG_PRIVATE_KEY: 'p',
     WIRELESS_MESH: '', MESH_ID: 'm', MESH_PASSWD: 's',
   }, {});
   for (const k of ['GUEST_WIFI_SSID', 'GUEST_VLAN_ID', 'GUEST_ISOLATE',
     'IOT_WIFI_SSID', 'IOT_VLAN_ID', 'IOT_INTERNET', 'IOT_ROUTE_VIA_WG',
-    'LAN_WG_WIFI_SSID', 'LAN_WG_VLAN_ID', 'WG_PRIVATE_KEY',
+    'LAN_VPN_WIFI_SSID', 'LAN_VPN_VLAN_ID', 'WG_PRIVATE_KEY',
     'MESH_ID', 'MESH_PASSWD']) {
     assert.equal(off[k], '', `${k} should be gated off`);
   }

@@ -119,7 +119,20 @@ import { selectDevice, loadOverview, devicesState } from './devices.js';
     return matches.length ? matches[matches.length - 1] : opts[0];
   }
 
-  function restoreConfig(cfg) {
+  // Migration: the VPN fields were renamed LAN_WG_* -> LAN_VPN_*. BUILDER_SCHEMA
+  // only knows the new names, so pre-rename entries would restore them blank.
+  function upgradeLegacyKeys(cfg) {
+    const out = Object.assign({}, cfg);
+    for (const k of ['BASE_PREFIX', 'SUBNET', 'IFACE', 'VLAN_ID', 'WIFI_SSID', 'WIFI_PASSWD']) {
+      const v = out['LAN_WG_' + k];
+      delete out['LAN_WG_' + k];
+      if (v && !out['LAN_VPN_' + k]) out['LAN_VPN_' + k] = v;
+    }
+    return out;
+  }
+
+  function restoreConfig(rawCfg) {
+    const cfg = upgradeLegacyKeys(rawCfg);
     // wan_type, DNSMASQ_MULTI_INSTANCE and ENDPOINT are UI-only shapes: saved
     // configs carry the emitted one (PPPOE_*, DNSMASQ_SINGLE_INSTANCE, and the
     // endpoint host and port apart), so reconstruct them.

@@ -22,7 +22,7 @@ export const checkboxVal = (id)   => { const el = $('#' + id); return el && el.c
 export const textVal     = (id)   => ($('#' + id) || {}).value || '';
 export const radioVal    = (name) => ($('input[name="' + name + '"]:checked') || {}).value || '';
 export const selectVal   = (id)   => ($('#' + id) || {}).value || '';
-export const SUBNET_KEYS = new Set(['LAN_SUBNET', 'GUEST_SUBNET', 'IOT_SUBNET', 'LAN_WG_SUBNET']);
+export const SUBNET_KEYS = new Set(['LAN_SUBNET', 'GUEST_SUBNET', 'IOT_SUBNET', 'LAN_VPN_SUBNET']);
 export const subnetVal   = (id)   => { const el = $('#' + id); return el && el.dataset.explicit ? (el.value || '') : ''; };
 export function writeSubnet(el, val) {
   if (val) { el.value = val; el.dataset.explicit = '1'; }  // explicit override
@@ -52,7 +52,7 @@ export const BASE_SCHEMA = /** @type {[string,string,(string|undefined)?,(string
   ['GUEST_ENABLE', 'checkbox'], ['GUEST_BASE_PREFIX', 'text'], ['GUEST_IFACE', 'text'], ['GUEST_VLAN_ID', 'text'], ['GUEST_SUBNET', 'subnet'],
   ['IOT_ENABLE', 'checkbox'], ['IOT_BASE_PREFIX', 'text'], ['IOT_IFACE', 'text'], ['IOT_VLAN_ID', 'text'], ['IOT_SUBNET', 'subnet'],
   ['IOT_INTERNET', 'checkbox'], ['IOT_ROUTE_VIA_WG', 'checkbox'],
-  ['WG_ENABLE', 'checkbox'], ['LAN_WG_BASE_PREFIX', 'text'], ['LAN_WG_IFACE', 'text'], ['LAN_WG_VLAN_ID', 'text'], ['LAN_WG_SUBNET', 'subnet'],
+  ['WG_ENABLE', 'checkbox'], ['LAN_VPN_BASE_PREFIX', 'text'], ['LAN_VPN_IFACE', 'text'], ['LAN_VPN_VLAN_ID', 'text'], ['LAN_VPN_SUBNET', 'subnet'],
   ['ADDITIONAL_VLAN_LIST', 'text'], ['TAGGED_LAN_VLAN', 'checkbox'],
   ['P_STEERING', 'select'], ['ULA_PREFIX', 'text'],
   ['WG_PRIVATE_KEY', 'text'], ['PEER_PUBLIC_KEY', 'text'], ['ENDPOINT', 'text'],
@@ -68,7 +68,7 @@ export const BASE_SCHEMA = /** @type {[string,string,(string|undefined)?,(string
   ['LAN_WIFI_SSID', 'text'], ['LAN_WIFI_PASSWD', 'text'],
   ['GUEST_WIFI_SSID', 'text'], ['GUEST_WIFI_PASSWD', 'text'], ['GUEST_ISOLATE', 'checkbox'],
   ['IOT_WIFI_SSID', 'text'], ['IOT_WIFI_PASSWD', 'text'], ['IOT_NO_DOT11R', 'checkbox-inv'],
-  ['LAN_WG_WIFI_SSID', 'text'], ['LAN_WG_WIFI_PASSWD', 'text'],
+  ['LAN_VPN_WIFI_SSID', 'text'], ['LAN_VPN_WIFI_PASSWD', 'text'],
   ['CHANNEL_2G', 'select'], ['CHANNEL_5G', 'select'], ['CHANNEL_5G_2', 'select'], ['CHANNEL_6G', 'select'], ['WIFI_LOG_LVL', 'select'],
   ['DOT11KV', 'checkbox'], ['DOT11R', 'checkbox'], ['PSK_VLAN', 'checkbox'], ['BAND_SUFFIX', 'checkbox'], ['INDEX_SUFFIX', 'checkbox'],
   ['PORT_FORWARD_LIST', 'table', 'portfwd'], ['IPV6_SERVER_LIST', 'table', 'ipv6'],
@@ -93,7 +93,7 @@ export const BUILDER_SCHEMA = /** @type {[string,string,(string|undefined)?,(str
 
 // Interface-name fields guard (Network card). Empty means "use the wrtnova.sh
 // default" (lan/guest/iot/lan_vpn).
-export const IFACE_FIELDS = ['LAN_IFACE', 'GUEST_IFACE', 'IOT_IFACE', 'LAN_WG_IFACE'];
+export const IFACE_FIELDS = ['LAN_IFACE', 'GUEST_IFACE', 'IOT_IFACE', 'LAN_VPN_IFACE'];
 export const IFACE_RE = /^[A-Za-z0-9_]{1,15}$/;
 export function ifaceValid(v) { return !v || IFACE_RE.test(v); }
 
@@ -102,14 +102,14 @@ export function ifaceValid(v) { return !v || IFACE_RE.test(v); }
 // corrupt the config.
 export const WIFI_TEXT_FIELDS = [
   'LAN_WIFI_SSID', 'LAN_WIFI_PASSWD', 'GUEST_WIFI_SSID', 'GUEST_WIFI_PASSWD',
-  'IOT_WIFI_SSID', 'IOT_WIFI_PASSWD', 'LAN_WG_WIFI_SSID', 'LAN_WG_WIFI_PASSWD',
+  'IOT_WIFI_SSID', 'IOT_WIFI_PASSWD', 'LAN_VPN_WIFI_SSID', 'LAN_VPN_WIFI_PASSWD',
 ];
 export function wifiTextValid(v) { return !String(v == null ? '' : v).includes('|'); }
 
 // IP-prefix fields (first two octets, e.g. "192.168"). Empty means "use the
 // wrtnova.sh default". Only the two octets' numeric range (0-255) is checked;
 // no RFC1918 restriction, so users with a real (public/ASN) range are allowed.
-export const PREFIX_FIELDS = ['BASE_NET_PREFIX', 'LAN_BASE_PREFIX', 'GUEST_BASE_PREFIX', 'IOT_BASE_PREFIX', 'LAN_WG_BASE_PREFIX'];
+export const PREFIX_FIELDS = ['BASE_NET_PREFIX', 'LAN_BASE_PREFIX', 'GUEST_BASE_PREFIX', 'IOT_BASE_PREFIX', 'LAN_VPN_BASE_PREFIX'];
 export const PREFIX_RE = /^(\d{1,3})\.(\d{1,3})$/;
 export function prefixValid(v) {
   if (!v) return true;
@@ -133,7 +133,7 @@ export function pskVlanPassIssue(cfg) {
   const parts = [
     { label: 'LAN',   pass: cfg.LAN_WIFI_PASSWD    || '', active: true },
     { label: 'Guest', pass: cfg.GUEST_WIFI_PASSWD  || '', active: cfg.GUEST_ENABLE === '1' },
-    { label: 'VPN',   pass: cfg.LAN_WG_WIFI_PASSWD || '', active: cfg.WG_ENABLE === '1' },
+    { label: 'VPN',   pass: cfg.LAN_VPN_WIFI_PASSWD || '', active: cfg.WG_ENABLE === '1' },
     { label: 'IoT',   pass: cfg.IOT_WIFI_PASSWD    || '', active: cfg.IOT_ENABLE === '1' && cfg.IOT_NO_DOT11R !== '1' },
   ].filter((p) => p.active);
   if (parts.length < 2) return null;

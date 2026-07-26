@@ -17,7 +17,7 @@ const NETS = [
   { key: 'lan',   on: '',            pfx: 'LAN_BASE_PREFIX',    vid: 'LAN_VLAN_ID',    sub: 'LAN_SUBNET',    defVid: '1'  },
   { key: 'guest', on: 'GUEST_ENABLE', pfx: 'GUEST_BASE_PREFIX',  vid: 'GUEST_VLAN_ID',  sub: 'GUEST_SUBNET',  defVid: '5'  },
   { key: 'iot',   on: 'IOT_ENABLE',   pfx: 'IOT_BASE_PREFIX',    vid: 'IOT_VLAN_ID',    sub: 'IOT_SUBNET',    defVid: '10' },
-  { key: 'wg',    on: 'WG_ENABLE',    pfx: 'LAN_WG_BASE_PREFIX', vid: 'LAN_WG_VLAN_ID', sub: 'LAN_WG_SUBNET', defVid: '15' },
+  { key: 'wg',    on: 'WG_ENABLE',    pfx: 'LAN_VPN_BASE_PREFIX', vid: 'LAN_VPN_VLAN_ID', sub: 'LAN_VPN_SUBNET', defVid: '15' },
 ];
 
 const on = (cfg, k) => cfg[k] === '1';
@@ -84,7 +84,7 @@ const VLAN_TABLE = [
   { key: 'lan',   field: 'LAN_VLAN_ID',    def: 1,  max: 255  },
   { key: 'guest', field: 'GUEST_VLAN_ID',  def: 5,  max: 255,  flag: 'GUEST_ENABLE' },
   { key: 'iot',   field: 'IOT_VLAN_ID',    def: 10, max: 255,  flag: 'IOT_ENABLE'   },
-  { key: 'wg',    field: 'LAN_WG_VLAN_ID', def: 15, max: 255,  flag: 'WG_ENABLE'    },
+  { key: 'wg',    field: 'LAN_VPN_VLAN_ID', def: 15, max: 255,  flag: 'WG_ENABLE'    },
   { key: 'wan',   field: 'WAN_VLAN_ID',    def: 20, max: 4094, wan: true },
   { key: 'wanb',  field: 'WAN_B_VLAN_ID',  def: 21, max: 4094, wan: true, flag: 'WAN_B_ENABLE' },
 ];

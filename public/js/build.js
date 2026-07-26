@@ -324,7 +324,7 @@ import { collectTarget, devicesState } from './devices.js';
       ['LAN_WIFI_SSID',    'WrtNova'],
       ['GUEST_WIFI_SSID',  'WrtNova_Guest'],
       ['IOT_WIFI_SSID',    'WrtNova_IoT'],
-      ['LAN_WG_WIFI_SSID', 'WrtNova_VPN'],
+      ['LAN_VPN_WIFI_SSID', 'WrtNova_VPN'],
     ].forEach(([id, ph]) => { const el = $('#' + id); if (el) el.placeholder = ph; });
   }
   ui.syncSsidPlaceholders = syncSsidPlaceholders;
@@ -426,7 +426,7 @@ import { collectTarget, devicesState } from './devices.js';
   // themselves stay declared as min/max on the inputs; this only renames the noun.
   const RANGE_NOUN = {
     LAN_VLAN_ID:    'LAN VLAN', GUEST_VLAN_ID: 'Guest VLAN', IOT_VLAN_ID:   'IoT VLAN',
-    LAN_WG_VLAN_ID: 'VLAN', WAN_VLAN_ID:   'VLAN', WAN_B_VLAN_ID: 'VLAN',
+    LAN_VPN_VLAN_ID: 'VLAN', WAN_VLAN_ID:   'VLAN', WAN_B_VLAN_ID: 'VLAN',
   };
 
   // Refresh one field's custom validity from its native range state. Clearing
@@ -619,7 +619,7 @@ import { collectTarget, devicesState } from './devices.js';
       { id: 'LAN_WIFI_PASSWD',   active: true },
       { id: 'GUEST_WIFI_PASSWD', active: $('#GUEST_ENABLE').checked },
       { id: 'IOT_WIFI_PASSWD',   active: $('#IOT_ENABLE').checked },
-      { id: 'LAN_WG_WIFI_PASSWD',active: $('#WG_ENABLE').checked },
+      { id: 'LAN_VPN_WIFI_PASSWD',active: $('#WG_ENABLE').checked },
       { id: 'MESH_PASSWD',       active: true },
     ];
     for (const { id, active } of wifiPassFields) {
@@ -644,7 +644,7 @@ import { collectTarget, devicesState } from './devices.js';
       IOT_NO_DOT11R:      $('#IOT_NO_DOT11R').checked ? '' : '1',
       LAN_WIFI_PASSWD:    $('#LAN_WIFI_PASSWD').value,
       GUEST_WIFI_PASSWD:  $('#GUEST_WIFI_PASSWD').value,
-      LAN_WG_WIFI_PASSWD: $('#LAN_WG_WIFI_PASSWD').value,
+      LAN_VPN_WIFI_PASSWD: $('#LAN_VPN_WIFI_PASSWD').value,
       IOT_WIFI_PASSWD:    $('#IOT_WIFI_PASSWD').value,
     });
     if (pskIssue) {

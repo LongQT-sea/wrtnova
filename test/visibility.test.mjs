@@ -110,7 +110,7 @@ test('deriveNetRows: BASE_NET_PREFIX + DEFAULT_SUBNET propagate as fallbacks', (
 });
 
 test('deriveNetRows: per-net override wins over base', () => {
-  const wg = deriveNetRows({ WG_ENABLE: '1', LAN_WG_BASE_PREFIX: '172.16', LAN_WG_VLAN_ID: '99' })
+  const wg = deriveNetRows({ WG_ENABLE: '1', LAN_VPN_BASE_PREFIX: '172.16', LAN_VPN_VLAN_ID: '99' })
     .find(r => r.key === 'wg');
   assert.equal(wg.effPfx, '172.16');
   assert.equal(wg.effVid, '99');
@@ -204,7 +204,7 @@ test('detectVlanConflict: a default net/WAN on a trunk VLAN auto-bumps away (no 
 
 test('resolveVlanEmit: all-default emits nothing (no redundant defaults)', () => {
   const e = resolveVlanEmit({});
-  for (const k of ['LAN_VLAN_ID', 'GUEST_VLAN_ID', 'IOT_VLAN_ID', 'LAN_WG_VLAN_ID', 'WAN_VLAN_ID', 'WAN_B_VLAN_ID']) {
+  for (const k of ['LAN_VLAN_ID', 'GUEST_VLAN_ID', 'IOT_VLAN_ID', 'LAN_VPN_VLAN_ID', 'WAN_VLAN_ID', 'WAN_B_VLAN_ID']) {
     assert.equal(e[k], '');
   }
 });

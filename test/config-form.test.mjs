@@ -79,7 +79,7 @@ test('pskVlanPassIssue: distinct passwords pass, duplicates flag the collision',
 
 test('pskVlanPassIssue: two blanks collide via the shared default', () => {
   // Both blank -> both resolve to def_pass (12345678).
-  const dup = pskVlanPassIssue({ PSK_VLAN: '1', WG_ENABLE: '1', LAN_WIFI_PASSWD: '', LAN_WG_WIFI_PASSWD: '' });
+  const dup = pskVlanPassIssue({ PSK_VLAN: '1', WG_ENABLE: '1', LAN_WIFI_PASSWD: '', LAN_VPN_WIFI_PASSWD: '' });
   assert.deepEqual(dup, { networks: ['LAN', 'VPN'] });
 });
 

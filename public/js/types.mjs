@@ -56,10 +56,10 @@
  * @property {string} [IOT_IFACE]
  * @property {string} [IOT_VLAN_ID]
  * @property {string} [IOT_SUBNET]
- * @property {string} [LAN_WG_BASE_PREFIX]
- * @property {string} [LAN_WG_IFACE]
- * @property {string} [LAN_WG_VLAN_ID]
- * @property {string} [LAN_WG_SUBNET]
+ * @property {string} [LAN_VPN_BASE_PREFIX]
+ * @property {string} [LAN_VPN_IFACE]
+ * @property {string} [LAN_VPN_VLAN_ID]
+ * @property {string} [LAN_VPN_SUBNET]
  * @property {string} [ADDITIONAL_VLAN_LIST]
  * @property {string} [TAGGED_LAN_VLAN]    flag: tag the LAN VLAN (trunk) on all ports
  * @property {string} [P_STEERING]         packet steering: '' | '1' | '2' (all CPUs, 24+)
@@ -87,8 +87,8 @@
  * @property {string} [IOT_WIFI_SSID]
  * @property {string} [IOT_WIFI_PASSWD]    sensitive
  * @property {string} [IOT_NO_DOT11R]      flag (disable 802.11r for IoT)
- * @property {string} [LAN_WG_WIFI_SSID]
- * @property {string} [LAN_WG_WIFI_PASSWD] sensitive
+ * @property {string} [LAN_VPN_WIFI_SSID]
+ * @property {string} [LAN_VPN_WIFI_PASSWD] sensitive
  * @property {string} [CHANNEL_2G]
  * @property {string} [CHANNEL_5G]
  * @property {string} [CHANNEL_5G_2]

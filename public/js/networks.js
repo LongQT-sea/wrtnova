@@ -59,6 +59,17 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
         const router = (net.nodes || []).find(n => n.overrides && n.overrides.AP_MODE !== '1');
         if (h && router && !router.overrides.HOST_NAME) router.overrides.HOST_NAME = h;
       }
+      // Migration: the VPN fields were renamed LAN_WG_* -> LAN_VPN_*. defaultConfig()
+      // no longer carries the old names, so saved values would be dropped on next save.
+      for (const cfg of [net.shared_config, ...(net.nodes || []).map(n => n.overrides)]) {
+        if (!cfg) continue;
+        for (const k of ['BASE_PREFIX', 'SUBNET', 'IFACE', 'VLAN_ID', 'WIFI_SSID', 'WIFI_PASSWD']) {
+          if (!('LAN_WG_' + k in cfg)) continue;
+          const v = cfg['LAN_WG_' + k];
+          delete cfg['LAN_WG_' + k];
+          if (v && !cfg['LAN_VPN_' + k]) cfg['LAN_VPN_' + k] = v;
+        }
+      }
     }
     return nets;
   }
@@ -95,7 +106,7 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
       GUEST_ENABLE: '1', GUEST_BASE_PREFIX: '', GUEST_IFACE: '', GUEST_VLAN_ID: '', GUEST_SUBNET: '',
       IOT_ENABLE: '', IOT_BASE_PREFIX: '', IOT_IFACE: '', IOT_VLAN_ID: '', IOT_SUBNET: '',
       IOT_INTERNET: '1', IOT_ROUTE_VIA_WG: '',
-      WG_ENABLE: '', LAN_WG_BASE_PREFIX: '', LAN_WG_IFACE: '', LAN_WG_VLAN_ID: '', LAN_WG_SUBNET: '',
+      WG_ENABLE: '', LAN_VPN_BASE_PREFIX: '', LAN_VPN_IFACE: '', LAN_VPN_VLAN_ID: '', LAN_VPN_SUBNET: '',
       ADDITIONAL_VLAN_LIST: '', TAGGED_LAN_VLAN: '',
       P_STEERING: '', ULA_PREFIX: '',
       WG_PRIVATE_KEY: '', PEER_PUBLIC_KEY: '', ENDPOINT: '',
@@ -110,7 +121,7 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
       LAN_WIFI_SSID: '', LAN_WIFI_PASSWD: '',
       GUEST_WIFI_SSID: '', GUEST_WIFI_PASSWD: '',
       IOT_WIFI_SSID: '', IOT_WIFI_PASSWD: '', IOT_NO_DOT11R: '',
-      LAN_WG_WIFI_SSID: '', LAN_WG_WIFI_PASSWD: '',
+      LAN_VPN_WIFI_SSID: '', LAN_VPN_WIFI_PASSWD: '',
       CHANNEL_2G: '', CHANNEL_5G: '', CHANNEL_5G_2: '', CHANNEL_6G: '', WIFI_LOG_LVL: '', DOT11KV: '1', DOT11R: '1', PSK_VLAN: '', BAND_SUFFIX: '', INDEX_SUFFIX: '', GUEST_ISOLATE: '',
       PORT_FORWARD_LIST: '', IPV6_SERVER_LIST: '',
       DDNS_ENABLE: '', LOOKUP_HOSTNAME: '', CLOUDFLARE_API_KEY: '',
@@ -1028,7 +1039,7 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
       ['LAN_WIFI_SSID', 'WrtNova'],
       ['GUEST_WIFI_SSID', 'WrtNova_Guest'],
       ['IOT_WIFI_SSID', 'WrtNova_IoT'],
-      ['LAN_WG_WIFI_SSID', 'WrtNova_VPN'],
+      ['LAN_VPN_WIFI_SSID', 'WrtNova_VPN'],
     ].forEach(([id, ph]) => {
       const el = document.getElementById(id);
       if (el) el.placeholder = ph;
