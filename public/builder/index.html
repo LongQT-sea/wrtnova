@@ -85,30 +85,30 @@
         </div>
 
         <div class="form-row form-row--full">
-          <div class="opt-card">
-            <div class="opt-text">
-              <span class="opt-title" data-i18n="deviceMode">Mode</span>
-              <p class="form-help mt-0" data-i18n="apModeHelp">In Access Point mode, DHCP is disabled and the device acts as a wireless access point and managed switch.</p>
+          <div class="opt-group">
+            <div class="opt-card">
+              <div class="opt-text">
+                <span class="opt-title" data-i18n="deviceMode">Mode</span>
+                <p class="form-help mt-0" data-i18n="apModeHelp">In Access Point mode, DHCP is disabled and the device acts as a wireless access point and managed switch.</p>
+              </div>
+              <div class="opt-control radio-seg" role="radiogroup" aria-label="Device mode">
+                <label>
+                  <input type="radio" name="AP_MODE" value="" checked>
+                  <span data-i18n="mainRouter">Main router</span>
+                </label>
+                <label>
+                  <input type="radio" name="AP_MODE" value="1">
+                  <span data-i18n="accessPoint">Access point</span>
+                </label>
+              </div>
             </div>
-            <div class="opt-control radio-seg" role="radiogroup" aria-label="Device mode">
-              <label>
-                <input type="radio" name="AP_MODE" value="" checked>
-                <span data-i18n="mainRouter">Main router</span>
-              </label>
-              <label>
-                <input type="radio" name="AP_MODE" value="1">
-                <span data-i18n="accessPoint">Access point</span>
-              </label>
+            <div class="opt-card ap-only hidden">
+              <div class="opt-text">
+                <label class="opt-title" for="AP_INDEX" data-i18n="apIndex">AP index</label>
+                <p class="form-help mt-0"><span data-i18n="apIndexHelp">Last octet 2–254. LAN IP becomes </span><span id="ap-index-preview">192.168.1.2</span></p>
+              </div>
+              <input type="number" id="AP_INDEX" name="AP_INDEX" class="opt-control opt-field--narrow input-base" min="2" max="254" value="2" onblur="var v=Math.min(254,Math.max(2,parseInt(this.value)||2));this.value=v;this.dispatchEvent(new Event('input',{bubbles:true}))">
             </div>
-          </div>
-        </div>
-        <div class="form-row form-row--full ap-only hidden">
-          <div class="opt-card">
-            <div class="opt-text">
-              <label class="opt-title" for="AP_INDEX" data-i18n="apIndex">AP index</label>
-              <p class="form-help mt-0"><span data-i18n="apIndexHelp">Last octet 2–254. LAN IP becomes </span><span id="ap-index-preview">192.168.1.2</span></p>
-            </div>
-            <input type="number" id="AP_INDEX" name="AP_INDEX" class="opt-control opt-field--narrow input-base" min="2" max="254" value="2" onblur="var v=Math.min(254,Math.max(2,parseInt(this.value)||2));this.value=v;this.dispatchEvent(new Event('input',{bubbles:true}))">
           </div>
         </div>
         <div class="info-note ap-only hidden" role="note">
