@@ -526,7 +526,7 @@ add_wifi_iface() {
 	local dev="$1" mode="$2" ssid="$3" key="$4" net="$5" vid="$6" enc="$7" band="$8" iot_plain
 
 	set -- device="$dev" mode="$mode" key="$key" network="$net" encryption="$enc" \
-		ssid="${ssid}${INDEX_SUFFIX:+_$AP_INDEX}${BAND_SUFFIX:+ ${band%g}G}"
+		ssid="${ssid}${INDEX_SUFFIX:+${AP_MODE:+_$AP_INDEX}}${BAND_SUFFIX:+ ${band%g}G}"
 
 	[ "$net" = "$guest_if" ] && [ -n "$GUEST_ISOLATE" ] && set -- "$@" isolate=1 bridge_isolate=1
 
