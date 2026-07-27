@@ -896,8 +896,8 @@ bridge_wan_port=1
 
 br_ports="$lan_ports"
 [ "$BATMAN_ADV" != 1 ] && {
-	[ "$WIRELESS_MESH" = 1 ] && br_ports="$br_ports mesh0"
-	[ "$WIRELESS_MESH_2G" = 1 ] && br_ports="$br_ports mesh1"
+	[ "$WIRELESS_MESH" = 1 ] && br_ports="$br_ports $mesh0_if"
+	[ "$WIRELESS_MESH_2G" = 1 ] && br_ports="$br_ports $mesh1_if"
 }
 [ "$AP_MODE" = 1 ] && [ -z "$sw_wan_port" ] && br_ports="$br_ports $wan_port"
 
@@ -963,7 +963,7 @@ add_vlan "$lan_vid" "$lan_vlan_ports" "$lan_if"
 [ "$bridge_wan_port" = 1 ] && add_vlan "$wan_vid" "$wan_vlan_ports" wan
 [ "$WAN_B_ENABLE" = 1 ] && add_vlan "$wanb_vid" "$trunk_ports" wanb
 
-if [ "$WAN_IS_TAGGED" = 1 ] && [ "$bridge_wan_port" != 1 ] || [ -n "$wan_cpu_port" ]; then
+if [ "$WAN_IS_TAGGED" = 1 ] && [ "$bridge_wan_port" != 1 ] && [ -n "$wan_port" ] || [ -n "$wan_cpu_port" ]; then
 	uci set network.wan.device="$wan_port.$wan_vid"
 fi
 
@@ -1385,9 +1385,9 @@ fw_add_base_rules() {
 	_uci firewall rule "" \
 		name="$1 Allow-ICMPv6-Input" src="$1" \
 		target=ACCEPT proto=icmp family=ipv6 limit=1000/sec \
-		+icmp_type="bad-header destination-unreachable \
-		echo-reply echo-request neighbour-advertisement \
-		neighbour-solicitation packet-too-big router-advertisement \
+		+icmp_type="bad-header destination-unreachable
+		echo-reply echo-request neighbour-advertisement
+		neighbour-solicitation packet-too-big router-advertisement
 		router-solicitation time-exceeded unknown-header-type"
 }
 
