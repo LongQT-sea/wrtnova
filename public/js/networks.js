@@ -14,7 +14,8 @@ import { mergeNodeConfig } from './config-merge.mjs';
 import { IFACE_FIELDS, ifaceValid, PREFIX_FIELDS, prefixValid, WIFI_TEXT_FIELDS, wifiTextValid, pskVlanPassIssue } from './config-form.mjs';
 import { detectVlanConflict, truncateAdditionalVlans, SWCONFIG_VLAN_MAX } from './visibility.mjs';
 import { renderConfigBlock } from './render-config.mjs';
-import { parseList, firstInvalidIpv6Octet, hostnameValid, ddnsHostnameValid, macValid, firstInvalidHost, firstInvalidPort, portListValid, joinEndpoint } from './list-grammar.mjs';
+import { parseList, firstInvalidIpv6Octet, ddnsHostnameValid, macValid, firstInvalidHost, firstInvalidPort, joinEndpoint } from './list-grammar.mjs';
+import { wireValidation } from './validate.mjs';
 import { parseAdditionalPackages } from './packages.mjs';
 import { createStore } from './store.mjs';
 
@@ -927,26 +928,10 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
     form.addEventListener('input', syncStore, { signal });
     form.addEventListener('change', syncStore, { signal });
 
-    // Live feedback: when the user leaves a validated field with a bad value,
-    // pop its native validation bubble (mirrors /builder's focusout handler).
-    form.addEventListener('focusout', e => {
-      const el = e.target;
-      if (!el) return;
-      if (PREFIX_FIELDS.includes(el.id)) {
-        el.setCustomValidity(prefixValid(el.value) ? '' : t('prefixInvalid', { field: el.value }));
-      } else if (el.id === 'LOOKUP_HOSTNAME') {
-        el.setCustomValidity(ddnsHostnameValid(el.value) ? '' : t('ddnsHostnameInvalid', { field: el.value }));
-      } else if (el.id === 'WAN_MAC_ADDR') {
-        el.setCustomValidity(macValid(el.value) ? '' : t('macInvalid', { field: el.value }));
-      } else if (el.matches && el.matches('[data-col="host"]')) {
-        el.setCustomValidity(hostnameValid(el.value) ? '' : t('hostnameInvalid', { field: el.value }));
-      } else if (el.matches && el.matches('[data-col="ports"]')) {
-        el.setCustomValidity(portListValid(el.value) ? '' : t('portInvalid', { field: el.value }));
-      } else {
-        return;
-      }
-      if (!el.validity.valid) el.reportValidity();
-    }, { signal });
+    // Live feedback on blur + the stale-message release on input. The rules are
+    // validate.mjs: a shorter copy lived here once, and its VLAN/iface/SSID
+    // fields silently went without live feedback for it.
+    wireValidation(form, { signal });
 
     document.getElementById('btn-save-config').onclick = () => {
       clearTimeout(saveTimer);

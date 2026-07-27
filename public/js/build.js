@@ -8,13 +8,14 @@
 import { ui } from './ui-ns.mjs';
 import './ui.js';
 import './i18n/core.mjs';
-import { BUILDER_SCHEMA, readForm, keySets, SUBNET_KEYS, writeSubnet, IFACE_FIELDS, ifaceValid, PREFIX_FIELDS, prefixValid, WIFI_TEXT_FIELDS, wifiTextValid, pskVlanPassIssue } from './config-form.mjs';
+import { BUILDER_SCHEMA, readForm, keySets, SUBNET_KEYS, writeSubnet, IFACE_FIELDS, PREFIX_FIELDS, WIFI_TEXT_FIELDS, pskVlanPassIssue } from './config-form.mjs';
 import { deriveConfig } from './builder-config.mjs';
 import { deriveNetRows, truncateAdditionalVlans, SWCONFIG_VLAN_MAX, isSwconfigTarget } from './visibility.mjs';
 import { createStore } from './store.mjs';
 import { renderConfigBlock } from './render-config.mjs';
 import { parseAdditionalPackages } from './packages.mjs';
-import { ipv6OctetValid, hostnameValid, ddnsHostnameValid, macValid, portListValid, joinEndpoint } from './list-grammar.mjs';
+import { joinEndpoint } from './list-grammar.mjs';
+import { RANGE_NOUN, refreshRangeValidity, refreshIfaceValidity, refreshPrefixValidity, refreshWifiTextValidity, refreshOctetV6Validity, refreshHostnameValidity, refreshDdnsValidity, refreshMacValidity, refreshPortsValidity, wireValidation } from './validate.mjs';
 import { collectTarget, devicesState } from './devices.js';
 
   const $  = ui.$, $$ = ui.$$;
@@ -329,6 +330,16 @@ import { collectTarget, devicesState } from './devices.js';
   }
   ui.syncSsidPlaceholders = syncSsidPlaceholders;
 
+  // Mirror the wrtnova.sh hostname default in the placeholder:
+  // host_name="${HOST_NAME:-WrtNova${AP_MODE:+-${AP_INDEX:=2}}}".
+  function syncHostnamePlaceholder() {
+    const el = $('#HOST_NAME');
+    if (!el) return;
+    const s = store ? store.get() : readRawForm();
+    el.placeholder = s.AP_MODE === '1' ? 'WrtNova-' + (s.AP_INDEX || '2') : 'WrtNova';
+  }
+  ui.syncHostnamePlaceholder = syncHostnamePlaceholder;
+
   // AP-mode LAN IP shown in the AP-index help text - a store selector that mirrors
   // the LAN row's ROUTER IP (effective LAN prefix + LAN VLAN + AP index), so the
   // help text and the Networks table never disagree.
@@ -354,7 +365,7 @@ import { collectTarget, devicesState } from './devices.js';
     ui.configStore = store;
     // Source of truth for the shared conditional-visibility selectors (ui.js).
     ui.configState = () => store.get();
-    store.subscribe(() => { renderAutoPackages(); syncApIndexPreview(); renderPreview(); });
+    store.subscribe(() => { renderAutoPackages(); syncApIndexPreview(); syncHostnamePlaceholder(); renderPreview(); });
     document.body.addEventListener('input',  refreshStore);
     document.body.addEventListener('change', refreshStore);
     $$('input[name="DNS_MODE"]').forEach(el =>
@@ -366,6 +377,7 @@ import { collectTarget, devicesState } from './devices.js';
     renderAutoPackages();
     syncSsidPlaceholders();
     syncApIndexPreview();
+    syncHostnamePlaceholder();
     renderPreview();
   };
 
@@ -421,35 +433,12 @@ import { collectTarget, devicesState } from './devices.js';
   }
 
   let polling = null;
-  // Numeric fields whose out-of-range values get a friendly, localized validation
-  // message instead of the browser default ("Value must be <= 255"). The bounds
-  // themselves stay declared as min/max on the inputs; this only renames the noun.
-  const RANGE_NOUN = {
-    LAN_VLAN_ID:    'LAN VLAN', GUEST_VLAN_ID: 'Guest VLAN', IOT_VLAN_ID:   'IoT VLAN',
-    LAN_VPN_VLAN_ID: 'VLAN', WAN_VLAN_ID:   'VLAN', WAN_B_VLAN_ID: 'VLAN',
-  };
 
-  // Refresh one field's custom validity from its native range state. Clearing
-  // first reveals the native rangeOverflow/Underflow flags (a non-empty custom
-  // message would otherwise pin validity to customError).
-  function refreshRangeValidity(el) {
-    const noun = RANGE_NOUN[el.id];
-    if (!noun) return false;
-    el.setCustomValidity('');
-    const v = el.validity;
-    const bad = v.rangeOverflow || v.rangeUnderflow || v.stepMismatch || v.badInput;
-    if (bad) {
-      el.setCustomValidity(ui.t
-        ? ui.t('rangeMsg', { label: noun, min: el.min, max: el.max })
-        : noun + ' must be ' + el.min + '-' + el.max);
-    }
-    return bad;
-  }
-
-  // Validate every range field; return the first *visible* offender so the caller
-  // can pop its bubble. Hidden fields (collapsed card via .hidden or a closed
-  // <details>) have offsetParent === null and are skipped: reportValidity can't
-  // render a bubble on them, and out-of-range VLANs are dropped at emit time.
+  // Refreshers and messages live in validate.mjs; what stays here is the
+  // Build-time sweep. Each check* returns the first *visible* offender so the
+  // caller can pop its bubble - hidden fields (collapsed card, closed <details>)
+  // have offsetParent === null and are skipped, since reportValidity cannot
+  // render a bubble on them and their values are dropped at emit time anyway.
   function checkRangeFields() {
     let first = null;
     Object.keys(RANGE_NOUN).forEach(id => {
@@ -460,13 +449,6 @@ import { collectTarget, devicesState } from './devices.js';
     return first;
   }
 
-  const IFACE_SET = new Set(IFACE_FIELDS);
-  function refreshIfaceValidity(el) {
-    el.setCustomValidity('');
-    if (ifaceValid(el.value)) return false;
-    el.setCustomValidity(t('ifaceInvalid', { field: el.value }));
-    return true;
-  }
   function checkIfaceFields() {
     let first = null;
     for (const id of IFACE_FIELDS) {
@@ -477,13 +459,6 @@ import { collectTarget, devicesState } from './devices.js';
     return first;
   }
 
-  const PREFIX_SET = new Set(PREFIX_FIELDS);
-  function refreshPrefixValidity(el) {
-    el.setCustomValidity('');
-    if (prefixValid(el.value)) return false;
-    el.setCustomValidity(t('prefixInvalid', { field: el.value }));
-    return true;
-  }
   function checkPrefixFields() {
     let first = null;
     for (const id of PREFIX_FIELDS) {
@@ -494,13 +469,6 @@ import { collectTarget, devicesState } from './devices.js';
     return first;
   }
 
-  const WIFI_TEXT_SET = new Set(WIFI_TEXT_FIELDS);
-  function refreshWifiTextValidity(el) {
-    el.setCustomValidity('');
-    if (wifiTextValid(el.value)) return false;
-    el.setCustomValidity(t('wifiPipeInvalid', { field: el.id }));
-    return true;
-  }
   function checkWifiTextFields() {
     let first = null;
     for (const id of WIFI_TEXT_FIELDS) {
@@ -511,13 +479,6 @@ import { collectTarget, devicesState } from './devices.js';
     return first;
   }
 
-  // IPv6 host IDs (the ipv6-table octet column): 1-4 hex digits, not 0.
-  function refreshOctetV6Validity(el) {
-    el.setCustomValidity('');
-    if (ipv6OctetValid(el.value)) return false;
-    el.setCustomValidity(t('octetV6Invalid'));
-    return true;
-  }
   function checkOctetV6Fields() {
     let first = null;
     for (const el of $$('#ipv6-table [data-col="octet"]')) {
@@ -526,14 +487,6 @@ import { collectTarget, devicesState } from './devices.js';
     return first;
   }
 
-  // Hostnames: System card HOST_NAME + the portfwd/ipv6 host column (they become
-  // UCI section names / DHCP hosts, so a malformed one corrupts the config).
-  function refreshHostnameValidity(el) {
-    el.setCustomValidity('');
-    if (hostnameValid(el.value)) return false;
-    el.setCustomValidity(t('hostnameInvalid', { field: el.value }));
-    return true;
-  }
   function checkHostnameFields() {
     let first = null;
     const els = [$('#HOST_NAME'), ...$$('#portfwd-table [data-col="host"], #ipv6-table [data-col="host"]')];
@@ -544,38 +497,18 @@ import { collectTarget, devicesState } from './devices.js';
     return first;
   }
 
-  function refreshDdnsValidity(el) {
-    el.setCustomValidity('');
-    if (ddnsHostnameValid(el.value)) return false;
-    el.setCustomValidity(t('ddnsHostnameInvalid', { field: el.value }));
-    return true;
-  }
   function checkDdnsFields() {
     const el = $('#LOOKUP_HOSTNAME');
     if (el && refreshDdnsValidity(el) && el.offsetParent !== null) return el;
     return null;
   }
 
-  // WAN MAC address: empty (leave the stock MAC) or six colon-separated hex
-  // octets (e.g. F0:B4:29:2E:33:11), the form LuCI accepts.
-  function refreshMacValidity(el) {
-    el.setCustomValidity('');
-    if (macValid(el.value)) return false;
-    el.setCustomValidity(t('macInvalid', { field: el.value }));
-    return true;
-  }
   function checkMacFields() {
     const el = $('#WAN_MAC_ADDR');
     if (el && refreshMacValidity(el) && el.offsetParent !== null) return el;
     return null;
   }
 
-  function refreshPortsValidity(el) {
-    el.setCustomValidity('');
-    if (portListValid(el.value)) return false;
-    el.setCustomValidity(t('portInvalid', { field: el.value }));
-    return true;
-  }
   function checkPortFields() {
     let first = null;
     for (const el of $$('#portfwd-table [data-col="ports"], #ipv6-table [data-col="ports"]')) {
@@ -584,21 +517,8 @@ import { collectTarget, devicesState } from './devices.js';
     return first;
   }
 
-  // Live feedback: when the user leaves a range/iface/prefix field with a bad
-  // value, set the message and show the bubble immediately rather than waiting
-  // for Build.
-  document.addEventListener('focusout', e => {
-    const el = e.target;
-    if (!el) return;
-    if (RANGE_NOUN[el.id] && refreshRangeValidity(el)) el.reportValidity();
-    else if (IFACE_SET.has(el.id) && refreshIfaceValidity(el)) el.reportValidity();
-    else if (PREFIX_SET.has(el.id) && refreshPrefixValidity(el)) el.reportValidity();
-    else if (WIFI_TEXT_SET.has(el.id) && refreshWifiTextValidity(el)) el.reportValidity();
-    else if (el.id === 'LOOKUP_HOSTNAME') { if (refreshDdnsValidity(el)) el.reportValidity(); }
-    else if (el.id === 'WAN_MAC_ADDR') { if (refreshMacValidity(el)) el.reportValidity(); }
-    else if (el.id === 'HOST_NAME' || (el.matches && el.matches('[data-col="host"]'))) { if (refreshHostnameValidity(el)) el.reportValidity(); }
-    else if (el.matches && el.matches('[data-col="ports"]')) { if (refreshPortsValidity(el)) el.reportValidity(); }
-  });
+  // Live feedback on blur, and the stale-message release on input (validate.mjs).
+  wireValidation(document);
 
   ui.startBuild = async function () {
     if (polling) return;

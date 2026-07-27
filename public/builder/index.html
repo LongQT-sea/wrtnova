@@ -130,7 +130,6 @@
           <div class="opt-card">
             <div class="opt-text">
               <label class="opt-title" for="HOST_NAME" data-i18n="hostname">Hostname</label>
-              <p class="form-help mt-0" data-i18n="hostnameHelp">Defaults to WrtNova, plus the AP index in AP mode.</p>
             </div>
             <input type="text" id="HOST_NAME" name="HOST_NAME" class="input-base opt-control opt-field" placeholder="WrtNova">
           </div>
@@ -261,7 +260,7 @@
             <div class="opt-text">
               <label class="opt-title" for="BASE_NET_PREFIX" data-i18n="defaultIpPrefix">Default IP prefix</label>
             </div>
-            <input type="text" id="BASE_NET_PREFIX" name="BASE_NET_PREFIX" class="opt-control opt-field input-base" placeholder="192.168" list="prefix-options">
+            <input type="text" id="BASE_NET_PREFIX" name="BASE_NET_PREFIX" class="opt-control opt-field--narrow input-base" maxlength="7" placeholder="192.168" list="prefix-options">
             <datalist id="prefix-options">
               <option value="192.168">
               <option value="10.0">
@@ -764,7 +763,7 @@
                 <span class="toggle-thumb"></span>
               </span>
               <div>
-                <span class="toggle-text" data-i18n="bridgeStp">Enable Spanning Tree Protocol for br-vlan</span>
+                <span class="toggle-text" data-i18n-html="bridgeStp">Enable STP (Spanning Tree Protocol) on <code>br-vlan</code></span>
                 <p class="form-help mt-0" data-i18n="stpNote">Prevents bridge loops when mixing wired and wireless backhaul.</p>
               </div>
             </label>
@@ -892,7 +891,7 @@
                 </span>
                 <div>
                   <span class="toggle-text" data-i18n="bandSuffix">Add band suffix</span>
-                  <p class="form-help mt-0" data-i18n-html="bandSuffixHelp">Add 2G/5G/6G to the end of each SSID. This may cause <code>usteer</code> band steering between 2G/5G/6G to stop working; same-band roaming between APs still works.</p>
+                  <p class="form-help mt-0" data-i18n-html="bandSuffixHelp">Add 2G/5G/6G to the end of each SSID. This may cause <code>usteer</code> band steering between bands to stop working; same-band roaming between APs is unaffected.</p>
                 </div>
               </label>
             </div>
@@ -1111,9 +1110,8 @@
               <div class="opt-card">
                 <div class="opt-text">
                   <label class="opt-title" for="WAN_VLAN_ID" data-i18n="wanVlanId">WAN VLAN ID</label>
-                  <p class="form-help mt-0" data-i18n="wanVlanHint">802.1Q VLAN tag for the WAN interface.</p>
                 </div>
-                <input type="number" id="WAN_VLAN_ID" name="WAN_VLAN_ID" class="opt-control opt-field input-base" min="1" max="4094" placeholder="20">
+                <input type="number" id="WAN_VLAN_ID" name="WAN_VLAN_ID" class="opt-control opt-field--narrow input-base" min="1" max="4094" placeholder="20">
               </div>
             </div>
             <div class="opt-group">
@@ -1130,9 +1128,8 @@
               <div class="opt-card wan-b-only hidden">
                 <div class="opt-text">
                   <label class="opt-title" for="WAN_B_VLAN_ID" data-i18n="wanBVlanId">WAN-B VLAN ID</label>
-                  <p class="form-help mt-0" data-i18n="wanBVlanHint">802.1Q VLAN tag for WAN-B.</p>
                 </div>
-                <input type="number" id="WAN_B_VLAN_ID" name="WAN_B_VLAN_ID" class="opt-control opt-field input-base" min="1" max="4094" placeholder="21">
+                <input type="number" id="WAN_B_VLAN_ID" name="WAN_B_VLAN_ID" class="opt-control opt-field--narrow input-base" min="1" max="4094" placeholder="21">
               </div>
             </div>
             <label class="toggle-label">
@@ -1143,7 +1140,7 @@
               </span>
               <div>
                 <span class="toggle-text" data-i18n="bridgeWanPort">Bridge WAN port</span>
-                <p class="form-help mt-0" data-i18n="bridgeWanPortNote">Add WAN port to br-vlan bridge, useful for IPTV, VoIP, and multi-PPPoE setups.</p>
+                <p class="form-help mt-0" data-i18n-html="bridgeWanPortNote">Add WAN port to the <code>br-vlan</code> bridge, so WAN-side VLANs (IPTV, VoIP, multi-PPPoE) can be trunked to downstream devices. Each VLAN id must also be listed under Additional VLANs.</p>
               </div>
             </label>
           </div>

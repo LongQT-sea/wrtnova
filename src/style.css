@@ -174,15 +174,29 @@
     margin-left: 0;
   }
   /* A field with a hard, tiny content limit - a two-letter country code, a
-     two-digit index - reads as broken when it fills half the card: the box
-     promises far more input than it accepts. These size to their content and
-     keep the trailing edge at every width, including below the breakpoint
-     where a normal field goes full-width. Declared after both media queries
-     because it has the same specificity as the rules it overrides. */
+     two-digit index, a two-octet prefix - reads as broken when it fills half
+     the card: the box promises far more input than it accepts. These size to
+     their content and keep the trailing edge at every width, including below
+     the breakpoint where a normal field goes full-width. Declared after both
+     media queries because it has the same specificity as the rules it
+     overrides. */
   .opt-card > .opt-field--narrow {
     flex: 0 0 auto;
     width: 6.5rem;
     margin-left: auto;
+  }
+  /* Wrapping is decided from flex base sizes, before any shrinking, so 12rem of
+     text plus a 6.5rem field overflows a 375px card and maroons the small box on
+     a line of its own. Above the breakpoint the text block grows to fill the card
+     either way, so the smaller basis changes nothing there. */
+  .opt-card:has(> .opt-field--narrow) > .opt-text { flex-basis: 8rem; }
+  /* The picker arrow of a datalist field holds ~22px inside the box at every
+     width - it only fades in on hover, the space never comes back - which clips
+     the last character of 192.168 at 6.5rem. The list still opens on typing and
+     on Down-arrow; Firefox draws no arrow at all. !important because the UA sheet
+     sets display on this pseudo-element. */
+  .opt-card > .opt-field--narrow::-webkit-calendar-picker-indicator {
+    display: none !important;
   }
   /* The mirror of --narrow: a 44-char base64 key is unreadable in half a card,
      and a key you cannot read is one you cannot check against what you pasted.

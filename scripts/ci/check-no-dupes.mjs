@@ -29,6 +29,8 @@ const CANONICAL = {
   deriveConfig: 'builder-config.mjs',
   readForm: 'config-form.mjs',
   writeForm: 'config-form.mjs',
+  refreshValidityFor: 'validate.mjs',
+  wireValidation: 'validate.mjs',
 };
 
 const files = [
