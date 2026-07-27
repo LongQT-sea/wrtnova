@@ -296,6 +296,147 @@ export function detectVlanConflict(cfg) {
   return conflict.anchorCollision || conflict.trunkCollision || conflict.exhausted;
 }
 
+// -- Interface (UCI section) names -------------------------------------------
+
+// What UCI accepts as a section name. Empty means "use the wrtnova.sh default".
+export const IFACE_RE = /^[A-Za-z0-9_]{1,15}$/;
+/** @param {string} [v] @returns {boolean} */
+export function ifaceValid(v) { return !v || IFACE_RE.test(v); }
+
+// `def` is the wrtnova.sh fallback (lan_if=${LAN_IFACE:-lan} and friends);
+// `vlanKey` picks the resolved VLAN id behind the vlan<id> fallback name, which
+// wrtnova.sh already documents as the alternative form ("e.g. lan, vlan1, ...").
+const IFACE_TABLE = [
+  { key: 'lan',   field: 'LAN_IFACE',     def: 'lan',     vlanKey: 'lan'   },
+  { key: 'guest', field: 'GUEST_IFACE',   def: 'guest',   vlanKey: 'guest', flag: 'GUEST_ENABLE' },
+  { key: 'iot',   field: 'IOT_IFACE',     def: 'iot',     vlanKey: 'iot',   flag: 'IOT_ENABLE'   },
+  { key: 'wg',    field: 'LAN_VPN_IFACE', def: 'lan_vpn', vlanKey: 'wg',    flag: 'WG_ENABLE'    },
+];
+
+/** Config field -> IFACE_TABLE key, for callers that hold an element id. */
+export const IFACE_KEY_BY_FIELD = /** @type {Record<string, string>} */ (
+  Object.fromEntries(IFACE_TABLE.map((r) => [r.field, r.key]))
+);
+
+/**
+ * Names wrtnova.sh or stock OpenWrt already owns: the WAN interfaces and their
+ * _6 siblings, the modem/tethering ones, ${WG_IFACE:-vpn}, and OpenWrt's own two
+ * sections. netifd keys interfaces by section name, so a LAN-side network
+ * landing on one silently overwrites it - the build still succeeds and two
+ * networks quietly become one. Held unconditionally, not gated on the flags that
+ * create them: enabling WAN-B or the modem later must not break a saved config.
+ * vpn/vpn_6 track WG_IFACE's default, which is script-only today.
+ */
+export const RESERVED_IFACES = [
+  'wan', 'wan_6', 'wanb', 'wanb_6', 'cellular', 'usb0', 'vpn', 'vpn_6', 'loopback', 'globals',
+];
+
+/**
+ * The string twin of resolveVlanAssignment, same anchor/auto rule: a typed name
+ * is a fixed anchor, an empty field is an auto that yields, falling back to
+ * vlan<resolved vid> then <default>_<vid> when its default name is taken.
+ *
+ * Only anchors can truly collide - an auto always has somewhere to go - so the
+ * flags below are the only cases that block a build. Per-entry `conflict` also
+ * carries 'invalid' for a typed name failing the charset rule; that one is
+ * per-field (refreshIfaceValidity reports it) but recorded here so a caller
+ * holding just a config reaches the same verdict, `raw` keeping the unusable
+ * value that `name` cannot. Matching is case-sensitive, as UCI section names are.
+ *
+ * @param {Config} cfg
+ * @returns {{ byKey: Record<string, { name: string, raw: string, userSet: boolean,
+ *   participates: boolean, def: string, conflict: string }>,
+ *   conflict: { anchorCollision: boolean, reservedCollision: boolean, exhausted: boolean } }}
+ */
+export function resolveIfaceAssignment(cfg) {
+  const vlan = resolveVlanAssignment(cfg).byKey;
+  const conflict = { anchorCollision: false, reservedCollision: false, exhausted: false };
+
+  // Pass 1: anchor (usable typed name) or auto. A value failing the charset rule
+  // is deliberately not an anchor - it reserves nothing, and blurring its precise
+  // message into a conflict one would help nobody.
+  const entries = IFACE_TABLE.map((row) => {
+    const raw = String(cfg[row.field] || '').trim();
+    const userSet = raw !== '' && ifaceValid(raw);
+    return { row, raw, part: row.flag ? on(cfg, row.flag) : true, userSet, anchor: userSet ? raw : '' };
+  });
+
+  // Reserve the script's names + every participating anchor. Duplicates are
+  // counted first so both sides of a collision are flagged, not just the later.
+  const reserved = new Set(RESERVED_IFACES);
+  /** @type {Map<string, number>} */
+  const counts = new Map();
+  for (const e of entries) {
+    if (e.part && e.userSet) counts.set(e.anchor, (counts.get(e.anchor) || 0) + 1);
+  }
+  /** @type {Record<string, string>} */
+  const flagged = {};
+  for (const e of entries) {
+    if (!e.part || !e.userSet) continue;
+    if (RESERVED_IFACES.indexOf(e.anchor) !== -1) {
+      conflict.reservedCollision = true;
+      flagged[e.row.key] = 'reserved';
+    } else if ((counts.get(e.anchor) || 0) > 1) {
+      conflict.anchorCollision = true;
+      flagged[e.row.key] = 'dup';
+    }
+    reserved.add(e.anchor);
+  }
+
+  // Pass 2: name the autos around the reserved set.
+  /** @type {Record<string, any>} */
+  const byKey = {};
+  for (const e of entries) {
+    const { key, def, vlanKey } = e.row;
+    const raw = e.raw;
+    const at = (name, c) => { byKey[key] = { name, raw, userSet: e.userSet, participates: e.part, def, conflict: c }; };
+    if (!e.part) { at(def, ''); continue; }
+    if (e.userSet) { at(e.anchor, flagged[key] || ''); continue; }
+    if (raw !== '') { at(def, 'invalid'); continue; }   // charset reject: keeps the default
+    const a = vlan[vlanKey];
+    const vid = a.vid != null ? a.vid : a.def;
+    let name = null;
+    for (const cand of [def, 'vlan' + vid, def + '_' + vid]) {
+      if (!reserved.has(cand)) { name = cand; break; }
+    }
+    if (name === null) { conflict.exhausted = true; name = def; }
+    else reserved.add(name);
+    at(name, '');
+  }
+
+  return { byKey, conflict };
+}
+
+/**
+ * The name to emit per field: the resolved one when it participates and differs
+ * from the script's own default, else '' (Section 1, no redundant defaults).
+ * Unlike resolveVlanEmit this must write auto-assigned values too - the script's
+ * fallback is 'guest', not 'vlan5'.
+ * @param {Config} cfg
+ * @returns {Record<string, string>}
+ */
+export function resolveIfaceEmit(cfg) {
+  const { byKey } = resolveIfaceAssignment(cfg);
+  /** @type {Record<string, string>} */
+  const out = {};
+  for (const row of IFACE_TABLE) {
+    const a = byKey[row.key];
+    out[row.field] = (a.participates && a.name !== a.def) ? a.name : '';
+  }
+  return out;
+}
+
+/**
+ * True only for unresolvable interface-name conflicts. A default colliding with
+ * a typed name is renamed, not a conflict.
+ * @param {Config} cfg
+ * @returns {boolean}
+ */
+export function detectIfaceConflict(cfg) {
+  const { conflict } = resolveIfaceAssignment(cfg);
+  return conflict.anchorCollision || conflict.reservedCollision || conflict.exhausted;
+}
+
 /** Max VLAN table slots on a swconfig switch (see isSwconfigTarget). */
 export const SWCONFIG_VLAN_MAX = 16;
 

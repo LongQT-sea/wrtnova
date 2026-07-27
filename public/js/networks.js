@@ -11,8 +11,8 @@ import './i18n/core.mjs';
 import './tzdata.js';
 import { BASE_SCHEMA, readForm, writeForm } from './config-form.mjs';
 import { mergeNodeConfig } from './config-merge.mjs';
-import { IFACE_FIELDS, ifaceValid, PREFIX_FIELDS, prefixValid, WIFI_TEXT_FIELDS, wifiTextValid, countryValid, pskVlanPassIssue } from './config-form.mjs';
-import { detectVlanConflict, truncateAdditionalVlans, SWCONFIG_VLAN_MAX } from './visibility.mjs';
+import { PREFIX_FIELDS, prefixValid, WIFI_TEXT_FIELDS, wifiTextValid, countryValid, pskVlanPassIssue } from './config-form.mjs';
+import { detectVlanConflict, detectIfaceConflict, resolveIfaceAssignment, truncateAdditionalVlans, SWCONFIG_VLAN_MAX } from './visibility.mjs';
 import { renderConfigBlock } from './render-config.mjs';
 import { parseList, firstInvalidIpv6Octet, ddnsHostnameValid, macValid, firstInvalidHost, firstInvalidPort, joinEndpoint } from './list-grammar.mjs';
 import { wireValidation } from './validate.mjs';
@@ -1281,12 +1281,18 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
       return;
     }
 
-    // Interface names: empty (use default) or a valid UCI section name. mergeNodeConfig
-    // already blanks disabled networks' iface fields, so only active ones are checked.
     const mergedForCheck = mergeNodeConfig(net.shared_config, node.overrides);
-    const badIface = IFACE_FIELDS.find(k => !ifaceValid(mergedForCheck[k]));
-    if (badIface) {
-      showPanelError(actEl, t('ifaceInvalid', { field: mergedForCheck[badIface] }), () => buildNode(net, node));
+
+    // Interface names: valid charset, unique among the active networks, and not
+    // one wrtnova.sh owns. Read from the shared config, not mergedForCheck -
+    // merging already resolves the names, which would mask the conflict.
+    const ifaceByKey = resolveIfaceAssignment(net.shared_config).byKey;
+    const badIfaceKey = Object.keys(ifaceByKey).find(k => ifaceByKey[k].conflict);
+    if (badIfaceKey) {
+      const a = ifaceByKey[badIfaceKey];
+      const key = a.conflict === 'invalid' ? 'ifaceInvalid'
+                : a.conflict === 'reserved' ? 'ifaceReserved' : 'ifaceDup';
+      showPanelError(actEl, t(key, { field: a.raw }), () => buildNode(net, node));
       return;
     }
 
@@ -1512,15 +1518,18 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
   }
 
   function buildAll(net) {
-    // Block the whole fleet build on a genuine VLAN conflict in the shared config.
-    if (detectVlanConflict(net.shared_config)) {
+    // Block the whole fleet build on a genuine VLAN or interface-name conflict
+    // in the shared config - every node would inherit it.
+    const sharedIssue = detectVlanConflict(net.shared_config) ? S.fixVlanConflict
+                      : detectIfaceConflict(net.shared_config) ? S.fixIfaceConflict : '';
+    if (sharedIssue) {
       const progressEl = document.getElementById('build-all-progress');
       if (progressEl) {
         progressEl.classList.remove('hidden');
         progressEl.innerHTML =
           '<div class="card p-3 mt-4 flex items-center gap-2 text-sm text-amber-600 dark:text-amber-400 border-amber-300/40 dark:border-amber-700/40">' +
           '<svg class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>' +
-          '<span>' + S.fixVlanConflict + '</span>' +
+          '<span>' + sharedIssue + '</span>' +
           '</div>';
         setTimeout(() => { progressEl.classList.add('hidden'); progressEl.innerHTML = ''; }, 3000);
       }

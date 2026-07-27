@@ -8,7 +8,7 @@
 // Boolean flags use flag(v) so '0' never leaks through (Section 1 invariant:
 // off-state is '' never '0').
 
-import { resolveVlanEmit, DNS_DEFAULT, isAdguard, isDohEngine, deriveBootstrapDns } from './visibility.mjs';
+import { resolveVlanEmit, resolveIfaceEmit, DNS_DEFAULT, isAdguard, isDohEngine, deriveBootstrapDns } from './visibility.mjs';
 import { normalizeEndpoint } from './list-grammar.mjs';
 import { assembleBanipFeeds } from './packages.mjs';
 
@@ -31,6 +31,9 @@ export function mergeNodeConfig(sharedConfig, nodeOverrides) {
   // Frontend-owned VLAN ids: resolved value when it differs from the natural
   // default, else '' (participation/AP gating handled by the allocator).
   const vlan = resolveVlanEmit(c);
+  // Same deal for the UCI interface names: typed name, or the vlan<id> fallback
+  // when a default would collide. '' when it matches the script's own default.
+  const iface = resolveIfaceEmit(c);
   // AP nodes bridging the WAN carry the router's BRIDGE_WAN_PORT + WAN VLAN id
   // (allocator drops WAN in AP, so resolve the vid in router view for that case).
   const brWan = flag(c.BRIDGE_WAN_PORT);
@@ -51,10 +54,10 @@ export function mergeNodeConfig(sharedConfig, nodeOverrides) {
     BASE_NET_PREFIX: c.BASE_NET_PREFIX || '', DEFAULT_SUBNET: c.DEFAULT_SUBNET || '',
     GUEST_ENABLE: guestOn ? '1' : '', IOT_ENABLE: iotOn ? '1' : '',
     IOT_INTERNET: (iotOn && !isAp) ? flag(c.IOT_INTERNET) : '', IOT_ROUTE_VIA_WG: (iotOn && wgOn && !isAp) ? flag(c.IOT_ROUTE_VIA_WG) : '', WG_ENABLE: wgOn ? '1' : '',
-    LAN_BASE_PREFIX: c.LAN_BASE_PREFIX || '', LAN_IFACE: c.LAN_IFACE || '', LAN_VLAN_ID: vlan.LAN_VLAN_ID, LAN_SUBNET: c.LAN_SUBNET || '',
-    GUEST_BASE_PREFIX: guestOn ? (c.GUEST_BASE_PREFIX || '') : '', GUEST_IFACE: guestOn ? (c.GUEST_IFACE || '') : '', GUEST_VLAN_ID: vlan.GUEST_VLAN_ID, GUEST_SUBNET: guestOn ? (c.GUEST_SUBNET || '') : '',
-    IOT_BASE_PREFIX:   iotOn   ? (c.IOT_BASE_PREFIX   || '') : '', IOT_IFACE:   iotOn   ? (c.IOT_IFACE   || '') : '', IOT_VLAN_ID:   vlan.IOT_VLAN_ID, IOT_SUBNET:   iotOn   ? (c.IOT_SUBNET   || '') : '', IOT_NO_DOT11R: iotOn ? flag(c.IOT_NO_DOT11R) : '',
-    LAN_VPN_BASE_PREFIX: wgOn  ? (c.LAN_VPN_BASE_PREFIX || '') : '', LAN_VPN_IFACE: wgOn  ? (c.LAN_VPN_IFACE || '') : '', LAN_VPN_VLAN_ID: vlan.LAN_VPN_VLAN_ID, LAN_VPN_SUBNET: wgOn  ? (c.LAN_VPN_SUBNET || '') : '',
+    LAN_BASE_PREFIX: c.LAN_BASE_PREFIX || '', LAN_IFACE: iface.LAN_IFACE, LAN_VLAN_ID: vlan.LAN_VLAN_ID, LAN_SUBNET: c.LAN_SUBNET || '',
+    GUEST_BASE_PREFIX: guestOn ? (c.GUEST_BASE_PREFIX || '') : '', GUEST_IFACE: iface.GUEST_IFACE, GUEST_VLAN_ID: vlan.GUEST_VLAN_ID, GUEST_SUBNET: guestOn ? (c.GUEST_SUBNET || '') : '',
+    IOT_BASE_PREFIX:   iotOn   ? (c.IOT_BASE_PREFIX   || '') : '', IOT_IFACE:   iface.IOT_IFACE, IOT_VLAN_ID:   vlan.IOT_VLAN_ID, IOT_SUBNET:   iotOn   ? (c.IOT_SUBNET   || '') : '', IOT_NO_DOT11R: iotOn ? flag(c.IOT_NO_DOT11R) : '',
+    LAN_VPN_BASE_PREFIX: wgOn  ? (c.LAN_VPN_BASE_PREFIX || '') : '', LAN_VPN_IFACE: iface.LAN_VPN_IFACE, LAN_VPN_VLAN_ID: vlan.LAN_VPN_VLAN_ID, LAN_VPN_SUBNET: wgOn  ? (c.LAN_VPN_SUBNET || '') : '',
     ADDITIONAL_VLAN_LIST: c.ADDITIONAL_VLAN_LIST || '', TAGGED_LAN_VLAN: flag(c.TAGGED_LAN_VLAN),
     P_STEERING: c.P_STEERING || '', ULA_PREFIX: c.ULA_PREFIX || '',
     COUNTRY_CODE: c.COUNTRY_CODE || '', DENSE_ENV: flag(c.DENSE_ENV), WIRELESS_MESH: flag(c.WIRELESS_MESH), WIRELESS_MESH_2G: flag(c.WIRELESS_MESH_2G), DOT11KV: flag(c.DOT11KV), DOT11R: flag(c.DOT11R), PSK_VLAN: flag(c.PSK_VLAN), BAND_SUFFIX: flag(c.BAND_SUFFIX), INDEX_SUFFIX: flag(c.INDEX_SUFFIX), AP_DISABLE: flag(c.AP_DISABLE), GUEST_ISOLATE: guestOn ? flag(c.GUEST_ISOLATE) : '',

@@ -535,6 +535,9 @@ import { collectTarget, devicesState } from './devices.js';
     const target = collectTarget();
     if (!target) { ui.status(S.pickDeviceFirst, 'error'); return; }
     if (ui.hasVlanConflict) { ui.status(S.fixVlanConflict, 'error'); return; }
+    // checkIfaceFields below pops the offending field's own bubble, but an
+    // exhausted allocation belongs to no single field, so gate on the flag too.
+    if (ui.hasIfaceConflict) { ui.status(S.fixIfaceConflict, 'error'); return; }
 
     // Out-of-range numeric fields: set a friendly message ("VLAN must be 1-255")
     // and pop the first visible offender's native validation bubble, then bail.

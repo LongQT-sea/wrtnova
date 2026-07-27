@@ -15,7 +15,7 @@
 // raw carries a few gating-only helpers (wan_type) that are NOT emitted, exactly
 // as the old collectConfig output omitted them.
 
-import { resolveVlanEmit, DNS_DEFAULT, isAdguard, isDohEngine, deriveBootstrapDns } from './visibility.mjs';
+import { resolveVlanEmit, resolveIfaceEmit, DNS_DEFAULT, isAdguard, isDohEngine, deriveBootstrapDns } from './visibility.mjs';
 import { normalizeEndpoint } from './list-grammar.mjs';
 import { assembleBanipFeeds } from './packages.mjs';
 
@@ -30,6 +30,9 @@ export function deriveConfig(raw) {
   // Frontend-owned VLAN ids: resolved value when it differs from the field's
   // natural default, else '' (participation/AP gating handled by the allocator).
   const vlan = resolveVlanEmit(r);
+  // Same deal for the UCI interface names: typed name, or the vlan<id> fallback
+  // when a default would collide. '' when it matches the script's own default.
+  const iface = resolveIfaceEmit(r);
 
   const apMode   = v('AP_MODE');             // '1' (AP) or ''
   const wanType  = v('wan_type') || 'dhcp';
@@ -72,19 +75,19 @@ export function deriveConfig(raw) {
     WG_ENABLE:       wgOn ? '1' : '',
 
     LAN_BASE_PREFIX:    v('LAN_BASE_PREFIX'),
-    LAN_IFACE:          v('LAN_IFACE'),
+    LAN_IFACE:          iface.LAN_IFACE,
     LAN_VLAN_ID:        vlan.LAN_VLAN_ID,
     LAN_SUBNET:         v('LAN_SUBNET'),
     GUEST_BASE_PREFIX:  guestOn ? v('GUEST_BASE_PREFIX') : '',
-    GUEST_IFACE:        guestOn ? v('GUEST_IFACE')       : '',
+    GUEST_IFACE:        iface.GUEST_IFACE,
     GUEST_VLAN_ID:      vlan.GUEST_VLAN_ID,
     GUEST_SUBNET:       guestOn ? v('GUEST_SUBNET')      : '',
     IOT_BASE_PREFIX:    iotOn   ? v('IOT_BASE_PREFIX')   : '',
-    IOT_IFACE:          iotOn   ? v('IOT_IFACE')         : '',
+    IOT_IFACE:          iface.IOT_IFACE,
     IOT_VLAN_ID:        vlan.IOT_VLAN_ID,
     IOT_SUBNET:         iotOn   ? v('IOT_SUBNET')        : '',
     LAN_VPN_BASE_PREFIX: wgOn ? v('LAN_VPN_BASE_PREFIX') : '',
-    LAN_VPN_IFACE:       wgOn ? v('LAN_VPN_IFACE')       : '',
+    LAN_VPN_IFACE:       iface.LAN_VPN_IFACE,
     LAN_VPN_VLAN_ID:     vlan.LAN_VPN_VLAN_ID,
     LAN_VPN_SUBNET:      wgOn ? v('LAN_VPN_SUBNET')      : '',
     ADDITIONAL_VLAN_LIST: v('ADDITIONAL_VLAN_LIST'),

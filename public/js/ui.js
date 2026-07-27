@@ -6,7 +6,8 @@ import { ui } from './ui-ns.mjs';
 import { renderConfigBlock } from './render-config.mjs';
 import { resolvePackages } from './packages.mjs';
 import { serializeList, clampOctet4, ipv6OctetValid } from './list-grammar.mjs';
-import { deriveVisibility, deriveNetRows, detectVlanConflict, resolveVlanAssignment, DOH_PROVIDERS } from './visibility.mjs';
+import { deriveVisibility, deriveNetRows, detectVlanConflict, resolveVlanAssignment,
+         detectIfaceConflict, resolveIfaceAssignment, DOH_PROVIDERS } from './visibility.mjs';
 
   ui.$  = (sel, root) => (root || document).querySelector(sel);
   ui.$$ = (sel, root) => Array.from((root || document).querySelectorAll(sel));
@@ -196,9 +197,23 @@ import { deriveVisibility, deriveNetRows, detectVlanConflict, resolveVlanAssignm
       if (el && a) el.placeholder = String(a.participates && a.vid != null ? a.vid : a.def);
     });
 
+    // Same for the interface names: an empty field reads the name it will
+    // actually get, so a net that yielded 'guest' shows its vlan5 fallback.
+    const ifaceByKey = resolveIfaceAssignment(cfg).byKey;
+    [['lan', 'LAN_IFACE'], ['guest', 'GUEST_IFACE'], ['iot', 'IOT_IFACE'], ['wg', 'LAN_VPN_IFACE']]
+      .forEach(([key, id]) => {
+        const el = ui.$('#' + id);
+        const a = ifaceByKey[key];
+        if (el && a) el.placeholder = a.name;
+      });
+
     ui.hasVlanConflict = detectVlanConflict(cfg);
     const warn = ui.$('#net-dup-warn');
     if (warn) warn.classList.toggle('hidden', !ui.hasVlanConflict);
+
+    ui.hasIfaceConflict = detectIfaceConflict(cfg);
+    const ifaceWarn = ui.$('#net-iface-warn');
+    if (ifaceWarn) ifaceWarn.classList.toggle('hidden', !ui.hasIfaceConflict);
   };
 
   // Back-compat: re-render rows from the current store config.

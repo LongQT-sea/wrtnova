@@ -11,8 +11,9 @@
 // while the value is bad.
 
 import { ui } from './ui-ns.mjs';
-import { IFACE_FIELDS, ifaceValid, PREFIX_FIELDS, prefixValid, WIFI_TEXT_FIELDS, wifiTextValid, countryValid } from './config-form.mjs';
+import { IFACE_FIELDS, PREFIX_FIELDS, prefixValid, WIFI_TEXT_FIELDS, wifiTextValid, countryValid } from './config-form.mjs';
 import { ipv6OctetValid, hostnameValid, ddnsHostnameValid, macValid, portListValid } from './list-grammar.mjs';
+import { ifaceValid, resolveIfaceAssignment, IFACE_KEY_BY_FIELD } from './visibility.mjs';
 
 // Numeric fields that get a friendly, localized message instead of the browser
 // default ("Value must be <= 255"). Bounds stay declared as min/max on the
@@ -43,7 +44,23 @@ export function refreshRangeValidity(el) {
   return bad;
 }
 
-export const refreshIfaceValidity = (el) => apply(el, ifaceValid(el.value), 'ifaceInvalid', { field: el.value });
+/**
+ * Charset first, then uniqueness: a name shared with another network or with one
+ * wrtnova.sh owns would silently overwrite it. Only typed names are reported -
+ * a default that would collide gets renamed by the allocator instead. Reads the
+ * page's store (ui.configState) rather than the DOM, so it does not depend on
+ * listener order; with no store registered the charset check still runs alone.
+ * @param {any} el
+ * @returns {boolean} true when the value is bad
+ */
+export const refreshIfaceValidity = (el) => {
+  if (apply(el, ifaceValid(el.value), 'ifaceInvalid', { field: el.value })) return true;
+  const key = IFACE_KEY_BY_FIELD[el.id];
+  const cfg = key && ui.configState ? ui.configState() : null;
+  if (!cfg) return false;
+  const bad = resolveIfaceAssignment(cfg).byKey[key].conflict;
+  return apply(el, !bad, bad === 'reserved' ? 'ifaceReserved' : 'ifaceDup', { field: el.value });
+};
 export const refreshPrefixValidity = (el) => apply(el, prefixValid(el.value), 'prefixInvalid', { field: el.value });
 export const refreshWifiTextValidity = (el) => apply(el, wifiTextValid(el.value), 'wifiPipeInvalid', { field: el.id });
 export const refreshCountryValidity = (el) => apply(el, countryValid(el.value), 'countryInvalid', { field: el.value });
@@ -88,5 +105,15 @@ export function wireValidation(root, opts) {
   root.addEventListener('focusout', (e) => {
     if (refreshValidityFor(e.target)) e.target.reportValidity();
   }, o);
-  root.addEventListener('input', (e) => { refreshValidityFor(e.target); }, o);
+  root.addEventListener('input', (e) => {
+    refreshValidityFor(e.target);
+    // An interface-name conflict is the one message here that depends on the
+    // OTHER fields, so editing one can clear or raise it on its siblings.
+    if (IFACE_KEY_BY_FIELD[e.target.id]) {
+      IFACE_FIELDS.forEach((id) => {
+        const el = root.querySelector('#' + id);
+        if (el && el !== e.target) refreshIfaceValidity(el);
+      });
+    }
+  }, o);
 }

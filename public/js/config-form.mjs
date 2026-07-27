@@ -91,11 +91,10 @@ export const BUILDER_SCHEMA = /** @type {[string,string,(string|undefined)?,(str
   ...BASE_SCHEMA, ['AP_MODE', 'radio'], ['AP_INDEX', 'text'], ['NON_CT_ATH10K', 'checkbox'], ['WED_ENABLE', 'checkbox'],
 ]);
 
-// Interface-name fields guard (Network card). Empty means "use the wrtnova.sh
-// default" (lan/guest/iot/lan_vpn).
+// Interface-name fields (Network card). ifaceValid lives in visibility.mjs with
+// the allocator that consumes it: this module is DOM-coupled and outside the
+// typechecked set, so pure predicates cannot live here.
 export const IFACE_FIELDS = ['LAN_IFACE', 'GUEST_IFACE', 'IOT_IFACE', 'LAN_VPN_IFACE'];
-export const IFACE_RE = /^[A-Za-z0-9_]{1,15}$/;
-export function ifaceValid(v) { return !v || IFACE_RE.test(v); }
 
 // Wireless regulatory country. Empty is meaningful: wrtnova.sh emits
 // ${COUNTRY_CODE:+country=...}, so blank leaves the radio on its built-in

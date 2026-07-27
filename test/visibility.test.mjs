@@ -8,6 +8,8 @@ import { readFileSync } from 'node:fs';
 
 import { deriveVisibility, deriveNetRows, detectVlanConflict,
          resolveVlanAssignment, resolveVlanEmit,
+         detectIfaceConflict, resolveIfaceAssignment, resolveIfaceEmit,
+         RESERVED_IFACES, ifaceValid,
          isSwconfigTarget, countBaseVlanSlots, truncateAdditionalVlans,
          SWCONFIG_VLAN_MAX, deriveBootstrapDns, DOH_PROVIDERS } from '../public/js/visibility.mjs';
 
@@ -225,6 +227,135 @@ test('resolveVlanEmit: disabled / AP-excluded fields emit empty', () => {
   const e = resolveVlanEmit({ AP_MODE: '1', GUEST_VLAN_ID: '20', WAN_VLAN_ID: '30' });
   assert.equal(e.GUEST_VLAN_ID, '');   // GUEST_ENABLE off
   assert.equal(e.WAN_VLAN_ID, '');     // AP excludes WAN
+});
+
+// ---------------------------------------------------------------------------
+// ifaceValid - the UCI section-name charset rule
+// ---------------------------------------------------------------------------
+
+test('ifaceValid: empty means "use the default", so it passes', () => {
+  assert.equal(ifaceValid(''), true);
+  assert.equal(ifaceValid(undefined), true);
+});
+
+test('ifaceValid: letters, digits and underscore up to 15 chars', () => {
+  assert.equal(ifaceValid('lan'), true);
+  assert.equal(ifaceValid('lan_vpn'), true);
+  assert.equal(ifaceValid('Vlan42'), true);
+  assert.equal(ifaceValid('a'.repeat(15)), true);
+  assert.equal(ifaceValid('a'.repeat(16)), false);
+});
+
+test('ifaceValid: rejects hyphens, dots and spaces', () => {
+  assert.equal(ifaceValid('br-lan'), false);
+  assert.equal(ifaceValid('lan.5'), false);
+  assert.equal(ifaceValid('my lan'), false);
+});
+
+// ---------------------------------------------------------------------------
+// resolveIfaceAssignment - typed names anchor, defaults yield to vlan<id>
+// ---------------------------------------------------------------------------
+
+const allOn = { GUEST_ENABLE: '1', IOT_ENABLE: '1', WG_ENABLE: '1' };
+
+test('resolveIfaceAssignment: all-default gives every net its script default', () => {
+  const { byKey, conflict } = resolveIfaceAssignment(allOn);
+  assert.equal(byKey.lan.name, 'lan');
+  assert.equal(byKey.guest.name, 'guest');
+  assert.equal(byKey.iot.name, 'iot');
+  assert.equal(byKey.wg.name, 'lan_vpn');
+  assert.deepEqual(conflict, { anchorCollision: false, reservedCollision: false, exhausted: false });
+});
+
+test('resolveIfaceAssignment: a default yields to a typed name and takes vlan<id>', () => {
+  const { byKey, conflict } = resolveIfaceAssignment({ ...allOn, IOT_IFACE: 'guest' });
+  assert.equal(byKey.iot.name, 'guest');    // the anchor keeps what was typed
+  assert.equal(byKey.guest.name, 'vlan5');  // Guest's default was taken -> renamed
+  assert.equal(detectIfaceConflict({ ...allOn, IOT_IFACE: 'guest' }), false);
+  assert.equal(conflict.anchorCollision, false);
+});
+
+test('resolveIfaceAssignment: the fallback tracks the RESOLVED vlan id', () => {
+  const cfg = { ...allOn, GUEST_VLAN_ID: '8', IOT_IFACE: 'guest' };
+  assert.equal(resolveIfaceAssignment(cfg).byKey.guest.name, 'vlan8');
+});
+
+test('resolveIfaceAssignment: escalates to <default>_<id> when vlan<id> is taken too', () => {
+  const cfg = { ...allOn, IOT_IFACE: 'guest', LAN_IFACE: 'vlan5' };
+  assert.equal(resolveIfaceAssignment(cfg).byKey.guest.name, 'guest_5');
+});
+
+test('resolveIfaceAssignment: two typed names that match flag BOTH sides', () => {
+  const cfg = { ...allOn, LAN_IFACE: 'net0', GUEST_IFACE: 'net0' };
+  const { byKey, conflict } = resolveIfaceAssignment(cfg);
+  assert.equal(conflict.anchorCollision, true);
+  assert.equal(byKey.lan.conflict, 'dup');
+  assert.equal(byKey.guest.conflict, 'dup');
+  assert.equal(detectIfaceConflict(cfg), true);
+});
+
+test('resolveIfaceAssignment: a typed name the script owns is a conflict', () => {
+  for (const name of ['wan', 'wanb_6', 'cellular', 'usb0', 'vpn', 'loopback']) {
+    const cfg = { ...allOn, IOT_IFACE: name };
+    const { byKey, conflict } = resolveIfaceAssignment(cfg);
+    assert.equal(conflict.reservedCollision, true, name);
+    assert.equal(byKey.iot.conflict, 'reserved', name);
+  }
+});
+
+test('resolveIfaceAssignment: defaults route around the reserved names silently', () => {
+  // No LAN-side default collides with a reserved name today; assert that the
+  // reserved set never swallows one, so adding a name there cannot go unnoticed.
+  const { byKey } = resolveIfaceAssignment(allOn);
+  for (const key of ['lan', 'guest', 'iot', 'wg']) {
+    assert.equal(RESERVED_IFACES.includes(byKey[key].def), false, byKey[key].def);
+  }
+});
+
+test('resolveIfaceAssignment: a disabled network reserves nothing and cannot conflict', () => {
+  const cfg = { IOT_ENABLE: '1', GUEST_IFACE: 'iot' };   // Guest off
+  const { byKey, conflict } = resolveIfaceAssignment(cfg);
+  assert.equal(conflict.anchorCollision, false);
+  assert.equal(conflict.reservedCollision, false);
+  assert.equal(byKey.iot.name, 'iot');                   // keeps its default
+  assert.equal(byKey.guest.participates, false);
+});
+
+test('resolveIfaceAssignment: an unusable name reserves nothing but is recorded', () => {
+  const cfg = { ...allOn, IOT_IFACE: 'br-lan' };
+  const { byKey, conflict } = resolveIfaceAssignment(cfg);
+  assert.equal(byKey.iot.conflict, 'invalid');
+  assert.equal(byKey.iot.raw, 'br-lan');
+  assert.equal(byKey.iot.name, 'iot');                   // falls back to default
+  assert.equal(conflict.anchorCollision, false);         // charset errors are per-field
+});
+
+// ---------------------------------------------------------------------------
+// resolveIfaceEmit - resolved name when != script default, else ''
+// ---------------------------------------------------------------------------
+
+test('resolveIfaceEmit: all-default emits nothing (no redundant defaults)', () => {
+  const e = resolveIfaceEmit(allOn);
+  for (const k of ['LAN_IFACE', 'GUEST_IFACE', 'IOT_IFACE', 'LAN_VPN_IFACE']) {
+    assert.equal(e[k], '');
+  }
+});
+
+test('resolveIfaceEmit: a typed name equal to the script default is not emitted', () => {
+  assert.equal(resolveIfaceEmit({ ...allOn, LAN_IFACE: 'lan' }).LAN_IFACE, '');
+});
+
+test('resolveIfaceEmit: writes both the typed name and the renamed default', () => {
+  const e = resolveIfaceEmit({ ...allOn, IOT_IFACE: 'guest' });
+  assert.equal(e.IOT_IFACE, 'guest');
+  assert.equal(e.GUEST_IFACE, 'vlan5');   // auto-assigned, so it must be written
+});
+
+test('resolveIfaceEmit: disabled networks emit empty', () => {
+  const e = resolveIfaceEmit({ GUEST_IFACE: 'g0', IOT_IFACE: 'i0', LAN_VPN_IFACE: 'v0' });
+  assert.equal(e.GUEST_IFACE, '');
+  assert.equal(e.IOT_IFACE, '');
+  assert.equal(e.LAN_VPN_IFACE, '');
 });
 
 // ---------------------------------------------------------------------------
