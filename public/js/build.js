@@ -15,7 +15,7 @@ import { createStore } from './store.mjs';
 import { renderConfigBlock } from './render-config.mjs';
 import { parseAdditionalPackages } from './packages.mjs';
 import { joinEndpoint } from './list-grammar.mjs';
-import { RANGE_NOUN, refreshRangeValidity, refreshIfaceValidity, refreshPrefixValidity, refreshWifiTextValidity, refreshOctetV6Validity, refreshHostnameValidity, refreshDdnsValidity, refreshMacValidity, refreshPortsValidity, wireValidation } from './validate.mjs';
+import { RANGE_NOUN, refreshRangeValidity, refreshIfaceValidity, refreshPrefixValidity, refreshWifiTextValidity, refreshCountryValidity, refreshOctetV6Validity, refreshHostnameValidity, refreshDdnsValidity, refreshMacValidity, refreshPortsValidity, wireValidation } from './validate.mjs';
 import { collectTarget, devicesState } from './devices.js';
 
   const $  = ui.$, $$ = ui.$$;
@@ -503,6 +503,12 @@ import { collectTarget, devicesState } from './devices.js';
     return null;
   }
 
+  function checkCountryField() {
+    const el = $('#COUNTRY_CODE');
+    if (el && refreshCountryValidity(el) && el.offsetParent !== null) return el;
+    return null;
+  }
+
   function checkMacFields() {
     const el = $('#WAN_MAC_ADDR');
     if (el && refreshMacValidity(el) && el.offsetParent !== null) return el;
@@ -585,6 +591,10 @@ import { collectTarget, devicesState } from './devices.js';
     // '|' would corrupt the wifi_networks table (its field delimiter).
     const badWifiText = checkWifiTextFields();
     if (badWifiText) { badWifiText.reportValidity(); return; }
+
+    // Country code: empty (radio keeps its built-in regdomain) or two letters.
+    const badCountry = checkCountryField();
+    if (badCountry) { badCountry.reportValidity(); return; }
 
     // IPv6 host IDs: 1-4 hex digits, not 0. Pop the first visible offender.
     const badOctet = checkOctetV6Fields();

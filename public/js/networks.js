@@ -11,7 +11,7 @@ import './i18n/core.mjs';
 import './tzdata.js';
 import { BASE_SCHEMA, readForm, writeForm } from './config-form.mjs';
 import { mergeNodeConfig } from './config-merge.mjs';
-import { IFACE_FIELDS, ifaceValid, PREFIX_FIELDS, prefixValid, WIFI_TEXT_FIELDS, wifiTextValid, pskVlanPassIssue } from './config-form.mjs';
+import { IFACE_FIELDS, ifaceValid, PREFIX_FIELDS, prefixValid, WIFI_TEXT_FIELDS, wifiTextValid, countryValid, pskVlanPassIssue } from './config-form.mjs';
 import { detectVlanConflict, truncateAdditionalVlans, SWCONFIG_VLAN_MAX } from './visibility.mjs';
 import { renderConfigBlock } from './render-config.mjs';
 import { parseList, firstInvalidIpv6Octet, ddnsHostnameValid, macValid, firstInvalidHost, firstInvalidPort, joinEndpoint } from './list-grammar.mjs';
@@ -1303,6 +1303,12 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
     const badWifiText = WIFI_TEXT_FIELDS.find(k => !wifiTextValid(mergedForCheck[k]));
     if (badWifiText) {
       showPanelError(actEl, t('wifiPipeInvalid', { field: badWifiText }), () => buildNode(net, node));
+      return;
+    }
+
+    // Country code: empty (radio keeps its built-in regdomain) or two letters.
+    if (!countryValid(mergedForCheck.COUNTRY_CODE)) {
+      showPanelError(actEl, t('countryInvalid', { field: mergedForCheck.COUNTRY_CODE }), () => buildNode(net, node));
       return;
     }
 

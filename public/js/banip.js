@@ -194,4 +194,24 @@ import './ui.js';
       return name && chain ? { name: name.trim(), chain: chain.trim(), descr: (descr || '').trim() } : null;
     }).filter(Boolean);
     ui.refreshBanipChips();
+    fillCountryOptions();
   };
+
+  // The wireless COUNTRY_CODE field (Wireless card) suggests the same list this
+  // module already fetched, so it rides along here instead of paying for its own
+  // copy: 242 inline <option> tags would be ~8 KB of HTML on the critical path,
+  // and the file is a lazy import that the byte budget does not count. The field
+  // holds the 2-letter code (uppercased at the store boundary) with the country
+  // name as the option label - a plain text input if this never runs.
+  function fillCountryOptions() {
+    const dl = $('#country-options');
+    if (!dl || dl.childElementCount) return;
+    const frag = document.createDocumentFragment();
+    for (const c of state.countries) {
+      const o = document.createElement('option');
+      o.value = c.code.toUpperCase();
+      o.label = c.name;
+      frag.appendChild(o);
+    }
+    dl.appendChild(frag);
+  }

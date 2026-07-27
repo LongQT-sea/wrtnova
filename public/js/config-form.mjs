@@ -97,6 +97,12 @@ export const IFACE_FIELDS = ['LAN_IFACE', 'GUEST_IFACE', 'IOT_IFACE', 'LAN_VPN_I
 export const IFACE_RE = /^[A-Za-z0-9_]{1,15}$/;
 export function ifaceValid(v) { return !v || IFACE_RE.test(v); }
 
+// Wireless regulatory country. Empty is meaningful: wrtnova.sh emits
+// ${COUNTRY_CODE:+country=...}, so blank leaves the radio on its built-in
+// regdomain. Either case is accepted - uppercased at the store boundary.
+export const COUNTRY_RE = /^[A-Za-z]{2}$/;
+export function countryValid(v) { return !v || COUNTRY_RE.test(v); }
+
 // wrtnova.sh packs these into the '|'-delimited wifi_networks table (parsed
 // with IFS='|' read), so a literal '|' would split a value across fields and
 // corrupt the config.

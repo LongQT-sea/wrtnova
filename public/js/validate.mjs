@@ -11,7 +11,7 @@
 // while the value is bad.
 
 import { ui } from './ui-ns.mjs';
-import { IFACE_FIELDS, ifaceValid, PREFIX_FIELDS, prefixValid, WIFI_TEXT_FIELDS, wifiTextValid } from './config-form.mjs';
+import { IFACE_FIELDS, ifaceValid, PREFIX_FIELDS, prefixValid, WIFI_TEXT_FIELDS, wifiTextValid, countryValid } from './config-form.mjs';
 import { ipv6OctetValid, hostnameValid, ddnsHostnameValid, macValid, portListValid } from './list-grammar.mjs';
 
 // Numeric fields that get a friendly, localized message instead of the browser
@@ -46,6 +46,7 @@ export function refreshRangeValidity(el) {
 export const refreshIfaceValidity = (el) => apply(el, ifaceValid(el.value), 'ifaceInvalid', { field: el.value });
 export const refreshPrefixValidity = (el) => apply(el, prefixValid(el.value), 'prefixInvalid', { field: el.value });
 export const refreshWifiTextValidity = (el) => apply(el, wifiTextValid(el.value), 'wifiPipeInvalid', { field: el.id });
+export const refreshCountryValidity = (el) => apply(el, countryValid(el.value), 'countryInvalid', { field: el.value });
 export const refreshOctetV6Validity = (el) => apply(el, ipv6OctetValid(el.value), 'octetV6Invalid');
 export const refreshHostnameValidity = (el) => apply(el, hostnameValid(el.value), 'hostnameInvalid', { field: el.value });
 export const refreshDdnsValidity = (el) => apply(el, ddnsHostnameValid(el.value), 'ddnsHostnameInvalid', { field: el.value });
@@ -65,6 +66,7 @@ export function refreshValidityFor(el) {
   if (IFACE_SET.has(el.id)) return refreshIfaceValidity(el);
   if (PREFIX_SET.has(el.id)) return refreshPrefixValidity(el);
   if (WIFI_TEXT_SET.has(el.id)) return refreshWifiTextValidity(el);
+  if (el.id === 'COUNTRY_CODE') return refreshCountryValidity(el);
   if (el.id === 'LOOKUP_HOSTNAME') return refreshDdnsValidity(el);
   if (el.id === 'WAN_MAC_ADDR') return refreshMacValidity(el);
   if (el.id === 'HOST_NAME' || el.matches('[data-col="host"]')) return refreshHostnameValidity(el);

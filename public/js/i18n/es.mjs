@@ -135,6 +135,7 @@ export default {
   wifiPipeInvalid:  'El SSID y la contraseña WiFi no pueden contener el carácter "|" ({field}).',
   ifaceInvalid:     'El nombre de interfaz "{field}" solo puede contener a-z, A-Z, 0-9, _ y tener como máximo 15 caracteres.',
   prefixInvalid:    'El prefijo IP "{field}" debe ser dos octetos 0-255, p. ej. 192.168',
+  countryInvalid:   'El código de país "{field}" debe tener dos letras, p. ej. US o DE',
   octetV6Invalid:   'El ID de host IPv6 debe tener 1-4 dígitos hex y no ser 0, p. ej. 20 o ff',
   hostnameInvalid:  'El nombre de host "{field}" solo puede contener letras, dígitos y guiones, con etiquetas de 1-63 caracteres y sin guion inicial ni final.',
   ddnsHostnameInvalid: 'El nombre de host DDNS "{field}" debe ser un nombre de dominio completo, p. ej. ddns.example.com.',

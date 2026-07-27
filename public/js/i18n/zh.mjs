@@ -135,6 +135,7 @@ export default {
   wifiPipeInvalid:  'WiFi SSID 和密码不能包含 "|" 字符（{field}）。',
   ifaceInvalid:     '接口名称 "{field}" 只能包含 a-z、A-Z、0-9、_，且最多 15 个字符。',
   prefixInvalid:    'IP 前缀 "{field}" 必须是两个 0-255 的八位组，例如 192.168',
+  countryInvalid:   '国家代码 "{field}" 必须是两个字母，例如 US 或 DE',
   octetV6Invalid:   'IPv6 主机 ID 必须是 1-4 位十六进制数且不能为 0，例如 20 或 ff',
   hostnameInvalid:  '主机名 "{field}" 只能包含字母、数字和连字符，每个标签 1-63 个字符，且不能以连字符开头或结尾。',
   ddnsHostnameInvalid: 'DDNS 主机名 "{field}" 必须是完全限定域名，例如 ddns.example.com。',
