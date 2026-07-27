@@ -31,6 +31,13 @@ const CANONICAL = {
   writeForm: 'config-form.mjs',
   refreshValidityFor: 'validate.mjs',
   wireValidation: 'validate.mjs',
+  cacheGet: 'device-data.mjs',
+  cacheSet: 'device-data.mjs',
+  versionToUrl: 'device-data.mjs',
+  titleFor: 'device-data.mjs',
+  pickLatestPatches: 'device-data.mjs',
+  indexByTitle: 'device-data.mjs',
+  searchTitles: 'device-data.mjs',
 };
 
 const files = [

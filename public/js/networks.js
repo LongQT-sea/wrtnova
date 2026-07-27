@@ -18,6 +18,7 @@ import { parseList, firstInvalidIpv6Octet, ddnsHostnameValid, macValid, firstInv
 import { wireValidation } from './validate.mjs';
 import { parseAdditionalPackages } from './packages.mjs';
 import { createStore } from './store.mjs';
+import { DL, BRANCHES, cacheGet, cacheSet, versionToUrl, pickLatestPatches, indexByTitle, searchTitles } from './device-data.mjs';
 
 // Shared-config schema for /networks: BASE_SCHEMA plus the per-network version
 // select. HOST_NAME is dropped because hostname is per-node here (as are
@@ -27,9 +28,6 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
 
   // -- Constants ----------------------------------------------------
   const STORE_KEY = 'wrtnova_networks';
-  const DL = 'https://downloads.openwrt.org';
-  const CACHE_TTL = 6 * 60 * 60 * 1000;
-  const BRANCHES = ['23.05', '24.10', '25.12'];
   const ASU_DEFAULT = 'https://sysupgrade.openwrt.org';
   let activeAsu = ASU_DEFAULT;
 
@@ -1227,12 +1225,12 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
     if (!node.overrides.version || node.overrides.version === tgt.version)
       return { version_code: tgt.version_code, default_packages: tgt.default_packages, device_packages: tgt.device_packages };
     const cacheKey = 'wrtnova_profiles_' + effectiveVersion + '_' + tgt.target;
-    let data = dpCacheGet(cacheKey);
+    let data = cacheGet(cacheKey);
     if (!data) {
-      const res = await fetch(dpUrl(effectiveVersion) + '/targets/' + tgt.target + '/profiles.json', { cache: 'no-cache' });
+      const res = await fetch(versionToUrl(effectiveVersion) + '/targets/' + tgt.target + '/profiles.json', { cache: 'no-cache' });
       if (!res.ok) throw new Error('Failed to fetch profiles for ' + effectiveVersion);
       data = await res.json();
-      dpCacheSet(cacheKey, data);
+      cacheSet(cacheKey, data);
     }
     const dev = (data.profiles || {})[tgt.profile] || {};
     return {
@@ -1768,41 +1766,21 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
     targetNodeId: null,
   };
 
-  function dpCacheGet(k) {
-    try { const x = JSON.parse(localStorage.getItem(k)||'null'); return x&&(Date.now()-x.ts<CACHE_TTL)?x.data:null; } catch(e){return null;}
-  }
-  function dpCacheSet(k, d) {
-    try { localStorage.setItem(k, JSON.stringify({data:d, ts:Date.now()})); } catch(e){}
-  }
-  function dpUrl(v) { return v==='SNAPSHOT' ? DL+'/snapshots' : DL+'/releases/'+v; }
-  function pickLatestN(list, branch, n) {
-    return list.filter(v => v.startsWith(branch + '.')).sort((a, b) => {
-      const pa = a.split('.').map(Number), pb = b.split('.').map(Number);
-      for (let i = 0; i < Math.max(pa.length, pb.length); i++) { const d = (pb[i]||0)-(pa[i]||0); if (d) return d; }
-      return 0;
-    }).slice(0, n).reverse();
-  }
-  function titleFor(p) {
-    const t=(p.titles&&p.titles[0])||{};
-    if(t.title) return t.title.trim();
-    return [t.vendor,t.model,t.variant].filter(Boolean).join(' ').trim();
-  }
-
   async function dpEnsureVersions() {
     const sharedSel = document.getElementById('shared-version');
     if (sharedSel && sharedSel.options.length > 1) return; // already populated
 
-    let data = dpCacheGet('wrtnova_versions');
+    let data = cacheGet('wrtnova_versions');
     if (!data) {
       try {
         const res = await fetch(DL + '/.versions.json', { cache: 'no-cache' });
-        if (res.ok) { data = await res.json(); dpCacheSet('wrtnova_versions', data); }
+        if (res.ok) { data = await res.json(); cacheSet('wrtnova_versions', data); }
       } catch(e) {}
     }
     if (!data) return;
 
     const picks = [];
-    BRANCHES.forEach(b => picks.push(...pickLatestN(data.versions_list || [], b, 2)));
+    BRANCHES.forEach(b => picks.push(...pickLatestPatches(data.versions_list || [], b, 2)));
 
     if (sharedSel) {
       sharedSel.innerHTML = '';
@@ -1824,36 +1802,20 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
 
   async function dpLoadOverview(version) {
     const key = 'wrtnova_overview_' + version;
-    let data = dpCacheGet(key);
+    let data = cacheGet(key);
     if (!data) {
-      const res = await fetch(dpUrl(version) + '/.overview.json', { cache: 'no-cache' });
+      const res = await fetch(versionToUrl(version) + '/.overview.json', { cache: 'no-cache' });
       if (!res.ok) throw new Error('Overview fetch failed (' + res.status + ')');
       data = await res.json();
-      dpCacheSet(key, data);
+      cacheSet(key, data);
     }
-    const titles = {}, dups = new Set();
-    (data.profiles || []).forEach(p => { const t = titleFor(p); if (titles[t]) dups.add(t); titles[t] = p; });
-    DP.devicesByTitle = {};
-    (data.profiles || []).forEach(p => {
-      const t = titleFor(p);
-      const k = dups.has(t) ? t + ' (' + p.target + ')' : t;
-      DP.devicesByTitle[k] = p;
-    });
-  }
-
-  function dpSearch(q) {
-    if (!DP.devicesByTitle) return [];
-    const qs = q.toLowerCase().split(/\s+/).filter(Boolean);
-    return Object.keys(DP.devicesByTitle).filter(t => {
-      const lc = t.toLowerCase();
-      return qs.every(w => lc.includes(w));
-    }).sort();
+    DP.devicesByTitle = indexByTitle(data.profiles);
   }
 
   function dpRenderList(q) {
     const list = document.getElementById('dp-list');
     if (!list) return;
-    const items = q ? dpSearch(q) : Object.keys(DP.devicesByTitle || {}).sort();
+    const items = q ? searchTitles(DP.devicesByTitle, q) : Object.keys(DP.devicesByTitle || {}).sort();
     list.innerHTML = '';
     if (!items.length) {
       const empty = document.createElement('div');
@@ -1914,12 +1876,12 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
     status.classList.remove('hidden');
     try {
       const cacheKey = 'wrtnova_profiles_' + DP.currentVersion + '_' + profile.target;
-      let data = dpCacheGet(cacheKey);
+      let data = cacheGet(cacheKey);
       if (!data) {
-        const res = await fetch(dpUrl(DP.currentVersion) + '/targets/' + profile.target + '/profiles.json', { cache: 'no-cache' });
+        const res = await fetch(versionToUrl(DP.currentVersion) + '/targets/' + profile.target + '/profiles.json', { cache: 'no-cache' });
         if (!res.ok) throw new Error('Profiles fetch failed (' + res.status + ')');
         data = await res.json();
-        dpCacheSet(cacheKey, data);
+        cacheSet(cacheKey, data);
       }
       const dev = (data.profiles || {})[profile.id] || {};
       const target = {

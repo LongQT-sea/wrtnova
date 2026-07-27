@@ -7,14 +7,13 @@
 // ui.js for side effects so ui.$ exists at module-eval time.
 import { ui } from './ui-ns.mjs';
 import './ui.js';
+import { DL, BRANCHES, cacheGet, cacheSet, versionToUrl, pickLatestPatches, indexByTitle, searchTitles } from './device-data.mjs';
 
-  const $   = ui.$;
-  const DL  = 'https://downloads.openwrt.org';
+  const $ = ui.$;
 
-  // PLAN: only latest patch of each major.minor branch - plus branch snapshots for
-  // recent branches and the rolling SNAPSHOT.
-  const SUPPORTED_BRANCHES = ['23.05', '24.10', '25.12'];
-  const SNAPSHOT_BRANCHES  = new Set(['24.10', '25.12']);
+  // Snapshot builds exist only for recent branches; the branch list itself is
+  // shared (device-data.mjs BRANCHES).
+  const SNAPSHOT_BRANCHES = new Set(['24.10', '25.12']);
 
   export const devicesState = {
     version: '',
@@ -26,47 +25,10 @@ import './ui.js';
   };
   const state = devicesState;
 
-  function pickLatestNPatches(versions, branch, n) {
-    return versions.filter(v => v.startsWith(branch + '.'))
-      .sort((a, b) => {
-        const pa = a.split('.').map(Number), pb = b.split('.').map(Number);
-        for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
-          const d = (pb[i] || 0) - (pa[i] || 0);
-          if (d) return d;
-        }
-        return 0;
-      })
-      .slice(0, n)
-      .reverse();
-  }
-
-  function versionToUrl(v) {
-    return v === 'SNAPSHOT' ? DL + '/snapshots' : DL + '/releases/' + v;
-  }
-
-  function titleFor(profile) {
-    const t = (profile.titles && profile.titles[0]) || {};
-    if (t.title) return t.title.trim();
-    return [t.vendor, t.model, t.variant].filter(Boolean).join(' ').trim();
-  }
-
-  const CACHE_TTL = 6 * 60 * 60 * 1000; // 6 hours
-
-  function cacheGet(key) {
-    try {
-      const item = JSON.parse(localStorage.getItem(key) || 'null');
-      return item && (Date.now() - item.ts < CACHE_TTL) ? item.data : null;
-    } catch (e) { return null; }
-  }
-
-  function cacheSet(key, data) {
-    try { localStorage.setItem(key, JSON.stringify({ data, ts: Date.now() })); } catch (e) {}
-  }
-
   function applyVersionsData(data) {
     const picks = [];
-    SUPPORTED_BRANCHES.forEach(b => {
-      picks.push(...pickLatestNPatches(data.versions_list || [], b, 2));
+    BRANCHES.forEach(b => {
+      picks.push(...pickLatestPatches(data.versions_list || [], b, 2));
       if (SNAPSHOT_BRANCHES.has(b)) picks.push(b + '-SNAPSHOT');
     });
     picks.push('SNAPSHOT');
@@ -90,20 +52,7 @@ import './ui.js';
   function applyOverviewData(data) {
     state.overview = data;
 
-    const titles = {};
-    const dups = new Set();
-    (data.profiles || []).forEach(p => {
-      const t = titleFor(p);
-      if (titles[t]) { dups.add(t); }
-      titles[t] = p;
-    });
-
-    state.devicesByTitle = {};
-    (data.profiles || []).forEach(p => {
-      const t = titleFor(p);
-      const key = dups.has(t) ? t + ' (' + p.target + ')' : t;
-      state.devicesByTitle[key] = p;
-    });
+    state.devicesByTitle = indexByTitle(data.profiles);
 
     $('#device').disabled = false;
     $('#device-info').textContent = ui.t ? ui.t('deviceRequirement') : 'Required: ≥8MB flash, ≥64MB RAM';
@@ -201,15 +150,6 @@ import './ui.js';
     const inp = $('#device');
     const tr = (key, fallback) => (ui.t ? ui.t(key) : fallback);
 
-    function search(q) {
-      if (!state.devicesByTitle) return [];
-      const qs = q.toLowerCase().split(/\s+/).filter(Boolean);
-      return Object.keys(state.devicesByTitle).filter(t => {
-        const lc = t.toLowerCase();
-        return qs.every(w => lc.includes(w));
-      }).sort();
-    }
-
     async function pick(title) {
       inp.value = title;
       if (dlg) dlg.close();
@@ -264,7 +204,7 @@ import './ui.js';
       document.body.appendChild(dlg);
 
       cancelBtn.addEventListener('click', () => dlg.close());
-      dlgInp.addEventListener('input', () => renderDlg(search(dlgInp.value)));
+      dlgInp.addEventListener('input', () => renderDlg(searchTitles(state.devicesByTitle, dlgInp.value)));
       dlg.addEventListener('close', () => { dlgInp.value = ''; dlgList.innerHTML = ''; });
     }
 
@@ -291,7 +231,7 @@ import './ui.js';
 
     inp.addEventListener('click', () => {
       ensureDialog();
-      renderDlg(search(''));
+      renderDlg(searchTitles(state.devicesByTitle, ''));
       dlg.showModal();
       setTimeout(() => { if (dlgInp) dlgInp.focus(); }, 60);
     });
