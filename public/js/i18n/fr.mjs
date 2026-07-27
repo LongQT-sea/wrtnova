@@ -376,8 +376,6 @@ export default {
   oneKeyPerLineFleet: 'Une clé par ligne. Déployée sur chaque nœud.',
   vlanIdsSame:        'Les ID VLAN sont identiques pour tous les nœuds de ce réseau.',
   additionalTrunkHelpFleet: 'ID VLAN supplémentaires à acheminer en trunk (tagués) sur chaque port de chaque nœud.',
-  enableMeshBackhaulDefault: 'Astuce : Le backhaul filaire est toujours meilleur que le sans-fil lorsque c’est réalisable. Modifiable par nœud.',
-  enableMeshBackhaul2GDefault: 'Plus de portée que le 5 GHz ; peut nécessiter un réglage pour un débit plus élevé. Modifiable par nœud.',
   portFwdNoteFleet:   'Chaque ligne crée un bail DHCPv4 statique et une redirection de port NAT. Les ports doivent être uniques.',
   doneConfig:         '← Terminé',
   hardwareOffloadHelp:      "Débit réseau plus élevé là où c'est supporté. Ne pas activer avec QoS/SQM.",

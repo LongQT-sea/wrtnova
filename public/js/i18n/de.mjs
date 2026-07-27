@@ -376,8 +376,6 @@ export default {
   oneKeyPerLineFleet: 'Einen Schlüssel pro Zeile. Auf jedem Knoten bereitgestellt.',
   vlanIdsSame:        'VLAN-IDs sind für alle Knoten in diesem Netzwerk identisch.',
   additionalTrunkHelpFleet: 'Zusätzliche VLAN-IDs zum Trunking (getaggt) über jeden Port an jedem Knoten.',
-  enableMeshBackhaulDefault: 'Tipp: Kabelgebundenes Backhaul ist dem WLAN immer vorzuziehen, sofern machbar. Pro Knoten überschreibbar.',
-  enableMeshBackhaul2GDefault: 'Größere Reichweite als 5 GHz; für höheren Durchsatz eventuell Optimierung nötig. Pro Knoten überschreibbar.',
   portFwdNoteFleet:   'Jede Zeile erstellt einen statischen DHCPv4-Lease und NAT-Portweiterleitung. Ports müssen eindeutig sein.',
   doneConfig:         '← Fertig',
   hardwareOffloadHelp:      'Höherer Netzwerkdurchsatz wo unterstützt. Nicht aktivieren bei QoS/SQM.',

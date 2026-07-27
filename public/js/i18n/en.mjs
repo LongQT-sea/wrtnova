@@ -376,8 +376,6 @@ export default {
   oneKeyPerLineFleet: 'One key per line. Deployed to every node.',
   vlanIdsSame:        'VLAN IDs are identical across all nodes in this network.',
   additionalTrunkHelpFleet: 'Extra VLAN IDs to trunk (tagged) through every port on every node.',
-  enableMeshBackhaulDefault: 'Tip: Wired backhaul is always better than wireless when feasible. Overridable per node.',
-  enableMeshBackhaul2GDefault: 'Longer range than 5 GHz; may need tuning for higher throughput. Overridable per node.',
   portFwdNoteFleet:   'Each row creates a static DHCPv4 lease and NAT port forward. Ports must be unique.',
   doneConfig:         '← Done',
   hardwareOffloadHelp:      'Higher network throughput where supported. Do not enable if using QoS/SQM.',

@@ -377,8 +377,6 @@ export default {
   oneKeyPerLineFleet: '每行一个密钥。部署到每个节点。',
   vlanIdsSame:        '此网络中所有节点的 VLAN ID 相同。',
   additionalTrunkHelpFleet: '通过每个节点的每个端口进行干道（标记）传输的额外 VLAN ID。',
-  enableMeshBackhaulDefault: '提示：条件允许时，有线回程始终优于无线。可按节点覆盖。',
-  enableMeshBackhaul2GDefault: '覆盖比 5 GHz 更广；可能需要调优以获得更高吞吐量。可按节点覆盖。',
   portFwdNoteFleet:   '每行创建一个静态 DHCPv4 租约和 NAT 端口转发。端口必须唯一。',
   doneConfig:         '← 完成',
   hardwareOffloadHelp:      '在受支持的设备上提高网络吞吐量。使用 QoS/SQM 时请勿启用。',

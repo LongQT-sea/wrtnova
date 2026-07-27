@@ -376,8 +376,6 @@ export default {
   oneKeyPerLineFleet: 'Jeden klucz na linię. Wdrażany na każdym węźle.',
   vlanIdsSame:        'Identyfikatory VLAN są identyczne dla wszystkich węzłów w tej sieci.',
   additionalTrunkHelpFleet: 'Dodatkowe identyfikatory VLAN do trunk (tagowane) przez każdy port na każdym węźle.',
-  enableMeshBackhaulDefault: 'Wskazówka: Backhaul przewodowy jest zawsze lepszy niż bezprzewodowy, o ile jest wykonalny. Nadpisywalne per węzeł.',
-  enableMeshBackhaul2GDefault: 'Większy zasięg niż 5 GHz; może wymagać dostrojenia dla wyższej przepustowości. Nadpisywalne per węzeł.',
   portFwdNoteFleet:   'Każdy wiersz tworzy statyczną dzierżawę DHCPv4 i przekierowanie portów NAT. Porty muszą być unikalne.',
   doneConfig:         '← Gotowe',
   hardwareOffloadHelp:      'Wyższa przepustowość sieci tam, gdzie jest obsługiwane. Nie włączaj przy QoS/SQM.',
