@@ -327,7 +327,7 @@ export default {
   irqbalance:         '启用 <code>irqbalance</code>',
   irqbalanceHelp:     '建议用于具有 4 个及以上 CPU 核心的系统。自动在 CPU 核心之间均衡 IRQ。某些设备可能需要手动调整 IRQ 亲和性以获得最佳性能。',
   luciHttps:          'LuCI HTTPS',
-  luciHttpsHelp:      '启用 HTTP 到 HTTPS 重定向',
+  luciHttpsHelp:      '启用 HTTP 到 HTTPS 重定向。',
   ntpServer:          'NTP 服务器 IP',
   ntpServerHelp:      '每次 WAN 接口连接时用于同步时钟的 NTP 服务器原始 IP 地址。',
   customScript:       '自定义脚本',

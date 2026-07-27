@@ -327,7 +327,7 @@ export default {
   irqbalance:         'Включить <code>irqbalance</code>',
   irqbalanceHelp:     'Рекомендуется для систем с ≥4 ядрами CPU. Автоматически распределяет IRQ по ядрам CPU. Некоторым устройствам для лучшей производительности может потребоваться ручная настройка привязки IRQ.',
   luciHttps:          'LuCI HTTPS',
-  luciHttpsHelp:      'Включить перенаправление с HTTP на HTTPS',
+  luciHttpsHelp:      'Включить перенаправление с HTTP на HTTPS.',
   ntpServer:          'IP NTP-сервера',
   ntpServerHelp:      'IP-адрес NTP-сервера для синхронизации часов при каждом поднятии WAN-интерфейса.',
   customScript:       'Пользовательский скрипт',

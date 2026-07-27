@@ -327,7 +327,7 @@ export default {
   irqbalance:         'Enable <code>irqbalance</code>',
   irqbalanceHelp:     'Recommended for systems with ≥4 CPU cores. Automatically balances IRQs across CPU cores. Some devices may require manual IRQ affinity tuning for the best performance.',
   luciHttps:          'LuCI HTTPS',
-  luciHttpsHelp:      'Enable HTTP-to-HTTPS redirect',
+  luciHttpsHelp:      'Enable HTTP-to-HTTPS redirect.',
   ntpServer:          'NTP server IP',
   ntpServerHelp:      'Raw NTP server IP to sync the clock every time a WAN interface comes up.',
   customScript:       'Custom script',
