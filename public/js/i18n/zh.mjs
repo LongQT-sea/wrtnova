@@ -43,7 +43,6 @@ export default {
   // -- Node panel fields ---------------------------------------------
   deviceSpecificNote: '这些是设备特定设置，其他所有设置来自网络配置。',
   device:             '设备',
-  change:             '更改',
   deviceRequirement:  '要求：≥8MB 闪存，≥64MB RAM',
   nodeName:           '节点名称',
   apIndex:            'AP 索引',

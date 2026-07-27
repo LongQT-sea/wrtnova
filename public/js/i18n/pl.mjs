@@ -43,7 +43,6 @@ export default {
   // -- Node panel fields ---------------------------------------------
   deviceSpecificNote: 'To są ustawienia specyficzne dla urządzenia. Wszystkie inne ustawienia pochodzą z konfiguracji sieci.',
   device:             'Urządzenie',
-  change:             'Zmień',
   deviceRequirement:  'Wymagane: ≥8MB flash, ≥64MB RAM',
   nodeName:           'Nazwa węzła',
   apIndex:            'Indeks AP',

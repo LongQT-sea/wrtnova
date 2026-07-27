@@ -1282,7 +1282,7 @@ body.editor-fs-open {
   overflow: hidden;
 }
 
-/* ── /networks device picker ─────────────────────────────────────── */
+/* ── Device picker (/networks markup, /builder built by devices.js) ── */
 #modal-device-picker {
   position: fixed;
   inset: 0;

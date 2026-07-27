@@ -43,7 +43,6 @@ export default {
   // -- Node panel fields ---------------------------------------------
   deviceSpecificNote: 'Это параметры конкретного устройства. Все остальные параметры берутся из конфигурации сети.',
   device:             'Устройство',
-  change:             'Изменить',
   deviceRequirement:  'Требуется: ≥8МБ flash, ≥64МБ RAM',
   nodeName:           'Имя узла',
   apIndex:            'Индекс AP',

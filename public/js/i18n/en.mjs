@@ -43,7 +43,6 @@ export default {
   // -- Node panel fields ---------------------------------------------
   deviceSpecificNote: 'These are device-specific settings. All other settings come from network config.',
   device:             'Device',
-  change:             'Change',
   deviceRequirement:  'Required: ≥8MB flash, ≥64MB RAM',
   nodeName:           'Node name',
   apIndex:            'AP index',

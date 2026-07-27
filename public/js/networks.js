@@ -690,14 +690,11 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
       nonCtRow + wedRow + irqRow;
 
     let fields;
-    // The device control is a readonly field plus its picker button, so it is a
-    // wrapper rather than a bare input - the same thing /builder does for the
-    // device combobox.
+    // Readonly display of the picked device_target, not an editable field: the
+    // whole row opens the picker modal (wirePanelEvents), since a typed string
+    // could not carry the target/profile/package lists a selection resolves.
     const deviceRow = optCard('np-device-' + id, S.device,
-      '<div class="opt-control opt-field flex gap-2 items-center">' +
-        '<input class="input-base" id="np-device-' + id + '" value="' + devTitle + '" placeholder="' + S.noDeviceSelected + '" readonly style="cursor:pointer">' +
-        '<button type="button" class="btn text-xs flex-shrink-0" data-pickdevice="' + id + '">' + S.change + '</button>' +
-      '</div>',
+      '<input class="opt-control opt-field input-base" id="np-device-' + id + '" value="' + devTitle + '" placeholder="' + S.noDeviceSelected + '" readonly style="cursor:pointer">',
       S.deviceRequirement);
 
     const nameRow =
@@ -750,12 +747,8 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
     const panel = document.getElementById('panel-' + node.id);
     if (!panel) return;
 
-    const pickBtn = panel.querySelector('[data-pickdevice]');
-    if (pickBtn) {
-      pickBtn.addEventListener('click', () => openDevicePicker(net.id, node.id));
-      panel.querySelector('#np-device-' + node.id)
-        ?.addEventListener('click', () => openDevicePicker(net.id, node.id));
-    }
+    panel.querySelector('#np-device-' + node.id)
+      ?.addEventListener('click', () => openDevicePicker(net.id, node.id));
 
     // Auto-save on any change or blur inside the panel
     panel.addEventListener('change', () => saveNodePanel(net, node));

@@ -43,7 +43,6 @@ export default {
   // -- Node panel fields ---------------------------------------------
   deviceSpecificNote: 'Estos son ajustes específicos del dispositivo. Todos los demás ajustes provienen de la configuración de red.',
   device:             'Dispositivo',
-  change:             'Cambiar',
   deviceRequirement:  'Requerido: ≥8MB flash, ≥64MB RAM',
   nodeName:           'Nombre del nodo',
   apIndex:            'Índice AP',

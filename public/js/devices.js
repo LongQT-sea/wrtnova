@@ -1,14 +1,14 @@
-// On mobile (<768px) the combobox opens as a full-screen native <dialog>.
 // ES module used by /builder and /builder/advanced (NOT /networks - that page
-// has its own device picker). Its public API is exported directly; the page-
+// has its own device picker, a near-copy of this one). Its public API is
+// exported directly; the page-
 // specific callbacks it fires (notifyTargetChanged / renderAutoPackages /
 // updateAth10kVisibility) are injected via the shared ui namespace - build.js
 // defines them on /builder, advanced.js stubs them on /builder/advanced. Imports
-// ui.js for side effects so ui.$/ui.$$ exist at module-eval time.
+// ui.js for side effects so ui.$ exists at module-eval time.
 import { ui } from './ui-ns.mjs';
 import './ui.js';
 
-  const $   = ui.$, $$ = ui.$$;
+  const $   = ui.$;
   const DL  = 'https://downloads.openwrt.org';
 
   // PLAN: only latest patch of each major.minor branch - plus branch snapshots for
@@ -186,9 +186,20 @@ import './ui.js';
     }
   };
 
+  // Device selection is a readonly field that opens a full-screen <dialog> on
+  // click, at every width - the same control /networks uses for its per-node
+  // device row. It replaced an inline type-ahead dropdown that only became a
+  // dialog below 768px; the dropdown was the second code path for one job, and
+  // opening on focus needed a guard flag (focus returns to the input when the
+  // dialog closes, which re-fired the handler and reopened it). Click has no
+  // such re-entry, so the guard is gone with it.
+  //
+  // Strings go through ui.t where it exists: /builder/advanced loads devices.js
+  // without i18n/core.mjs, so ui.S/ui.t may be absent there (same guard as
+  // applyVersionsData).
   export const initDeviceCombo = function () {
-    const inp = $('#device'), list = $('#device-list');
-    let active = -1;
+    const inp = $('#device');
+    const tr = (key, fallback) => (ui.t ? ui.t(key) : fallback);
 
     function search(q) {
       if (!state.devicesByTitle) return [];
@@ -200,62 +211,31 @@ import './ui.js';
     }
 
     async function pick(title) {
-      // Suppress the inp focus handler while we programmatically set the value.
-      // When <dialog>.close() returns focus to inp, the focus event re-fires and
-      // would immediately reopen the dialog with an empty list - this flag stops that.
-      suppressMobileFocus = true;
       inp.value = title;
-      close();
+      if (dlg) dlg.close();
       state.selectedTitle = title;
       state.selectedProfile = state.devicesByTitle[title];
       await loadProfileDetails();
       ui.notifyTargetChanged && ui.notifyTargetChanged();
-      // Release after a tick - any focus events triggered by the pick are now done.
-      setTimeout(() => { suppressMobileFocus = false; }, 200);
     }
-
-    function close() { list.classList.add('hidden'); active = -1; }
-    function render(items) {
-      list.innerHTML = '';
-      items.slice(0, 15).forEach((title, i) => {
-        const d = document.createElement('div');
-        d.textContent = title;
-        if (i === active) d.classList.add('active');
-        d.setAttribute('role', 'option');
-        d.addEventListener('mousedown', e => { e.preventDefault(); pick(title); });
-        list.appendChild(d);
-      });
-      list.classList.toggle('hidden', !items.length);
-    }
-
-    inp.addEventListener('input', () => { active = -1; render(search(inp.value)); });
-    inp.addEventListener('blur',  () => setTimeout(close, 120));
-    inp.addEventListener('keydown', e => {
-      const items = $$('div', list);
-      if (e.key === 'ArrowDown') { active = Math.min(active + 1, items.length - 1); render(search(inp.value)); e.preventDefault(); }
-      else if (e.key === 'ArrowUp') { active = Math.max(active - 1, 0); render(search(inp.value)); e.preventDefault(); }
-      else if (e.key === 'Enter' && active >= 0) { pick(items[active].textContent); e.preventDefault(); }
-      else if (e.key === 'Escape') { close(); }
-    });
 
     let dlg = null, dlgInp = null, dlgList = null;
-    let suppressMobileFocus = false; // guards against dialog reopening on focus-return
 
     function ensureDialog() {
       if (dlg) return;
 
       dlg = document.createElement('dialog');
-      dlg.id = 'device-dialog';
+      // Same id as the markup copy on /networks so both pick up the one
+      // #modal-device-picker rule in style.css: full-screen on mobile, a
+      // centered 560px panel above the breakpoint. Sizing stays in CSS - the
+      // inline full-screen override this used to carry made /builder's picker
+      // the odd one out at desktop widths.
+      dlg.id = 'modal-device-picker';
       dlg.setAttribute('aria-label', 'Select device');
-      // Full-screen override - browsers may limit dialog max-width/height
-      dlg.style.cssText =
-        'position:fixed;inset:0;width:100%;height:100%;' +
-        'max-width:100%;max-height:100%;margin:0;border:none;padding:0;' +
-        'background:transparent;';
 
       const wrap = document.createElement('div');
       wrap.className =
-        'flex flex-col h-full bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100';
+        'flex flex-col h-full bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 font-mono text-sm';
 
       const bar = document.createElement('div');
       bar.className =
@@ -264,46 +244,28 @@ import './ui.js';
       dlgInp = document.createElement('input');
       dlgInp.type = 'text';
       dlgInp.className = 'input-base flex-1 min-w-0';
-      dlgInp.placeholder = 'Type to search (e.g. Archer C7)';
+      dlgInp.placeholder = tr('deviceSearchPlaceholder', 'Type to search (e.g. Archer C7)');
       dlgInp.autocomplete = 'off';
       dlgInp.setAttribute('aria-autocomplete', 'list');
 
       const cancelBtn = document.createElement('button');
       cancelBtn.type = 'button';
       cancelBtn.className = 'btn btn-ghost text-sm flex-shrink-0';
-      cancelBtn.textContent = 'Cancel';
+      cancelBtn.textContent = tr('cancel', 'Cancel');
 
       dlgList = document.createElement('div');
       dlgList.setAttribute('role', 'listbox');
       dlgList.setAttribute('aria-label', 'Device suggestions');
-      dlgList.className = 'flex-1 overflow-y-auto font-mono text-sm';
+      dlgList.className = 'flex-1 overflow-y-auto';
 
       bar.append(dlgInp, cancelBtn);
       wrap.append(bar, dlgList);
       dlg.appendChild(wrap);
       document.body.appendChild(dlg);
 
-      cancelBtn.addEventListener('click', () => {
-        // Set flag BEFORE dlg.close() - focus returns to inp synchronously,
-        // before the 'close' event fires, so the guard must already be up.
-        suppressMobileFocus = true;
-        setTimeout(() => { suppressMobileFocus = false; }, 200);
-        dlg.close();
-      });
-
-      // Escape key also closes the dialog via the native 'cancel' event,
-      // which fires synchronously before 'close' - set the guard here too.
-      dlg.addEventListener('cancel', () => {
-        suppressMobileFocus = true;
-        setTimeout(() => { suppressMobileFocus = false; }, 200);
-      });
-
+      cancelBtn.addEventListener('click', () => dlg.close());
       dlgInp.addEventListener('input', () => renderDlg(search(dlgInp.value)));
-
-      dlg.addEventListener('close', () => {
-        dlgInp.value = '';
-        dlgList.innerHTML = '';
-      });
+      dlg.addEventListener('close', () => { dlgInp.value = ''; dlgList.innerHTML = ''; });
     }
 
     function renderDlg(items) {
@@ -311,43 +273,27 @@ import './ui.js';
       if (!items.length) {
         const empty = document.createElement('div');
         empty.className = 'px-4 py-8 text-center text-zinc-400 text-sm';
-        empty.textContent = 'No devices found.';
+        empty.textContent = tr('noDevicesFound', 'No devices found.');
         dlgList.appendChild(empty);
         return;
       }
-      // Show more results on mobile full-screen than desktop dropdown
-      items.slice(0, 50).forEach(title => {
+      items.slice(0, 80).forEach(title => {
         const d = document.createElement('div');
         d.setAttribute('role', 'option');
         d.className =
           'px-4 py-3 cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-800 ' +
           'border-b border-zinc-100 dark:border-zinc-800';
         d.textContent = title;
-        d.addEventListener('click', () => {
-          // Guard must be set BEFORE dlg.close() - focus returns to inp
-          // synchronously (before the async 'close' event task), so pick()'s
-          // later assignment would arrive too late.
-          suppressMobileFocus = true;
-          dlg.close();
-          pick(title);
-        });
+        d.addEventListener('click', () => pick(title));
         dlgList.appendChild(d);
       });
     }
 
-    inp.addEventListener('focus', () => {
-      if (window.innerWidth < 768) {
-        // Guard: don't reopen the dialog when focus returns to inp after a pick.
-        if (suppressMobileFocus) { inp.blur(); return; }
-        ensureDialog();
-        renderDlg(search(''));
-        dlg.showModal();
-        // Defer focus so dialog finishes opening
-        setTimeout(() => { if (dlgInp) dlgInp.focus(); }, 60);
-        inp.blur();
-        return;
-      }
-      render(search(inp.value));
+    inp.addEventListener('click', () => {
+      ensureDialog();
+      renderDlg(search(''));
+      dlg.showModal();
+      setTimeout(() => { if (dlgInp) dlgInp.focus(); }, 60);
     });
   };
 
