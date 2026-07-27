@@ -762,7 +762,7 @@
               </span>
               <div>
                 <span class="toggle-text" data-i18n-html="bridgeStp">Enable STP (Spanning Tree Protocol) on <code>br-vlan</code></span>
-                <p class="form-help mt-0" data-i18n="stpNote">Prevents bridge loops when mixing wired and wireless backhaul.</p>
+                <p class="form-help mt-0" data-i18n="stpNote">Prevents Layer 2 loops when mixing wired and wireless backhaul.</p>
               </div>
             </label>
           </div>
@@ -891,19 +891,6 @@
                 </div>
               </label>
             </div>
-            <div class="form-row form-row--full">
-              <label class="toggle-label">
-                <span class="toggle-wrap">
-                  <input type="checkbox" id="INDEX_SUFFIX" name="INDEX_SUFFIX" value="1" class="toggle-input">
-                  <span class="toggle-track"></span>
-                  <span class="toggle-thumb"></span>
-                </span>
-                <div>
-                  <span class="toggle-text" data-i18n="indexSuffix">Add AP index suffix</span>
-                  <p class="form-help mt-0" data-i18n="indexSuffixHelp">Append the AP index to each SSID (AP mode only). This may cause fast transition, neighbor reports and assisted roaming between APs to stop working.</p>
-                </div>
-              </label>
-            </div>
             <div class="form-row form-row--full guest-isolate-only hidden">
               <label class="toggle-label">
                 <span class="toggle-wrap">
@@ -959,6 +946,19 @@
             <div class="form-row form-row--full">
               <label class="toggle-label">
                 <span class="toggle-wrap">
+                  <input type="checkbox" id="INDEX_SUFFIX" name="INDEX_SUFFIX" value="1" class="toggle-input">
+                  <span class="toggle-track"></span>
+                  <span class="toggle-thumb"></span>
+                </span>
+                <div>
+                  <span class="toggle-text" data-i18n="indexSuffix">Add AP index suffix</span>
+                  <p class="form-help mt-0" data-i18n="indexSuffixHelp">Append the AP index to each SSID (AP mode only). This may stop 802.11r and 802.11k/v from working between APs.</p>
+                </div>
+              </label>
+            </div>
+            <div class="form-row form-row--full">
+              <label class="toggle-label">
+                <span class="toggle-wrap">
                   <input type="checkbox" id="AP_DISABLE" name="AP_DISABLE" value="1" class="toggle-input">
                   <span class="toggle-track"></span>
                   <span class="toggle-thumb"></span>
@@ -970,43 +970,39 @@
               </label>
             </div>
             <div class="form-row form-row--full">
-              <div class="opt-card">
-                <div class="opt-text">
-                  <label class="opt-title" for="CHANNEL_2G" data-i18n="channel2g">2.4 GHz channel</label>
+              <div class="opt-group">
+                <div class="opt-card">
+                  <div class="opt-text">
+                    <label class="opt-title" for="CHANNEL_2G" data-i18n="channel2g">2.4 GHz channel</label>
+                  </div>
+                  <select id="CHANNEL_2G" name="CHANNEL_2G" class="opt-control opt-field input-base">
+                    <option value="">Default</option>
+                  </select>
                 </div>
-                <select id="CHANNEL_2G" name="CHANNEL_2G" class="opt-control opt-field input-base">
-                  <option value="">Default</option>
-                </select>
-              </div>
-            </div>
-            <div class="form-row form-row--full">
-              <div class="opt-card">
-                <div class="opt-text">
-                  <label class="opt-title" for="CHANNEL_5G" data-i18n="channel5g">5 GHz channel</label>
+                <div class="opt-card">
+                  <div class="opt-text">
+                    <label class="opt-title" for="CHANNEL_5G" data-i18n="channel5g">5 GHz channel</label>
+                  </div>
+                  <select id="CHANNEL_5G" name="CHANNEL_5G" class="opt-control opt-field input-base">
+                    <option value="">Default</option>
+                  </select>
                 </div>
-                <select id="CHANNEL_5G" name="CHANNEL_5G" class="opt-control opt-field input-base">
-                  <option value="">Default</option>
-                </select>
-              </div>
-            </div>
-            <div class="form-row form-row--full">
-              <div class="opt-card">
-                <div class="opt-text">
-                  <label class="opt-title" for="CHANNEL_5G_2" data-i18n="channel5g2">5 GHz channel (second radio)</label>
+                <div class="opt-card">
+                  <div class="opt-text">
+                    <label class="opt-title" for="CHANNEL_5G_2" data-i18n="channel5g2">5 GHz channel (second radio)</label>
+                  </div>
+                  <select id="CHANNEL_5G_2" name="CHANNEL_5G_2" class="opt-control opt-field input-base">
+                    <option value="">Default</option>
+                  </select>
                 </div>
-                <select id="CHANNEL_5G_2" name="CHANNEL_5G_2" class="opt-control opt-field input-base">
-                  <option value="">Default</option>
-                </select>
-              </div>
-            </div>
-            <div class="form-row form-row--full">
-              <div class="opt-card">
-                <div class="opt-text">
-                  <label class="opt-title" for="CHANNEL_6G" data-i18n="channel6g">6 GHz channel</label>
+                <div class="opt-card">
+                  <div class="opt-text">
+                    <label class="opt-title" for="CHANNEL_6G" data-i18n="channel6g">6 GHz channel</label>
+                  </div>
+                  <select id="CHANNEL_6G" name="CHANNEL_6G" class="opt-control opt-field input-base">
+                    <option value="">Default</option>
+                  </select>
                 </div>
-                <select id="CHANNEL_6G" name="CHANNEL_6G" class="opt-control opt-field input-base">
-                  <option value="">Default</option>
-                </select>
               </div>
             </div>
             <div class="form-row form-row--full">
@@ -1153,17 +1149,19 @@
       </div>
       <div class="card-body-wrap">
       <div class="card-body">
-        <table class="responsive-table" id="portfwd-table">
-          <thead>
-            <tr>
-              <th data-i18n="tableHostname">Hostname</th>
-              <th data-i18n="tableLastOctet">Last octet</th>
-              <th data-i18n="tablePortsSeparated">Ports (space-separated)</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
+        <div class="table-box">
+          <table class="responsive-table" id="portfwd-table">
+            <thead>
+              <tr>
+                <th data-i18n="tableHostname">Hostname</th>
+                <th data-i18n="tableLastOctet">Last octet</th>
+                <th data-i18n="tablePortsSeparated">Ports (space-separated)</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
         <button class="btn mt-2 text-xs" type="button" data-add="portfwd">
           <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           <span data-i18n="addRow">Add row</span>
@@ -1183,17 +1181,19 @@
       </div>
       <div class="card-body-wrap">
       <div class="card-body">
-        <table class="responsive-table" id="ipv6-table">
-          <thead>
-            <tr>
-              <th data-i18n="tableHostname">Hostname</th>
-              <th data-i18n="tableLastOctet">Last octet</th>
-              <th data-i18n="tablePortsEmptyAll">Ports (empty = all)</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
+        <div class="table-box">
+          <table class="responsive-table" id="ipv6-table">
+            <thead>
+              <tr>
+                <th data-i18n="tableHostname">Hostname</th>
+                <th data-i18n="tableLastOctet">Last octet</th>
+                <th data-i18n="tablePortsEmptyAll">Ports (empty = all)</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
         <button class="btn mt-2 text-xs" type="button" data-add="ipv6">
           <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           <span data-i18n="addRow">Add row</span>
@@ -1296,7 +1296,7 @@
       <div class="card-body-wrap">
       <div class="card-body">
         <div class="form-row form-row--full">
-          <div class="space-y-3">
+          <div class="opt-group" role="radiogroup" aria-label="DNS and ad blocking mode">
             <label class="toggle-label items-start">
               <input type="radio" name="DNS_MODE" value="adguardhome" checked class="mt-0.5 flex-shrink-0">
               <div>
@@ -1382,7 +1382,7 @@
             </label>
           </div>
         </div>
-        <div class="warn-note adguard-only hidden" role="note" data-i18n="adguardRamNote">On devices with less than 230 MB of RAM, WrtNova will skip the initial AdGuard Home setup.</div>
+        <div class="warn-note adguard-only hidden" role="note" data-i18n-html="adguardRamNote">On devices with less than 230 MB of RAM, <code>wrtnova.sh</code> skips the initial AdGuard Home setup.</div>
         <details class="mt-4 dns-advanced">
           <summary class="text-xs text-zinc-500 dark:text-zinc-400 cursor-pointer hover:text-zinc-700 dark:hover:text-zinc-200 select-none flex items-center gap-1">
             <svg class="w-3 h-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
@@ -1427,14 +1427,12 @@
       </div>
       <div class="card-body-wrap">
       <div class="card-body">
-        <div class="sub-section" style="margin-top:0;padding-top:0;border-top:none">
-          <p class="sub-section-title" data-i18n="threatFeedsSection">Threat feeds</p>
-          <p class="form-help" data-i18n="banipFeedsHelp">Pre-configured IP blocklist feeds for banIP.</p>
-          <div class="form-row form-row--full">
-            <div class="opt-card">
-              <div class="opt-text">
-                <label class="opt-title" for="banip-feed-search" data-i18n="banipActiveFeeds">Active feeds</label>
-              </div>
+        <div class="form-row form-row--full">
+          <div class="opt-card">
+            <div class="opt-text">
+              <label class="opt-title" for="banip-feed-search" data-i18n="threatFeedsSection">Threat feeds</label>
+              <p class="form-help mt-0" data-i18n="banipFeedsHelp">Pre-configured IP blocklist feeds for banIP.</p>
+            </div>
             <div class="picker opt-control opt-stack" id="banip-feed-picker">
               <div class="picker-control">
                 <input type="text" id="banip-feed-search" class="picker-search" autocomplete="off" aria-label="Add feed" data-i18n-placeholder="banipAddFeedPh" placeholder="Type a feed name to add...">
@@ -1443,17 +1441,14 @@
               <div class="picker-list hidden" id="banip-feed-list" role="group" aria-label="Feed suggestions"></div>
               <input type="hidden" id="BANIP_FEEDS" name="BANIP_FEEDS">
             </div>
-            </div>
           </div>
         </div>
-        <div class="sub-section">
-          <p class="sub-section-title" data-i18n="countryBlockingSection">Country blocking</p>
-          <p class="form-help" data-i18n="banipCountryHelp">Drop WAN traffic from these countries via banIP.</p>
-          <div class="form-row form-row--full">
-            <div class="opt-card">
-              <div class="opt-text">
-                <label class="opt-title" for="banip-country-search" data-i18n="banipBlockedCountries">Blocked countries</label>
-              </div>
+        <div class="form-row form-row--full">
+          <div class="opt-card">
+            <div class="opt-text">
+              <label class="opt-title" for="banip-country-search" data-i18n="countryBlockingSection">Country blocking</label>
+              <p class="form-help mt-0" data-i18n="banipCountryHelp">Drop WAN traffic from these countries via banIP.</p>
+            </div>
             <div class="picker opt-control opt-stack" id="banip-country-picker">
               <div class="picker-control">
                 <input type="text" id="banip-country-search" class="picker-search" autocomplete="off" aria-label="Add country" data-i18n-placeholder="banipAddCountryPh" placeholder="Type a country name or code to add...">
@@ -1462,10 +1457,9 @@
               <div class="picker-list hidden" id="banip-country-list" role="group" aria-label="Country suggestions"></div>
               <input type="hidden" id="BANIP_COUNTRY_LIST" name="BANIP_COUNTRY_LIST">
             </div>
-            </div>
           </div>
         </div>
-        <div class="warn-note banip-multi-feed hidden" role="note" data-i18n="banipMemoryNote">Each enabled feed increases memory usage. Enabling too many feeds can quickly exhaust RAM and may trigger the OOM killer.</div>
+        <div class="warn-note banip-multi-feed hidden" role="note" data-i18n="banipMemoryNote">Each enabled feed or country increases memory usage. Enabling too many can quickly exhaust RAM and may trigger the OOM killer.</div>
         <div class="sub-section">
           <p class="sub-section-title" data-i18n="additionalRulesSection">Additional rules</p>
           <div class="space-y-3">

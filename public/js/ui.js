@@ -103,7 +103,16 @@ import { deriveVisibility, deriveNetRows, detectVlanConflict, resolveVlanAssignm
       '<td data-label="Ports"><input type="text" data-col="ports" class="input-base" placeholder="80 443"></td>' +
       '<td><button class="btn btn-icon" type="button" data-remove="1" aria-label="Remove row">×</button></td>';
     tbody.appendChild(tr);
-    tr.querySelector('[data-remove]').addEventListener('click', () => tr.remove());
+    // Removing the last row leaves the box as a bare column header with nothing
+    // under it, so the last one clears instead - the same end state, minus the
+    // empty shell.
+    tr.querySelector('[data-remove]').addEventListener('click', () => {
+      if (tbody.children.length > 1) { tr.remove(); return; }
+      for (const el of tr.querySelectorAll('input')) {
+        el.value = '';
+        el.setCustomValidity('');
+      }
+    });
     bindOctetClamp(tr.querySelector('[data-col="octet"]'), kind === 'ipv6' ? 'v6' : 'v4');
     return tr;
   }

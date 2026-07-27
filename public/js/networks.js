@@ -1046,7 +1046,14 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
       '<td data-label="Last octet"><input ' + ui.octetAttrs(isV6) + ' data-col="octet" class="input-base" placeholder="20" value="' + esc(octet || '') + '"></td>' +
       '<td data-label="Ports"><input type="text" data-col="ports" class="input-base" placeholder="80 443" value="' + esc(ports || '') + '"></td>' +
       '<td><button class="btn btn-icon" type="button" aria-label="Remove row">×</button></td>';
-    tr.querySelector('button').addEventListener('click', () => tr.remove());
+    // Same as ui.addRow: the last row clears rather than leaving an empty box.
+    tr.querySelector('button').addEventListener('click', () => {
+      if (tbody.children.length > 1) { tr.remove(); return; }
+      for (const el of tr.querySelectorAll('input')) {
+        el.value = '';
+        el.setCustomValidity('');
+      }
+    });
     ui.bindOctetClamp(tr.querySelector('[data-col="octet"]'), isV6 ? 'v6' : 'v4');
     tbody.appendChild(tr);
   }

@@ -241,11 +241,19 @@
     border-radius: 0;
     background: none;
   }
-  .opt-group > .toggle-label:hover { border-color: transparent; }
-  .opt-group .opt-card { border-top: 1px solid #e4e4e7; }
-  .dark .opt-group .opt-card { border-top-color: #303035; }
+  .opt-group .opt-card,
+  .opt-group > .toggle-label { border-top: 1px solid #e4e4e7; }
+  .dark .opt-group .opt-card,
+  .dark .opt-group > .toggle-label { border-top-color: #303035; }
   .opt-group > .opt-card:first-child,
   .opt-group > .toggle-label:first-child { border-top: 0; }
+  /* .toggle-label:hover repaints all four borders, so it has to put back the
+     rule the row draws above itself. */
+  .opt-group > .toggle-label:hover {
+    border-color: transparent;
+    border-top-color: #e4e4e7;
+  }
+  .dark .opt-group > .toggle-label:hover { border-top-color: #303035; }
   .toggle-label:hover { border-color: #d4d4d8; }
   .dark .toggle-label:hover { border-color: #3f3f46; }
   /* The whole card is the click target, so the keyboard ring belongs on the
@@ -254,6 +262,10 @@
     outline: 2px solid #f6821f;
     outline-offset: 2px;
   }
+  /* .opt-group clips its overflow to keep the rounded corners, which cuts the
+     ring off on both edges when the row is inside a group. Drawn inside there
+     instead. */
+  .opt-group .toggle-label:has(:focus-visible) { outline-offset: -2px; }
   /* Switch sits on the trailing edge; the text block takes the rest of the row.
      Visual order only - the label still wraps the input, so the card remains a
      single tab stop and the reading order is title, description, control. */
@@ -440,7 +452,19 @@
   .card-header:hover { background-color: #f9f9f9; }
   .dark .card-header:hover { background-color: rgba(39,39,42,0.5); }
 
-  .card-body { padding: 0 1rem 1rem; }
+  /* The body owns the space under the header. It used to come from whatever
+     came first instead - .form-row's 1rem - so the cards opening on a table or
+     a bare toggle stack sat 1rem tighter than the rest. */
+  .card-body { padding: 1rem; }
+  .card-body > :first-child { margin-top: 0; }
+  /* A leading .sub-section also drops its rule, which would otherwise draw
+     right under the header. Scoped to .sub-section: a blanket first-child reset
+     also strips the top border off a first child that is a real box - the
+     .table-box - leaving its side borders to taper off into the corner radius. */
+  .card-body > .sub-section:first-child {
+    padding-top: 0;
+    border-top: none;
+  }
 
   /* ── Status dots ──────────────────────────────────────────────── */
   .dot {
@@ -729,6 +753,20 @@
   }
 
   /* ── Responsive table (port fwd / IPv6 exposure) ─────────────── */
+  /* The tables are the only card content that would otherwise sit bare on the
+     card background. Same shell as .opt-group, but a table cannot hand its
+     padding to its rows the way .opt-card children do, so the box carries it. */
+  .table-box {
+    border: 1px solid #e4e4e7; /* zinc-200 */
+    border-radius: 0.75rem;
+    background-color: #fafafa; /* zinc-50 */
+    padding: 0.75rem;
+  }
+  .dark .table-box {
+    border-color: #303035;
+    background-color: #1c1c20;
+  }
+  .table-box .responsive-table { margin-top: 0; }
   .responsive-table {
     width: 100%;
     border-collapse: collapse;
@@ -788,6 +826,16 @@
     .dark .responsive-table td::before { color: #a1a1aa; }
     .responsive-table td:last-child { justify-content: flex-end; }
     .responsive-table td:last-child::before { display: none; }
+    /* Inside a box the row no longer needs a box of its own - the outer border
+       is the boundary, and rows are separated by a rule like any other group. */
+    .table-box tbody tr {
+      border: 0;
+      border-radius: 0;
+      margin-bottom: 0;
+      padding: 0.5rem 0;
+    }
+    .table-box tbody tr + tr { border-top: 1px solid #e4e4e7; }
+    .dark .table-box tbody tr + tr { border-top-color: #27272a; }
   }
 
   /* ── Build actions bar ────────────────────────────────────────── */
