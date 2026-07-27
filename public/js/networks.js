@@ -647,7 +647,7 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
         '<input type="checkbox" class="toggle-input" id="np-nonct-' + id + '"' + (node.overrides.NON_CT_ATH10K === '1' ? ' checked' : '') + '>' +
         '<span class="toggle-track"></span><span class="toggle-thumb"></span></span>' +
         '<div><span class="toggle-text">' + S.nonCtAth10k + '</span>' +
-        '<p class="form-help mt-0">' + S.useNonCtAth10k + '</p></div></label></div>'
+        '<p class="form-help mt-0">' + S.replaceCandela + '</p></div></label></div>'
       : '';
     const wedCapable = allPkgs.some(p => /^kmod-mt7915e$/.test(p));
     const wedRow = wedCapable
@@ -655,7 +655,7 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
         '<input type="checkbox" class="toggle-input" id="np-wed-' + id + '"' + (node.overrides.WED_ENABLE === '1' ? ' checked' : '') + '>' +
         '<span class="toggle-track"></span><span class="toggle-thumb"></span></span>' +
         '<div><span class="toggle-text">' + S.wedAccel + '</span>' +
-        '<p class="form-help mt-0">' + S.useWed + '</p></div></label></div>'
+        '<p class="form-help mt-0">' + S.wedAccelHelp + '</p></div></label></div>'
       : '';
     const irqRow =
       '<div class="form-row form-row--full"><label class="toggle-label"><span class="toggle-wrap">' +
@@ -704,17 +704,18 @@ const NET_SCHEMA = [['shared_version', 'select', 'shared-version'],
         '<input class="opt-control opt-field input-base" id="np-host-' + id + '" value="' +
         esc(node.overrides.HOST_NAME || '') + '" placeholder="' + placeholder + '">');
 
+    // Version first: it decides which device list the picker loads.
     if (!isAp) {
       fields = cardGroup(
-        deviceRow +
         versionCard(id, verOverride, cfg.shared_version) +
+        deviceRow +
         nameRow +
         hostRow('WrtNova')
       ) + wifiRows;
     } else {
       fields = cardGroup(
-        deviceRow +
         versionCard(id, verOverride, cfg.shared_version) +
+        deviceRow +
         nameRow +
         hostRow('WrtNova-' + esc(node.overrides.AP_INDEX || '2')) +
         optCard('np-apidx-' + id, S.apIndex,
