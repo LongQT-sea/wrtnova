@@ -1483,20 +1483,20 @@
       <div class="card-body-wrap">
       <div class="card-body">
         <div class="form-row form-row--full">
-          <div class="opt-card">
-            <div class="opt-text">
-              <span class="opt-title" data-i18n="finalPackages">Final packages</span>
+          <div class="opt-group">
+            <div class="opt-card">
+              <div class="opt-text">
+                <span class="opt-title" data-i18n="finalPackages">Final packages</span>
+              </div>
+              <div id="auto-packages" class="opt-control opt-stack flex flex-wrap gap-1 py-1 min-h-[1.75rem]"></div>
             </div>
-            <div id="auto-packages" class="opt-control opt-stack flex flex-wrap gap-1 py-1 min-h-[1.75rem]"></div>
-          </div>
-        </div>
-        <div class="form-row form-row--full">
-          <div class="opt-card">
-            <div class="opt-text">
-              <label class="opt-title" for="additional_packages" data-i18n="extraPackages">Extra packages</label>
-              <p class="form-help mt-0" data-i18n="extraPackagesHelp">Appended to the final list. Prefix with - to remove an auto-added package.</p>
+            <div class="opt-card">
+              <div class="opt-text">
+                <label class="opt-title" for="additional_packages" data-i18n="extraPackages">Extra packages</label>
+                <p class="form-help mt-0" data-i18n="extraPackagesHelp">Appended to the final list. Prefix with - to remove an auto-added package.</p>
+              </div>
+              <textarea id="additional_packages" name="additional_packages" class="opt-control opt-stack input-base" data-i18n-placeholder="packagesSeparatorPh" placeholder="space- or newline-separated, e.g. htop tcpdump" rows="3"></textarea>
             </div>
-            <textarea id="additional_packages" name="additional_packages" class="opt-control opt-stack input-base" data-i18n-placeholder="packagesSeparatorPh" placeholder="space- or newline-separated, e.g. htop tcpdump" rows="3"></textarea>
           </div>
         </div>
       </div>
