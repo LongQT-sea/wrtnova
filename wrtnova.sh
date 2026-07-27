@@ -1516,6 +1516,7 @@ process_host_list() {
 		duid=$(echo "$duid" | tr -d ' \t')
 		ports="${ports# }"
 		[ -z "$hostname" ] && continue
+		[ -z "$octet" ] && continue
 
 		[ "$1" = ipv4 ] && {
 			for port in $ports; do
@@ -1540,7 +1541,7 @@ process_host_list() {
 		}
 
 		[ "$octet" = 1 ] && continue
-		[ "$1" = ipv6 ] && while [ ${#octet} -lt 4 ]; do octet=0$octet; done
+		[ "$1" = ipv6 ] && [ $(( ${#octet} % 2 )) -eq 1 ] && octet=0$octet
 
 		name="${hostname//-/_}"
 		_uci dhcp host "$name" \
