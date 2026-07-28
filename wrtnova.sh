@@ -1035,20 +1035,19 @@ done >/dev/null
 
 # === banIP ===
 [ -x /etc/init.d/banip ] && {
-	_uci banip "" global \
-		ban_enabled=1 ban_trigger=wan ban_autodetect=0 \
-		ban_protov4=1 ban_protov6=1 ${PPPOE_USERNAME:++ban_dev=pppoe-wan}
-
+	ban_dev=${PPPOE_USERNAME:+pppoe-wan}
 	for i in $ifaces_wan; do
-		dev=$(uci -q get network."${i}".device)
+		ban_dev="$ban_dev $(uci -q get network."${i}".device)"
 		case $i in
-			*_6) _uci banip "" global +ban_ifv6="$i" ${dev:++ban_dev="$dev"} ;;
-			*)   _uci banip "" global +ban_ifv4="$i" ${dev:++ban_dev="$dev"} ;;
+			*_6) ban_if6="$ban_if6 $i" ;;
+			*)   ban_if4="$ban_if4 $i" ;;
 		esac
 	done
 
-	_uci banip "" global +ban_feed="${BLOCK_DOH:+doh} $BANIP_FEEDS"
-	_uci banip "" global +ban_country="$BANIP_COUNTRY_LIST"
+	_uci banip "" global \
+		ban_enabled=1 ban_trigger=wan ban_autodetect=0 ban_protov4=1 ban_protov6=1 \
+		+ban_dev="$ban_dev" +ban_ifv6="$ban_if6" +ban_ifv4="$ban_if4" \
+		+ban_feed="${BLOCK_DOH:+doh} $BANIP_FEEDS" +ban_country="$BANIP_COUNTRY_LIST"
 }
 
 # === mwan3 ===
