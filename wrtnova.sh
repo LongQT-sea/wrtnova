@@ -902,8 +902,8 @@ br_ports="$lan_ports"
 [ "$AP_MODE" = 1 ] && [ -z "$sw_wan_port" ] && br_ports="$br_ports $wan_port"
 
 for port in $br_ports; do
-	trunk_ports="${trunk_ports:+$trunk_ports }$port:t"
-	lan_vlan_ports="${lan_vlan_ports:+$lan_vlan_ports }$port:u*"
+	trunk_ports="$trunk_ports $port:t"
+	lan_vlan_ports="$lan_vlan_ports $port:u*"
 done
 
 wan_vlan_ports="$trunk_ports"
