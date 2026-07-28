@@ -108,7 +108,7 @@
 
       <div id="build-all-progress" class="hidden"></div>
 
-      <div class="warn-note" role="note" data-i18n-html="asuSecurityWarning">Anything you type is sent to the ASU build server and then stored inside the generated image, where anyone who knows the <strong>build hash</strong> can download and read it. Leave passwords empty (defaults are safe for first boot: no root password, AdGuard admin and Wi-Fi password 12345678) and set real credentials after first boot via LuCI or SSH.</div>
+      <div class="warn-note" role="note" data-i18n-html="asuSecurityWarning">Anything you type is sent to the ASU build server and stored in the generated image for up to 30 minutes. Anyone who knows the <strong>build hash</strong> (though unlikely) can download and read it. Leave sensitive fields empty and configure your real credentials after the first boot via LuCI or SSH.</div>
 
     </div>
 
@@ -171,7 +171,7 @@
         <!-- System -- copied from /builder, minus Hostname (per-node on this page) -->
         <div class="group card card-anim" id="card-system" data-section="system">
           <div class="card-header">
-            <span class="dot" aria-label="Not started"></span>
+            <span class="dot" data-i18n-aria="dotNotStarted" aria-label="Not started"></span>
             <h2 class="flex-1 text-sm font-semibold" data-i18n="system">System</h2>
             <svg class="w-4 h-4 text-zinc-400 card-chev transition-transform duration-200 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
           </div>
@@ -236,7 +236,7 @@
                   <input type="password" id="ROOT_PASSWD" name="ROOT_PASSWD" class="input-base" style="padding-right:2.5rem" autocomplete="new-password">
                   <button type="button" id="toggle-rootpw"
                           class="btn btn-ghost btn-icon absolute right-1.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
-                          aria-label="Show password">
+                          data-i18n-aria="showPassword" aria-label="Show password">
                     <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
                   </button>
                 </div>
@@ -293,7 +293,7 @@
         <!-- -- Network -- copied from /builder verbatim ------------- -->
         <div class="group card card-anim" id="card-network" data-section="network">
           <div class="card-header">
-            <span class="dot" aria-label="Not started"></span>
+            <span class="dot" data-i18n-aria="dotNotStarted" aria-label="Not started"></span>
             <h2 class="flex-1 text-sm font-semibold" data-i18n="networkSection">Network</h2>
             <svg class="w-4 h-4 text-zinc-400 card-chev transition-transform duration-200 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
           </div>
@@ -536,7 +536,7 @@
         <!-- -- WireGuard VPN client -- copied from /builder ---------- -->
         <div class="group card card-anim router-only" id="card-wg" data-section="wg">
           <div class="card-header">
-            <span class="dot" aria-label="Not started"></span>
+            <span class="dot" data-i18n-aria="dotNotStarted" aria-label="Not started"></span>
             <h2 class="flex-1 text-sm font-semibold"><span data-i18n="wgVpnClient">WireGuard VPN client</span> <span class="chip ml-1" data-i18n="routerNodeOnly">router node only</span></h2>
             <svg class="w-4 h-4 text-zinc-400 card-chev transition-transform duration-200 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
           </div>
@@ -563,7 +563,7 @@
                       <input type="password" id="WG_PRIVATE_KEY" name="WG_PRIVATE_KEY" class="input-base" style="padding-right:2.5rem" autocomplete="off">
                       <button type="button" id="toggle-wg-privkey"
                               class="btn btn-ghost btn-icon absolute right-1.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
-                              aria-label="Show private key">
+                              data-i18n-aria="showPrivateKey" aria-label="Show private key">
                         <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
                       </button>
                     </div>
@@ -619,7 +619,7 @@
                       <input type="password" id="PRESHARED_KEY" name="PRESHARED_KEY" class="input-base" style="padding-right:2.5rem" autocomplete="off" placeholder="optional">
                       <button type="button" id="toggle-wg-psk"
                               class="btn btn-ghost btn-icon absolute right-1.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
-                              aria-label="Show preshared key">
+                              data-i18n-aria="showPresharedKey" aria-label="Show preshared key">
                         <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
                       </button>
                     </div>
@@ -678,7 +678,7 @@
         <!-- -- WiFi -- copied from /builder verbatim ---------------- -->
         <div class="group card card-anim" id="card-wifi" data-section="wifi">
           <div class="card-header">
-            <span class="dot" aria-label="Not started"></span>
+            <span class="dot" data-i18n-aria="dotNotStarted" aria-label="Not started"></span>
             <h2 class="flex-1 text-sm font-semibold" data-i18n="wifi">WiFi</h2>
             <svg class="w-4 h-4 text-zinc-400 card-chev transition-transform duration-200 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
           </div>
@@ -697,7 +697,7 @@
                         <input type="password" id="LAN_WIFI_PASSWD" name="LAN_WIFI_PASSWD" class="input-base" style="padding-right:2.5rem" placeholder="password" autocomplete="new-password">
                         <button type="button" id="toggle-lan-wifi-pw"
                                 class="btn btn-ghost btn-icon absolute right-1.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
-                                aria-label="Show password">
+                                data-i18n-aria="showPassword" aria-label="Show password">
                           <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
                         </button>
                       </div>
@@ -713,7 +713,7 @@
                         <input type="password" id="GUEST_WIFI_PASSWD" name="GUEST_WIFI_PASSWD" class="input-base" style="padding-right:2.5rem" placeholder="password" autocomplete="new-password">
                         <button type="button" id="toggle-guest-wifi-pw"
                                 class="btn btn-ghost btn-icon absolute right-1.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
-                                aria-label="Show password">
+                                data-i18n-aria="showPassword" aria-label="Show password">
                           <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
                         </button>
                       </div>
@@ -729,7 +729,7 @@
                         <input type="password" id="IOT_WIFI_PASSWD" name="IOT_WIFI_PASSWD" class="input-base" style="padding-right:2.5rem" placeholder="password" autocomplete="new-password">
                         <button type="button" id="toggle-iot-wifi-pw"
                                 class="btn btn-ghost btn-icon absolute right-1.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
-                                aria-label="Show password">
+                                data-i18n-aria="showPassword" aria-label="Show password">
                           <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
                         </button>
                       </div>
@@ -745,7 +745,7 @@
                         <input type="password" id="LAN_VPN_WIFI_PASSWD" name="LAN_VPN_WIFI_PASSWD" class="input-base" style="padding-right:2.5rem" placeholder="password" autocomplete="new-password">
                         <button type="button" id="toggle-wg-wifi-pw"
                                 class="btn btn-ghost btn-icon absolute right-1.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
-                                aria-label="Show password">
+                                data-i18n-aria="showPassword" aria-label="Show password">
                           <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
                         </button>
                       </div>
@@ -793,7 +793,7 @@
                         <input type="password" id="MESH_PASSWD" name="MESH_PASSWD" class="input-base" style="padding-right:2.5rem" placeholder="password" autocomplete="new-password" aria-label="Mesh password">
                         <button type="button" id="toggle-mesh-pw"
                                 class="btn btn-ghost btn-icon absolute right-1.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
-                                aria-label="Show password">
+                                data-i18n-aria="showPassword" aria-label="Show password">
                           <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
                         </button>
                       </div>
@@ -976,7 +976,7 @@
                         <label class="opt-title" for="CHANNEL_2G" data-i18n="channel2g">2.4 GHz channel</label>
                       </div>
                       <select id="CHANNEL_2G" name="CHANNEL_2G" class="opt-control opt-field input-base">
-                        <option value="">Default</option>
+                        <option value="" data-i18n="channelDefault">Default</option>
                       </select>
                     </div>
                     <div class="opt-card">
@@ -984,7 +984,7 @@
                         <label class="opt-title" for="CHANNEL_5G" data-i18n="channel5g">5 GHz channel</label>
                       </div>
                       <select id="CHANNEL_5G" name="CHANNEL_5G" class="opt-control opt-field input-base">
-                        <option value="">Default</option>
+                        <option value="" data-i18n="channelDefault">Default</option>
                       </select>
                     </div>
                     <div class="opt-card">
@@ -992,7 +992,7 @@
                         <label class="opt-title" for="CHANNEL_5G_2" data-i18n="channel5g2">5 GHz channel (second radio)</label>
                       </div>
                       <select id="CHANNEL_5G_2" name="CHANNEL_5G_2" class="opt-control opt-field input-base">
-                        <option value="">Default</option>
+                        <option value="" data-i18n="channelDefault">Default</option>
                       </select>
                     </div>
                     <div class="opt-card">
@@ -1000,7 +1000,7 @@
                         <label class="opt-title" for="CHANNEL_6G" data-i18n="channel6g">6 GHz channel</label>
                       </div>
                       <select id="CHANNEL_6G" name="CHANNEL_6G" class="opt-control opt-field input-base">
-                        <option value="">Default</option>
+                        <option value="" data-i18n="channelDefault">Default</option>
                       </select>
                     </div>
                   </div>
@@ -1011,11 +1011,11 @@
                       <label class="opt-title" for="WIFI_LOG_LVL" data-i18n="wifiLogLevel">WiFi log level</label>
                     </div>
                     <select id="WIFI_LOG_LVL" name="WIFI_LOG_LVL" class="opt-control opt-field input-base">
-                      <option value="">Default</option>
-                      <option value="1">Debugging</option>
-                      <option value="2">Informational</option>
-                      <option value="3">Notification</option>
-                      <option value="4">Warning</option>
+                      <option value="" data-i18n="logLevelDefault">Default</option>
+                      <option value="1" data-i18n="logLevelDebug">Debugging</option>
+                      <option value="2" data-i18n="logLevelInfo">Informational</option>
+                      <option value="3" data-i18n="logLevelNotice">Notification</option>
+                      <option value="4" data-i18n="logLevelWarn">Warning</option>
                     </select>
                   </div>
                 </div>
@@ -1028,7 +1028,7 @@
 
         <div class="group card card-anim" id="card-wan" data-section="wan">
           <div class="card-header">
-            <span class="dot" aria-label="Not started"></span>
+            <span class="dot" data-i18n-aria="dotNotStarted" aria-label="Not started"></span>
             <h2 class="flex-1 text-sm font-semibold"><span data-i18n="wan">WAN</span> <span class="chip ml-1" data-i18n="routerNodeOnly">router node only</span></h2>
             <svg class="w-4 h-4 text-zinc-400 card-chev transition-transform duration-200 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
           </div>
@@ -1066,7 +1066,7 @@
                       <input type="password" id="PPPOE_PASSWD" name="PPPOE_PASSWD" class="input-base" style="padding-right:2.5rem" autocomplete="current-password">
                       <button type="button" id="toggle-pppoe-pw"
                               class="btn btn-ghost btn-icon absolute right-1.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
-                              aria-label="Show password">
+                              data-i18n-aria="showPassword" aria-label="Show password">
                         <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
                       </button>
                     </div>
@@ -1144,7 +1144,7 @@
         <!-- -- Port Forwarding -- copied from /builder --------------- -->
         <div class="group card card-anim" id="card-portfwd" data-section="portfwd">
           <div class="card-header">
-            <span class="dot" aria-label="Not started"></span>
+            <span class="dot" data-i18n-aria="dotNotStarted" aria-label="Not started"></span>
             <h2 class="flex-1 text-sm font-semibold"><span data-i18n="ipv4PortForwarding">IPv4 port forwarding</span> <span class="chip ml-1" data-i18n="routerNodeOnly">router node only</span></h2>
             <svg class="w-4 h-4 text-zinc-400 card-chev transition-transform duration-200 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
           </div>
@@ -1167,7 +1167,7 @@
               <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
               <span data-i18n="addRow">Add row</span>
             </button>
-            <div class="info-note" role="note" data-i18n="portFwdNoteFleet">Each row creates a static DHCPv4 lease and NAT port forward. Ports must be unique.</div>
+            <div class="info-note" role="note" data-i18n="portFwdNote">Each row creates a static DHCPv4 lease and NAT port forward. Ports must be unique.</div>
           </div>
           </div>
         </div>
@@ -1175,7 +1175,7 @@
         <!-- -- IPv6 Exposure -- copied from /builder ----------------- -->
         <div class="group card card-anim" id="card-ipv6" data-section="ipv6">
           <div class="card-header">
-            <span class="dot" aria-label="Not started"></span>
+            <span class="dot" data-i18n-aria="dotNotStarted" aria-label="Not started"></span>
             <h2 class="flex-1 text-sm font-semibold"><span data-i18n="ipv6Exposure">IPv6 server exposure</span> <span class="chip ml-1" data-i18n="routerNodeOnly">router node only</span></h2>
             <svg class="w-4 h-4 text-zinc-400 card-chev transition-transform duration-200 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
           </div>
@@ -1206,7 +1206,7 @@
         <!-- -- DDNS -- copied from /builder -------------------------- -->
         <div class="group card card-anim" id="card-ddns" data-section="ddns">
           <div class="card-header">
-            <span class="dot" aria-label="Not started"></span>
+            <span class="dot" data-i18n-aria="dotNotStarted" aria-label="Not started"></span>
             <h2 class="flex-1 text-sm font-semibold">DDNS <span class="font-normal text-zinc-500 dark:text-zinc-400">(Cloudflare)</span> <span class="chip ml-1" data-i18n="routerNodeOnly">router node only</span></h2>
             <svg class="w-4 h-4 text-zinc-400 card-chev transition-transform duration-200 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
           </div>
@@ -1238,7 +1238,7 @@
                     <input type="password" id="CLOUDFLARE_API_KEY" name="CLOUDFLARE_API_KEY" class="input-base" style="padding-right:2.5rem" autocomplete="off">
                     <button type="button" id="toggle-cfkey"
                             class="btn btn-ghost btn-icon absolute right-1.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
-                            aria-label="Show API token">
+                            data-i18n-aria="showApiToken" aria-label="Show API token">
                       <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
                     </button>
                   </div>
@@ -1253,7 +1253,7 @@
         <!-- -- Failover -- copied from /builder ---------------------- -->
         <div class="group card card-anim" id="card-failover" data-section="failover">
           <div class="card-header">
-            <span class="dot" aria-label="Not started"></span>
+            <span class="dot" data-i18n-aria="dotNotStarted" aria-label="Not started"></span>
             <h2 class="flex-1 text-sm font-semibold"><span data-i18n="failover">Failover</span> <span class="chip ml-1" data-i18n="routerNodeOnly">router node only</span></h2>
             <svg class="w-4 h-4 text-zinc-400 card-chev transition-transform duration-200 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
           </div>
@@ -1290,7 +1290,7 @@
         <!-- -- DNS & adblock -- copied from /builder ----------------- -->
         <div class="group card card-anim" id="card-dns" data-section="dns">
           <div class="card-header">
-            <span class="dot" aria-label="Not started"></span>
+            <span class="dot" data-i18n-aria="dotNotStarted" aria-label="Not started"></span>
             <h2 class="flex-1 text-sm font-semibold"><span data-i18n="encryptedDns">DNS &amp; Ad blocking</span> <span class="chip ml-1" data-i18n="routerNodeOnly">router node only</span></h2>
             <svg class="w-4 h-4 text-zinc-400 card-chev transition-transform duration-200 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
           </div>
@@ -1423,7 +1423,7 @@
         <!-- -- Firewall -- copied from /builder --------------------- -->
         <div class="group card card-anim" id="card-firewall" data-section="firewall">
           <div class="card-header">
-            <span class="dot" aria-label="Not started"></span>
+            <span class="dot" data-i18n-aria="dotNotStarted" aria-label="Not started"></span>
             <h2 class="flex-1 text-sm font-semibold" data-i18n="firewall">Firewall</h2>
             <svg class="w-4 h-4 text-zinc-400 card-chev transition-transform duration-200 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
           </div>
@@ -1485,7 +1485,7 @@
         <!-- -- Packages -- copied from /builder --------------------- -->
         <div class="group card card-anim" id="card-pkgs" data-section="pkgs">
           <div class="card-header">
-            <span class="dot" aria-label="Not started"></span>
+            <span class="dot" data-i18n-aria="dotNotStarted" aria-label="Not started"></span>
             <h2 class="flex-1 text-sm font-semibold" data-i18n="additionalPackages">Packages</h2>
             <svg class="w-4 h-4 text-zinc-400 card-chev transition-transform duration-200 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
           </div>
@@ -1507,7 +1507,7 @@
         <!-- -- Performance & misc -- copied from /builder ------------ -->
         <div class="group card card-anim" id="card-misc" data-section="misc">
           <div class="card-header">
-            <span class="dot" aria-label="Not started"></span>
+            <span class="dot" data-i18n-aria="dotNotStarted" aria-label="Not started"></span>
             <h2 class="flex-1 text-sm font-semibold" data-i18n="perfMisc">Performance &amp; misc</h2>
             <svg class="w-4 h-4 text-zinc-400 card-chev transition-transform duration-200 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
           </div>
@@ -1576,7 +1576,7 @@
 
         <div class="group card card-anim" id="card-custom" data-section="custom">
           <div class="card-header">
-            <span class="dot" aria-label="Not started"></span>
+            <span class="dot" data-i18n-aria="dotNotStarted" aria-label="Not started"></span>
             <h2 class="flex-1 text-sm font-semibold" data-i18n="customScript">Custom script</h2>
             <svg class="w-4 h-4 text-zinc-400 card-chev transition-transform duration-200 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
           </div>

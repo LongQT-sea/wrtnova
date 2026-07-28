@@ -11,6 +11,11 @@ import { DL, BRANCHES, cacheGet, cacheSet, versionToUrl, pickLatestPatches, inde
 
   const $ = ui.$;
 
+  // Every user-visible string here goes through tr: /builder/advanced loads this
+  // module without i18n/core.mjs, so ui.t may be absent and the English literal
+  // is the fallback.
+  const tr = (key, fallback, vars) => (ui.t ? ui.t(key, vars) : fallback);
+
   // Snapshot builds exist only for recent branches; the branch list itself is
   // shared (device-data.mjs BRANCHES).
   const SNAPSHOT_BRANCHES = new Set(['24.10', '25.12']);
@@ -55,7 +60,7 @@ import { DL, BRANCHES, cacheGet, cacheSet, versionToUrl, pickLatestPatches, inde
     state.devicesByTitle = indexByTitle(data.profiles);
 
     $('#device').disabled = false;
-    $('#device-info').textContent = ui.t ? ui.t('deviceRequirement') : 'Required: ≥8MB flash, ≥64MB RAM';
+    $('#device-info').textContent = tr('deviceRequirement', 'Required: ≥8MB flash, ≥64MB RAM');
     state.selectedTitle = ''; state.selectedProfile = null; state.profileDetails = null;
     ui.notifyTargetChanged && ui.notifyTargetChanged();
   }
@@ -66,7 +71,8 @@ import { DL, BRANCHES, cacheGet, cacheSet, versionToUrl, pickLatestPatches, inde
 
     $('#version').addEventListener('change', () => {
       state.version = $('#version').value;
-      loadOverview().catch(err => ui.status('Failed to load device list: ' + err.message, 'error'));
+      loadOverview().catch(err => ui.status(
+        tr('errorLoadingDevices', 'Error loading devices: ' + err.message, { msg: err.message }), 'error'));
     });
 
     if (cachedVersions) {
@@ -125,7 +131,7 @@ import { DL, BRANCHES, cacheGet, cacheSet, versionToUrl, pickLatestPatches, inde
         .then(d => cacheSet(OVERVIEW_KEY, d))
         .catch(() => {});
     } else {
-      $('#device-info').textContent = 'Loading devices…';
+      $('#device-info').textContent = tr('loadingDevices', 'Loading devices…');
       const res = await fetch(versionToUrl(v) + '/.overview.json', { cache: 'no-cache' });
       if (!res.ok) throw new Error('overview fetch failed: ' + res.status);
       const data = await res.json();
@@ -142,13 +148,8 @@ import { DL, BRANCHES, cacheGet, cacheSet, versionToUrl, pickLatestPatches, inde
   // opening on focus needed a guard flag (focus returns to the input when the
   // dialog closes, which re-fired the handler and reopened it). Click has no
   // such re-entry, so the guard is gone with it.
-  //
-  // Strings go through ui.t where it exists: /builder/advanced loads devices.js
-  // without i18n/core.mjs, so ui.S/ui.t may be absent there (same guard as
-  // applyVersionsData).
   export const initDeviceCombo = function () {
     const inp = $('#device');
-    const tr = (key, fallback) => (ui.t ? ui.t(key) : fallback);
 
     async function pick(title) {
       inp.value = title;
@@ -240,11 +241,12 @@ import { DL, BRANCHES, cacheGet, cacheSet, versionToUrl, pickLatestPatches, inde
   async function loadProfileDetails() {
     const prof = state.selectedProfile;
     if (!prof) return;
-    $('#device-info').textContent = 'Loading device details…';
+    $('#device-info').textContent = tr('loadingDeviceDetails', 'Loading device details…');
     const url = versionToUrl(state.version) + '/targets/' + prof.target + '/profiles.json';
     const res = await fetch(url, { cache: 'no-cache' });
     if (!res.ok) {
-      $('#device-info').textContent = 'Failed to load device details (' + res.status + ')';
+      $('#device-info').textContent =
+        tr('errorDeviceDetails', 'Failed to load device details (' + res.status + ')', { msg: res.status });
       return;
     }
     const data = await res.json();

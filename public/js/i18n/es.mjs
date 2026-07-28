@@ -12,8 +12,6 @@ export default {
   adguardHome:      'AdGuard Home',
   dnsproxy:         'dnsproxy',
   wireGuardVpn:     'WireGuard VPN',
-  guestNetwork:     'Red de invitados',
-  iotNetwork:       'Red IoT',
   rootPassword:     'Contraseña root',
 
   // -- Navigation / breadcrumbs --------------------------------------
@@ -91,9 +89,6 @@ export default {
   // -- Flash note (HTML content) -------------------------------------
   flashNote: 'Flashea la imagen "<strong>sysupgrade</strong>" mediante "Sistema → Copia de seguridad / Flashear firmware → Flashear imagen". Asegúrate de <strong>desmarcar "Mantener la configuración actual"</strong>.',
 
-  // -- Confirm dialogs -----------------------------------------------
-  confirmDeleteNode: '¿Eliminar "{name}"? Esta acción no se puede deshacer.',
-
   // -- Build all -----------------------------------------------------
   noDevicesSelected:   'Ningún nodo tiene un dispositivo seleccionado todavía.',
   buildingNodes:       'Compilando {n} nodo…',
@@ -110,6 +105,8 @@ export default {
   noDevicesLoaded:      'No se cargaron dispositivos.',
   errorLoadingDevices:  'Error al cargar dispositivos: {msg}',
   loadingDeviceDetails: 'Cargando detalles del dispositivo…',
+  loadingDevices:       'Cargando dispositivos…',
+  errorDeviceDetails:   'No se pudieron cargar los detalles del dispositivo ({msg})',
 
   // -- Generic UI ----------------------------------------------------
   save:               'Guardar',
@@ -207,6 +204,18 @@ export default {
   peerPublicKey:      'Clave pública del par',
   endpoint:           'Punto de conexión',
   presharedKey:       'Clave precompartida',
+  // -- Status dot / reveal-toggle labels (aria-label only) -----------
+  dotNotStarted:    'No iniciado',
+  dotInProgress:    'En curso',
+  dotComplete:      'Completado',
+  showPassword:     'Mostrar contraseña',
+  hidePassword:     'Ocultar contraseña',
+  showPrivateKey:   'Mostrar clave privada',
+  hidePrivateKey:   'Ocultar clave privada',
+  showPresharedKey: 'Mostrar clave precompartida',
+  hidePresharedKey: 'Ocultar clave precompartida',
+  showApiToken:     'Mostrar token de API',
+  hideApiToken:     'Ocultar token de API',
   clientIpv4:         'IPv4 del cliente',
   clientIpv6:         'IPv6 del cliente',
   dnsV4:              'DNS IPv4',
@@ -243,7 +252,7 @@ export default {
   ulaPrefix:          'Prefijo ULA IPv6',
   ulaPrefixHelp:      'Déjelo vacío para generar automáticamente un prefijo aleatorio en el primer arranque.',
   bridgeWanPort:      'Puente del puerto WAN',
-  bridgeWanPortNote:  'Agrega el puerto WAN al puente <code>br-vlan</code>, para que las VLANs del lado WAN (IPTV, VoIP, multi-PPPoE) puedan enlazarse a los dispositivos aguas abajo. Cada id de VLAN también debe figurar en «VLANs adicionales».',
+  bridgeWanPortNote:  'Agrega el puerto WAN al puente <code>br-vlan</code>, permitiendo que las VLANs del lado WAN (IPTV, VoIP, multi-PPPoE) se puenteen a los dispositivos aguas abajo. Cada ID de VLAN también debe figurar en «VLANs adicionales».',
   wifi:               'WiFi',
   countryCode:        'Código de país',
   denseEnvironment:   'Entorno denso',
@@ -264,6 +273,13 @@ export default {
   channel5g2:         'Canal 5 GHz (segunda radio)',
   channel6g:          'Canal 6 GHz',
   wifiLogLevel:       'Nivel de registro WiFi',
+  channelDefault:     'Predeterminado',
+  channelAuto:        'Automático',
+  logLevelDefault:    'Predeterminado',
+  logLevelDebug:      'Depuración',
+  logLevelInfo:       'Informativo',
+  logLevelNotice:     'Notificación',
+  logLevelWarn:       'Advertencia',
   dot11kv:            '802.11k/v',
   dot11kvHelp:        'Informes de vecinos y roaming asistido.',
   dot11r:             '802.11r',
@@ -318,7 +334,6 @@ export default {
   dnsmasqMultiNote:   'Para añadir DHCP en una nueva interfaz, usa el comando integrado <code>dhcp-instance-add</code>.',
   bootstrapDnsPh:     'IPs simples adicionales, una por línea',
   additionalPackages: 'Paquetes',
-  autoAdded:          'Añadido automáticamente',
   extraPackages:      'Paquetes adicionales',
   perfMisc:           'Rendimiento y varios',
   softwareOffload:    'Descarga de flujo por software',
@@ -355,7 +370,7 @@ export default {
   buildLog:           'Activar registro de depuración',
   buildLogHelp:       'Registrar la ejecución del script de primer arranque en /root/99-asu-defaults.log.',
   asuEndpoint:        'Punto de conexión ASU',
-  asuSecurityWarning: 'Todo lo que escribas se envía al servidor de compilación ASU y luego queda almacenado dentro de la imagen generada, donde cualquiera que conozca el <strong>hash de compilación</strong> puede descargarla y leerla. Deja las contraseñas vacías (los valores predeterminados son seguros para el primer arranque: sin contraseña root, contraseña de administrador de AdGuard y Wi-Fi 12345678) y configura credenciales reales tras el primer arranque mediante LuCI o SSH.',
+  asuSecurityWarning: 'Todo lo que escribas se envía al servidor de compilación ASU y queda almacenado en la imagen generada durante un máximo de 30 minutos. Cualquiera que conozca el <strong>hash de compilación</strong> (aunque es poco probable) puede descargarla y leerla. Deja vacíos los campos sensibles y configura tus credenciales reales tras el primer arranque mediante LuCI o SSH.',
   recentBuilds:       'Compilaciones recientes',
   noBuildsYet:        'Sin compilaciones aún.',
   configPreview:      'Vista previa de configuración',
@@ -380,7 +395,6 @@ export default {
   oneKeyPerLineFleet: 'Una clave por línea. Desplegada en cada nodo.',
   vlanIdsSame:        'Los IDs de VLAN son idénticos para todos los nodos en esta red.',
   additionalTrunkHelpFleet: 'IDs de VLAN adicionales para trunk (etiquetados) a través de cada puerto en cada nodo.',
-  portFwdNoteFleet:   'Cada fila crea un arrendamiento DHCPv4 estático y redirección de puertos NAT. Los puertos deben ser únicos.',
   doneConfig:         '← Listo',
   hardwareOffloadHelp:      'Mayor rendimiento de red donde sea compatible. No activar si se usa QoS/SQM.',
   extraPackagesHelp:      'Añadido a la lista final. Usa el prefijo - para eliminar un paquete añadido automáticamente.',

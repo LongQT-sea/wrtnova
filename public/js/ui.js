@@ -46,6 +46,8 @@ import { deriveVisibility, deriveNetRows, detectVlanConflict, resolveVlanAssignm
   };
 
   // states: 'untouched' | 'touched' | 'valid'
+  const DOT_LABEL = { untouched: 'dotNotStarted', touched: 'dotInProgress', valid: 'dotComplete' };
+
   ui.setDot = function (sectionId, state) {
     const card = document.getElementById('card-' + sectionId);
     if (!card) return;
@@ -54,6 +56,10 @@ import { deriveVisibility, deriveNetRows, detectVlanConflict, resolveVlanAssignm
     dot.classList.remove('touched', 'valid');
     if (state === 'touched') dot.classList.add('touched');
     else if (state === 'valid') dot.classList.add('valid');
+    const key = DOT_LABEL[state];
+    if (!key) return;
+    dot.dataset.i18nAria = key;
+    if (ui.t) dot.setAttribute('aria-label', ui.t(key));
   };
 
   ui.wireDotTouches = function () {
@@ -420,12 +426,15 @@ import { deriveVisibility, deriveNetRows, detectVlanConflict, resolveVlanAssignm
     Object.keys(ui.WIFI_CHANNELS).forEach(function (id) {
       const sel = ui.$('#' + id);
       if (!sel || sel.childElementCount > 1) return;   // missing, or already built
-      const add = function (v, label) {
+      const add = function (v, label, key) {
         const o = document.createElement('option');
         o.value = v; o.textContent = label;
+        // These are built during page init, which can beat the lazy locale
+        // import; the key lets applyTranslations come back for them.
+        if (key) o.dataset.i18n = key;
         sel.appendChild(o);
       };
-      add('auto', 'Auto');
+      add('auto', ui.t ? ui.t('channelAuto') : 'Auto', 'channelAuto');
       ui.WIFI_CHANNELS[id].forEach(function (n) { add(String(n), String(n)); });
     });
   };
@@ -481,27 +490,30 @@ import { deriveVisibility, deriveNetRows, detectVlanConflict, resolveVlanAssignm
 
   // ----------------------------------- show/hide password toggle buttons
   // Toggles input type between password/text. Does NOT alter button content
-  // (SVG icons stay intact). Updates aria-label for screen reader context.
+  // (SVG icons stay intact). Third column is the noun the aria-label keeps
+  // naming, so the four kinds of reveal button stay distinguishable.
   ui.initPasswordToggles = function () {
     [
-      ['toggle-rootpw',       'ROOT_PASSWD'],
-      ['toggle-pppoe-pw',     'PPPOE_PASSWD'],
-      ['toggle-wg-privkey',   'WG_PRIVATE_KEY'],
-      ['toggle-wg-psk',       'PRESHARED_KEY'],
-      ['toggle-cfkey',        'CLOUDFLARE_API_KEY'],
-      ['toggle-mesh-pw',      'MESH_PASSWD'],
-      ['toggle-lan-wifi-pw',  'LAN_WIFI_PASSWD'],
-      ['toggle-guest-wifi-pw','GUEST_WIFI_PASSWD'],
-      ['toggle-iot-wifi-pw',  'IOT_WIFI_PASSWD'],
-      ['toggle-wg-wifi-pw',   'LAN_VPN_WIFI_PASSWD'],
-    ].forEach(([btnId, inpId]) => {
+      ['toggle-rootpw',       'ROOT_PASSWD',         'Password'],
+      ['toggle-pppoe-pw',     'PPPOE_PASSWD',        'Password'],
+      ['toggle-wg-privkey',   'WG_PRIVATE_KEY',      'PrivateKey'],
+      ['toggle-wg-psk',       'PRESHARED_KEY',       'PresharedKey'],
+      ['toggle-cfkey',        'CLOUDFLARE_API_KEY',  'ApiToken'],
+      ['toggle-mesh-pw',      'MESH_PASSWD',         'Password'],
+      ['toggle-lan-wifi-pw',  'LAN_WIFI_PASSWD',     'Password'],
+      ['toggle-guest-wifi-pw','GUEST_WIFI_PASSWD',   'Password'],
+      ['toggle-iot-wifi-pw',  'IOT_WIFI_PASSWD',     'Password'],
+      ['toggle-wg-wifi-pw',   'LAN_VPN_WIFI_PASSWD', 'Password'],
+    ].forEach(([btnId, inpId, noun]) => {
       const b = document.getElementById(btnId);
       const i = document.getElementById(inpId);
       if (!b || !i) return;
       b.addEventListener('click', () => {
         const showing = i.type !== 'password';
         i.type = showing ? 'password' : 'text';
-        b.setAttribute('aria-label', showing ? 'Show' : 'Hide');
+        const key = (showing ? 'show' : 'hide') + noun;
+        b.dataset.i18nAria = key;
+        if (ui.t) b.setAttribute('aria-label', ui.t(key));
       });
     });
   };

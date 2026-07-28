@@ -36,6 +36,13 @@ function applyTranslations() {
     const v = t(el.dataset.i18nPlaceholder);
     if (v !== el.dataset.i18nPlaceholder) el.placeholder = v;
   });
+  // Keyed off the dataset, not the attribute: a control whose state changed
+  // before the locale loaded re-translates to its current label, not the one
+  // the markup shipped.
+  document.querySelectorAll('[data-i18n-aria]').forEach(function (el) {
+    const v = t(el.dataset.i18nAria);
+    if (v !== el.dataset.i18nAria) el.setAttribute('aria-label', v);
+  });
 }
 
 function applyWhenReady() {

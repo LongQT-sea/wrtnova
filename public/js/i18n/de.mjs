@@ -12,8 +12,6 @@ export default {
   adguardHome:      'AdGuard Home',
   dnsproxy:         'dnsproxy',
   wireGuardVpn:     'WireGuard VPN',
-  guestNetwork:     'Gastnetzwerk',
-  iotNetwork:       'IoT-Netzwerk',
   rootPassword:     'Root-Passwort',
 
   // -- Navigation / breadcrumbs --------------------------------------
@@ -91,9 +89,6 @@ export default {
   // -- Flash note (HTML content) -------------------------------------
   flashNote: 'Flashen Sie das "<strong>sysupgrade</strong>"-Image über "System → Sicherung / Firmware flashen → Image flashen". Stellen Sie sicher, dass Sie <strong>"Einstellungen beibehalten und aktuelle Konfiguration erhalten" deaktivieren</strong>.',
 
-  // -- Confirm dialogs -----------------------------------------------
-  confirmDeleteNode: '"{name}" löschen? Dies kann nicht rückgängig gemacht werden.',
-
   // -- Build all -----------------------------------------------------
   noDevicesSelected:   'Für keinen Knoten ist ein Gerät ausgewählt.',
   buildingNodes:       '{n} Knoten wird erstellt…',
@@ -110,6 +105,8 @@ export default {
   noDevicesLoaded:      'Keine Geräte geladen.',
   errorLoadingDevices:  'Fehler beim Laden der Geräte: {msg}',
   loadingDeviceDetails: 'Gerätedetails werden geladen…',
+  loadingDevices:       'Geräte werden geladen…',
+  errorDeviceDetails:   'Laden der Gerätedetails fehlgeschlagen ({msg})',
 
   // -- Generic UI ----------------------------------------------------
   save:               'Speichern',
@@ -207,6 +204,18 @@ export default {
   peerPublicKey:      'Öffentlicher Peer-Schlüssel',
   endpoint:           'Endpunkt',
   presharedKey:       'Vorgeteilter Schlüssel',
+  // -- Status dot / reveal-toggle labels (aria-label only) -----------
+  dotNotStarted:    'Nicht begonnen',
+  dotInProgress:    'In Bearbeitung',
+  dotComplete:      'Abgeschlossen',
+  showPassword:     'Passwort anzeigen',
+  hidePassword:     'Passwort verbergen',
+  showPrivateKey:   'Privaten Schlüssel anzeigen',
+  hidePrivateKey:   'Privaten Schlüssel verbergen',
+  showPresharedKey: 'Vorgeteilten Schlüssel anzeigen',
+  hidePresharedKey: 'Vorgeteilten Schlüssel verbergen',
+  showApiToken:     'API-Token anzeigen',
+  hideApiToken:     'API-Token verbergen',
   clientIpv4:         'Client-IPv4',
   clientIpv6:         'Client-IPv6',
   dnsV4:              'DNS IPv4',
@@ -243,7 +252,7 @@ export default {
   ulaPrefix:          'IPv6-ULA-Präfix',
   ulaPrefixHelp:      'Leer lassen, um beim ersten Start automatisch ein zufälliges Präfix zu generieren.',
   bridgeWanPort:      'WAN-Port überbrücken',
-  bridgeWanPortNote:  'WAN-Port zur <code>br-vlan</code>-Bridge hinzufügen, damit WAN-seitige VLANs (IPTV, VoIP, Multi-PPPoE) zu nachgelagerten Geräten getrunkt werden können. Jede VLAN-ID muss zusätzlich unter „Zusätzliche VLANs“ eingetragen sein.',
+  bridgeWanPortNote:  'WAN-Port zur <code>br-vlan</code>-Bridge hinzufügen, sodass WAN-seitige VLANs (IPTV, VoIP, Multi-PPPoE) per Bridge an nachgelagerte Geräte weitergereicht werden. Jede VLAN-ID muss zusätzlich unter „Zusätzliche VLANs“ eingetragen sein.',
   wifi:               'WiFi',
   countryCode:        'Ländercode',
   denseEnvironment:   'Dichtes Umfeld',
@@ -264,6 +273,13 @@ export default {
   channel5g2:         '5-GHz-Kanal (zweites Funkmodul)',
   channel6g:          '6-GHz-Kanal',
   wifiLogLevel:       'WLAN-Protokollstufe',
+  channelDefault:     'Standard',
+  channelAuto:        'Automatisch',
+  logLevelDefault:    'Standard',
+  logLevelDebug:      'Debugging',
+  logLevelInfo:       'Informationen',
+  logLevelNotice:     'Benachrichtigung',
+  logLevelWarn:       'Warnung',
   dot11kv:            '802.11k/v',
   dot11kvHelp:        'Nachbarschaftsberichte und unterstütztes Roaming.',
   dot11r:             '802.11r',
@@ -318,7 +334,6 @@ export default {
   dnsmasqMultiNote:   'Um DHCP auf einer neuen Schnittstelle hinzuzufügen, den eingebauten Befehl <code>dhcp-instance-add</code> verwenden.',
   bootstrapDnsPh:     'zusätzliche einfache IPs, eine pro Zeile',
   additionalPackages: 'Pakete',
-  autoAdded:          'Automatisch hinzugefügt',
   extraPackages:      'Zusätzliche Pakete',
   perfMisc:           'Leistung & Sonstiges',
   softwareOffload:    'Software-Flow-Offload',
@@ -355,7 +370,7 @@ export default {
   buildLog:           'Debug-Protokoll aktivieren',
   buildLogHelp:       'Skriptausführung beim Erststart nach /root/99-asu-defaults.log protokollieren.',
   asuEndpoint:        'ASU-Endpunkt',
-  asuSecurityWarning: 'Alles, was Sie eingeben, wird an den ASU-Build-Server gesendet und dann im erzeugten Image gespeichert, wo jeder, der den <strong>Build-Hash</strong> kennt, es herunterladen und lesen kann. Lassen Sie Passwörter leer (die Standardwerte sind für den ersten Start sicher: kein Root-Passwort, AdGuard-Admin- und WLAN-Passwort 12345678) und richten Sie echte Zugangsdaten nach dem ersten Start über LuCI oder SSH ein.',
+  asuSecurityWarning: 'Alles, was Sie eingeben, wird an den ASU-Build-Server gesendet und bis zu 30 Minuten lang im erzeugten Image gespeichert. Wer den <strong>Build-Hash</strong> kennt (auch wenn das unwahrscheinlich ist), kann es herunterladen und lesen. Lassen Sie sensible Felder leer und richten Sie Ihre echten Zugangsdaten nach dem ersten Start über LuCI oder SSH ein.',
   recentBuilds:       'Zuletzt erstellte Builds',
   noBuildsYet:        'Noch keine Builds.',
   configPreview:      'Konfigurationsvorschau',
@@ -380,7 +395,6 @@ export default {
   oneKeyPerLineFleet: 'Einen Schlüssel pro Zeile. Auf jedem Knoten bereitgestellt.',
   vlanIdsSame:        'VLAN-IDs sind für alle Knoten in diesem Netzwerk identisch.',
   additionalTrunkHelpFleet: 'Zusätzliche VLAN-IDs zum Trunking (getaggt) über jeden Port an jedem Knoten.',
-  portFwdNoteFleet:   'Jede Zeile erstellt einen statischen DHCPv4-Lease und NAT-Portweiterleitung. Ports müssen eindeutig sein.',
   doneConfig:         '← Fertig',
   hardwareOffloadHelp:      'Höherer Netzwerkdurchsatz wo unterstützt. Nicht aktivieren bei QoS/SQM.',
   extraPackagesHelp:      'Wird an die finale Liste angehängt. Präfix - entfernt ein automatisch hinzugefügtes Paket.',

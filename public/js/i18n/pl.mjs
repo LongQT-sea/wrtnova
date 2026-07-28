@@ -12,8 +12,6 @@ export default {
   adguardHome:      'AdGuard Home',
   dnsproxy:         'dnsproxy',
   wireGuardVpn:     'WireGuard VPN',
-  guestNetwork:     'Sieć gości',
-  iotNetwork:       'Sieć IoT',
   rootPassword:     'Hasło root',
 
   // -- Navigation / breadcrumbs --------------------------------------
@@ -91,9 +89,6 @@ export default {
   // -- Flash note (HTML content) -------------------------------------
   flashNote: 'Wgraj obraz "<strong>sysupgrade</strong>" przez "System → Kopia zapasowa / Wgrywanie firmware → Wgraj obraz". Upewnij się, że <strong>odznaczono "Zachowaj ustawienia i bieżącą konfigurację"</strong>.',
 
-  // -- Confirm dialogs -----------------------------------------------
-  confirmDeleteNode: 'Usunąć "{name}"? Tej operacji nie można cofnąć.',
-
   // -- Build all -----------------------------------------------------
   noDevicesSelected:   'Żaden węzeł nie ma wybranego urządzenia.',
   buildingNodes:       'Kompilowanie {n} węzła…',
@@ -110,6 +105,8 @@ export default {
   noDevicesLoaded:      'Nie załadowano urządzeń.',
   errorLoadingDevices:  'Błąd ładowania urządzeń: {msg}',
   loadingDeviceDetails: 'Ładowanie szczegółów urządzenia…',
+  loadingDevices:       'Ładowanie urządzeń…',
+  errorDeviceDetails:   'Nie udało się załadować szczegółów urządzenia ({msg})',
 
   // -- Generic UI ----------------------------------------------------
   save:               'Zapisz',
@@ -207,6 +204,18 @@ export default {
   peerPublicKey:      'Publiczny klucz peera',
   endpoint:           'Punkt końcowy',
   presharedKey:       'Klucz wstępnie współdzielony',
+  // -- Status dot / reveal-toggle labels (aria-label only) -----------
+  dotNotStarted:    'Nierozpoczęte',
+  dotInProgress:    'W trakcie',
+  dotComplete:      'Ukończone',
+  showPassword:     'Pokaż hasło',
+  hidePassword:     'Ukryj hasło',
+  showPrivateKey:   'Pokaż klucz prywatny',
+  hidePrivateKey:   'Ukryj klucz prywatny',
+  showPresharedKey: 'Pokaż klucz wstępnie współdzielony',
+  hidePresharedKey: 'Ukryj klucz wstępnie współdzielony',
+  showApiToken:     'Pokaż token API',
+  hideApiToken:     'Ukryj token API',
   clientIpv4:         'IPv4 klienta',
   clientIpv6:         'IPv6 klienta',
   dnsV4:              'DNS IPv4',
@@ -243,7 +252,7 @@ export default {
   ulaPrefix:          'Prefiks IPv6 ULA',
   ulaPrefixHelp:      'Pozostaw puste, aby automatycznie wygenerować losowy prefiks przy pierwszym uruchomieniu.',
   bridgeWanPort:      'Mostkowanie portu WAN',
-  bridgeWanPortNote:  'Dodaje port WAN do mostu <code>br-vlan</code>, aby VLAN-y po stronie WAN (IPTV, VoIP, wiele sesji PPPoE) mogły być trunkowane do urządzeń podrzędnych. Każdy id VLAN musi być też wpisany w „Dodatkowe VLAN-y”.',
+  bridgeWanPortNote:  'Dodaje port WAN do mostu <code>br-vlan</code>, aby VLAN-y po stronie WAN (IPTV, VoIP, wiele sesji PPPoE) mogły być mostkowane do urządzeń podrzędnych. Każdy ID VLAN musi być też wpisany w „Dodatkowe VLAN-y”.',
   wifi:               'WiFi',
   countryCode:        'Kod kraju',
   denseEnvironment:   'Gęste środowisko',
@@ -264,6 +273,13 @@ export default {
   channel5g2:         'Kanał 5 GHz (drugie radio)',
   channel6g:          'Kanał 6 GHz',
   wifiLogLevel:       'Poziom logowania WiFi',
+  channelDefault:     'Domyślny',
+  channelAuto:        'Automatycznie',
+  logLevelDefault:    'Domyślny',
+  logLevelDebug:      'Debugowanie',
+  logLevelInfo:       'Informacyjny',
+  logLevelNotice:     'Powiadomienie',
+  logLevelWarn:       'Ostrzeżenie',
   dot11kv:            '802.11k/v',
   dot11kvHelp:        'Raporty sąsiadów i wspomagany roaming.',
   dot11r:             '802.11r',
@@ -318,7 +334,6 @@ export default {
   dnsmasqMultiNote:   'Aby dodać DHCP na nowym interfejsie, użyj wbudowanego polecenia <code>dhcp-instance-add</code>.',
   bootstrapDnsPh:     'dodatkowe zwykłe IP, jeden na linię',
   additionalPackages: 'Pakiety',
-  autoAdded:          'Dodane automatycznie',
   extraPackages:      'Dodatkowe pakiety',
   perfMisc:           'Wydajność i różne',
   softwareOffload:    'Programowy offload przepływu',
@@ -355,7 +370,7 @@ export default {
   buildLog:           'Włącz dziennik debugowania',
   buildLogHelp:       'Zapisuj wykonanie skryptu pierwszego uruchomienia do /root/99-asu-defaults.log.',
   asuEndpoint:        'Punkt końcowy ASU',
-  asuSecurityWarning: 'Wszystko, co wpiszesz, jest wysyłane na serwer kompilacji ASU, a następnie przechowywane w wygenerowanym obrazie, gdzie każdy, kto zna <strong>hash kompilacji</strong>, może go pobrać i odczytać. Pozostaw hasła puste (domyślne wartości są bezpieczne przy pierwszym uruchomieniu: brak hasła root, hasło administratora AdGuard i Wi-Fi 12345678) i ustaw prawdziwe dane logowania po pierwszym uruchomieniu przez LuCI lub SSH.',
+  asuSecurityWarning: 'Wszystko, co wpiszesz, jest wysyłane na serwer kompilacji ASU i przechowywane w wygenerowanym obrazie przez maksymalnie 30 minut. Każdy, kto zna <strong>hash kompilacji</strong> (choć jest to mało prawdopodobne), może go pobrać i odczytać. Pozostaw wrażliwe pola puste i skonfiguruj prawdziwe dane logowania po pierwszym uruchomieniu przez LuCI lub SSH.',
   recentBuilds:       'Ostatnie kompilacje',
   noBuildsYet:        'Brak kompilacji.',
   configPreview:      'Podgląd konfiguracji',
@@ -380,7 +395,6 @@ export default {
   oneKeyPerLineFleet: 'Jeden klucz na linię. Wdrażany na każdym węźle.',
   vlanIdsSame:        'Identyfikatory VLAN są identyczne dla wszystkich węzłów w tej sieci.',
   additionalTrunkHelpFleet: 'Dodatkowe identyfikatory VLAN do trunk (tagowane) przez każdy port na każdym węźle.',
-  portFwdNoteFleet:   'Każdy wiersz tworzy statyczną dzierżawę DHCPv4 i przekierowanie portów NAT. Porty muszą być unikalne.',
   doneConfig:         '← Gotowe',
   hardwareOffloadHelp:      'Wyższa przepustowość sieci tam, gdzie jest obsługiwane. Nie włączaj przy QoS/SQM.',
   extraPackagesHelp:      'Dołączane do ostatecznej listy. Przedrostek - usuwa automatycznie dodany pakiet.',

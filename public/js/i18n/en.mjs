@@ -12,8 +12,6 @@ export default {
   adguardHome:      'AdGuard Home',
   dnsproxy:         'dnsproxy',
   wireGuardVpn:     'WireGuard VPN',
-  guestNetwork:     'Guest network',
-  iotNetwork:       'IoT network',
   rootPassword:     'Root password',
 
   // -- Navigation / breadcrumbs --------------------------------------
@@ -91,9 +89,6 @@ export default {
   // -- Flash note (HTML content) -------------------------------------
   flashNote: 'Flash the "<strong>sysupgrade</strong>" image via "System → Backup / Flash firmware → Flash image". Make sure to <strong>disable "Keep settings and retain the current configuration"</strong>.',
 
-  // -- Confirm dialogs -----------------------------------------------
-  confirmDeleteNode: 'Delete "{name}"? This cannot be undone.',
-
   // -- Build all -----------------------------------------------------
   noDevicesSelected:   'No nodes have a device selected yet.',
   buildingNodes:       'Building {n} node…',
@@ -110,6 +105,8 @@ export default {
   noDevicesLoaded:      'No devices loaded.',
   errorLoadingDevices:  'Error loading devices: {msg}',
   loadingDeviceDetails: 'Loading device details…',
+  loadingDevices:       'Loading devices…',
+  errorDeviceDetails:   'Failed to load device details ({msg})',
 
   // -- Generic UI ----------------------------------------------------
   save:               'Save',
@@ -207,6 +204,18 @@ export default {
   peerPublicKey:      'Peer public key',
   endpoint:           'Endpoint',
   presharedKey:       'Preshared key',
+  // -- Status dot / reveal-toggle labels (aria-label only) -----------
+  dotNotStarted:    'Not started',
+  dotInProgress:    'In progress',
+  dotComplete:      'Complete',
+  showPassword:     'Show password',
+  hidePassword:     'Hide password',
+  showPrivateKey:   'Show private key',
+  hidePrivateKey:   'Hide private key',
+  showPresharedKey: 'Show preshared key',
+  hidePresharedKey: 'Hide preshared key',
+  showApiToken:     'Show API token',
+  hideApiToken:     'Hide API token',
   clientIpv4:         'Client IPv4',
   clientIpv6:         'Client IPv6',
   dnsV4:              'DNS IPv4',
@@ -264,6 +273,13 @@ export default {
   channel5g2:         '5 GHz channel (second radio)',
   channel6g:          '6 GHz channel',
   wifiLogLevel:       'WiFi log level',
+  channelDefault:     'Default',
+  channelAuto:        'Auto',
+  logLevelDefault:    'Default',
+  logLevelDebug:      'Debugging',
+  logLevelInfo:       'Informational',
+  logLevelNotice:     'Notification',
+  logLevelWarn:       'Warning',
   dot11kv:            '802.11k/v',
   dot11kvHelp:        'Neighbor reports and assisted roaming.',
   dot11r:             '802.11r',
@@ -318,7 +334,6 @@ export default {
   dnsmasqMultiNote:   'To add DHCP on a new interface, use the built-in <code>dhcp-instance-add</code> command.',
   bootstrapDnsPh:     'extra plain IPs, one per line',
   additionalPackages: 'Packages',
-  autoAdded:          'Auto-added',
   extraPackages:      'Extra packages',
   perfMisc:           'Performance & misc',
   softwareOffload:    'Software flow offload',
@@ -355,7 +370,7 @@ export default {
   buildLog:           'Enable debug log',
   buildLogHelp:       'Trace first-boot script execution to /root/99-asu-defaults.log.',
   asuEndpoint:        'ASU endpoint',
-  asuSecurityWarning: 'Anything you type is sent to the ASU build server and then stored inside the generated image, where anyone who knows the <strong>build hash</strong> can download and read it. Leave passwords empty (defaults are safe for first boot: no root password, AdGuard admin and Wi-Fi password 12345678) and set real credentials after first boot via LuCI or SSH.',
+  asuSecurityWarning: 'Anything you type is sent to the ASU build server and stored in the generated image for up to 30 minutes. Anyone who knows the <strong>build hash</strong> (though unlikely) can download and read it. Leave sensitive fields empty and configure your real credentials after the first boot via LuCI or SSH.',
   recentBuilds:       'Recent builds',
   noBuildsYet:        'No builds yet.',
   configPreview:      'Config preview',
@@ -380,7 +395,6 @@ export default {
   oneKeyPerLineFleet: 'One key per line. Deployed to every node.',
   vlanIdsSame:        'VLAN IDs are identical across all nodes in this network.',
   additionalTrunkHelpFleet: 'Extra VLAN IDs to trunk (tagged) through every port on every node.',
-  portFwdNoteFleet:   'Each row creates a static DHCPv4 lease and NAT port forward. Ports must be unique.',
   doneConfig:         '← Done',
   hardwareOffloadHelp:      'Higher network throughput where supported. Do not enable if using QoS/SQM.',
   extraPackagesHelp:      'Appended to the final list. Prefix with - to remove an auto-added package.',

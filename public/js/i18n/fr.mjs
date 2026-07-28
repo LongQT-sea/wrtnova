@@ -12,8 +12,6 @@ export default {
   adguardHome:      'AdGuard Home',
   dnsproxy:         'dnsproxy',
   wireGuardVpn:     'WireGuard VPN',
-  guestNetwork:     'Réseau invité',
-  iotNetwork:       'Réseau IoT',
   rootPassword:     'Mot de passe root',
 
   // -- Navigation / breadcrumbs --------------------------------------
@@ -91,9 +89,6 @@ export default {
   // -- Flash note (HTML content) -------------------------------------
   flashNote: 'Flashez l\'image "<strong>sysupgrade</strong>" via "Système → Sauvegarde / Flasher le firmware → Flasher l\'image". Assurez-vous de <strong>décocher "Conserver les paramètres et la configuration actuelle"</strong>.',
 
-  // -- Confirm dialogs -----------------------------------------------
-  confirmDeleteNode: 'Supprimer "{name}" ? Cette action est irréversible.',
-
   // -- Build all -----------------------------------------------------
   noDevicesSelected:   "Aucun nœud n'a d'appareil sélectionné.",
   buildingNodes:       'Compilation de {n} nœud…',
@@ -110,6 +105,8 @@ export default {
   noDevicesLoaded:      'Aucun appareil chargé.',
   errorLoadingDevices:  'Erreur de chargement des appareils : {msg}',
   loadingDeviceDetails: "Chargement des détails de l'appareil…",
+  loadingDevices:       'Chargement des appareils…',
+  errorDeviceDetails:   "Échec du chargement des détails de l'appareil ({msg})",
 
   // -- Generic UI ----------------------------------------------------
   save:               'Enregistrer',
@@ -207,6 +204,18 @@ export default {
   peerPublicKey:      'Clé publique du pair',
   endpoint:           'Point de terminaison',
   presharedKey:       'Clé pré-partagée',
+  // -- Status dot / reveal-toggle labels (aria-label only) -----------
+  dotNotStarted:    'Non commencé',
+  dotInProgress:    'En cours',
+  dotComplete:      'Terminé',
+  showPassword:     'Afficher le mot de passe',
+  hidePassword:     'Masquer le mot de passe',
+  showPrivateKey:   'Afficher la clé privée',
+  hidePrivateKey:   'Masquer la clé privée',
+  showPresharedKey: 'Afficher la clé pré-partagée',
+  hidePresharedKey: 'Masquer la clé pré-partagée',
+  showApiToken:     'Afficher le jeton API',
+  hideApiToken:     'Masquer le jeton API',
   clientIpv4:         'IPv4 client',
   clientIpv6:         'IPv6 client',
   dnsV4:              'DNS IPv4',
@@ -243,7 +252,7 @@ export default {
   ulaPrefix:          'Préfixe ULA IPv6',
   ulaPrefixHelp:      'Laissez vide pour générer automatiquement un préfixe aléatoire au premier démarrage.',
   bridgeWanPort:      'Pont du port WAN',
-  bridgeWanPortNote:  'Ajoute le port WAN au pont <code>br-vlan</code>, afin que les VLANs côté WAN (IPTV, VoIP, multi-PPPoE) puissent être transportés vers les équipements en aval. Chaque id de VLAN doit aussi figurer dans « VLANs supplémentaires ».',
+  bridgeWanPortNote:  "Ajoute le port WAN au pont <code>br-vlan</code>, permettant aux VLANs côté WAN (IPTV, VoIP, multi-PPPoE) d'être pontés vers les équipements en aval. Chaque ID de VLAN doit aussi figurer dans « VLANs supplémentaires ».",
   wifi:               'WiFi',
   countryCode:        'Code pays',
   denseEnvironment:   'Environnement dense',
@@ -264,6 +273,13 @@ export default {
   channel5g2:         'Canal 5 GHz (deuxième radio)',
   channel6g:          'Canal 6 GHz',
   wifiLogLevel:       'Niveau de journalisation WiFi',
+  channelDefault:     'Par défaut',
+  channelAuto:        'Automatique',
+  logLevelDefault:    'Par défaut',
+  logLevelDebug:      'Débogage',
+  logLevelInfo:       'Informations',
+  logLevelNotice:     'Notification',
+  logLevelWarn:       'Avertissement',
   dot11kv:            '802.11k/v',
   dot11kvHelp:        'Rapports de voisinage et roaming assisté.',
   dot11r:             '802.11r',
@@ -318,7 +334,6 @@ export default {
   dnsmasqMultiNote:   'Pour ajouter le DHCP sur une nouvelle interface, utilisez la commande intégrée <code>dhcp-instance-add</code>.',
   bootstrapDnsPh:     'IP simples supplémentaires, une par ligne',
   additionalPackages: 'Paquets',
-  autoAdded:          'Ajouté automatiquement',
   extraPackages:      'Paquets supplémentaires',
   perfMisc:           'Performance et divers',
   softwareOffload:    'Déchargement logiciel des flux',
@@ -355,7 +370,7 @@ export default {
   buildLog:           'Activer le journal de débogage',
   buildLogHelp:       "Enregistrer l'exécution du script de premier démarrage dans /root/99-asu-defaults.log.",
   asuEndpoint:        'Point de terminaison ASU',
-  asuSecurityWarning: "Tout ce que vous saisissez est envoyé au serveur de compilation ASU puis stocké dans l'image générée, où quiconque connaît le <strong>hash de compilation</strong> peut la télécharger et la lire. Laissez les mots de passe vides (les valeurs par défaut sont sûres pour le premier démarrage : pas de mot de passe root, mot de passe administrateur AdGuard et Wi-Fi 12345678) et configurez de vrais identifiants après le premier démarrage via LuCI ou SSH.",
+  asuSecurityWarning: "Tout ce que vous saisissez est envoyé au serveur de compilation ASU et stocké dans l'image générée pendant 30 minutes au maximum. Quiconque connaît le <strong>hash de compilation</strong> (bien que ce soit peu probable) peut la télécharger et la lire. Laissez vides les champs sensibles et configurez vos identifiants réels après le premier démarrage via LuCI ou SSH.",
   recentBuilds:       'Compilations récentes',
   noBuildsYet:        "Aucune compilation pour l'instant.",
   configPreview:      'Aperçu de la configuration',
@@ -380,7 +395,6 @@ export default {
   oneKeyPerLineFleet: 'Une clé par ligne. Déployée sur chaque nœud.',
   vlanIdsSame:        'Les ID VLAN sont identiques pour tous les nœuds de ce réseau.',
   additionalTrunkHelpFleet: 'ID VLAN supplémentaires à acheminer en trunk (tagués) sur chaque port de chaque nœud.',
-  portFwdNoteFleet:   'Chaque ligne crée un bail DHCPv4 statique et une redirection de port NAT. Les ports doivent être uniques.',
   doneConfig:         '← Terminé',
   hardwareOffloadHelp:      "Débit réseau plus élevé là où c'est supporté. Ne pas activer avec QoS/SQM.",
   extraPackagesHelp:      'Ajouté à la liste finale. Préfixez avec - pour supprimer un paquet ajouté automatiquement.',

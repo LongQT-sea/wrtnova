@@ -9,6 +9,7 @@
 // Coverage:
 //   data-i18n             -> compare element text content to en[key]  (strict)
 //   data-i18n-placeholder -> compare the placeholder attribute        (strict)
+//   data-i18n-aria        -> compare the aria-label attribute         (strict)
 //   data-i18n-html        -> key-existence only (innerHTML markup is not
 //                            text-comparable without a real DOM)
 
@@ -108,7 +109,11 @@ function innerContent(html, tag, openEnd) {
   return null;
 }
 
-const ATTR_RE = /data-i18n(-placeholder|-html)?="([^"]+)"/g;
+const ATTR_RE = /data-i18n(-placeholder|-html|-aria)?="([^"]+)"/g;
+
+// kind -> the HTML attribute whose value must equal en[key]
+const ATTR_OF = { '-placeholder': 'placeholder', '-aria': 'aria-label' };
+
 const errors = [];
 let checked = 0;
 
@@ -130,9 +135,10 @@ for (const { html: htmlPath, table } of PAGES) {
     if (kind === '-html') { checked++; continue; } // existence only
 
     let actual;
-    if (kind === '-placeholder') {
-      const pm = html.slice(tagStart, openEnd + 1).match(/\splaceholder="([^"]*)"/);
-      if (!pm) { errors.push(`${htmlPath}: data-i18n-placeholder="${key}" but element has no placeholder attribute`); continue; }
+    const attr = ATTR_OF[kind];
+    if (attr) {
+      const pm = html.slice(tagStart, openEnd + 1).match(new RegExp(`\\s${attr}="([^"]*)"`));
+      if (!pm) { errors.push(`${htmlPath}: data-i18n${kind}="${key}" but element has no ${attr} attribute`); continue; }
       actual = norm(pm[1]);
     } else {
       const inner = innerContent(html, tagName, openEnd);

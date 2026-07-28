@@ -12,8 +12,6 @@ export default {
   adguardHome:      'AdGuard Home',
   dnsproxy:         'dnsproxy',
   wireGuardVpn:     'WireGuard VPN',
-  guestNetwork:     '访客网络',
-  iotNetwork:       '物联网网络',
   rootPassword:     'Root 密码',
 
   // -- Navigation / breadcrumbs --------------------------------------
@@ -91,9 +89,6 @@ export default {
   // -- Flash note (HTML content) -------------------------------------
   flashNote: '通过"系统 → 备份/刷写固件 → 刷写镜像"刷写 "<strong>sysupgrade</strong>" 镜像。确保<strong>取消勾选"保留设置和当前配置"</strong>。',
 
-  // -- Confirm dialogs -----------------------------------------------
-  confirmDeleteNode: '删除"{name}"？此操作无法撤销。',
-
   // -- Build all -----------------------------------------------------
   noDevicesSelected:   '还没有节点选择设备。',
   buildingNodes:       '正在构建 {n} 个节点…',
@@ -110,6 +105,8 @@ export default {
   noDevicesLoaded:      '未加载设备。',
   errorLoadingDevices:  '加载设备出错：{msg}',
   loadingDeviceDetails: '正在加载设备详情…',
+  loadingDevices:       '正在加载设备…',
+  errorDeviceDetails:   '加载设备详情失败（{msg}）',
 
   // -- Generic UI ----------------------------------------------------
   save:               '保存',
@@ -207,6 +204,18 @@ export default {
   peerPublicKey:      '对端公钥',
   endpoint:           '端点',
   presharedKey:       '预共享密钥',
+  // -- Status dot / reveal-toggle labels (aria-label only) -----------
+  dotNotStarted:    '未开始',
+  dotInProgress:    '进行中',
+  dotComplete:      '已完成',
+  showPassword:     '显示密码',
+  hidePassword:     '隐藏密码',
+  showPrivateKey:   '显示私钥',
+  hidePrivateKey:   '隐藏私钥',
+  showPresharedKey: '显示预共享密钥',
+  hidePresharedKey: '隐藏预共享密钥',
+  showApiToken:     '显示 API 令牌',
+  hideApiToken:     '隐藏 API 令牌',
   clientIpv4:         '客户端 IPv4',
   clientIpv6:         '客户端 IPv6',
   dnsV4:              'DNS IPv4',
@@ -243,7 +252,7 @@ export default {
   ulaPrefix:          'IPv6 ULA 前缀',
   ulaPrefixHelp:      '留空则在首次启动时自动随机生成前缀。',
   bridgeWanPort:      '桥接 WAN 端口',
-  bridgeWanPortNote:  '将 WAN 端口加入 <code>br-vlan</code> 网桥，使 WAN 侧 VLAN（IPTV、VoIP、多 PPPoE）可以中继到下游设备。每个 VLAN id 还需填入“额外 VLAN”。',
+  bridgeWanPortNote:  '将 WAN 端口加入 <code>br-vlan</code> 网桥，使 WAN 侧 VLAN（IPTV、VoIP、多 PPPoE）可以桥接到下游设备。每个 VLAN ID 还需填入“额外 VLAN”。',
   wifi:               'WiFi',
   countryCode:        '国家代码',
   denseEnvironment:   '密集环境',
@@ -264,6 +273,13 @@ export default {
   channel5g2:         '5 GHz 信道 (第二射频)',
   channel6g:          '6 GHz 信道',
   wifiLogLevel:       'WiFi 日志级别',
+  channelDefault:     '默认',
+  channelAuto:        '自动',
+  logLevelDefault:    '默认',
+  logLevelDebug:      '调试',
+  logLevelInfo:       '信息',
+  logLevelNotice:     '通知',
+  logLevelWarn:       '警告',
   dot11kv:            '802.11k/v',
   dot11kvHelp:        '邻居报告和辅助漫游。',
   dot11r:             '802.11r',
@@ -318,7 +334,6 @@ export default {
   dnsmasqMultiNote:   '要为新接口添加 DHCP，请使用内置命令 <code>dhcp-instance-add</code>。',
   bootstrapDnsPh:     '额外的纯 IP，每行一个',
   additionalPackages: '软件包',
-  autoAdded:          '自动添加',
   extraPackages:      '额外软件包',
   perfMisc:           '性能和杂项',
   softwareOffload:    '软件流卸载',
@@ -356,7 +371,7 @@ export default {
   buildLog:           '启用调试日志',
   buildLogHelp:       '将首次启动脚本执行过程追踪写入 /root/99-asu-defaults.log。',
   asuEndpoint:        'ASU 端点',
-  asuSecurityWarning: '您输入的任何内容都会发送到 ASU 构建服务器，随后存储在生成的固件映像中，任何知道<strong>构建哈希</strong>的人都可以下载并读取。请将密码留空（默认值适合首次启动：无 root 密码，AdGuard 管理员和 Wi-Fi 密码均为 12345678），并在首次启动后通过 LuCI 或 SSH 设置真实凭据。',
+  asuSecurityWarning: '您输入的任何内容都会发送到 ASU 构建服务器，并在生成的固件映像中最多保存 30 分钟。任何知道<strong>构建哈希</strong>的人（虽然可能性很小）都可以下载并读取。请将敏感字段留空，并在首次启动后通过 LuCI 或 SSH 配置真实凭据。',
   recentBuilds:       '最近构建',
   noBuildsYet:        '暂无构建记录。',
   configPreview:      '配置预览',
@@ -381,7 +396,6 @@ export default {
   oneKeyPerLineFleet: '每行一个密钥。部署到每个节点。',
   vlanIdsSame:        '此网络中所有节点的 VLAN ID 相同。',
   additionalTrunkHelpFleet: '通过每个节点的每个端口进行干道（标记）传输的额外 VLAN ID。',
-  portFwdNoteFleet:   '每行创建一个静态 DHCPv4 租约和 NAT 端口转发。端口必须唯一。',
   doneConfig:         '← 完成',
   hardwareOffloadHelp:      '在受支持的设备上提高网络吞吐量。使用 QoS/SQM 时请勿启用。',
   extraPackagesHelp:      '附加到最终列表。使用 - 前缀删除自动添加的软件包。',
