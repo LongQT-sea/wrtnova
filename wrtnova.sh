@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2024 - 2026 Tieu Long <https://github.com/LongQT-sea>
 
-# WrtNova - Opinionated uci-defaults script for OpenWrt
+# WrtNova - Opinionated first-boot provisioning script for OpenWrt
 
 # Router LAN IP is derived from NET_PREFIX.VLAN.1, e.g. 192.168.1.1 or 192.168.1.2 if AP mode
 
@@ -241,8 +241,8 @@ _uci() {
 	shift 3
 
 	if [ -z "$name" ]; then
-		uci add "$config" "$type"
-		name="@$type[-1]"
+		name=$(uci add "$config" "$type")
+		echo $name
 	else
 		uci set "$config.$name=$type"
 	fi
@@ -705,7 +705,7 @@ fi
 
 # === Network ===
 add_bridge_vlan() {
-	local vlan_id="$1" ports="$2" iface="$3" p list=
+	local vlan_id="$1" ports="$2" iface="$3" p list
 
 	for p in $ports; do
 		case "$p" in
