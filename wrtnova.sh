@@ -1363,27 +1363,22 @@ fw_add_forwarding() {
 	_uci firewall forwarding "${1}_to_${2}" src="$1" dest="$2"
 }
 
+fw_rule() {
+	local zone="$1" name="$2"; shift 2
+	_uci firewall rule "" name="$zone $name" src="$zone" target=ACCEPT "$@"
+}
+
 fw_add_base_rules() {
-	_uci firewall rule "" \
-		name="$1 Allow-DNS-DHCP-NTP" src="$1" \
-		target=ACCEPT proto="tcp udp" dest_port="53 67 123"
+	fw_rule "$1" Allow-DNS-DHCP-NTP proto="tcp udp" dest_port="53 67 123"
 
-	_uci firewall rule "" \
-		name="$1 Allow-Ping" src="$1" \
-		target=ACCEPT proto=icmp family=ipv4 +icmp_type=echo-request
+	fw_rule "$1" Allow-Ping proto=icmp family=ipv4 +icmp_type=echo-request
 
-	_uci firewall rule "" \
-		name="$1 Allow-DHCPv6" src="$1" \
-		target=ACCEPT proto=udp family=ipv6 dest_port=546
+	fw_rule "$1" Allow-DHCPv6 proto=udp family=ipv6 dest_port=546
 
-	_uci firewall rule "" \
-		name="$1 Allow-MLD" src="$1" \
-		target=ACCEPT proto=icmp family=ipv6 src_ip=fe80::/10 \
+	fw_rule "$1" Allow-MLD proto=icmp family=ipv6 src_ip=fe80::/10 \
 		+icmp_type="130/0 131/0 132/0 143/0"
 
-	_uci firewall rule "" \
-		name="$1 Allow-ICMPv6-Input" src="$1" \
-		target=ACCEPT proto=icmp family=ipv6 limit=1000/sec \
+	fw_rule "$1" Allow-ICMPv6-Input proto=icmp family=ipv6 limit=1000/sec \
 		+icmp_type="bad-header destination-unreachable
 		echo-reply echo-request neighbour-advertisement
 		neighbour-solicitation packet-too-big router-advertisement
