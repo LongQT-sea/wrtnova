@@ -1016,10 +1016,19 @@
   .inline > label { cursor: pointer; }
 
   /* ── Per-network VLAN / addressing table ────────────────────────── */
+  /* Below the breakpoint this scrolls sideways rather than stacking into
+     per-network cards: reading a VLAN ID or a prefix down the column is the
+     point of the table.
+     The scroller is a BFC, so the table's top margin no longer collapses with
+     the title above it - the wrapper carries it instead. */
+  .net-table-wrap {
+    position: relative;
+    margin-top: 0.5rem;
+  }
+  .net-table-scroll { overflow-x: auto; }
   .net-table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 0.5rem;
   }
   .net-table thead th {
     text-align: left;
@@ -1104,44 +1113,87 @@
   }
   .net-table .toggle-input:disabled { cursor: not-allowed; }
   @media (max-width: 767px) {
-    .net-table thead { display: none; }
-    .net-table,
-    .net-table tbody,
-    .net-table tr,
-    .net-table td {
-      display: block;
-      width: 100%;
+    .net-table {
+      min-width: 37.75rem;
+      table-layout: fixed;
     }
-    .net-table tr {
-      border: 1px solid #e4e4e7;
-      border-radius: 0.375rem;
-      padding: 0.5rem 0.25rem;
-      margin-bottom: 0.625rem;
+    .net-table td { padding: 0.4rem 0.5rem; }
+    /* Column widths are set by the headers, and the widest is German's
+       Schnittstellenname - one unbreakable word no column here can hold, so
+       the header may break mid-word rather than paint across its neighbour. */
+    .net-table thead th {
+      white-space: normal;
+      overflow-wrap: anywhere;
     }
-    .dark .net-table tr { border-color: #27272a; }
-    .net-table td {
-      border: none;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 1rem;
-      padding: 0.35rem 0.5rem;
+    .net-table .col-en  { width: 3.25rem; }
+    .net-table .col-net { width: 4.25rem; }
+    .net-table .col-if  { width: 7.25rem; }
+    .net-table .col-pfx { width: 6rem; }
+    .net-table .col-vid { width: 4.5rem; }
+    .net-table .col-sub { width: 5rem; }
+    .net-table .col-ip  { width: 7.5rem; }
+    /* 22px of reserved picker arrow is what clips 192.168, not the column -
+       same tax and same remedy as .opt-field--narrow above. */
+    .net-table .input-base::-webkit-calendar-picker-indicator {
+      display: none !important;
     }
-    .net-table td::before {
-      content: attr(data-label);
-      font-size: 0.6875rem;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-      color: #a1a1aa;
-      flex-shrink: 0;
+    /* On + Network stay put so a scrolled row is still identifiable. Both need
+       an opaque background of their own: the other columns pass under them. */
+    .net-table .col-en,
+    .net-table .col-net {
+      position: sticky;
+      z-index: 1;
+      background-color: #ffffff;
     }
-    .net-table td.col-en::before { content: none; }
-    .net-table .col-if,
-    .net-table .col-pfx,
-    .net-table .col-vid,
-    .net-table .col-sub,
-    .net-table .col-ip { width: auto; }
-    .net-table .input-base { max-width: 60%; }
+    .dark .net-table .col-en,
+    .dark .net-table .col-net { background-color: #18181b; }
+    .net-table .col-en { left: 0; }
+    .net-table .col-net {
+      left: 3.25rem;
+      box-shadow: inset -1px 0 0 #e4e4e7, 6px 0 6px -6px rgba(0,0,0,0.18);
+    }
+    .dark .net-table .col-net {
+      box-shadow: inset -1px 0 0 #27272a, 6px 0 6px -6px rgba(0,0,0,0.6);
+    }
+    .net-table thead .col-en,
+    .net-table thead .col-net { z-index: 2; }
+    /* The switch shrinks to buy the fields back some width; the tap target
+       does not - the transparent input is what gets tapped, and it keeps a
+       44px reach of its own. */
+    .net-table .toggle-wrap {
+      width: 2.25rem;
+      height: 1.25rem;
+    }
+    .net-table .toggle-thumb {
+      top: 0.1875rem;
+      left: 0.1875rem;
+      width: 0.875rem;
+      height: 0.875rem;
+    }
+    .net-table .toggle-input:checked ~ .toggle-thumb { transform: translateX(1rem); }
+    .net-table .toggle-input {
+      inset: -0.75rem -0.5rem;
+      width: auto;
+      height: auto;
+    }
+    /* Dimming a pinned cell dims its background with it and lets the scrolled
+       columns show through, so the name dims on its own. */
+    tr.net-off td.col-net { opacity: 1; }
+    tr.net-off td.col-net .net-name { opacity: 0.35; }
+    /* Router IP is cut off at every phone width - the fade says so. */
+    .net-table-wrap::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: 1.75rem;
+      pointer-events: none;
+      background: linear-gradient(to right, rgba(255,255,255,0), #ffffff);
+    }
+    .dark .net-table-wrap::after {
+      background: linear-gradient(to right, rgba(24,24,27,0), #18181b);
+    }
   }
 
   /* ── Networks fleet builder ─────────────────────────────────────── */

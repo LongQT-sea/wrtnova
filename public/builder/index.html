@@ -271,105 +271,109 @@
 
         <div class="sub-section">
           <p class="sub-section-title" data-i18n="networksAddressing">Networks &amp; addressing</p>
-          <table class="net-table">
-            <thead>
-              <tr>
-                <th data-i18n="tableOn">On</th>
-                <th data-i18n="tableNetwork">Network</th>
-                <th class="col-if" data-i18n="tableIface">Interface name</th>
-                <th class="col-pfx" data-i18n="tableIpPrefix">IP prefix</th>
-                <th class="col-vid" data-i18n="tableVlanId">VLAN ID</th>
-                <th class="col-sub" data-i18n="tableSubnet">Subnet</th>
-                <th class="col-ip" data-i18n="tableRouterIp">Router IP</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr data-net="lan" data-def-vid="1">
-                <td class="col-en">
-                  <span class="toggle-wrap net-lan-toggle">
-                    <input type="checkbox" class="toggle-input" checked disabled aria-label="LAN is always enabled">
-                    <span class="toggle-track"></span>
-                    <span class="toggle-thumb"></span>
-                  </span>
-                </td>
-                <td data-label="Network"><span class="net-name">LAN</span></td>
-                <td class="col-if" data-label="Interface name"><input type="text" id="LAN_IFACE" name="LAN_IFACE" class="input-base" maxlength="15" pattern="[A-Za-z0-9_]+" placeholder="lan"></td>
-                <td class="col-pfx" data-label="Prefix"><input type="text" id="LAN_BASE_PREFIX" name="LAN_BASE_PREFIX" class="input-base" placeholder="192.168" list="prefix-options"></td>
-                <td class="col-vid" data-label="VLAN"><input type="number" id="LAN_VLAN_ID" name="LAN_VLAN_ID" class="input-base" min="1" max="255" placeholder="1"></td>
-                <td class="col-sub" data-label="Subnet">
-                  <select id="LAN_SUBNET" name="LAN_SUBNET" class="input-base net-sub" aria-label="LAN subnet">
-                    <option value="/24">/24</option>
-                    <option value="/23">/23</option>
-                    <option value="/22">/22</option>
-                  </select>
-                </td>
-                <td class="col-ip" data-label="Router IP"><span class="net-derived">—</span></td>
-              </tr>
-              <tr data-net="guest" data-def-vid="5">
-                <td class="col-en">
-                  <span class="toggle-wrap">
-                    <input type="checkbox" id="GUEST_ENABLE" name="GUEST_ENABLE" value="1" class="toggle-input" checked aria-label="Enable Guest network">
-                    <span class="toggle-track"></span>
-                    <span class="toggle-thumb"></span>
-                  </span>
-                </td>
-                <td data-label="Network"><span class="net-name">Guest</span></td>
-                <td class="col-if" data-label="Interface name"><input type="text" id="GUEST_IFACE" name="GUEST_IFACE" class="input-base" maxlength="15" pattern="[A-Za-z0-9_]+" placeholder="guest"></td>
-                <td class="col-pfx" data-label="Prefix"><input type="text" id="GUEST_BASE_PREFIX" name="GUEST_BASE_PREFIX" class="input-base" placeholder="192.168" list="prefix-options"></td>
-                <td class="col-vid" data-label="VLAN"><input type="number" id="GUEST_VLAN_ID" name="GUEST_VLAN_ID" class="input-base" min="1" max="255" placeholder="5"></td>
-                <td class="col-sub" data-label="Subnet">
-                  <select id="GUEST_SUBNET" name="GUEST_SUBNET" class="input-base net-sub" aria-label="Guest subnet">
-                    <option value="/24">/24</option>
-                    <option value="/23">/23</option>
-                    <option value="/22">/22</option>
-                  </select>
-                </td>
-                <td class="col-ip" data-label="Router IP"><span class="net-derived">—</span></td>
-              </tr>
-              <tr data-net="iot" data-def-vid="10">
-                <td class="col-en">
-                  <span class="toggle-wrap">
-                    <input type="checkbox" id="IOT_ENABLE" name="IOT_ENABLE" value="1" class="toggle-input" aria-label="Enable IoT network">
-                    <span class="toggle-track"></span>
-                    <span class="toggle-thumb"></span>
-                  </span>
-                </td>
-                <td data-label="Network"><span class="net-name">IoT</span></td>
-                <td class="col-if" data-label="Interface name"><input type="text" id="IOT_IFACE" name="IOT_IFACE" class="input-base" maxlength="15" pattern="[A-Za-z0-9_]+" placeholder="iot"></td>
-                <td class="col-pfx" data-label="Prefix"><input type="text" id="IOT_BASE_PREFIX" name="IOT_BASE_PREFIX" class="input-base" placeholder="192.168" list="prefix-options"></td>
-                <td class="col-vid" data-label="VLAN"><input type="number" id="IOT_VLAN_ID" name="IOT_VLAN_ID" class="input-base" min="1" max="255" placeholder="10"></td>
-                <td class="col-sub" data-label="Subnet">
-                  <select id="IOT_SUBNET" name="IOT_SUBNET" class="input-base net-sub" aria-label="IoT subnet">
-                    <option value="/24">/24</option>
-                    <option value="/23">/23</option>
-                    <option value="/22">/22</option>
-                  </select>
-                </td>
-                <td class="col-ip" data-label="Router IP"><span class="net-derived">—</span></td>
-              </tr>
-              <tr data-net="wg" data-def-vid="15">
-                <td class="col-en">
-                  <span class="toggle-wrap">
-                    <input type="checkbox" id="WG_ENABLE" name="WG_ENABLE" value="1" class="toggle-input" aria-label="Enable WireGuard VPN network">
-                    <span class="toggle-track"></span>
-                    <span class="toggle-thumb"></span>
-                  </span>
-                </td>
-                <td data-label="Network"><span class="net-name">VPN</span></td>
-                <td class="col-if" data-label="Interface name"><input type="text" id="LAN_VPN_IFACE" name="LAN_VPN_IFACE" class="input-base" maxlength="15" pattern="[A-Za-z0-9_]+" placeholder="lan_vpn"></td>
-                <td class="col-pfx" data-label="Prefix"><input type="text" id="LAN_VPN_BASE_PREFIX" name="LAN_VPN_BASE_PREFIX" class="input-base" placeholder="192.168" list="prefix-options"></td>
-                <td class="col-vid" data-label="VLAN"><input type="number" id="LAN_VPN_VLAN_ID" name="LAN_VPN_VLAN_ID" class="input-base" min="1" max="255" placeholder="15"></td>
-                <td class="col-sub" data-label="Subnet">
-                  <select id="LAN_VPN_SUBNET" name="LAN_VPN_SUBNET" class="input-base net-sub" aria-label="VPN subnet">
-                    <option value="/24">/24</option>
-                    <option value="/23">/23</option>
-                    <option value="/22">/22</option>
-                  </select>
-                </td>
-                <td class="col-ip" data-label="Router IP"><span class="net-derived">—</span></td>
-              </tr>
-            </tbody>
-          </table>
+          <div class="net-table-wrap">
+            <div class="net-table-scroll">
+              <table class="net-table">
+                <thead>
+                  <tr>
+                    <th class="col-en" data-i18n="tableOn">On</th>
+                    <th class="col-net" data-i18n="tableNetwork">Network</th>
+                    <th class="col-if" data-i18n="tableIface">Interface name</th>
+                    <th class="col-pfx" data-i18n="tableIpPrefix">IP prefix</th>
+                    <th class="col-vid" data-i18n="tableVlanId">VLAN ID</th>
+                    <th class="col-sub" data-i18n="tableSubnet">Subnet</th>
+                    <th class="col-ip" data-i18n="tableRouterIp">Router IP</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr data-net="lan" data-def-vid="1">
+                    <td class="col-en">
+                      <span class="toggle-wrap net-lan-toggle">
+                        <input type="checkbox" class="toggle-input" checked disabled aria-label="LAN is always enabled">
+                        <span class="toggle-track"></span>
+                        <span class="toggle-thumb"></span>
+                      </span>
+                    </td>
+                    <td class="col-net"><span class="net-name">LAN</span></td>
+                    <td class="col-if"><input type="text" id="LAN_IFACE" name="LAN_IFACE" class="input-base" maxlength="15" pattern="[A-Za-z0-9_]+" placeholder="lan"></td>
+                    <td class="col-pfx"><input type="text" id="LAN_BASE_PREFIX" name="LAN_BASE_PREFIX" class="input-base" placeholder="192.168" list="prefix-options"></td>
+                    <td class="col-vid"><input type="number" id="LAN_VLAN_ID" name="LAN_VLAN_ID" class="input-base" min="1" max="255" placeholder="1"></td>
+                    <td class="col-sub">
+                      <select id="LAN_SUBNET" name="LAN_SUBNET" class="input-base net-sub" aria-label="LAN subnet">
+                        <option value="/24">/24</option>
+                        <option value="/23">/23</option>
+                        <option value="/22">/22</option>
+                      </select>
+                    </td>
+                    <td class="col-ip"><span class="net-derived">—</span></td>
+                  </tr>
+                  <tr data-net="guest" data-def-vid="5">
+                    <td class="col-en">
+                      <span class="toggle-wrap">
+                        <input type="checkbox" id="GUEST_ENABLE" name="GUEST_ENABLE" value="1" class="toggle-input" checked aria-label="Enable Guest network">
+                        <span class="toggle-track"></span>
+                        <span class="toggle-thumb"></span>
+                      </span>
+                    </td>
+                    <td class="col-net"><span class="net-name">Guest</span></td>
+                    <td class="col-if"><input type="text" id="GUEST_IFACE" name="GUEST_IFACE" class="input-base" maxlength="15" pattern="[A-Za-z0-9_]+" placeholder="guest"></td>
+                    <td class="col-pfx"><input type="text" id="GUEST_BASE_PREFIX" name="GUEST_BASE_PREFIX" class="input-base" placeholder="192.168" list="prefix-options"></td>
+                    <td class="col-vid"><input type="number" id="GUEST_VLAN_ID" name="GUEST_VLAN_ID" class="input-base" min="1" max="255" placeholder="5"></td>
+                    <td class="col-sub">
+                      <select id="GUEST_SUBNET" name="GUEST_SUBNET" class="input-base net-sub" aria-label="Guest subnet">
+                        <option value="/24">/24</option>
+                        <option value="/23">/23</option>
+                        <option value="/22">/22</option>
+                      </select>
+                    </td>
+                    <td class="col-ip"><span class="net-derived">—</span></td>
+                  </tr>
+                  <tr data-net="iot" data-def-vid="10">
+                    <td class="col-en">
+                      <span class="toggle-wrap">
+                        <input type="checkbox" id="IOT_ENABLE" name="IOT_ENABLE" value="1" class="toggle-input" aria-label="Enable IoT network">
+                        <span class="toggle-track"></span>
+                        <span class="toggle-thumb"></span>
+                      </span>
+                    </td>
+                    <td class="col-net"><span class="net-name">IoT</span></td>
+                    <td class="col-if"><input type="text" id="IOT_IFACE" name="IOT_IFACE" class="input-base" maxlength="15" pattern="[A-Za-z0-9_]+" placeholder="iot"></td>
+                    <td class="col-pfx"><input type="text" id="IOT_BASE_PREFIX" name="IOT_BASE_PREFIX" class="input-base" placeholder="192.168" list="prefix-options"></td>
+                    <td class="col-vid"><input type="number" id="IOT_VLAN_ID" name="IOT_VLAN_ID" class="input-base" min="1" max="255" placeholder="10"></td>
+                    <td class="col-sub">
+                      <select id="IOT_SUBNET" name="IOT_SUBNET" class="input-base net-sub" aria-label="IoT subnet">
+                        <option value="/24">/24</option>
+                        <option value="/23">/23</option>
+                        <option value="/22">/22</option>
+                      </select>
+                    </td>
+                    <td class="col-ip"><span class="net-derived">—</span></td>
+                  </tr>
+                  <tr data-net="wg" data-def-vid="15">
+                    <td class="col-en">
+                      <span class="toggle-wrap">
+                        <input type="checkbox" id="WG_ENABLE" name="WG_ENABLE" value="1" class="toggle-input" aria-label="Enable WireGuard VPN network">
+                        <span class="toggle-track"></span>
+                        <span class="toggle-thumb"></span>
+                      </span>
+                    </td>
+                    <td class="col-net"><span class="net-name">VPN</span></td>
+                    <td class="col-if"><input type="text" id="LAN_VPN_IFACE" name="LAN_VPN_IFACE" class="input-base" maxlength="15" pattern="[A-Za-z0-9_]+" placeholder="lan_vpn"></td>
+                    <td class="col-pfx"><input type="text" id="LAN_VPN_BASE_PREFIX" name="LAN_VPN_BASE_PREFIX" class="input-base" placeholder="192.168" list="prefix-options"></td>
+                    <td class="col-vid"><input type="number" id="LAN_VPN_VLAN_ID" name="LAN_VPN_VLAN_ID" class="input-base" min="1" max="255" placeholder="15"></td>
+                    <td class="col-sub">
+                      <select id="LAN_VPN_SUBNET" name="LAN_VPN_SUBNET" class="input-base net-sub" aria-label="VPN subnet">
+                        <option value="/24">/24</option>
+                        <option value="/23">/23</option>
+                        <option value="/22">/22</option>
+                      </select>
+                    </td>
+                    <td class="col-ip"><span class="net-derived">—</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
 
           <div class="iot-internet-only hidden mt-2 pl-1">
             <label class="toggle-label">
