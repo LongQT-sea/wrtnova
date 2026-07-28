@@ -243,7 +243,7 @@ export default {
   ulaPrefix:          'IPv6 ULA prefix',
   ulaPrefixHelp:      'Leave empty to auto-generate a random prefix on first boot.',
   bridgeWanPort:      'Bridge WAN port',
-  bridgeWanPortNote:  'Add WAN port to the <code>br-vlan</code> bridge, so WAN-side VLANs (IPTV, VoIP, multi-PPPoE) can be trunked to downstream devices. Each VLAN id must also be listed under Additional VLANs.',
+  bridgeWanPortNote:  'Add WAN port to <code>br-vlan</code> bridge, allowing WAN-side VLANs (IPTV, VoIP, multi-PPPoE) to be bridged to downstream devices. Each VLAN ID must also be listed under Additional VLANs.',
   wifi:               'WiFi',
   countryCode:        'Country code',
   denseEnvironment:   'Dense environment',
