@@ -1456,7 +1456,7 @@ add_cf_ddns() {
 	[ "$ip_source" = script ] && {
 		ip_key=ip_script
 		name="${network_or_hostname//-/_}_ipv6"
-		network_or_hostname="ip6host $network_or_hostname $lan_if"
+		network_or_hostname="/sbin/ip6host $network_or_hostname $lan_if"
 	}
 
 	_uci ddns service "$name" \
