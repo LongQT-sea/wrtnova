@@ -803,27 +803,24 @@ _uci network interface wan6 device=@wan ~wan_6
 			ip4table=20 ip6table=20 ${WG_MTU:+mtu=$WG_MTU}
 
 		if [ "$no_mwan3" = 1 ]; then
-			[ -n "$WG_DNS_V4" ] && _uci network rule  "" in="$lan_vpn_if" dest="$WG_DNS_V4/32" lookup=20 priority=988
-			[ -n "$WG_DNS_V6" ] && _uci network rule6 "" in="$lan_vpn_if" dest="$WG_DNS_V6/128" lookup=20 priority=988
-
-			for n in $SPLIT_TUNNEL_V4 $lan_net_pfx.1$lan_subnet; do
-				_uci network rule "" in="$lan_vpn_if" dest="$n" lookup=254 priority=989
-			done
-
-			for n in $SPLIT_TUNNEL_V6 $ula_prefix; do
-				_uci network rule6 "" in="$lan_vpn_if" dest="$n" lookup=254 priority=989
-			done
-
 			for f in '' 6; do
+				if [ -z "$f" ]; then
+					dns=$WG_DNS_V4 mask=32 split="$SPLIT_TUNNEL_V4 $lan_net_pfx.1$lan_subnet"
+				else
+					dns=$WG_DNS_V6 mask=128 split="$SPLIT_TUNNEL_V6 $ula_prefix"
+				fi
+
+				[ -n "$dns" ] && _uci network rule$f "" in="$lan_vpn_if" dest="$dns/$mask" lookup=20 priority=988
+
+				for n in $split; do
+					_uci network rule$f "" in="$lan_vpn_if" dest="$n" lookup=254 priority=989
+				done
+
 				_uci network rule$f "" in="$lan_vpn_if" lookup=20 priority=990
 				_uci network rule$f "" in="$lan_vpn_if" action=prohibit priority=991
-			done
 
-			[ "$iot_via_wg" = 1 ] && {
-				for f in '' 6; do
-					_uci network rule$f "" in=iot lookup=20 priority=990
-				done
-			}
+				[ "$iot_via_wg" = 1 ] && _uci network rule$f "" in=iot lookup=20 priority=990
+			done
 		else
 			# mwan3 already handles PBR and kill switch
 			_uci network interface "$wg_if" -ip4table -ip6table
