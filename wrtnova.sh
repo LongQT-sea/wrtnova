@@ -1491,15 +1491,20 @@ LAN_IF="${2:-lan}"
 	exit 0
 }
 
-# Get LAN_IF netdev and extract IPv6 prefix
+# Get LAN_IF netdev and every IPv6 prefix delegated to it.
 eval "$(ubus call network.interface dump | jsonfilter \
 	-e "LAN_DEV=@.interface[@.interface='$LAN_IF'].device" \
 	-e "PREFIX=@.interface[@.proto='dhcpv6']['ipv6-prefix'][@.assigned['$LAN_IF']].address")"
 
-# Get HOST IPv6 lease, match against the PREFIX, %???? is enough for /56 -> /64 PD
-ubus call dhcp ipv6leases | jsonfilter \
-	-e "@.device['${LAN_DEV}'].leases[@.hostname='${HOST}']['ipv6-addr'][*].address" \
-	| grep "${PREFIX%????}" | head -1
+leases=$(ubus call dhcp ipv6leases | jsonfilter \
+	-e "@.device['${LAN_DEV}'].leases[@.hostname='${HOST}']['ipv6-addr'][*].address")
+
+# Match HOST lease against each global prefix, %???? is enough for /56 -> /64 PD.
+for pfx in $PREFIX; do
+	case "$pfx" in [23]*) ;; *) continue ;; esac
+	addr=$(echo "$leases" | grep "${pfx%????}" | head -1)
+	[ -n "$addr" ] && { echo "$addr"; break; }
+done
 EOF
 
 # === Static Leases & Port Forwarding ===
