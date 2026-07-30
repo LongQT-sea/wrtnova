@@ -1,5 +1,5 @@
 #!/bin/sh
-# shellcheck disable=SC3043,SC3060,SC3057,SC1091
+# shellcheck disable=SC3043,SC3060,SC3057,SC1091,SC2048
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2024 - 2026 Tieu Long <https://github.com/LongQT-sea>
 
@@ -296,6 +296,10 @@ check_iface() {
 write_script() {
 	cat > "$1"
 	chmod +x "$1"
+}
+
+_uci_del() {
+	while uci -q del "$1[0]"; do :; done
 }
 EOF
 . /usr/share/wrtnova/functions.sh
@@ -606,7 +610,7 @@ mesh|$mesh_id|$mesh_pass|$mesh0_if|5g|$WIRELESS_MESH||sae
 mesh|$mesh_id|$mesh_pass|$mesh1_if|2g|$WIRELESS_MESH_2G||sae
 "
 
-while uci -q del wireless.@wifi-iface[0]; do :; done
+_uci_del wireless.@wifi-iface
 
 for radio in $radios; do
 	band=$(wl_get "$radio" band) || continue
@@ -888,7 +892,7 @@ bridge_wan_port=1
 		bridge_wan_port=1
 	}
 
-	while uci -q del network.@switch_vlan[0]; do :; done
+	_uci_del network.@switch_vlan
 }
 
 br_ports="$lan_ports"
@@ -1032,6 +1036,7 @@ done >/dev/null
 
 # === banIP ===
 [ -x /etc/init.d/banip ] && {
+	echo "sleep 10; /etc/init.d/banip restart &" >> "$hplug_ifup_wan"
 	ban_dev=${PPPOE_USERNAME:+pppoe-wan}
 	for i in $ifaces_wan; do
 		ban_dev="$ban_dev $(uci -q get network."${i}".device)"
@@ -1206,8 +1211,8 @@ setup_dnsmasq_upstream() {
 	done
 }
 
-while uci -q del dhcp.@dnsmasq[0]; do :; done
-while uci -q del dhcp.@dhcp[0]; do :; done
+_uci_del dhcp.@dnsmasq
+_uci_del dhcp.@dhcp
 
 [ "$GUEST_ENABLE" = 1 ] && dhcp-instance-add "$guest_if" 1h guest.lan "" 0 "$GUEST_DHCP_START"
 
@@ -1270,8 +1275,9 @@ bootstrap_dns="${BOOTSTRAP_DNS:-
 	echo "sleep 20; /etc/init.d/adguardhome restart &" >> "$hplug_ifup_wan"
 }
 
-adguard_upstream="$(for u in $doh_upstreams $adguard_upstream; do printf "    - %s\n" "$u"; done)"
-adguard_bootstrap="$(for u in $bootstrap_dns; do printf "    - %s\n" "$u"; done)"
+_yaml() { for u in $*; do echo "    - $u"; done }
+adguard_upstream=$(_yaml "$doh_upstreams" "$adguard_upstream")
+adguard_bootstrap=$(_yaml "$bootstrap_dns")
 
 ADGUARD_PASSWD=${ADGUARD_PASSWD:-\$2y\$10\$aRfh9IbImR8PIf/FWlLvkeW6wiyp47BjY0KqW/FD/F14QloYuV00a}
 [ "$os_version" -ge "25" ] && { mkdir -p /etc/adguardhome; adguard_dir=/etc/adguardhome; }
@@ -1336,7 +1342,7 @@ doh_upstreams="${DOH_UPSTREAMS:-https://dns.adguard-dns.com/dns-query}"
 }
 
 [ "$https_dns" = 1 ] && {
-	while uci -q del https-dns-proxy.@https-dns-proxy[0]; do :; done
+	_uci_del https-dns-proxy.@https-dns-proxy
 	uci set https-dns-proxy.config.force_dns=0
 	for i in $bootstrap_dns; do _csv="${_csv:+$_csv,}$i"; done
 
@@ -1470,7 +1476,7 @@ add_cf_ddns() {
 
 [ -x /usr/bin/ddns ] && [ "$AP_MODE" != 1 ] && {
 	LOOKUP_HOST=${LOOKUP_HOSTNAME:-ddns.example.com}
-	while uci -q del ddns.@service[0]; do :; done
+	_uci_del ddns.@service
 	add_cf_ddns wan 0 network wan "$LOOKUP_HOST"
 }
 
