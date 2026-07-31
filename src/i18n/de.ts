@@ -414,6 +414,12 @@ const de: Catalog = {
   laneConflict: 'Konflikt',
   stpForced: 'Beide Mesh-Funkmodule sind aktiv, daher wird STP für dich aktiviert: zwei Meshpoints in einer Bridge können eine Schleife bilden.',
   batmanOneRadio: 'BATMAN-adv läuft über ein Mesh-Funkmodul, daher wird 5 GHz genutzt und das 2,4-GHz-Mesh ist aus.',
+
+  // -- build history --------------------------------------------------
+  restore: 'Wiederherstellen',
+  restoredSecrets: 'Passwörter und Schlüssel werden nie gespeichert, diese Felder sind daher leer.',
+  restoredRelease: 'OpenWrt {from} wird nicht mehr angeboten, daher wurde {to} gewählt.',
+  restoreFailed: 'Dieser Build konnte nicht wiederhergestellt werden: {msg}',
 };
 
 export default de;

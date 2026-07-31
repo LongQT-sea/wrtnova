@@ -26,7 +26,7 @@ export function DeviceStep() {
   const version = useConfigStore((s) => s.version);
   const fellBackFrom = useConfigStore((s) => s.fellBackFrom);
 
-  const [versions, setVersions] = useState<string[]>([]);
+  const versions = useConfigStore((s) => s.versions);
   const [index, setIndex] = useState<Index | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -37,8 +37,8 @@ export function DeviceStep() {
     void loadVersions()
       .then(({ versions: list, stable }) => {
         if (!live) return;
-        setVersions(list);
         const state = useConfigStore.getState();
+        state.setVersions(list);
         if (!state.version) state.setVersion(stable);
       })
       .catch((e: Error) => live && setError(e.message));

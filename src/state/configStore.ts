@@ -175,6 +175,8 @@ export interface ConfigState {
   target: DeviceTarget | null;
   /** The release being built, which the device index is read from. */
   version: string;
+  /** Every release on offer, discovered once by the device step. */
+  versions: string[];
   /** Set when the requested release had no published index (FR-005). */
   fellBackFrom: string | null;
 
@@ -192,6 +194,7 @@ export interface ConfigState {
   patch: (p: Partial<RawConfig>) => void;
   setTarget: (target: DeviceTarget | null) => void;
   setVersion: (version: string) => void;
+  setVersions: (versions: string[]) => void;
   setFellBackFrom: (from: string | null) => void;
   markDnsTouched: () => void;
   setAsuUrl: (url: string) => void;
@@ -201,6 +204,7 @@ export const useConfigStore = create<ConfigState>((set) => ({
   raw: INITIAL_RAW,
   target: null,
   version: '',
+  versions: [],
   fellBackFrom: null,
   dnsModeTouched: false,
   asuUrl: ASU_DEFAULT,
@@ -210,6 +214,7 @@ export const useConfigStore = create<ConfigState>((set) => ({
   patch: (p) => set((s) => ({ raw: { ...s.raw, ...p } })),
   setTarget: (target) => set({ target }),
   setVersion: (version) => set({ version }),
+  setVersions: (versions) => set({ versions }),
   setFellBackFrom: (fellBackFrom) => set({ fellBackFrom }),
   markDnsTouched: () => set({ dnsModeTouched: true }),
   setAsuUrl: (asuUrl) => set({ asuUrl }),

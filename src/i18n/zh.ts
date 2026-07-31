@@ -414,6 +414,12 @@ const zh: Catalog = {
   laneConflict: '冲突',
   stpForced: '两个 Mesh 射频均已启用，因此已自动开启 STP：同一网桥中的两个 meshpoint 可能形成环路。',
   batmanOneRadio: 'BATMAN-adv 仅使用一个 Mesh 射频，因此采用 5 GHz，2.4 GHz Mesh 已关闭。',
+
+  // -- build history --------------------------------------------------
+  restore: '恢复',
+  restoredSecrets: '密码和密钥从不保存，因此这些字段恢复为空。',
+  restoredRelease: '不再提供 OpenWrt {from}，因此改选 {to}。',
+  restoreFailed: '无法恢复该构建：{msg}',
 };
 
 export default zh;

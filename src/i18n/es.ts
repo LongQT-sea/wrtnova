@@ -414,6 +414,12 @@ const es: Catalog = {
   laneConflict: 'conflicto',
   stpForced: 'Ambas radios de malla están activas, así que STP se activa por ti: dos meshpoints en un puente pueden formar un bucle.',
   batmanOneRadio: 'BATMAN-adv usa una sola radio de malla, así que se emplea 5 GHz y la malla de 2,4 GHz queda apagada.',
+
+  // -- build history --------------------------------------------------
+  restore: 'Restaurar',
+  restoredSecrets: 'Las contraseñas y claves nunca se guardan, así que esos campos vuelven vacíos.',
+  restoredRelease: 'OpenWrt {from} ya no está disponible, así que se seleccionó {to}.',
+  restoreFailed: 'No se pudo restaurar esa compilación: {msg}',
 };
 
 export default es;

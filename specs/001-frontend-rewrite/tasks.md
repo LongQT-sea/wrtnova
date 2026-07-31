@@ -130,9 +130,9 @@ and the five retired CI gate scripts are re-expressed here (research.md R9).
 
 ## Phase 8: User Story 3 — rebuilding and reusing (P2)
 
-- [ ] T066 [US3] `src/state/historyStore.ts` — bounded to 5, secrets stripped, top-entry replacement on identical rebuild *(FR-033, FR-034)*
-- [ ] T067 [US3] History surface with device, release, age, download link, restore
-- [ ] T068 [US3] Restore reconstructing UI-only shapes (`wan_type`, dnsmasq mode, joined endpoint) and falling back to the nearest release *(FR-035, FR-036)*
+- [x] T066 [US3] `src/state/historyStore.ts` — bounded to 5, secrets stripped, top-entry replacement on identical rebuild *(FR-033, FR-034)*
+- [x] T067 [US3] History surface with device, release, age, download link, restore
+- [x] T068 [US3] Restore reconstructing UI-only shapes (`wan_type`, dnsmasq mode, joined endpoint) and falling back to the nearest release *(FR-035, FR-036)*
 
 ---
 

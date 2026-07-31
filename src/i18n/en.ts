@@ -413,4 +413,10 @@ export const en = {
   laneConflict: 'conflict',
   stpForced: 'Both mesh radios are on, so STP is enabled for you: two meshpoints in one bridge can form a loop.',
   batmanOneRadio: 'BATMAN-adv runs over one mesh radio, so 5 GHz is used and the 2.4 GHz mesh is off.',
+
+  // -- build history --------------------------------------------------
+  restore: 'Restore',
+  restoredSecrets: 'Passwords and keys are never stored, so those fields came back empty.',
+  restoredRelease: 'OpenWrt {from} is no longer offered, so {to} was selected instead.',
+  restoreFailed: 'Could not restore that build: {msg}',
 } as const;

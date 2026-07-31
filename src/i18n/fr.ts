@@ -414,6 +414,12 @@ const fr: Catalog = {
   laneConflict: 'conflit',
   stpForced: 'Les deux radios maillées sont actives, donc STP est activé pour vous : deux meshpoints dans un même pont peuvent former une boucle.',
   batmanOneRadio: 'BATMAN-adv n\'utilise qu\'une radio maillée : le 5 GHz est retenu et le maillage 2,4 GHz est désactivé.',
+
+  // -- build history --------------------------------------------------
+  restore: 'Restaurer',
+  restoredSecrets: 'Les mots de passe et les clés ne sont jamais stockés : ces champs reviennent vides.',
+  restoredRelease: 'OpenWrt {from} n\'est plus proposé, {to} a donc été sélectionné.',
+  restoreFailed: 'Impossible de restaurer cette compilation : {msg}',
 };
 
 export default fr;

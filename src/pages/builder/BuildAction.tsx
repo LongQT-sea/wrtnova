@@ -11,6 +11,7 @@ import { adguardHashFromRoot } from '@core/adguard';
 import {
   AsuError,
   pollBuild,
+  primaryImageUrl,
   resolveImages,
   submitBuild,
   type ResolvedImage,
@@ -19,6 +20,7 @@ import { isStorageError, nextLighterDnsMode } from '@core/dns';
 import { parseAdditionalPackages, resolvePackages, withBase64Pkg } from '@core/packages';
 import { assembleScriptForBuild, fetchScriptBody } from '@core/script';
 import { emissionFor, useConfigStore } from '@state/configStore';
+import { useHistoryStore } from '@state/historyStore';
 import { sectionOfKey, sweep } from '@state/validation';
 import { revealField } from '@ui/fieldRegistry';
 import { t, type MessageId } from '@i18n/index';
@@ -106,12 +108,30 @@ export function BuildAction({ onNavigate }: BuildActionProps) {
         defaults: built.script,
       });
 
+      const history = useHistoryStore.getState();
+
       if (outcome.kind === 'cached') {
         setImages(resolveImages(outcome.data, outcome.asuBase));
+        history.record({
+          raw: state.raw,
+          target: board,
+          result: {
+            status: 'success',
+            firmware_url: primaryImageUrl(outcome.data, outcome.asuBase),
+          },
+        });
         setProgress({ message: t('doneCachedBuild'), percent: 100 });
         setPhase('done');
         return;
       }
+
+      // Recorded before the poll, not after: a build that takes ten minutes and a
+      // tab that gets closed should still leave a trace of what was asked for.
+      history.record({
+        raw: state.raw,
+        target: board,
+        result: { status: 'queued', firmware_url: null },
+      });
 
       const hash = outcome.data.request_hash ?? '';
       let percent = 15;
@@ -127,6 +147,10 @@ export function BuildAction({ onNavigate }: BuildActionProps) {
       });
 
       setImages(resolveImages(done, outcome.asuBase));
+      history.completeTop({
+        status: 'success',
+        firmware_url: primaryImageUrl(done, outcome.asuBase),
+      });
       setProgress({ message: t('done'), percent: 100 });
       setPhase('done');
     } catch (e) {

@@ -16,6 +16,7 @@ import { planOf } from '@state/plan';
 import { flaggedSections } from '@state/validation';
 import { AppShell, type ShellSection } from '@ui/AppShell';
 import { ConfigDisclosure } from '@ui/ConfigDisclosure';
+import { HistoryPanel } from '@ui/HistoryPanel';
 import { PlanPanel } from '@ui/PlanPanel';
 import { useLocaleTick } from '@ui/useLocale';
 import { Access } from '@sections/Access';
@@ -69,6 +70,7 @@ export function App() {
           <BuildAction onNavigate={(id) => setActive(id as SectionId)} />
           <PackagePanel />
           <ConfigDisclosure />
+          <HistoryPanel />
         </>
       }
       panelTitle={t('planTitle')}

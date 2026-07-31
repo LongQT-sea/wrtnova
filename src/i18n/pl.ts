@@ -414,6 +414,12 @@ const pl: Catalog = {
   laneConflict: 'konflikt',
   stpForced: 'Oba radia mesh są włączone, więc STP zostaje włączone za Ciebie: dwa meshpointy w jednym mostku mogą utworzyć pętlę.',
   batmanOneRadio: 'BATMAN-adv działa na jednym radiu mesh, więc używane jest 5 GHz, a mesh 2,4 GHz jest wyłączony.',
+
+  // -- build history --------------------------------------------------
+  restore: 'Przywróć',
+  restoredSecrets: 'Hasła i klucze nigdy nie są zapisywane, więc te pola wróciły puste.',
+  restoredRelease: 'OpenWrt {from} nie jest już oferowane, więc wybrano {to}.',
+  restoreFailed: 'Nie udało się przywrócić tej kompilacji: {msg}',
 };
 
 export default pl;
