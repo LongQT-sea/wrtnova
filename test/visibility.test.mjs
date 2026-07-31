@@ -1,5 +1,5 @@
 // Unit tests for the pure conditional-visibility / net-row selectors
-// (Section 0 "State Model": derived UI are pure selectors of the config).
+// (derived UI are pure selectors of the config).
 // Run: node --test
 
 import { test } from 'node:test';

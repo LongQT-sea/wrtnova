@@ -1,9 +1,8 @@
 // @ts-check
 // Shared form read/write boundary for the config editor used by BOTH /builder
 // (build.js) and /networks (networks.js). One ordered field schema drives the
-// DOM<->config translation, so the field list lives in exactly ONE place (SPEC
-// Section 0 "Shared Logic: One Definition") - the two pages previously
-// hand-mirrored it (readRawForm vs readConfig; renderConfigToDom vs loadConfig),
+// DOM<->config translation, so the field list lives in exactly ONE place - the
+// two pages previously hand-mirrored it (readRawForm vs readConfig; renderConfigToDom vs loadConfig),
 // which is precisely how copies drift.
 //
 // This module TOUCHES THE DOM, so it is a browser module imported directly by
@@ -38,7 +37,7 @@ export function writeSubnet(el, val) {
 //   country        : text + .toUpperCase()
 //   tz             : emits ZONE_NAME + TIME_ZONE via ui.collectTimezone()
 //   table          : opt === table kind for ui.serializeRows (write: page loads it)
-// BASE_SCHEMA is the shared config (SPEC Section 1) in canonical contract order;
+// BASE_SCHEMA is the shared config in canonical contract order;
 // it is also the exact order /networks readConfig produced, so the /networks
 // store stays byte-identical. Pages compose it with their own extras:
 //   /networks: [shared_version select, ...BASE_SCHEMA]

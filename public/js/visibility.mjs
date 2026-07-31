@@ -1,6 +1,6 @@
 // @ts-check
-// Pure conditional-visibility and network-row selectors (Section 0 "State
-// Model": derived UI are pure selectors of the config, not DOM readers).
+// Pure conditional-visibility and network-row selectors (derived UI are pure
+// selectors of the config, not DOM readers).
 //
 // These compute *what* should be shown/derived from a config object; the DOM
 // writing (toggling .hidden, painting derived IPs, the dup warning) stays in
@@ -268,7 +268,7 @@ export function resolveVlanAssignment(cfg) {
 /**
  * The VLAN id strings to emit for each of the six fields: the resolved value when
  * it participates and differs from the field's natural default, else '' (so we
- * never write a redundant default - Section 1 invariant). Consumed by the two
+ * never write a redundant default). Consumed by the two
  * emit paths (builder-config.mjs deriveConfig, config-merge.mjs mergeNodeConfig).
  * @param {Config} cfg
  * @returns {Record<string, string>}
@@ -409,7 +409,7 @@ export function resolveIfaceAssignment(cfg) {
 
 /**
  * The name to emit per field: the resolved one when it participates and differs
- * from the script's own default, else '' (Section 1, no redundant defaults).
+ * from the script's own default, else '' (no redundant defaults).
  * Unlike resolveVlanEmit this must write auto-assigned values too - the script's
  * fallback is 'guest', not 'vlan5'.
  * @param {Config} cfg

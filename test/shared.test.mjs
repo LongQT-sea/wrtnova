@@ -1,4 +1,4 @@
-// Unit tests for the shared pure modules (Section 0 Test Strategy).
+// Unit tests for the shared pure modules.
 // Run: node --test  (no dependency; Node built-in test runner)
 
 import { test } from 'node:test';

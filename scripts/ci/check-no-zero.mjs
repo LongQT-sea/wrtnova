@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-// CI gate: checkbox off-state is '' never '0' (CLAUDE.md / SPEC Section 0
-// "Business Rules / Invariants"). renderConfigBlock skips both '' and '0', but
+// CI gate: checkbox off-state is '' never '0' (CLAUDE.md invariant).
+// renderConfigBlock skips both '' and '0', but
 // the source must never PRODUCE '0' for a boolean/checkbox in the first place.
 //
 // This flags the emission anti-patterns only - comparisons like `v === '0'`

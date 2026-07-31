@@ -11,8 +11,8 @@
 // This gate closes only that hole. It runs the TypeScript checker over every
 // JS/MJS file - including the ones jsconfig excludes - and reports a single
 // diagnostic code: TS2304 "Cannot find name". Every other diagnostic is
-// discarded, so the files stay untyped and the SPEC Section 0 typing policy is
-// unchanged; a typo'd or deleted function is all this can fail on.
+// discarded, so the files stay untyped and the typing policy is unchanged;
+// a typo'd or deleted function is all this can fail on.
 
 import { globSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';

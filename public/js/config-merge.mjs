@@ -5,8 +5,8 @@
 // per-node overrides, applying all conditional suppression rules (AP vs router,
 // sub-fields gated on their parent flag, etc.).
 //
-// Boolean flags use flag(v) so '0' never leaks through (Section 1 invariant:
-// off-state is '' never '0').
+// Boolean flags use flag(v) so '0' never leaks through (off-state is ''
+// never '0').
 
 import { resolveVlanEmit, resolveIfaceEmit, DNS_DEFAULT, isAdguard, isDohEngine, deriveBootstrapDns } from './visibility.mjs';
 import { normalizeEndpoint } from './list-grammar.mjs';

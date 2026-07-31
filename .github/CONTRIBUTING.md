@@ -3,8 +3,7 @@
 Thanks for your interest. This project is small and deliberately
 framework-free, and it has a handful of invariants that are easy to violate by
 accident. Please skim this whole file before your first PR. The authoritative
-references are [SPEC.md](../docs/SPEC.md) (design) and `CLAUDE.md` (the hard rules,
-restated below).
+reference is `CLAUDE.md` (the hard rules, restated below).
 
 ## Getting set up
 
@@ -74,8 +73,7 @@ The DOM is a view, never the state. Each page owns one typed config store
 (`store.mjs`); every derived view (config preview, package chips, visibility,
 VLAN-conflict warning) is a pure selector of the store. Build payloads read the
 store, not the form. Programmatic changes go through the store first
-(`applyStorePatch`). Normalize values once, at the store boundary. See SPEC.md
-sections 9-12 for the details.
+(`applyStorePatch`). Normalize values once, at the store boundary.
 
 ## Comment style
 
@@ -89,7 +87,6 @@ of the surrounding code (`wrtnova.sh` is the house standard).
   `feat:`, `fix:`, `chore:`, `docs:`, `refactor:`, `perf:`, `style:`.
 - One logical change per commit; one conventional prefix per commit (no
   `feat(a): X; fix(b): Y` compound messages).
-- Reference SPEC.md sections by number when implementing a spec'd feature.
 - Describe what you tested. For UI changes, confirm the 375px layout.
 
 ## Reporting bugs and requesting features

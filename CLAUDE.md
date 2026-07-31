@@ -1,6 +1,6 @@
 # WrtNova Project Context
 
-This repo implements the WrtNova firmware builder per docs/SPEC.md.
+This repo implements the WrtNova firmware builder.
 
 ## Invariants — never violate
 - wrtnova.sh is the canonical source of truth, owned and maintained by the user.
@@ -19,7 +19,6 @@ This repo implements the WrtNova firmware builder per docs/SPEC.md.
 - Native HTML primitives (`<dialog>, <details>, <select>`) over custom widgets.
 
 ## Workflow
-- Reference docs/SPEC.md sections by number when implementing features.
 - After any wrtnova.sh edit, run `node scripts/embed-wrtnova.mjs`.
 - Verify the build still produces a working image via test deploy to CF Pages.
 

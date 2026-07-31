@@ -114,8 +114,6 @@ test/              node:test unit tests
 src/style.css      Tailwind input
 ```
 
-See [SPEC.md](docs/SPEC.md) for the full repository map and design.
-
 ## Testing and CI
 
 ```sh

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// CI gate: the config-section marker contract (SPEC Section 1). The marker
+// CI gate: the config-section marker contract. The marker
 //   # ===================
 //   # End config section
 //   # ===================

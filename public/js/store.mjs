@@ -1,6 +1,6 @@
 // @ts-check
-// Tiny observable state container - the single source of truth per page
-// (Section 0 "State Model: Single Source of Truth"). No framework.
+// Tiny observable state container - the single source of truth per page.
+// No framework.
 //
 // The DOM is a view; this store holds the typed config. One input listener
 // normalizes and writes the store; derived views subscribe and are pure

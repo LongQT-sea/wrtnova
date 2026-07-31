@@ -1,7 +1,7 @@
 // Structural-invariant tests for the shared config-form field schema
 // (config-form.mjs), the single definition of the config editor's field list +
-// ordering used by BOTH /builder and /networks (SPEC Section 0 "one
-// definition"). These assert the schema is internally consistent; exact match
+// ordering used by BOTH /builder and /networks (one definition).
+// These assert the schema is internally consistent; exact match
 // to the real DOM forms is proven separately by the byte-parity harnesses
 // (scripts/dev/parity-harness*.mjs). readForm/writeForm touch the DOM, so they
 // are exercised in-browser by the harnesses, not here.

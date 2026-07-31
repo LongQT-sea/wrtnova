@@ -1,6 +1,6 @@
 // @ts-check
-// Single typed Config contract (Section 0 "Typing Policy"), derived from
-// Section 1's variable dictionary. This is the shape the store holds, the
+// Single typed Config contract, derived from the wrtnova.sh variable
+// dictionary. This is the shape the store holds, the
 // shared modules consume/produce, and the build payload carries. Every value
 // is a string: checkboxes normalize to '' (off) or '1' (on) - never '0' - and
 // text/select fields carry their raw string. Keys are optional because callers

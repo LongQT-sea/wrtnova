@@ -1,6 +1,5 @@
-// Unit tests for the shared "host | octet | ports" list grammar
-// (Section 0 Test Strategy: "serializeRows / table round-trip ... round-trips
-// to PORT_FORWARD_LIST / IPV6_SERVER_LIST and back").
+// Unit tests for the shared "host | octet | ports" list grammar: serializeRows
+// and the table round-trip to PORT_FORWARD_LIST / IPV6_SERVER_LIST and back.
 // Run: node --test
 
 import { test } from 'node:test';

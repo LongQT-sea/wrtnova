@@ -1,7 +1,7 @@
 # Dev verification harnesses
 
-Browser-driven checks used to gate the UI ESM migration (SPEC Section 0 Test
-Strategy). Not part of `npm test` / `npm run ci` - they launch Chromium via the
+Browser-driven checks used to gate the UI ESM migration. Not part of
+`npm test` / `npm run ci` - they launch Chromium via the
 `playwright` devDependency and serve `public/` statically, so they run on demand.
 
 ## parity-harness.mjs

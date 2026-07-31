@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-// CI gate: shared logic has exactly one definition (SPEC Section 0 "Shared
-// Logic: One Definition, Two Runtimes"). The collapsed functions must be
+// CI gate: shared logic has exactly one definition, two runtimes. The
+// collapsed functions must be
 // DEFINED only in their canonical module - never re-declared in the worker or a
 // UI file (which is how the two mergeNodeConfig copies diverged historically).
 // Calls/references (ui.mergeNodeConfig(...), imports) are fine; only a second

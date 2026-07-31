@@ -1,6 +1,6 @@
 // @ts-check
-// Field validation messages, defined once for both pages (SPEC Section 0
-// "Shared Logic: One Definition, Two Runtimes"). The predicates live in
+// Field validation messages, defined once for both pages - one definition, two
+// runtimes. The predicates live in
 // config-form.mjs / list-grammar.mjs; this is the layer above them - which
 // fields are checked and what a bad value says in the native bubble. It existed
 // twice before and the copies drifted: /networks never grew the range, iface,

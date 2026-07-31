@@ -5,7 +5,7 @@
 // block that is prepended to the wrtnova.sh body. It drops:
 //   - keys beginning with '_' (internal)
 //   - BUILD-ONLY keys (consumed for package resolution, never read by wrtnova.sh)
-//   - values equal to '' or '0' (off-state; Section 1 invariant)
+//   - values equal to '' or '0' (off-state invariant)
 //
 // Optional maskKeys (a Set) renders those keys as KEY='****' instead of their
 // value - used by the browser preview to hide secrets.

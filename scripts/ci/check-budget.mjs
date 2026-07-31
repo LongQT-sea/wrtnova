@@ -1,8 +1,8 @@
 #!/usr/bin/env node
-// CI gate: initial byte budget (SPEC Section 0 NFR "Byte budget").
+// CI gate: initial byte budget.
 //
-// CSS is enforced at the NFR ceiling. JS is a ratchet above the 30 KB SPEC
-// target: tighten JS_CEILING_KB as pages are slimmed. Only statically imported
+// CSS is enforced at the NFR ceiling. JS is a ratchet above the 30 KB target:
+// tighten JS_CEILING_KB as pages are slimmed. Only statically imported
 // JS counts - the lazily imported locales and side modules do not.
 
 import { readFileSync, existsSync } from 'node:fs';
@@ -14,7 +14,7 @@ const here = dirname(fileURLToPath(import.meta.url));
 const root = resolve(here, '..', '..');
 
 const CSS_NFR_KB = 15;       // hard NFR - enforced
-const JS_TARGET_KB = 30;     // SPEC NFR target - documented, not yet met
+const JS_TARGET_KB = 30;     // NFR target - documented, not yet met
 const JS_CEILING_KB = 75;    // hold the line here; raising it is a last resort - only a
                              // small bump, and only with explicit user confirmation
 
@@ -77,7 +77,7 @@ for (const [name, htmlRel] of Object.entries(PAGES)) {
   const bytes = files.reduce((n, f) => n + gz(f), 0);
   const kb = bytes / 1024;
   const ok = kb <= JS_CEILING_KB;
-  const note = kb > JS_TARGET_KB ? ` (over ${JS_TARGET_KB} KB SPEC target)` : '';
+  const note = kb > JS_TARGET_KB ? ` (over ${JS_TARGET_KB} KB target)` : '';
   console.log(`check-budget: JS ${name} ${kb.toFixed(1)} KB gz, ${files.length} files, ceiling ${JS_CEILING_KB} KB ${ok ? 'OK' : 'FAIL'}${note}`);
   if (!ok) failed = true;
 }

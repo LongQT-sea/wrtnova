@@ -1,7 +1,7 @@
 // @ts-check
 // The OpenWrt downloads server, as both pages read it: version list, per-version
-// device index, and the localStorage cache in front of both (SPEC Section 0
-// "Shared Logic: One Definition, Two Runtimes"). Pure - no DOM, no page state.
+// device index, and the localStorage cache in front of both - one definition,
+// two runtimes. Pure - no DOM, no page state.
 //
 // Fetch orchestration stays page-local and should: /builder refreshes the cache
 // in the background and falls back a version when a fresh stable's

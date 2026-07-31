@@ -1,5 +1,5 @@
 {
-  "// note": "Dev-only type-check (SPEC Section 0 Typing Policy). tsc --checkJs --noEmit over JSDoc - no transpile, no emit, no bundler. Scoped to the pure shared modules; the DOM-coupled IIFE files (ui.js, build.js, networks.js) are intentionally excluded.",
+  "// note": "Dev-only type-check. tsc --checkJs --noEmit over JSDoc - no transpile, no emit, no bundler. Scoped to the pure shared modules; the DOM-coupled IIFE files (ui.js, build.js, networks.js) are intentionally excluded.",
   "compilerOptions": {
     "checkJs": true,
     "allowJs": true,
