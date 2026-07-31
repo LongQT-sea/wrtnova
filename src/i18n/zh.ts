@@ -393,6 +393,24 @@ const zh: Catalog = {
   dnsHttpsDnsProxy: 'https-dns-proxy',
   dnsAdblockFast: 'adblock-fast',
   ssidField: 'SSID',
+
+  // -- the network plan and config inspection ------------------------
+  planTitle: '网络规划',
+  planEmpty: '选择硬件后，即将构建的网络会显示在这里。',
+  laneOff: '关闭',
+  reachInternet: '互联网',
+  reachTunnel: '经隧道',
+  reachNoInternet: '无互联网',
+  reachIsolated: '客户端隔离',
+  laneAuto: '自动',
+  laneAutoTitle: '自动分配：留空的 ID 或名称已解析为最小的可用值。',
+  showGeneratedConfig: '查看生成的配置',
+  copied: '已复制',
+  copyFailed: '无法复制 — 请选中文本手动复制。',
+  copyRealValues: '无论此处显示什么，复制得到的始终是真实值。',
+  meshSection: 'Mesh 回程',
+  meshIdLabel: 'Mesh ID',
+  countryDefault: '无线电默认',
 };
 
 export default zh;

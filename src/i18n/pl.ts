@@ -393,6 +393,24 @@ const pl: Catalog = {
   dnsHttpsDnsProxy: 'https-dns-proxy',
   dnsAdblockFast: 'adblock-fast',
   ssidField: 'SSID',
+
+  // -- the network plan and config inspection ------------------------
+  planTitle: 'Plan sieci',
+  planEmpty: 'Wybierz sprzęt — sieć, którą zbudujesz, pojawi się tutaj.',
+  laneOff: 'wyłączone',
+  reachInternet: 'Internet',
+  reachTunnel: 'Przez tunel',
+  reachNoInternet: 'Bez internetu',
+  reachIsolated: 'Klienci odizolowani',
+  laneAuto: 'auto',
+  laneAutoTitle: 'Przydzielone automatycznie: pozostawiony pusty identyfikator lub nazwa otrzymały najniższą wolną wartość.',
+  showGeneratedConfig: 'Pokaż wygenerowaną konfigurację',
+  copied: 'Skopiowano',
+  copyFailed: 'Nie udało się skopiować — zaznacz tekst i skopiuj ręcznie.',
+  copyRealValues: 'Kopiowanie zawsze zwraca prawdziwe wartości, niezależnie od tego, co widać.',
+  meshSection: 'Backhaul mesh',
+  meshIdLabel: 'ID mesh',
+  countryDefault: 'Domyślne radia',
 };
 
 export default pl;

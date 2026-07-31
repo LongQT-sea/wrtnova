@@ -393,6 +393,24 @@ const fr: Catalog = {
   dnsHttpsDnsProxy: 'https-dns-proxy',
   dnsAdblockFast: 'adblock-fast',
   ssidField: 'SSID',
+
+  // -- the network plan and config inspection ------------------------
+  planTitle: 'Plan du réseau',
+  planEmpty: 'Choisissez le matériel : le réseau que vous allez construire apparaîtra ici.',
+  laneOff: 'désactivé',
+  reachInternet: 'Internet',
+  reachTunnel: 'Via le tunnel',
+  reachNoInternet: 'Pas d\'internet',
+  reachIsolated: 'Clients isolés',
+  laneAuto: 'auto',
+  laneAutoTitle: 'Attribué automatiquement : l\'identifiant ou le nom laissé vide a été résolu au premier libre.',
+  showGeneratedConfig: 'Afficher la configuration générée',
+  copied: 'Copié',
+  copyFailed: 'Copie impossible — sélectionnez le texte et copiez-le manuellement.',
+  copyRealValues: 'La copie donne toujours les vraies valeurs, quel que soit l’affichage.',
+  meshSection: 'Backhaul maillé',
+  meshIdLabel: 'ID du maillage',
+  countryDefault: 'Par défaut de la radio',
 };
 
 export default fr;

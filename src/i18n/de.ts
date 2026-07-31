@@ -393,6 +393,24 @@ const de: Catalog = {
   dnsHttpsDnsProxy: 'https-dns-proxy',
   dnsAdblockFast: 'adblock-fast',
   ssidField: 'SSID',
+
+  // -- the network plan and config inspection ------------------------
+  planTitle: 'Netzwerkplan',
+  planEmpty: 'Wähle die Hardware — das Netzwerk, das du baust, erscheint hier.',
+  laneOff: 'aus',
+  reachInternet: 'Internet',
+  reachTunnel: 'Über Tunnel',
+  reachNoInternet: 'Kein Internet',
+  reachIsolated: 'Clients isoliert',
+  laneAuto: 'auto',
+  laneAutoTitle: 'Automatisch zugewiesen: die leer gelassene ID bzw. der Name wurde auf den niedrigsten freien Wert gesetzt.',
+  showGeneratedConfig: 'Erzeugte Konfiguration anzeigen',
+  copied: 'Kopiert',
+  copyFailed: 'Kopieren fehlgeschlagen — markiere den Text und kopiere ihn manuell.',
+  copyRealValues: 'Kopiert werden immer die echten Werte, unabhängig von der Anzeige.',
+  meshSection: 'Mesh-Backhaul',
+  meshIdLabel: 'Mesh-ID',
+  countryDefault: 'Standard des Funkmoduls',
 };
 
 export default de;

@@ -6,12 +6,13 @@
 import { useField, useFieldState } from '@state/configStore';
 import { validatorFor } from '@state/validation';
 import { RowTable } from '@ui/RowTable';
+import { SegmentGroup, SegmentToggle } from '@ui/SegmentGroup';
 import { t } from '@i18n/index';
 import { BoundText, BoundToggle, Disclosure, Note, SectionPage } from './bound';
 
 export function Security() {
   const apMode = useField('AP_MODE');
-  const wg = useField('WG_ENABLE');
+  const [wg, setWg] = useFieldState('WG_ENABLE');
 
   if (apMode === '1') {
     return (
@@ -23,58 +24,68 @@ export function Security() {
 
   return (
     <SectionPage title="sectionSecurity">
-      <BoundToggle k="WG_ENABLE" label="wgVpnClient" help="wgNetworkDesc" />
+      {/* The tunnel and the VPN lane are one decision: WG_ENABLE both terminates
+          the tunnel and creates the VPN network. So this block carries the VPN
+          segment's identity and matches its lane in the plan (T059). */}
+      <SegmentGroup
+        segment="vpn"
+        title={t('wgVpnClient')}
+        help={t('wgNetworkDesc')}
+        control={
+          <SegmentToggle id="WG_ENABLE" name={t('wgVpnClient')} value={wg} onChange={setWg} />
+        }
+      >
+        {wg === '1' ? (
+          <>
+            <Note id="wgConfigNote" rich />
 
-      {wg === '1' ? (
-        <>
-          <Note id="wgConfigNote" rich />
-
-          <h3 className="field-label mt-3">{t('wgInterfaceSection')}</h3>
-          <BoundText k="WG_PRIVATE_KEY" label="privateKey" secret mono unvalidated />
-          <div className="grid gap-x-4 sm:grid-cols-2">
-            <BoundText
-              k="WG_IPV4"
-              label="clientIpv4"
-              placeholder="172.16.0.2/32"
-              mono
-              unvalidated
-            />
-            <BoundText k="WG_IPV6" label="clientIpv6" placeholder="fd88::/128" mono unvalidated />
-          </div>
-
-          <h3 className="field-label mt-3">{t('wgPeerSection')}</h3>
-          <BoundText k="PEER_PUBLIC_KEY" label="peerPublicKey" secret mono unvalidated />
-          <BoundText
-            k="ENDPOINT"
-            label="endpoint"
-            placeholder="vpn.example.com:51820"
-            mono
-            unvalidated
-          />
-          <BoundText k="PRESHARED_KEY" label="presharedKey" secret mono unvalidated />
-
-          <Disclosure title="advancedWg">
+            <h3 className="field-label mt-3">{t('wgInterfaceSection')}</h3>
+            <BoundText k="WG_PRIVATE_KEY" label="privateKey" secret mono unvalidated />
             <div className="grid gap-x-4 sm:grid-cols-2">
-              <BoundText k="WG_DNS_V4" label="dnsV4" mono unvalidated />
-              <BoundText k="WG_DNS_V6" label="dnsV6" mono unvalidated />
-              <BoundText k="WG_MTU" label="wgMtu" placeholder="1420" mono unvalidated />
               <BoundText
-                k="ALLOWED_IPS"
-                label="allowedIps"
-                placeholder="0.0.0.0/0 ::/0"
+                k="WG_IPV4"
+                label="clientIpv4"
+                placeholder="172.16.0.2/32"
                 mono
                 unvalidated
               />
+              <BoundText k="WG_IPV6" label="clientIpv6" placeholder="fd88::/128" mono unvalidated />
             </div>
-            <h4 className="field-label mt-3">{t('wgSplitTunnelSection')}</h4>
-            <p className="field-help">{t('splitTunnelHelp')}</p>
-            <div className="grid gap-x-4 sm:grid-cols-2">
-              <BoundText k="SPLIT_TUNNEL_V4" label="splitTunnelV4" mono unvalidated />
-              <BoundText k="SPLIT_TUNNEL_V6" label="splitTunnelV6" mono unvalidated />
-            </div>
-          </Disclosure>
-        </>
-      ) : null}
+
+            <h3 className="field-label mt-3">{t('wgPeerSection')}</h3>
+            <BoundText k="PEER_PUBLIC_KEY" label="peerPublicKey" secret mono unvalidated />
+            <BoundText
+              k="ENDPOINT"
+              label="endpoint"
+              placeholder="vpn.example.com:51820"
+              mono
+              unvalidated
+            />
+            <BoundText k="PRESHARED_KEY" label="presharedKey" secret mono unvalidated />
+
+            <Disclosure title="advancedWg">
+              <div className="grid gap-x-4 sm:grid-cols-2">
+                <BoundText k="WG_DNS_V4" label="dnsV4" mono unvalidated />
+                <BoundText k="WG_DNS_V6" label="dnsV6" mono unvalidated />
+                <BoundText k="WG_MTU" label="wgMtu" placeholder="1420" mono unvalidated />
+                <BoundText
+                  k="ALLOWED_IPS"
+                  label="allowedIps"
+                  placeholder="0.0.0.0/0 ::/0"
+                  mono
+                  unvalidated
+                />
+              </div>
+              <h4 className="field-label mt-3">{t('wgSplitTunnelSection')}</h4>
+              <p className="field-help">{t('splitTunnelHelp')}</p>
+              <div className="grid gap-x-4 sm:grid-cols-2">
+                <BoundText k="SPLIT_TUNNEL_V4" label="splitTunnelV4" mono unvalidated />
+                <BoundText k="SPLIT_TUNNEL_V6" label="splitTunnelV6" mono unvalidated />
+              </div>
+            </Disclosure>
+          </>
+        ) : null}
+      </SegmentGroup>
 
       <PortForwards />
       <Ipv6Servers />

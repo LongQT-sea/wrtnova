@@ -110,10 +110,10 @@ and the five retired CI gate scripts are re-expressed here (research.md R9).
 
 ## Phase 6: User Story 2 — reviewing what will be applied (P1)
 
-- [ ] T056 [US2] `src/ui/PlanPanel.tsx` — **the signature element**: router card, one lane per segment in cable-pair colour with address, VLAN badge, subnet and reachability; disabled segments greyed; staggered assembly on device selection
-- [ ] T057 [US2] Auto-assigned VLAN ids and interface names surfaced in the plan before build *(FR-011, FR-012)*
-- [ ] T058 [US2] "Show generated config" disclosure — masked by default, reveal toggle, full-script toggle, copy that always yields real values *(US2 scenarios 2–4)*
-- [ ] T059 [P] [US2] Segment colour applied to the matching field groups so form and plan read as one system
+- [x] T056 [US2] `src/ui/PlanPanel.tsx` — **the signature element**: router card, one lane per segment in cable-pair colour with address, VLAN badge, subnet and reachability; disabled segments greyed; staggered assembly on device selection
+- [x] T057 [US2] Auto-assigned VLAN ids and interface names surfaced in the plan before build *(FR-011, FR-012)*
+- [x] T058 [US2] "Show generated config" disclosure — masked by default, reveal toggle, full-script toggle, copy that always yields real values *(US2 scenarios 2–4)*
+- [x] T059 [P] [US2] Segment colour applied to the matching field groups so form and plan read as one system
 
 ---
 

@@ -392,4 +392,22 @@ export const en = {
   dnsHttpsDnsProxy: 'https-dns-proxy',
   dnsAdblockFast: 'adblock-fast',
   ssidField: 'SSID',
+
+  // -- the network plan and config inspection ------------------------
+  planTitle: 'Network plan',
+  planEmpty: 'Pick your hardware and the network you are about to build appears here.',
+  laneOff: 'off',
+  reachInternet: 'Internet',
+  reachTunnel: 'Via tunnel',
+  reachNoInternet: 'No internet',
+  reachIsolated: 'Clients isolated',
+  laneAuto: 'auto',
+  laneAutoTitle: 'Assigned automatically: the id or name you left blank was resolved to the lowest free one.',
+  showGeneratedConfig: 'Show generated config',
+  copied: 'Copied',
+  copyFailed: 'Could not copy — select the text and copy it manually.',
+  copyRealValues: 'Copying always yields the real values, whatever is shown here.',
+  meshSection: 'Mesh backhaul',
+  meshIdLabel: 'Mesh ID',
+  countryDefault: 'Radio default',
 } as const;

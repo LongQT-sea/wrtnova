@@ -8,6 +8,7 @@
 import { useEffect, useState } from 'react';
 import { loadAsuServers, type AsuServer } from '@core/asu';
 import { useConfigStore, useField } from '@state/configStore';
+import { SegmentMark } from '@ui/SegmentGroup';
 import { t } from '@i18n/index';
 import { BoundText, BoundToggle, Disclosure, Note, SectionPage } from './bound';
 
@@ -32,7 +33,9 @@ export function Advanced() {
       />
       <BoundToggle k="QUARTERLY_REBOOT" label="quarterlyReboot" help="quarterlyRebootHelp" />
       {guest === '1' && apMode !== '1' ? (
-        <BoundToggle k="DENY_GUEST_NIGHT" label="denyGuestNight" help="denyGuestNightHelp" />
+        <SegmentMark segment="guest">
+          <BoundToggle k="DENY_GUEST_NIGHT" label="denyGuestNight" help="denyGuestNightHelp" />
+        </SegmentMark>
       ) : null}
       <BoundToggle k="LOG" label="buildLog" help="buildLogHelp" />
 

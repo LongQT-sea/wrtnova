@@ -10,7 +10,7 @@ import { capsFor } from '@state/capabilities';
 import { usePskVlanError } from '@state/validation';
 import { loadCountries, type Country } from '@state/staticData';
 import { Combobox } from '@ui/Combobox';
-import { SegmentGroup } from '@ui/SegmentGroup';
+import { SegmentGroup, SegmentMark } from '@ui/SegmentGroup';
 import { t } from '@i18n/index';
 import {
   BoundSelect,
@@ -165,6 +165,7 @@ function CountryField() {
       label={t('countryCode')}
       value={shown}
       items={items}
+      placeholder={t('countryDefault')}
       loading={countries.length === 0}
       mono
       onChange={(picked) => set('COUNTRY_CODE', (picked.split(' - ')[0] ?? '').toUpperCase())}
@@ -182,7 +183,11 @@ function GuestIsolate() {
   const guest = useField('GUEST_ENABLE');
   const psk = useField('PSK_VLAN');
   if (guest !== '1' || psk === '1') return null;
-  return <BoundToggle k="GUEST_ISOLATE" label="guestIsolate" help="guestIsolateHelp" />;
+  return (
+    <SegmentMark segment="guest">
+      <BoundToggle k="GUEST_ISOLATE" label="guestIsolate" help="guestIsolateHelp" />
+    </SegmentMark>
+  );
 }
 
 /** Dense-environment tuning only tightens usteer thresholds, which need 802.11k/v. */
@@ -200,7 +205,11 @@ function IotFastTransition() {
   const iot = useField('IOT_ENABLE');
   const dot11r = useField('DOT11R');
   if (iot !== '1' || dot11r !== '1') return null;
-  return <BoundToggle k="IOT_DOT11R_UI" label="iotNoDot11r" help="iotNoDot11rHelp" />;
+  return (
+    <SegmentMark segment="iot">
+      <BoundToggle k="IOT_DOT11R_UI" label="iotNoDot11r" help="iotNoDot11rHelp" />
+    </SegmentMark>
+  );
 }
 
 /** Withheld unless the board has the mt7915e driver WED needs (FR-023). */
@@ -226,7 +235,7 @@ function MeshGroup() {
 
   return (
     <div className="mt-4 border-t border-rule pt-3">
-      <h3 className="field-label">{t('wirelessMesh')}</h3>
+      <h3 className="field-label">{t('meshSection')}</h3>
       <Note id="wiredBackhaulNote" />
       <BoundToggle k="WIRELESS_MESH" label="wirelessMesh" />
       <BoundToggle k="WIRELESS_MESH_2G" label="wirelessMesh2g" help="mesh2gNote" />
@@ -236,7 +245,7 @@ function MeshGroup() {
           <div className="grid gap-x-4 sm:grid-cols-2">
             <BoundText
               k="MESH_ID"
-              label="meshCredentials"
+              label="meshIdLabel"
               placeholder="mesh_trunk_backhaul"
               mono
               unvalidated

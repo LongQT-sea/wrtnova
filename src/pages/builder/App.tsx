@@ -12,8 +12,11 @@
 import { useState } from 'react';
 import type { SectionId } from '@core/types';
 import { useConfigStore } from '@state/configStore';
+import { planOf } from '@state/plan';
 import { flaggedSections } from '@state/validation';
 import { AppShell, type ShellSection } from '@ui/AppShell';
+import { ConfigDisclosure } from '@ui/ConfigDisclosure';
+import { PlanPanel } from '@ui/PlanPanel';
 import { useLocaleTick } from '@ui/useLocale';
 import { Access } from '@sections/Access';
 import { Advanced } from '@sections/Advanced';
@@ -62,11 +65,13 @@ export function App() {
       onSelect={(id) => setActive(id as SectionId)}
       panel={
         <>
+          <PlanPanel />
           <BuildAction onNavigate={(id) => setActive(id as SectionId)} />
           <PackagePanel />
+          <ConfigDisclosure />
         </>
       }
-      panelTitle={t('buildFirmware')}
+      panelTitle={t('planTitle')}
       panelSummary={<DeviceSummary />}
     >
       {/* Until hardware is chosen there is nothing else worth showing: the
@@ -103,9 +108,12 @@ function SectionFlag({ id }: { id: SectionId }) {
 
 function DeviceSummary() {
   const target = useConfigStore((s) => s.target);
+  const address = useConfigStore((s) => planOf(s.raw).address);
+  if (!target) return <span className="block truncate text-ink-soft">{t('pickDeviceHint')}</span>;
   return (
-    <span className="mono block truncate text-ink-soft">
-      {target ? target.title : t('pickDeviceHint')}
+    <span className="block truncate">
+      <span className="mono text-ink">{address}</span>{' '}
+      <span className="text-ink-soft">{target.title}</span>
     </span>
   );
 }

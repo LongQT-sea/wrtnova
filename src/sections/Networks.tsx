@@ -6,7 +6,6 @@
 // segment stays on screen, greyed, because a first-timer needs to see what they
 // are not getting as much as what they are.
 
-import * as Checkbox from '@radix-ui/react-checkbox';
 import * as Dialog from '@radix-ui/react-dialog';
 import { useState } from 'react';
 import type { SegmentId } from '@core/types';
@@ -20,7 +19,7 @@ import {
 } from '@state/configStore';
 import { capsFor } from '@state/capabilities';
 import { useIfaceConflict } from '@state/validation';
-import { SegmentGroup } from '@ui/SegmentGroup';
+import { SegmentGroup, SegmentToggle } from '@ui/SegmentGroup';
 import { Toggle } from '@ui/Toggle';
 import { t } from '@i18n/index';
 import {
@@ -172,7 +171,7 @@ function Segment({ seg }: { seg: SegFields }) {
       title={t(seg.name)}
       muted={!on}
       {...(seg.enable
-        ? { control: <BareToggle k={seg.enable} name={t(seg.name)} /> }
+        ? { control: <BoundSegmentToggle k={seg.enable} name={t(seg.name)} /> }
         : {})}
       aside={
         <span className="mono flex items-center gap-2 text-xs text-ink-soft">
@@ -208,25 +207,10 @@ function Segment({ seg }: { seg: SegFields }) {
   );
 }
 
-/**
- * The segment's enable switch, sitting in the group header where the group's own
- * title already names it -- so the control carries the name only for screen
- * readers, and the header does not say "Guest" twice.
- */
-function BareToggle({ k, name }: { k: FlagKey; name: string }) {
+/** Bound to a segment's enable key, for the group header. */
+function BoundSegmentToggle({ k, name }: { k: FlagKey; name: string }) {
   const [value, set] = useFieldState(k);
-  return (
-    <Checkbox.Root
-      id={k}
-      checked={value === '1'}
-      onCheckedChange={(next) => set(next === true ? '1' : '')}
-      aria-label={name}
-      className="toggle-track"
-      data-state={value === '1' ? 'checked' : 'unchecked'}
-    >
-      <span className="toggle-thumb" data-state={value === '1' ? 'checked' : 'unchecked'} />
-    </Checkbox.Root>
-  );
+  return <SegmentToggle id={k} name={name} value={value} onChange={set} />;
 }
 
 function IotExtras() {

@@ -393,6 +393,24 @@ const ru: Catalog = {
   dnsHttpsDnsProxy: 'https-dns-proxy',
   dnsAdblockFast: 'adblock-fast',
   ssidField: 'SSID',
+
+  // -- the network plan and config inspection ------------------------
+  planTitle: 'План сети',
+  planEmpty: 'Выберите устройство — сеть, которую вы собираете, появится здесь.',
+  laneOff: 'выключено',
+  reachInternet: 'Интернет',
+  reachTunnel: 'Через туннель',
+  reachNoInternet: 'Без интернета',
+  reachIsolated: 'Клиенты изолированы',
+  laneAuto: 'авто',
+  laneAutoTitle: 'Назначено автоматически: оставленный пустым идентификатор или имя получили наименьшее свободное значение.',
+  showGeneratedConfig: 'Показать сгенерированный конфиг',
+  copied: 'Скопировано',
+  copyFailed: 'Не удалось скопировать — выделите текст и скопируйте вручную.',
+  copyRealValues: 'Копирование всегда даёт настоящие значения, что бы здесь ни отображалось.',
+  meshSection: 'Mesh-транспорт',
+  meshIdLabel: 'Mesh ID',
+  countryDefault: 'По умолчанию радиомодуля',
 };
 
 export default ru;
