@@ -21,7 +21,7 @@ and the five retired CI gate scripts are re-expressed here (research.md R9).
 - [x] T002 [P] `tsconfig.json` with `strict`, `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`; delete `jsconfig.json`
 - [x] T003 [P] `vite.config.ts` with two HTML entries (`builder`, `networks`) plus the landing page, output `dist/`
 - [x] T004 [P] Rewrite `scripts/embed-wrtnova.mjs` to copy `wrtnova.sh` into `dist/`; add `dist/` and `dist/wrtnova.sh` to `.gitignore`
-- [ ] T005 [P] Self-host Archivo, Public Sans, JetBrains Mono as subset variable fonts in `public/fonts/`; delete the three IBM Plex Mono files
+- [x] T005 [P] Self-host Archivo, Public Sans, JetBrains Mono as subset variable fonts in `public/fonts/`; delete the three IBM Plex Mono files *(fonts self-hosted; Cyrillic served by Noto Sans under the same family names, see plan.md. The IBM Plex files stay until Phase 11: the superseded `public/` pages still reference them.)*
 - [x] T006 Replace `npm run ci` with `npm run check` (typecheck + test); delete `scripts/ci/check-{no-zero,marker,no-dupes,budget,no-undef,i18n-html,i18n-locales,i18n-diacritics}.mjs`
 - [x] T007 Update `.github/workflows/ci.yml` to run `npm run check`
 
@@ -64,22 +64,22 @@ and the five retired CI gate scripts are re-expressed here (research.md R9).
 
 ## Phase 3: Design system and shell
 
-- [ ] T031 `src/ui/tokens.css` — the cable-pair palette, type scale, spacing, light and dark, `prefers-reduced-motion`
-- [ ] T032 [P] `src/ui/Field.tsx`, `Toggle.tsx`, `TextField.tsx`, `SelectField.tsx`, `RadioRow.tsx` — labelled, described, error-bearing primitives
-- [ ] T033 [P] `src/ui/Combobox.tsx` on Radix — the device picker, timezone picker
-- [ ] T034 [P] `src/ui/ChipPicker.tsx` — multi-select with removable chips, for countries and threat feeds
-- [ ] T035 [P] `src/ui/SegmentGroup.tsx` — the tinted, hairline-edged field group carrying a segment's identity colour
-- [ ] T036 `src/ui/AppShell.tsx` — three-region chassis; left rail, centre, right panel; phone tab strip and bottom sheet
-- [ ] T037 [P] `src/ui/ThemeToggle.tsx` and `LangSwitcher.tsx`, persisting to `theme` and `lang`
+- [x] T031 `src/ui/tokens.css` — the cable-pair palette, type scale, spacing, light and dark, `prefers-reduced-motion`
+- [x] T032 [P] `src/ui/Field.tsx`, `Toggle.tsx`, `TextField.tsx`, `SelectField.tsx`, `RadioRow.tsx` — labelled, described, error-bearing primitives
+- [x] T033 [P] `src/ui/Combobox.tsx` on Radix — the device picker, timezone picker
+- [x] T034 [P] `src/ui/ChipPicker.tsx` — multi-select with removable chips, for countries and threat feeds
+- [x] T035 [P] `src/ui/SegmentGroup.tsx` — the tinted, hairline-edged field group carrying a segment's identity colour
+- [x] T036 `src/ui/AppShell.tsx` — three-region chassis; left rail, centre, right panel; phone tab strip and bottom sheet
+- [x] T037 [P] `src/ui/ThemeToggle.tsx` and `LangSwitcher.tsx`, persisting to `theme` and `lang`
 
 ---
 
 ## Phase 4: i18n
 
-- [ ] T038 `src/i18n/ids.ts` — the `MessageId` union derived from the English catalogue
-- [ ] T039 Port `public/js/i18n/en.mjs` to `src/i18n/en.ts` as `Record<MessageId, string>`
-- [ ] T040 [P] Port de, es, fr, pl, ru, zh the same way; a missing key is a compile error *(Constitution VIII, SC-008)*
-- [ ] T041 [P] `src/i18n/index.ts` — `t()` with interpolation, browser detection, lazy non-English import, English fallback
+- [x] T038 `src/i18n/ids.ts` — the `MessageId` union derived from the English catalogue
+- [x] T039 Port `public/js/i18n/en.mjs` to `src/i18n/en.ts` as `Record<MessageId, string>`
+- [x] T040 [P] Port de, es, fr, pl, ru, zh the same way; a missing key is a compile error *(Constitution VIII, SC-008)*
+- [x] T041 [P] `src/i18n/index.ts` — `t()` with interpolation, browser detection, lazy non-English import, English fallback
 
 ---
 
@@ -89,20 +89,20 @@ and the five retired CI gate scripts are re-expressed here (research.md R9).
 
 **Independent Test**: pick a device, press build, receive a download link.
 
-- [ ] T042 [US1] `src/state/configStore.ts` — Zustand store over `RawConfig`, selector subscriptions, derived selectors wired to `core/derive.ts`
-- [ ] T043 [US1] `src/pages/builder/DeviceStep.tsx` — the opening question; nothing else renders until hardware is chosen
-- [ ] T044 [US1] Release picker with snapshot branches and the one-step stable fallback *(FR-004, FR-005)*
-- [ ] T045 [P] [US1] `src/sections/Access.tsx` — hostname, root password, SSH key and password auth, timezone, time format
-- [ ] T046 [P] [US1] `src/sections/Networks.tsx` — base prefix, subnet, the four segments with prefix/interface/VLAN/subnet, trunk list, tagged-LAN guard dialog, packet steering, ULA
-- [ ] T047 [P] [US1] `src/sections/Wifi.tsx` — country, roaming flags, the four SSIDs and passwords, isolation, channels, log level, WED, mesh backhaul group
-- [ ] T048 [P] [US1] `src/sections/Internet.tsx` — DHCP vs PPPoE, MAC, WAN tagging, second WAN, bridged WAN port, modem and tethering failover
-- [ ] T049 [P] [US1] `src/sections/Filtering.tsx` — DNS engine, AdGuard options, DoH presets and upstreams, bootstrap, dnsmasq mode, forced DNS, DoT/DoQ and DoH blocking, banIP countries and feeds
-- [ ] T050 [P] [US1] `src/sections/Security.tsx` — WireGuard client, split tunnel, port forwards, IPv6 servers, dynamic DNS
-- [ ] T051 [P] [US1] `src/sections/Advanced.tsx` — offloading, irqbalance, LUCI HTTPS, NTP, reboot, guest curfew, logging, and the disclosure holding extra packages, custom script, and ASU server
-- [ ] T052 [US1] Version- and hardware-gated options: packet steering `2` on OpenWrt ≥ 24, time format on ≥ 25, ath10k-CT, WED *(FR-023)*
-- [ ] T053 [US1] Hardware-aware DNS engine default that never overrides an explicit choice *(FR-022)*
-- [ ] T054 [US1] `src/pages/builder/BuildAction.tsx` — pre-flight validation sweep, progress, queue position, results with checksums, storage auto-retry *(FR-029, FR-030)*
-- [ ] T055 [US1] Package chip list showing the resolved set before building *(FR-025)*
+- [x] T042 [US1] `src/state/configStore.ts` — Zustand store over `RawConfig`, selector subscriptions, derived selectors wired to `core/derive.ts`
+- [x] T043 [US1] `src/pages/builder/DeviceStep.tsx` — the opening question; nothing else renders until hardware is chosen
+- [x] T044 [US1] Release picker with snapshot branches and the one-step stable fallback *(FR-004, FR-005)*
+- [x] T045 [P] [US1] `src/sections/Access.tsx` — hostname, root password, SSH key and password auth, timezone, time format
+- [x] T046 [P] [US1] `src/sections/Networks.tsx` — base prefix, subnet, the four segments with prefix/interface/VLAN/subnet, trunk list, tagged-LAN guard dialog, packet steering, ULA
+- [x] T047 [P] [US1] `src/sections/Wifi.tsx` — country, roaming flags, the four SSIDs and passwords, isolation, channels, log level, WED, mesh backhaul group
+- [x] T048 [P] [US1] `src/sections/Internet.tsx` — DHCP vs PPPoE, MAC, WAN tagging, second WAN, bridged WAN port, modem and tethering failover
+- [x] T049 [P] [US1] `src/sections/Filtering.tsx` — DNS engine, AdGuard options, DoH presets and upstreams, bootstrap, dnsmasq mode, forced DNS, DoT/DoQ and DoH blocking, banIP countries and feeds
+- [x] T050 [P] [US1] `src/sections/Security.tsx` — WireGuard client, split tunnel, port forwards, IPv6 servers, dynamic DNS
+- [x] T051 [P] [US1] `src/sections/Advanced.tsx` — offloading, irqbalance, LUCI HTTPS, NTP, reboot, guest curfew, logging, and the disclosure holding extra packages, custom script, and ASU server
+- [x] T052 [US1] Version- and hardware-gated options: packet steering `2` on OpenWrt ≥ 24, time format on ≥ 25, ath10k-CT, WED *(FR-023)*
+- [x] T053 [US1] Hardware-aware DNS engine default that never overrides an explicit choice *(FR-022)*
+- [x] T054 [US1] `src/pages/builder/BuildAction.tsx` — pre-flight validation sweep, progress, queue position, results with checksums, storage auto-retry *(FR-029, FR-030)*
+- [x] T055 [US1] Package chip list showing the resolved set before building *(FR-025)*
 
 **Checkpoint**: a first-time user can build an image. This is the MVP.
 

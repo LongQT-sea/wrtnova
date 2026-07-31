@@ -17,3 +17,6 @@ public/wrtnova.sh
 .DS_Store
 test-results/
 playwright-report/
+
+# Playwright MCP scratch output
+.playwright-mcp/

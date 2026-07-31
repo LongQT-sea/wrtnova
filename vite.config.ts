@@ -3,9 +3,15 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwind from '@tailwindcss/vite';
 
-// Multi-page build: the landing page plus the two product pages. Vite emits
-// them at the same URLs the previous site used (/, /builder/, /networks/), so
-// existing links and bookmarks keep working.
+// Multi-page build. Each new page joins `input` in the phase that builds it, and
+// emits at the same URL the previous site used, so links and bookmarks keep
+// working. Until then the superseded page in `public/` is still copied to the same
+// path and keeps serving -- rollup's output wins over the public-dir copy for any
+// path both produce, so adding an entry here is what retires the old page.
+//
+//   /builder/   this phase
+//   /networks/  Phase 9 (US4)
+//   /           Phase 11 (T083)
 export default defineConfig({
   plugins: [react(), tailwind()],
   resolve: {
@@ -22,9 +28,7 @@ export default defineConfig({
     emptyOutDir: true,
     rollupOptions: {
       input: {
-        landing: resolve(__dirname, 'index.html'),
         builder: resolve(__dirname, 'builder/index.html'),
-        networks: resolve(__dirname, 'networks/index.html'),
       },
     },
   },

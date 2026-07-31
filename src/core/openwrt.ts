@@ -14,7 +14,7 @@ export function versionToUrl(v: string): string {
   return v === 'SNAPSHOT' ? DOWNLOADS + '/snapshots' : DOWNLOADS + '/releases/' + v;
 }
 
-interface OverviewProfile {
+export interface OverviewProfile {
   id: string;
   target: string;
   titles?: Array<{ title?: string; vendor?: string; model?: string; variant?: string }>;

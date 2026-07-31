@@ -94,12 +94,21 @@ carries its name.
 | Role | Face | Why |
 | --- | --- | --- |
 | Display | **Archivo** 600/700, tight tracking | A slightly condensed industrial grotesque. Used only for page titles, lane names, and the few large numbers. Confident and engineered without being a "tech startup" face. |
-| Body / UI | **Public Sans** 400/500/600 | Carries the 110-field form. Chosen over Inter (the default everyone reaches for) with equally good small-size legibility, and over Instrument Sans because Public Sans has the Cyrillic coverage the Russian locale needs. |
+| Body / UI | **Public Sans** 400/500/600 | Carries the 110-field form. Chosen over Inter (the default everyone reaches for) with equally good small-size legibility, and over Instrument Sans. |
 | Data | **JetBrains Mono** 400/500 | Only for values that are machine values: IP addresses, VLAN ids, keys, package names, the generated config. Better zero/one/l disambiguation than IBM Plex Mono, which matters when someone is reading back a WireGuard key. |
 | CJK | System stack (`PingFang SC`, `Noto Sans SC`, `Microsoft YaHei`) | Shipping a CJK webfont would cost megabytes for one locale. |
 
 Self-hosted, variable, subset to the ranges each locale needs. IBM Plex Mono is
-removed. The key move is demotion: the old app set its entire interface in mono,
+removed.
+
+**Correction from implementation (T005)**: Public Sans and Archivo ship Latin and
+Latin Extended only — neither has Cyrillic, so the claim above that Public Sans
+was chosen for its Cyrillic coverage was wrong. The Russian locale is served by
+registering **Noto Sans**' Cyrillic subset under the same two family names with a
+`unicode-range` that covers only U+0400-04FF. Per-glyph selection means a Latin
+page never fetches the Cyrillic file and a Russian page gets a designed face
+rather than an arbitrary system fallback. Do not "fix" this by dropping the extra
+`@font-face` blocks; that regresses the Russian locale to a system font. The key move is demotion: the old app set its entire interface in mono,
 which is what made it read as a developer tool. Here mono means "this is a
 literal value", and that meaning is the point.
 
