@@ -1,20 +1,21 @@
 name: CI
 
-# The gates are npm scripts (scripts/ci/*.mjs) so they run identically locally
-# via `npm run ci`. This workflow just provisions the toolchain and invokes them.
-# Node 22+ is required (the gate scripts use the stable fs.globSync).
+# `npm run check` is the gate: type check plus the Vitest suite, which carries
+# the constitutional invariants (section marker, off-state never '0', no
+# redundant defaults, configuration key coverage, build determinism). It runs
+# identically locally.
 
 on:
   push:
     branches: [main]
   pull_request:
 
-# Least privilege: the gates only read the repo, build, and run tests.
+# Least privilege: the gate only reads the repo, builds, and runs tests.
 permissions:
   contents: read
 
 jobs:
-  ci:
+  check:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -27,11 +28,5 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build CSS (Tailwind)
-        run: npm run build:css
-
-      - name: Regenerate wrtnova.sh artifact
-        run: npm run embed
-
-      - name: Run gates (typecheck, tests, invariants, budget)
-        run: npm run ci
+      - name: Type check and test
+        run: npm run check

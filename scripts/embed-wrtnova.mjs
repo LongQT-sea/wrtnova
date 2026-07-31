@@ -1,24 +1,38 @@
 #!/usr/bin/env node
-// Regenerate build artifacts from wrtnova.sh:
-//   public/wrtnova.sh  -- full script served to the browser
+// Copy the canonical wrtnova.sh into the build output so the browser can fetch
+// it at /wrtnova.sh.
 //
-// wrtnova.sh is the canonical, tracked source at the repo root (CLAUDE.md
-// invariant). This step copies it verbatim into public/ (git-ignored) so the
-// browser can fetch it. It writes exactly one file and does not slice on the
-// marker - the browser does that itself.
+// wrtnova.sh is the user's file, tracked at the repo root, and is NEVER edited
+// by the build (Constitution I). This step copies it verbatim; it does not slice
+// on the section marker, because the browser does that itself and the marker is
+// byte-load-bearing (Constitution II).
 
-import { readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = resolve(here, '..');
 
-const localPath = resolve(root, 'wrtnova.sh');
-if (!existsSync(localPath)) {
-  console.error('Missing canonical wrtnova.sh at repo root: ' + localPath);
+const source = resolve(root, 'wrtnova.sh');
+if (!existsSync(source)) {
+  console.error('Missing canonical wrtnova.sh at repo root: ' + source);
   process.exit(1);
 }
-const sh = readFileSync(localPath, 'utf8');
-writeFileSync(resolve(root, 'public/wrtnova.sh'), sh);
-console.log('Wrote public/wrtnova.sh  (' + sh.length + ' bytes)');
+
+const MARKER = '# ===================\n# End config section\n# ===================\n';
+const sh = readFileSync(source, 'utf8');
+
+// Fail the build rather than ship a script the browser cannot slice.
+const occurrences = sh.split(MARKER).length - 1;
+if (occurrences !== 1) {
+  console.error(
+    'wrtnova.sh must contain the section marker exactly once, found ' + occurrences + '.',
+  );
+  process.exit(1);
+}
+
+const outDir = resolve(root, 'dist');
+mkdirSync(outDir, { recursive: true });
+writeFileSync(resolve(outDir, 'wrtnova.sh'), sh);
+console.log('Wrote dist/wrtnova.sh  (' + sh.length + ' bytes)');

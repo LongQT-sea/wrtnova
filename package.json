@@ -1,7 +1,8 @@
 {
   "name": "wrtnova",
-  "version": "0.1.0",
+  "version": "2.0.0",
   "private": true,
+  "type": "module",
   "description": "Browser-based OpenWrt firmware builder that bakes in the wrtnova.sh first-boot provisioning script.",
   "license": "MIT",
   "author": "LongQT-sea",
@@ -17,24 +18,40 @@
     "node": ">=22"
   },
   "scripts": {
-    "build:css": "tailwindcss -i src/style.css -o public/style.css --minify",
-    "watch:css": "tailwindcss -i src/style.css -o public/style.css --watch",
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build && npm run embed",
+    "preview": "vite preview",
     "embed": "node scripts/embed-wrtnova.mjs",
-    "test": "node --test",
-    "typecheck": "tsc -p jsconfig.json",
-    "check:no-undef": "node scripts/ci/check-no-undef.mjs",
-    "check:no-zero": "node scripts/ci/check-no-zero.mjs",
-    "check:marker": "node scripts/ci/check-marker.mjs",
-    "check:no-dupes": "node scripts/ci/check-no-dupes.mjs",
-    "check:budget": "node scripts/ci/check-budget.mjs",
-    "check:i18n": "node scripts/ci/check-i18n-html.mjs",
-    "check:i18n-locales": "node scripts/ci/check-i18n-locales.mjs",
-    "check:i18n-diacritics": "node scripts/ci/check-i18n-diacritics.mjs",
-    "ci": "npm run typecheck && npm run check:no-undef && npm test && npm run check:no-zero && npm run check:marker && npm run check:no-dupes && npm run check:budget && npm run check:i18n && npm run check:i18n-locales && npm run check:i18n-diacritics"
+    "dev:pages": "npm run build && wrangler pages dev dist",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "check": "npm run typecheck && npm run test"
+  },
+  "dependencies": {
+    "@radix-ui/react-checkbox": "^1.1.4",
+    "@radix-ui/react-dialog": "^1.1.6",
+    "@radix-ui/react-popover": "^1.1.6",
+    "@radix-ui/react-radio-group": "^1.2.3",
+    "@radix-ui/react-select": "^2.1.6",
+    "@radix-ui/react-tabs": "^1.1.3",
+    "bcryptjs": "^3.0.2",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "zustand": "^5.0.3"
   },
   "devDependencies": {
-    "playwright": "^1.60.0",
-    "tailwindcss": "^3.4.0",
-    "typescript": "^5.4.0"
+    "@playwright/test": "^1.60.0",
+    "@tailwindcss/vite": "^4.0.0",
+    "@types/node": "^26.1.2",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^4.3.4",
+    "tailwindcss": "^4.0.0",
+    "typescript": "^5.7.0",
+    "vite": "^6.0.0",
+    "vitest": "^3.0.0",
+    "wrangler": "^3.90.0"
   }
 }
