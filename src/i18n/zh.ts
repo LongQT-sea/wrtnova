@@ -411,6 +411,9 @@ const zh: Catalog = {
   meshSection: 'Mesh 回程',
   meshIdLabel: 'Mesh ID',
   countryDefault: '无线电默认',
+  laneConflict: '冲突',
+  stpForced: '两个 Mesh 射频均已启用，因此已自动开启 STP：同一网桥中的两个 meshpoint 可能形成环路。',
+  batmanOneRadio: 'BATMAN-adv 仅使用一个 Mesh 射频，因此采用 5 GHz，2.4 GHz Mesh 已关闭。',
 };
 
 export default zh;

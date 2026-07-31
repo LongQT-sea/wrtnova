@@ -10,7 +10,9 @@ import { capsFor } from '@state/capabilities';
 import { usePskVlanError } from '@state/validation';
 import { loadCountries, type Country } from '@state/staticData';
 import { Combobox } from '@ui/Combobox';
+import { Rich } from '@ui/Rich';
 import { SegmentGroup, SegmentMark } from '@ui/SegmentGroup';
+import { ForcedToggle } from '@ui/Toggle';
 import { t } from '@i18n/index';
 import {
   BoundSelect,
@@ -238,7 +240,18 @@ function MeshGroup() {
       <h3 className="field-label">{t('meshSection')}</h3>
       <Note id="wiredBackhaulNote" />
       <BoundToggle k="WIRELESS_MESH" label="wirelessMesh" />
-      <BoundToggle k="WIRELESS_MESH_2G" label="wirelessMesh2g" help="mesh2gNote" />
+      {/* batman-adv runs over ONE mesh radio, and the derivation picks 5 GHz, so with
+          both radios meshing the 2.4 GHz control is not the user's to set (T065). */}
+      {batman === '1' && bothMesh ? (
+        <ForcedToggle
+          id="WIRELESS_MESH_2G"
+          label={t('wirelessMesh2g')}
+          reason={t('batmanOneRadio')}
+          value=""
+        />
+      ) : (
+        <BoundToggle k="WIRELESS_MESH_2G" label="wirelessMesh2g" help="mesh2gNote" />
+      )}
       {meshOn ? (
         <>
           <Note id="meshTrunkNote" />
@@ -257,9 +270,14 @@ function MeshGroup() {
             <BoundToggle k="BATMAN_ALL_VLAN" label="batmanAllVlan" help="batmanAllVlanHelp" />
           ) : null}
           {/* Two meshpoints in one bridge can form an L2 loop, so with both radios
-              meshing the derivation forces STP on and the control would be a lie. */}
+              meshing the derivation forces STP on (T065). */}
           {bothMesh ? (
-            <Note id="stpNote" />
+            <ForcedToggle
+              id="BRIDGE_STP"
+              label={<Rich id="bridgeStp" />}
+              reason={t('stpForced')}
+              value="1"
+            />
           ) : (
             <BoundToggle k="BRIDGE_STP" label="bridgeStp" help="stpNote" richLabel />
           )}

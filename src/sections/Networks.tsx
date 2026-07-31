@@ -9,9 +9,11 @@
 import * as Dialog from '@radix-ui/react-dialog';
 import { useState } from 'react';
 import type { SegmentId } from '@core/types';
+import { SWCONFIG_VLAN_MAX } from '@core/vlan';
 import {
   useConfigStore,
   useDevice,
+  useEmission,
   useField,
   useFieldState,
   useIfacePlan,
@@ -136,6 +138,7 @@ export function Networks() {
           mono
           unvalidated
         />
+        <TrunkTruncationNote />
         <TaggedLanGuard />
         <PacketSteering />
         <BoundText
@@ -244,6 +247,24 @@ function ConflictNotices() {
       {vlanBad ? <Note id="vlanDupWarn" danger /> : null}
       {ifaceBad ? <Note id="ifaceDupWarn" danger /> : null}
     </>
+  );
+}
+
+/**
+ * A swconfig switch has a 16-entry hardware VLAN table, so a trunk list longer than
+ * the free slots is cut to fit. Saying which ids were dropped, live, is the whole
+ * point (FR-014): the cut is applied to the emitted config, so without this the
+ * built image would quietly carry fewer VLANs than the form shows.
+ */
+function TrunkTruncationNote() {
+  const emission = useEmission();
+  if (!emission.truncated) return null;
+  return (
+    <Note
+      id="vlanTruncNote"
+      danger
+      vars={{ max: SWCONFIG_VLAN_MAX, dropped: emission.dropped }}
+    />
   );
 }
 

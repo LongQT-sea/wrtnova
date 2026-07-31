@@ -411,6 +411,9 @@ const de: Catalog = {
   meshSection: 'Mesh-Backhaul',
   meshIdLabel: 'Mesh-ID',
   countryDefault: 'Standard des Funkmoduls',
+  laneConflict: 'Konflikt',
+  stpForced: 'Beide Mesh-Funkmodule sind aktiv, daher wird STP für dich aktiviert: zwei Meshpoints in einer Bridge können eine Schleife bilden.',
+  batmanOneRadio: 'BATMAN-adv läuft über ein Mesh-Funkmodul, daher wird 5 GHz genutzt und das 2,4-GHz-Mesh ist aus.',
 };
 
 export default de;

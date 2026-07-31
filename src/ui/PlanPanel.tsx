@@ -13,7 +13,7 @@
 // not getting as much as what they are.
 
 import type { SegmentId } from '@core/types';
-import { planOf, type Lane, type Reach } from '@state/plan';
+import { planOf, type Lane, type LaneConflict, type Reach } from '@state/plan';
 import { useConfigStore } from '@state/configStore';
 import { SEGMENT_VAR } from './SegmentGroup';
 import { t, type MessageId } from '@i18n/index';
@@ -30,6 +30,16 @@ const REACH_NAME: Record<Reach, MessageId> = {
   tunnel: 'reachTunnel',
   noInternet: 'reachNoInternet',
   isolated: 'reachIsolated',
+};
+
+/** The badge is short; the explanation rides along as its title. */
+const CONFLICT_DETAIL: Record<Exclude<LaneConflict, ''>, MessageId> = {
+  vlanDuplicate: 'vlanDupWarn',
+  vlanTrunked: 'vlanDupWarn',
+  vlanExhausted: 'fixVlanConflict',
+  ifaceReserved: 'ifaceDupWarn',
+  ifaceDuplicate: 'ifaceDupWarn',
+  ifaceInvalid: 'fixIfaceConflict',
 };
 
 export function PlanPanel() {
@@ -104,6 +114,16 @@ function LaneRow({ lane, index }: { lane: Lane; index: number }) {
               {t(REACH_NAME[r])}
             </span>
           ))}
+          {/* A conflict is surfaced on the lane that owns it, so the panel the user
+              is watching is where they find out a build will be refused (FR-013). */}
+          {lane.conflict ? (
+            <span
+              className="chip border-danger text-danger"
+              title={t(CONFLICT_DETAIL[lane.conflict])}
+            >
+              {t('laneConflict')}
+            </span>
+          ) : null}
         </div>
       ) : null}
     </li>

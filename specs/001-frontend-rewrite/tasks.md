@@ -119,12 +119,12 @@ and the five retired CI gate scripts are re-expressed here (research.md R9).
 
 ## Phase 7: User Story 6 — stopped before a mistake reaches hardware (P2)
 
-- [ ] T060 [US6] Inline validity: message on blur, released on input, conflict messages that depend on sibling fields re-evaluated across the group
-- [ ] T061 [US6] Build-time sweep refusing on the first *visible* offender and explaining it *(FR-015)*
-- [ ] T062 [US6] VLAN and interface conflict surfacing in the plan panel *(FR-013)*
-- [ ] T063 [US6] Shared-password VLAN scheme requiring distinct passwords *(FR-016)*
-- [ ] T064 [US6] Swconfig trunk truncation notice naming the dropped ids *(FR-014)*
-- [ ] T065 [US6] Mutually-inert controls forced to what will actually be built, never left lying *(spec edge case)*
+- [x] T060 [US6] Inline validity: message on blur, released on input, conflict messages that depend on sibling fields re-evaluated across the group
+- [x] T061 [US6] Build-time sweep refusing on the first *visible* offender and explaining it *(FR-015)* — a VLAN collision was NOT blocking a build until Phase 7; the allocator now reports per row and the sweep reads it
+- [x] T062 [US6] VLAN and interface conflict surfacing in the plan panel *(FR-013)*
+- [x] T063 [US6] Shared-password VLAN scheme requiring distinct passwords *(FR-016)*
+- [x] T064 [US6] Swconfig trunk truncation notice naming the dropped ids *(FR-014)*
+- [x] T065 [US6] Mutually-inert controls forced to what will actually be built, never left lying *(spec edge case)*
 
 ---
 

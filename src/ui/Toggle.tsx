@@ -18,6 +18,37 @@ export interface ToggleProps {
   disabled?: boolean;
 }
 
+export interface ForcedToggleProps {
+  id: string;
+  label: ReactNode;
+  /** Why the value is not the user's to choose right now. */
+  reason: ReactNode;
+  /** The value that will actually be built. */
+  value: Flag;
+}
+
+/**
+ * A control another setting has decided. It shows what will be built and says why,
+ * which is the point: a mutually-inert control left editable lies about the outcome,
+ * and one that is simply hidden hides the outcome.
+ */
+export function ForcedToggle({ id, label, reason, value }: ForcedToggleProps) {
+  const state = value === '1' ? 'checked' : 'unchecked';
+  return (
+    <div className="flex items-start gap-2.5 py-1.5 opacity-70">
+      <span className="toggle-track mt-0.5" data-state={state} role="img" aria-hidden="true">
+        <span className="toggle-thumb" data-state={state} />
+      </span>
+      <div className="min-w-0">
+        <p className="field-label" id={id + '-forced'}>
+          {label}
+        </p>
+        <p className="field-help mt-0.5">{reason}</p>
+      </div>
+    </div>
+  );
+}
+
 export function Toggle({ id, label, help, value, onChange, disabled }: ToggleProps) {
   const ref = useRef<HTMLButtonElement>(null);
 

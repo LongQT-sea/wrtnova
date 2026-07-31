@@ -411,6 +411,9 @@ const es: Catalog = {
   meshSection: 'Backhaul de malla',
   meshIdLabel: 'ID de malla',
   countryDefault: 'Predeterminado de la radio',
+  laneConflict: 'conflicto',
+  stpForced: 'Ambas radios de malla están activas, así que STP se activa por ti: dos meshpoints en un puente pueden formar un bucle.',
+  batmanOneRadio: 'BATMAN-adv usa una sola radio de malla, así que se emplea 5 GHz y la malla de 2,4 GHz queda apagada.',
 };
 
 export default es;

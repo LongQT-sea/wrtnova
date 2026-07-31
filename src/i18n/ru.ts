@@ -411,6 +411,9 @@ const ru: Catalog = {
   meshSection: 'Mesh-транспорт',
   meshIdLabel: 'Mesh ID',
   countryDefault: 'По умолчанию радиомодуля',
+  laneConflict: 'конфликт',
+  stpForced: 'Оба mesh-радио включены, поэтому STP включается автоматически: две mesh-точки в одном мосте могут образовать петлю.',
+  batmanOneRadio: 'BATMAN-adv работает через одно mesh-радио, поэтому используется 5 ГГц, а mesh 2,4 ГГц отключён.',
 };
 
 export default ru;

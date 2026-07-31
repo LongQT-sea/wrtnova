@@ -411,6 +411,9 @@ const fr: Catalog = {
   meshSection: 'Backhaul maillé',
   meshIdLabel: 'ID du maillage',
   countryDefault: 'Par défaut de la radio',
+  laneConflict: 'conflit',
+  stpForced: 'Les deux radios maillées sont actives, donc STP est activé pour vous : deux meshpoints dans un même pont peuvent former une boucle.',
+  batmanOneRadio: 'BATMAN-adv n\'utilise qu\'une radio maillée : le 5 GHz est retenu et le maillage 2,4 GHz est désactivé.',
 };
 
 export default fr;

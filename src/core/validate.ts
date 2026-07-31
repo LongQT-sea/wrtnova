@@ -17,7 +17,13 @@ import {
   prefixValid,
   wifiTextValid,
 } from './list-grammar';
-import { IFACE_KEY_BY_FIELD, ifaceValid, resolveIfaceAssignment } from './vlan';
+import {
+  IFACE_KEY_BY_FIELD,
+  VLAN_KEY_BY_FIELD,
+  ifaceValid,
+  resolveIfaceAssignment,
+  resolveVlanAssignment,
+} from './vlan';
 
 export interface FieldIssue {
   key: string;
@@ -66,6 +72,7 @@ export function validateField(
 
   const range = VLAN_RANGE[key as ConfigKey];
   if (range) {
+    // Empty means "let the allocator pick", which can never collide.
     if (v === '') return null;
     const n = Number(v);
     if (!/^\d+$/.test(v) || n < range.min || n > range.max) {
@@ -74,6 +81,16 @@ export function validateField(
         messageId: 'rangeMsg',
         vars: { label: range.noun, min: String(range.min), max: String(range.max) },
       };
+    }
+    // A typed id is an anchor and can genuinely collide -- with a sibling, or with a
+    // trunked VLAN. Those are the cases that MUST block a build (FR-013), so they
+    // are reported against the field that owns them and not merely as a banner.
+    const row = VLAN_KEY_BY_FIELD[key];
+    if (row) {
+      const conflict = resolveVlanAssignment(cfg).byKey[row]?.conflict;
+      if (conflict === 'dup' || conflict === 'trunk') {
+        return { key, messageId: 'fixVlanConflict' };
+      }
     }
     return null;
   }

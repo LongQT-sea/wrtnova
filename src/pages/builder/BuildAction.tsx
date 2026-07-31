@@ -18,8 +18,7 @@ import {
 import { isStorageError, nextLighterDnsMode } from '@core/dns';
 import { parseAdditionalPackages, resolvePackages, withBase64Pkg } from '@core/packages';
 import { assembleScriptForBuild, fetchScriptBody } from '@core/script';
-import { truncateAdditionalVlans } from '@core/vlan';
-import { emittedFrom, useConfigStore } from '@state/configStore';
+import { emissionFor, useConfigStore } from '@state/configStore';
 import { sectionOfKey, sweep } from '@state/validation';
 import { revealField } from '@ui/fieldRegistry';
 import { t, type MessageId } from '@i18n/index';
@@ -70,9 +69,7 @@ export function BuildAction({ onNavigate }: BuildActionProps) {
       if (section) onNavigate(section);
       setPhase('error');
       setProgress(null);
-      setError(
-        t(first.messageId as MessageId, first.vars) + ' ' + t('fixBeforeBuild'),
-      );
+      setError(t(first.messageId as MessageId, first.vars));
       // Let the section mount before reaching for the control.
       requestAnimationFrame(() => {
         if (revealField(first.key)) {
@@ -252,18 +249,16 @@ function Results({ images }: { images: ResolvedImage[] }) {
 }
 
 /**
- * The config as it will be written: gated, trunk-truncated to the switch's VLAN
- * table, and carrying the derived AdGuard Home admin hash.
+ * The config as it will be written: the emission for this board -- gated and cut to
+ * its VLAN table -- plus the derived AdGuard Home admin hash.
  *
  * The hash is a deterministic bcrypt of the root password, which is what keeps a
  * rebuild byte-identical and lets the build server serve a cached image (FR-032).
+ * It is the only thing added here rather than in the emission, because it is async
+ * and everything else has to stay synchronously readable by the preview.
  */
 async function buildConfig(raw: RawConfig, boardTarget: string): Promise<EmittedConfig> {
-  const cfg = { ...emittedFrom(raw) };
-
-  const trunc = truncateAdditionalVlans(cfg, boardTarget);
-  if (trunc.truncated) cfg.ADDITIONAL_VLAN_LIST = trunc.list;
-
+  const cfg = { ...emissionFor(raw, boardTarget).config };
   if (cfg.ROOT_PASSWD) {
     const hash = await adguardHashFromRoot(cfg.ROOT_PASSWD);
     if (hash) cfg.ADGUARD_PASSWD = hash;

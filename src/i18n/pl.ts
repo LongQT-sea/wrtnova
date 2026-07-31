@@ -411,6 +411,9 @@ const pl: Catalog = {
   meshSection: 'Backhaul mesh',
   meshIdLabel: 'ID mesh',
   countryDefault: 'Domyślne radia',
+  laneConflict: 'konflikt',
+  stpForced: 'Oba radia mesh są włączone, więc STP zostaje włączone za Ciebie: dwa meshpointy w jednym mostku mogą utworzyć pętlę.',
+  batmanOneRadio: 'BATMAN-adv działa na jednym radiu mesh, więc używane jest 5 GHz, a mesh 2,4 GHz jest wyłączony.',
 };
 
 export default pl;

@@ -14,7 +14,13 @@ import { useShallow } from 'zustand/react/shallow';
 import type { DeviceTarget, EmittedConfig, RawConfig } from '@core/types';
 import { derive } from '@core/derive';
 import { DNS_DEFAULT } from '@core/dns';
-import { resolveIfaceAssignment, resolveVlanAssignment, type IfaceResult, type VlanResult } from '@core/vlan';
+import {
+  resolveIfaceAssignment,
+  resolveVlanAssignment,
+  truncateAdditionalVlans,
+  type IfaceResult,
+  type VlanResult,
+} from '@core/vlan';
 import { ASU_DEFAULT } from '@core/asu';
 
 /**
@@ -248,9 +254,54 @@ export function useRaw(): RawConfig {
   return useConfigStore((s) => s.raw);
 }
 
-/** The gated config: what would actually be written into the script. */
+/** The gated config, before the selected board's own limits apply. */
 export function useEmitted(): EmittedConfig {
   return useConfigStore((s) => emittedOf(s.raw));
+}
+
+// -- the board's own limits --------------------------------------------------
+//
+// A swconfig switch has a 16-entry hardware VLAN table, so a long trunk list has
+// to be cut to fit (FR-014). That cut used to happen at submit time only, which
+// meant the preview and the copied config promised VLANs the built image did not
+// carry. It belongs here instead: ONE emitted config, board limits included, that
+// the plan, the preview, the copy and the build all read.
+
+/** Two levels: the config's identity, then the board, since both decide the result. */
+const byTarget = new WeakMap<RawConfig, Map<string, TargetEmission>>();
+
+export interface TargetEmission {
+  config: EmittedConfig;
+  /** The ids that did not fit, range-compressed, for the notice that names them. */
+  dropped: string;
+  truncated: boolean;
+  budget: number;
+}
+
+export function emissionFor(raw: RawConfig, boardTarget: string): TargetEmission {
+  let cache = byTarget.get(raw);
+  if (!cache) {
+    cache = new Map();
+    byTarget.set(raw, cache);
+  }
+  const hit = cache.get(boardTarget);
+  if (hit) return hit;
+
+  const base = emittedOf(raw);
+  const trunc = truncateAdditionalVlans(base, boardTarget);
+  const out: TargetEmission = {
+    config: trunc.truncated ? { ...base, ADDITIONAL_VLAN_LIST: trunc.list } : base,
+    dropped: trunc.dropped,
+    truncated: trunc.truncated,
+    budget: trunc.budget,
+  };
+  cache.set(boardTarget, out);
+  return out;
+}
+
+/** What will actually be written, for the board currently selected. */
+export function useEmission(): TargetEmission {
+  return useConfigStore((s) => emissionFor(s.raw, s.target?.target ?? ''));
 }
 
 export function useVlanPlan(): VlanResult {

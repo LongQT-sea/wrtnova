@@ -41,12 +41,21 @@ const VLAN_TABLE = [
 
 export type VlanRowKey = (typeof VLAN_TABLE)[number]['key'];
 
+/**
+ * Why this row's id cannot stand. Mirrors IfaceConflict: only an ANCHOR can truly
+ * collide, because an auto always has somewhere to go, so an auto being reassigned
+ * is never a conflict (FR-013).
+ */
+export type VlanConflict = '' | 'dup' | 'trunk' | 'exhausted';
+
 export interface VlanAssignment {
   vid: number | null;
   userSet: boolean;
   participates: boolean;
   def: number;
   exhausted: boolean;
+  /** Reported per row, so the offending FIELD can be named and focused. */
+  conflict: VlanConflict;
 }
 
 export interface VlanResult {
@@ -97,13 +106,25 @@ export function resolveVlanAssignment(cfg: Cfg): VlanResult {
   });
 
   // Reserve participating anchors plus the trunk, flagging real collisions.
+  // Anchors are counted first so BOTH sides of a duplicate are flagged, not just
+  // the second one the loop happens to reach.
   const reserved = new Set<number>(trunk);
-  const anchorSeen = new Set<number>();
+  const anchorCount = new Map<number, number>();
+  for (const e of entries) {
+    if (e.part && e.userSet && e.anchor !== null) {
+      anchorCount.set(e.anchor, (anchorCount.get(e.anchor) ?? 0) + 1);
+    }
+  }
+  const flagged: Record<string, VlanConflict> = {};
   for (const e of entries) {
     if (!e.part || !e.userSet || e.anchor === null) continue;
-    if (anchorSeen.has(e.anchor)) conflict.anchorCollision = true;
-    anchorSeen.add(e.anchor);
-    if (trunk.has(e.anchor)) conflict.trunkCollision = true;
+    if ((anchorCount.get(e.anchor) ?? 0) > 1) {
+      conflict.anchorCollision = true;
+      flagged[e.row.key] = 'dup';
+    } else if (trunk.has(e.anchor)) {
+      conflict.trunkCollision = true;
+      flagged[e.row.key] = 'trunk';
+    }
     reserved.add(e.anchor);
   }
 
@@ -112,11 +133,25 @@ export function resolveVlanAssignment(cfg: Cfg): VlanResult {
   for (const e of entries) {
     const { key, def, max } = e.row;
     if (!e.part) {
-      byKey[key] = { vid: null, userSet: e.userSet, participates: false, def, exhausted: false };
+      byKey[key] = {
+        vid: null,
+        userSet: e.userSet,
+        participates: false,
+        def,
+        exhausted: false,
+        conflict: '',
+      };
       continue;
     }
     if (e.userSet && e.anchor !== null) {
-      byKey[key] = { vid: e.anchor, userSet: true, participates: true, def, exhausted: false };
+      byKey[key] = {
+        vid: e.anchor,
+        userSet: true,
+        participates: true,
+        def,
+        exhausted: false,
+        conflict: flagged[key] ?? '',
+      };
       continue;
     }
     let pick: number | null = null;
@@ -124,10 +159,24 @@ export function resolveVlanAssignment(cfg: Cfg): VlanResult {
     for (let v = 1; v < def && pick === null; v++) if (!reserved.has(v)) pick = v;
     if (pick === null) {
       conflict.exhausted = true;
-      byKey[key] = { vid: def, userSet: false, participates: true, def, exhausted: true };
+      byKey[key] = {
+        vid: def,
+        userSet: false,
+        participates: true,
+        def,
+        exhausted: true,
+        conflict: 'exhausted',
+      };
     } else {
       reserved.add(pick);
-      byKey[key] = { vid: pick, userSet: false, participates: true, def, exhausted: false };
+      byKey[key] = {
+        vid: pick,
+        userSet: false,
+        participates: true,
+        def,
+        exhausted: false,
+        conflict: '',
+      };
     }
   }
 
@@ -148,6 +197,10 @@ export function resolveVlanEmit(cfg: Cfg): Record<string, string> {
   }
   return out;
 }
+
+export const VLAN_KEY_BY_FIELD: Record<string, string> = Object.fromEntries(
+  VLAN_TABLE.map((r) => [r.field, r.key]),
+);
 
 export function detectVlanConflict(cfg: Cfg): boolean {
   const { conflict } = resolveVlanAssignment(cfg);

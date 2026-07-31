@@ -15,12 +15,13 @@ import type { EmittedConfig } from '@core/types';
 import { adguardHashFromRoot, adguardHashIfReady } from '@core/adguard';
 import { renderConfigBlock, renderConfigBlockMasked } from '@core/render-config';
 import { assembleScriptForDisplay, fetchScriptBody } from '@core/script';
+import { useEmission } from '@state/configStore';
 import { useConfigStore } from '@state/configStore';
-import { emittedFrom } from '@state/configStore';
 import { t } from '@i18n/index';
 
 export function ConfigDisclosure() {
   const raw = useConfigStore((s) => s.raw);
+  const emission = useEmission();
   const [revealed, setRevealed] = useState(false);
   const [fullScript, setFullScript] = useState(false);
   const [body, setBody] = useState<string | null>(null);
@@ -55,7 +56,7 @@ export function ConfigDisclosure() {
 
   void hashTick;
   const cfg: EmittedConfig = {
-    ...emittedFrom(raw),
+    ...emission.config,
     ADGUARD_PASSWD: adguardHashIfReady(raw.ROOT_PASSWD) ?? '',
   };
 

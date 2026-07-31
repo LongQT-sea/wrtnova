@@ -18,6 +18,21 @@ import { resolveIfaceAssignment, resolveVlanAssignment } from '@core/vlan';
 /** What a lane is permitted to talk to. */
 export type Reach = 'internet' | 'tunnel' | 'noInternet' | 'isolated';
 
+/**
+ * Why this lane cannot be built. Only genuinely unresolvable cases appear here --
+ * two explicit values colliding, an explicit value landing on a trunked VLAN or a
+ * reserved name, or exhaustion. An auto-reassignment is normal operation and is
+ * not a conflict (FR-013).
+ */
+export type LaneConflict =
+  | ''
+  | 'vlanDuplicate'
+  | 'vlanTrunked'
+  | 'vlanExhausted'
+  | 'ifaceReserved'
+  | 'ifaceDuplicate'
+  | 'ifaceInvalid';
+
 export interface Lane {
   id: SegmentId;
   enabled: boolean;
@@ -36,6 +51,7 @@ export interface Lane {
   iface: string;
   ifaceReassigned: boolean;
   reach: Reach[];
+  conflict: LaneConflict;
 }
 
 export interface Plan {
@@ -44,6 +60,8 @@ export interface Plan {
   /** The address the node itself answers on. */
   address: string;
   lanes: Lane[];
+  /** True when any lane cannot be built, which is what blocks a build. */
+  blocked: boolean;
 }
 
 const SEGMENTS: ReadonlyArray<{
@@ -109,10 +127,27 @@ export function buildPlan(raw: RawConfig): Plan {
     const v = vlan[seg.row];
     const i = iface[seg.row];
     const vlanId = v?.vid ?? v?.def ?? 0;
+    const enabled = seg.enable === null || raw[seg.enable] === '1';
+    // Both allocators report per row, so a lane simply asks about itself.
+    const conflict: LaneConflict = !enabled
+      ? ''
+      : v?.conflict === 'dup'
+        ? 'vlanDuplicate'
+        : v?.conflict === 'trunk'
+          ? 'vlanTrunked'
+          : v?.conflict === 'exhausted'
+            ? 'vlanExhausted'
+            : i?.conflict === 'reserved'
+              ? 'ifaceReserved'
+              : i?.conflict === 'dup'
+                ? 'ifaceDuplicate'
+                : i?.conflict === 'invalid'
+                  ? 'ifaceInvalid'
+                  : '';
     const prefix = str(raw, seg.prefix) || basePrefix;
     return {
       id: seg.id,
-      enabled: seg.enable === null || raw[seg.enable] === '1',
+      enabled,
       address: `${prefix}.${vlanId}.${host}`,
       subnet: str(raw, seg.subnet) || baseSubnet,
       vlanId,
@@ -120,6 +155,7 @@ export function buildPlan(raw: RawConfig): Plan {
       iface: i?.name ?? '',
       ifaceReassigned: i ? !i.userSet && i.name !== i.def : false,
       reach: reachOf(seg.id, raw, isRouter),
+      conflict,
     };
   });
 
@@ -128,5 +164,6 @@ export function buildPlan(raw: RawConfig): Plan {
     accessPoint: !isRouter,
     address: lanLane ? lanLane.address : `${basePrefix}.1.${host}`,
     lanes,
+    blocked: lanes.some((l) => l.conflict !== ''),
   };
 }
