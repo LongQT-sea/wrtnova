@@ -1,64 +1,52 @@
 # WrtNova Project Context
 
-This repo implements the WrtNova firmware builder.
+WrtNova is a browser-based OpenWrt firmware builder. The frontend is being
+rewritten from scratch. Everything about the stack, the build tooling, the
+visual design, the information architecture and the component structure is open
+— pick whatever serves the product best.
 
-## Invariants — never violate
-- wrtnova.sh is the canonical source of truth, owned and maintained by the user.
-  Claude must NEVER modify, edit, stage, or commit wrtnova.sh under any
-  circumstances. If the user asks to fix a typo or make any change to
-  wrtnova.sh, Claude should only output the suggested change and let the user
-  apply it manually.
-  Claude may only stage or commit frontend files (e.g. public/, scripts/, etc.),
-  never wrtnova.sh.
-- The marker "# ===================\n# End config section\n# ==================="
-  in wrtnova.sh splits config block (rendered per build) from body (embedded).
-- No SPDX license headers in any source file except wrtnova.sh (MIT) and LICENSE.
-- Tailwind CSS via standalone CLI is the only build step. No Node bundler.
-- Mobile-first responsive. Breakpoint 768px. All features usable at 375px width.
-- Lighthouse Performance ≥95 on mobile slow 4G. Budget: 30KB JS / 15KB CSS initial.
-- Native HTML primitives (`<dialog>, <details>, <select>`) over custom widgets.
+The rules below are the only ones that survive the rewrite. They are functional,
+not stylistic: the app breaks, or leaks the user's secrets, without them.
 
-## Workflow
-- After any wrtnova.sh edit, run `node scripts/embed-wrtnova.mjs`.
-- Verify the build still produces a working image via test deploy to CF Pages.
+## Hard requirements
 
-## Frontend conventions — follow exactly, no exceptions
-- `/builder` is the reference implementation. Before adding any feature to `/networks`,
-  read how `/builder` does the equivalent thing first.
-- Checkbox off-state: always emit `''` (empty), never `'0'`. Use `checkboxVal()` in
-  build.js / `gv()` in networks.js (which returns `''` for unchecked). `renderConfigBlock`
-  skips both `''` and `'0'`, but the source should never produce `'0'`.
-- Boolean flags in `mergeNodeConfig`: use `flag(v)` helper (`v === '1' ? '1' : ''`).
-  Never use `v || ''` for booleans — `'0'` is truthy and leaks through.
-- `defaultConfig()` in networks.js: no `'0'` or pre-filled string defaults that match
-  wrtnova.sh defaults. Use `''` so nothing redundant is emitted.
-- The build path is fully client-side: pages resolve packages via `ui.computeFinalPackages`
-  (shared `resolvePackages`) and POST the assembled defaults script straight to the ASU
-  server's `/api/v1/build`. There is no `/api/build` worker.
-- `/api/warp/register` requires a session cookie. Every page that can register WARP must
-  ping `/api/session` on init.
-- WARP API (`/api/warp/register`) returns uppercase keys: `WG_PRIVATE_KEY`,
-  `PEER_PUBLIC_KEY`, `ENDPOINT`, `ENDPOINT_PORT`, `WG_IPV4`, `WG_IPV6`, `ALLOWED_IPS`.
-  Use `wrtnova_warp_refresh` as the localStorage key (shared between pages).
-- WireGuard card (`#card-wg`): only auto-expand when the user directly toggles
-  `WG_ENABLE` on. Check `e?.target?.id === 'WG_ENABLE'` in the visibility handler —
-  never force `open = true` on form load.
+1. **wrtnova.sh is the user's file.** `wrtnova.sh` at the repo root is the source
+   of truth for the provisioning script, owned and maintained by the user. Never
+   edit, stage, or commit it. If a change is needed, print the suggested diff and
+   let the user apply it. The rewrite is frontend-only.
 
-## What to check before declaring a task done
-- `npm run ci` passes. This is the gate — run it before every commit (and re-run
-  before `--amend`). It chains: typecheck, check:no-undef, tests, check:no-zero,
-  check:marker, check:no-dupes, check:budget, check:i18n, check:i18n-locales,
-  check:i18n-diacritics.
-- check:no-undef is the safety net for the files jsconfig.json excludes (ui.js,
-  build.js, networks.js). It reports only TS2304 "Cannot find name", so deleting
-  a function while leaving a call site behind fails CI instead of shipping a
-  ReferenceError. Fix the call site; do not extend the allowlist.
-- Any new config key added to a build path (builder-config.mjs / config-merge.mjs)
-  must also be declared on the `Config` typedef in public/js/types.mjs, or
-  typecheck fails (TS2353/TS2339).
-- New user-facing strings exist in all locales in i18n.js (check:i18n compares every
-  page's data-i18n defaults against `en`).
-- The Tailwind output (public/style.css) is regenerated
-- public/wrtnova.sh is regenerated if wrtnova.sh changed (via scripts/embed-wrtnova.mjs)
-- No new console errors in browser
-- Mobile layout works at 375px (DevTools responsive mode)
+2. **The section marker is byte-load-bearing.** These exact three lines in
+   `wrtnova.sh`:
+
+   ```
+   # ===================
+   # End config section
+   # ===================
+   ```
+
+   split the per-build config block from the embedded body. The browser slices
+   the fetched script on those exact bytes. Do not reformat, re-space, or
+   re-generate them.
+
+3. **The build path stays 100% client-side.** Root password, Wi-Fi passphrases,
+   WireGuard keys and API tokens are assembled in the browser and POSTed straight
+   to the user-chosen OpenWrt ASU server as the `defaults` field. They must never
+   pass through a WrtNova backend. This is a published promise in README.md.
+
+4. **Checkbox off-state emits `''`, never `'0'`.** This is a wrtnova.sh contract:
+   `KEY='0'` would *set* the variable rather than leave it unset. The same
+   applies to boolean flags in any node-config merge.
+
+5. **Never emit a value identical to the wrtnova.sh default.** The config block
+   is an override layer; a redundant default is a bug.
+
+6. **WARP.** `/api/warp/register` requires a session cookie, so any page that can
+   register WARP must hit `/api/session` on init. The endpoint returns UPPERCASE
+   keys: `WG_PRIVATE_KEY`, `PEER_PUBLIC_KEY`, `ENDPOINT`, `ENDPOINT_PORT`,
+   `WG_IPV4`, `WG_IPV6`, `ALLOWED_IPS`. The localStorage key is
+   `wrtnova_warp_refresh`.
+
+7. **Deploy target is Cloudflare Pages + Pages Functions.** Keep `session`,
+   `asu-servers` and `warp` working. `nodejs_compat` is required for WARP keygen.
+
+8. **Keep all 7 locales.** No English-only rewrite.
