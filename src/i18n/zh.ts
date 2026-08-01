@@ -94,6 +94,7 @@ const zh: Catalog = {
   fetchingWarp: '正在获取 WARP…',
   warpTooMany: '请求过多——请稍候再试',
   warpFailed: 'WARP 注册失败——请稍后再试',
+  warpNotConfigured: '本站未启用 WARP 预填——请手动填写 WireGuard 配置。',
   warpSuccess: '✓ 已从 Cloudflare WARP 填充',
   wgConfigNote: '您可以稍后通过 <strong>LuCI &rarr; 网络 &rarr; 接口 &rarr; vpn &rarr; 编辑 &rarr; 加载配置</strong> 更换 WireGuard 配置。导入配置后，请记得在对等点设置中启用<em>路由允许的 IP</em>。',
   pickDeviceFirst: '请先选择设备。',

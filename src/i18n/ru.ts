@@ -94,6 +94,7 @@ const ru: Catalog = {
   fetchingWarp: 'Получение WARP…',
   warpTooMany: 'Слишком много запросов — подождите и повторите попытку',
   warpFailed: 'Регистрация WARP не удалась — повторите попытку позже',
+  warpNotConfigured: 'Предзаполнение WARP на этом сайте недоступно — введите конфигурацию WireGuard вручную.',
   warpSuccess: '✓ Заполнено из Cloudflare WARP',
   wgConfigNote: 'Вы можете позже сменить конфигурацию WireGuard через <strong>LuCI &rarr; Сеть &rarr; Интерфейсы &rarr; vpn &rarr; Изменить &rarr; Загрузить конфигурацию</strong>. После импорта не забудьте включить <em>Маршрутизировать разрешённые IP</em> в настройках пиров.',
   pickDeviceFirst: 'Сначала выберите устройство.',

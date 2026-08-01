@@ -11,6 +11,7 @@ import { ConfigScope } from '@state/ConfigScope';
 import { useReleases } from '@state/deviceIndex';
 import { routerNode } from '@state/networksStore';
 import { sharedScope } from '@state/sharedScope';
+import { networkIdentity, WarpScope } from '@state/warpScope';
 import { AppShell, type ShellSection } from '@ui/AppShell';
 import { SectionFlag } from '@ui/SectionFlag';
 import { Access } from '@sections/Access';
@@ -78,39 +79,44 @@ export function NetworkDetail({ net, onBack }: NetworkDetailProps) {
     badge: s.id === 'nodes' ? null : <SectionFlag id={s.id} />,
   }));
 
+  // Two scopes, drawn along the same line: the sections write to this network's
+  // configuration, and the tunnel prefill inside them remembers its identity on
+  // this network rather than in the single-node builder's slot.
   return (
     <ConfigScope store={store}>
-      <AppShell
-        title={net.name}
-        subtitle={net.name}
-        headerExtra={
-          <button type="button" className="btn btn-quiet" onClick={onBack}>
-            {t('backToNetworks')}
-          </button>
-        }
-        sections={sections}
-        active={active}
-        onSelect={(id) => setActive(id as FleetSection)}
-        panel={<FleetPanel net={net} onOpen={(id) => {
-          setActive('nodes');
-          setOpenNode(id);
-        }} />}
-        panelTitle={t('nodesTitle')}
-        panelSummary={<FleetSummary net={net} />}
-      >
-        {active === 'nodes' ? (
-          <NodesSection net={net} openId={openNode} onToggle={setOpenNode} />
-        ) : (
-          <p className="field-help mb-3">{t('sharedConfigDesc')}</p>
-        )}
-        {active === 'access' ? <Access /> : null}
-        {active === 'networks' ? <Networks /> : null}
-        {active === 'wifi' ? <Wifi /> : null}
-        {active === 'internet' ? <Internet /> : null}
-        {active === 'filtering' ? <Filtering /> : null}
-        {active === 'security' ? <Security /> : null}
-        {active === 'advanced' ? <Advanced /> : null}
-      </AppShell>
+      <WarpScope identity={networkIdentity(net.id)}>
+        <AppShell
+          title={net.name}
+          subtitle={net.name}
+          headerExtra={
+            <button type="button" className="btn btn-quiet" onClick={onBack}>
+              {t('backToNetworks')}
+            </button>
+          }
+          sections={sections}
+          active={active}
+          onSelect={(id) => setActive(id as FleetSection)}
+          panel={<FleetPanel net={net} onOpen={(id) => {
+            setActive('nodes');
+            setOpenNode(id);
+          }} />}
+          panelTitle={t('nodesTitle')}
+          panelSummary={<FleetSummary net={net} />}
+        >
+          {active === 'nodes' ? (
+            <NodesSection net={net} openId={openNode} onToggle={setOpenNode} />
+          ) : (
+            <p className="field-help mb-3">{t('sharedConfigDesc')}</p>
+          )}
+          {active === 'access' ? <Access /> : null}
+          {active === 'networks' ? <Networks /> : null}
+          {active === 'wifi' ? <Wifi /> : null}
+          {active === 'internet' ? <Internet /> : null}
+          {active === 'filtering' ? <Filtering /> : null}
+          {active === 'security' ? <Security /> : null}
+          {active === 'advanced' ? <Advanced /> : null}
+        </AppShell>
+      </WarpScope>
     </ConfigScope>
   );
 }

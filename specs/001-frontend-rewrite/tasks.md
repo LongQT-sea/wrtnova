@@ -150,9 +150,9 @@ and the five retired CI gate scripts are re-expressed here (research.md R9).
 
 ## Phase 10: User Story 5 — tunnel prefill (P3)
 
-- [ ] T076 [US5] `/api/session` on mount of both pages *(Constitution VI, FR-042)*
-- [ ] T077 [US5] Prefill action populating the tunnel fields, enabling the tunnel, persisting the refresh token to `wrtnova_warp_refresh` and to the entry or network *(FR-043, FR-044)*
-- [ ] T078 [US5] Plain-language rate-limit and not-configured states *(FR-045)*
+- [x] T076 [US5] `/api/session` on mount of both pages *(Constitution VI, FR-042)* — `core/warp.ts` owns it: one request per page load, cached, and it never rejects, so a site whose operator never configured the proxy behaves exactly as before everywhere else
+- [x] T077 [US5] Prefill action populating the tunnel fields, enabling the tunnel, persisting the refresh token to `wrtnova_warp_refresh` and to the entry or network *(FR-043, FR-044)* — `ui/WarpPrefill.tsx` writes through the **scoped** store, so the same button fills the builder's config on /builder and the network's shared config on /networks. The refresh token gets a scope of its own (`state/warpScope.tsx`) drawn along the same line: the browser's slot by default, the network's `warp_refresh_token` under `/networks`, and a network with none yet falls back to the browser's rather than registering a second device. A build records the identity it used, and restoring that build puts it back
+- [x] T078 [US5] Plain-language rate-limit and not-configured states *(FR-045)* — the client returns message IDS, not sentences (`core/validate.ts`'s convention): a 429 the WAF answered in HTML is still `warpTooMany`, an unconfigured proxy is the new `warpNotConfigured` in all seven locales, and everything else is `warpFailed`
 
 ---
 

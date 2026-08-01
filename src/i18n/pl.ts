@@ -94,6 +94,7 @@ const pl: Catalog = {
   fetchingWarp: 'Pobieranie WARP…',
   warpTooMany: 'Zbyt wiele żądań — poczekaj chwilę i spróbuj ponownie',
   warpFailed: 'Rejestracja WARP nie powiodła się — spróbuj ponownie za chwilę',
+  warpNotConfigured: 'Wypełnianie z WARP nie jest dostępne w tej witrynie — wpisz konfigurację WireGuard ręcznie.',
   warpSuccess: '✓ Wypełniono z Cloudflare WARP',
   wgConfigNote: 'Możesz później zmienić konfigurację WireGuard przez <strong>LuCI &rarr; Sieć &rarr; Interfejsy &rarr; vpn &rarr; Edytuj &rarr; Załaduj konfigurację</strong>. Po zaimportowaniu konfiguracji pamiętaj, aby w ustawieniach peerów włączyć <em>Trasuj dozwolone IP</em>.',
   pickDeviceFirst: 'Najpierw wybierz urządzenie.',

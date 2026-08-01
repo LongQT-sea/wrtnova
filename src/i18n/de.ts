@@ -94,6 +94,7 @@ const de: Catalog = {
   fetchingWarp: 'WARP wird abgerufen…',
   warpTooMany: 'Zu viele Anfragen — warten Sie einen Moment und versuchen Sie es erneut',
   warpFailed: 'WARP-Registrierung fehlgeschlagen — versuchen Sie es in Kürze erneut',
+  warpNotConfigured: 'WARP-Vorbefüllung ist auf dieser Website nicht verfügbar — geben Sie eine WireGuard-Konfiguration von Hand ein.',
   warpSuccess: '✓ Aus Cloudflare WARP ausgefüllt',
   wgConfigNote: 'Sie können die WireGuard-Konfiguration später unter <strong>LuCI &rarr; Netzwerk &rarr; Schnittstellen &rarr; vpn &rarr; Bearbeiten &rarr; Konfiguration laden</strong> wechseln. Denken Sie nach dem Import daran, in den Peer-Einstellungen <em>Erlaubte IPs routen</em> zu aktivieren.',
   pickDeviceFirst: 'Zuerst ein Gerät auswählen.',

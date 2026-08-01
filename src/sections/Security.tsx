@@ -7,6 +7,7 @@ import { useField, useFieldState } from '@state/configStore';
 import { validatorFor } from '@state/validation';
 import { RowTable } from '@ui/RowTable';
 import { SegmentGroup, SegmentToggle } from '@ui/SegmentGroup';
+import { WarpPrefill } from '@ui/WarpPrefill';
 import { t } from '@i18n/index';
 import { BoundText, BoundToggle, Disclosure, Note, SectionPage } from './bound';
 
@@ -35,6 +36,11 @@ export function Security() {
           <SegmentToggle id="WG_ENABLE" name={t('wgVpnClient')} value={wg} onChange={setWg} />
         }
       >
+        {/* Outside the `wg === '1'` block: the user who needs this is the one who
+            has no config to enter, so the offer has to be visible while the
+            tunnel is still off -- and taking it turns the tunnel on. */}
+        <WarpPrefill />
+
         {wg === '1' ? (
           <>
             <Note id="wgConfigNote" rich />

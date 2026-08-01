@@ -94,6 +94,7 @@ const es: Catalog = {
   fetchingWarp: 'Obteniendo WARP…',
   warpTooMany: 'Demasiadas solicitudes — espera un momento e inténtalo de nuevo',
   warpFailed: 'Error en el registro WARP — inténtalo de nuevo en breve',
+  warpNotConfigured: 'El rellenado con WARP no está disponible en este sitio — introduce una configuración de WireGuard a mano.',
   warpSuccess: '✓ Rellenado desde Cloudflare WARP',
   wgConfigNote: 'Puedes cambiar a una configuración de WireGuard diferente más tarde en <strong>LuCI &rarr; Red &rarr; Interfaces &rarr; vpn &rarr; Editar &rarr; Cargar configuración</strong>. Tras importar, recuerda activar <em>Enrutar IPs permitidas</em> en los ajustes de pares.',
   pickDeviceFirst: 'Selecciona un dispositivo primero.',

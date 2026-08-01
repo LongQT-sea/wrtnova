@@ -52,6 +52,9 @@ export interface NetworksState {
 
   setShared: (id: string, shared: Network['shared_config']) => void;
 
+  /** The WARP identity this network's tunnel was prefilled from (FR-044). */
+  setWarpToken: (id: string, token: string) => void;
+
   /** Append an access point, at the lowest index not already taken (FR-039). */
   addAp: (id: string, name: (index: number) => string) => FleetNode | null;
   patchNode: (netId: string, nodeId: string, patch: Partial<FleetNode>) => void;
@@ -108,6 +111,13 @@ export const useNetworksStore = create<NetworksState>((set, get) => ({
   setShared: (id, shared) =>
     set({
       networks: persist(mapNet(get().networks, id, (net) => ({ ...net, shared_config: shared }))),
+    }),
+
+  setWarpToken: (id, token) =>
+    set({
+      networks: persist(
+        mapNet(get().networks, id, (net) => ({ ...net, warp_refresh_token: token })),
+      ),
     }),
 
   addAp: (id, name) => {

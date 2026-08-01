@@ -93,6 +93,7 @@ export const en = {
   fetchingWarp: 'Fetching WARP…',
   warpTooMany: 'Too many requests — wait a moment and try again',
   warpFailed: 'WARP registration failed — try again shortly',
+  warpNotConfigured: 'WARP prefill is not available on this site — enter a WireGuard config by hand.',
   warpSuccess: '✓ Filled from Cloudflare WARP',
   wgConfigNote: 'You can change to a different WireGuard config later via <strong>LuCI &rarr; Network &rarr; Interfaces &rarr; vpn &rarr; Edit &rarr; Load configuration</strong>. After importing a config, remember to enable <em>Route Allowed IPs</em> in the Peers settings.',
   pickDeviceFirst: 'Pick a device first.',

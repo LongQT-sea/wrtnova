@@ -9,6 +9,7 @@
 import { useEffect, useState } from 'react';
 import type { HistoryEntry } from '@core/types';
 import { findBestVersion } from '@core/openwrt';
+import { writeWarpToken } from '@core/storage';
 import { builderStore, useConfigStore } from '@state/configStore';
 import { rawFromEntry, targetFromEntry, useHistoryStore } from '@state/historyStore';
 import { t } from '@i18n/index';
@@ -41,6 +42,10 @@ export function HistoryPanel() {
       // A restored configuration is the user's explicit choice of DNS engine, so
       // the hardware default must not overwrite it on the next device change.
       state.markDnsTouched();
+      // The tunnel keys were stripped as secrets, so prefilling again is how they
+      // come back -- and with the entry's identity restored, "again" returns the
+      // same WARP device this build already used (FR-044).
+      writeWarpToken(entry.warp_refresh_token);
       setNote(
         version === entry.device.version
           ? t('restoredSecrets')

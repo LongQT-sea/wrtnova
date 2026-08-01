@@ -19,6 +19,7 @@ import {
 import { isStorageError, nextLighterDnsMode } from '@core/dns';
 import { parseAdditionalPackages, resolvePackages, withBase64Pkg } from '@core/packages';
 import { assembleScriptForBuild, fetchScriptBody } from '@core/script';
+import { readWarpToken } from '@core/storage';
 import { builderStore, emissionFor, useConfigStore } from '@state/configStore';
 import { useHistoryStore } from '@state/historyStore';
 import { sectionOfKey, sweep } from '@state/validation';
@@ -109,12 +110,17 @@ export function BuildAction({ onNavigate }: BuildActionProps) {
       });
 
       const history = useHistoryStore.getState();
+      // A build with a tunnel carries the identity it was built from, so
+      // restoring it comes back to the same WARP device rather than registering
+      // another (FR-044). A build without one has nothing to remember.
+      const warpRefreshToken = state.raw.WG_ENABLE === '1' ? readWarpToken() : '';
 
       if (outcome.kind === 'cached') {
         setImages(resolveImages(outcome.data, outcome.asuBase));
         history.record({
           raw: state.raw,
           target: board,
+          warpRefreshToken,
           result: {
             status: 'success',
             firmware_url: primaryImageUrl(outcome.data, outcome.asuBase),
@@ -130,6 +136,7 @@ export function BuildAction({ onNavigate }: BuildActionProps) {
       history.record({
         raw: state.raw,
         target: board,
+        warpRefreshToken,
         result: { status: 'queued', firmware_url: null },
       });
 
