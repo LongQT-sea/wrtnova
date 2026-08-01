@@ -51,7 +51,14 @@ const WIFI_TEXT_FIELDS: ConfigKey[] = [
   'LAN_VPN_WIFI_SSID', 'LAN_VPN_WIFI_PASSWD',
 ];
 
-const VLAN_RANGE: Partial<Record<ConfigKey, { min: number; max: number; noun: string }>> = {
+/**
+ * Fields holding a bounded number. AP_INDEX is the last octet of an access
+ * point's management address: 0 is the network address, 1 is the router and 255
+ * is broadcast, so an index outside 2-254 gives the node an address it cannot
+ * answer on.
+ */
+const NUMERIC_RANGE: Partial<Record<ConfigKey, { min: number; max: number; noun: string }>> = {
+  AP_INDEX: { min: 2, max: 254, noun: 'AP index' },
   LAN_VLAN_ID: { min: 1, max: 255, noun: 'lan' },
   GUEST_VLAN_ID: { min: 1, max: 255, noun: 'guest' },
   IOT_VLAN_ID: { min: 1, max: 255, noun: 'iot' },
@@ -70,7 +77,7 @@ export function validateField(
 ): FieldIssue | null {
   const v = String(value ?? '');
 
-  const range = VLAN_RANGE[key as ConfigKey];
+  const range = NUMERIC_RANGE[key as ConfigKey];
   if (range) {
     // Empty means "let the allocator pick", which can never collide.
     if (v === '') return null;

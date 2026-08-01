@@ -420,6 +420,12 @@ const pl: Catalog = {
   restoredSecrets: 'Hasła i klucze nigdy nie są zapisywane, więc te pola wróciły puste.',
   restoredRelease: 'OpenWrt {from} nie jest już oferowane, więc wybrano {to}.',
   restoreFailed: 'Nie udało się przywrócić tej kompilacji: {msg}',
+
+  // -- the fleet page -------------------------------------------------
+  networkName: 'Nazwa sieci',
+  rename: 'Zmień nazwę',
+  nodesTitle: 'Węzły',
+  backToNetworks: '← Wszystkie sieci',
 };
 
 export default pl;

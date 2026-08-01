@@ -206,6 +206,13 @@ export function hasAth10kCt(target: DeviceTarget): boolean {
   );
 }
 
+/** A board with no radio has no Wi-Fi settings worth offering, mesh least of all. */
+export function hasWireless(target: DeviceTarget): boolean {
+  return [...target.default_packages, ...target.device_packages].some((p) =>
+    /^wpad|^hostapd|mac80211/.test(p),
+  );
+}
+
 /**
  * WED needs the mt7915e MediaTek Filogic driver (MT7622/7981/7986); the kmod's
  * presence is the capability signal. Newer mt7996e parts use a different module

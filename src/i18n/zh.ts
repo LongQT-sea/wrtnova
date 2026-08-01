@@ -420,6 +420,12 @@ const zh: Catalog = {
   restoredSecrets: '密码和密钥从不保存，因此这些字段恢复为空。',
   restoredRelease: '不再提供 OpenWrt {from}，因此改选 {to}。',
   restoreFailed: '无法恢复该构建：{msg}',
+
+  // -- the fleet page -------------------------------------------------
+  networkName: '网络名称',
+  rename: '重命名',
+  nodesTitle: '节点',
+  backToNetworks: '← 所有网络',
 };
 
 export default zh;

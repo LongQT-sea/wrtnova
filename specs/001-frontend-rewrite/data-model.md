@@ -86,6 +86,7 @@ entry rather than appending.
 | `name` | `string` | "Main Router", "Living Room", … |
 | `device_target` | `DeviceTarget` | may be empty until chosen |
 | `overrides` | `Partial<RawConfig>` | layered over `shared_config` |
+| `version` | `string?` | a release pinned for this node; absent follows `shared_version` |
 | `last_build` | `{ ts, firmware_url } \| null` | |
 
 Role is `overrides.AP_MODE`: `'1'` is an access point, `''` is the router. AP

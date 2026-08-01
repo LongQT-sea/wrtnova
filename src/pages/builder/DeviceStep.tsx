@@ -6,20 +6,13 @@
 // in. Once a device is picked this collapses to a single line with a way back.
 
 import { useCallback, useEffect, useState } from 'react';
-import {
-  loadDeviceTarget,
-  loadOverviewWithFallback,
-  loadVersions,
-  searchTitles,
-  type OverviewProfile,
-} from '@core/openwrt';
-import { useConfigStore } from '@state/configStore';
+import { loadDeviceTarget, searchTitles } from '@core/openwrt';
+import { builderStore, useConfigStore } from '@state/configStore';
 import { capsFor, clearUnsupported, dnsDefaultFor } from '@state/capabilities';
+import { useDeviceIndex, useReleases } from '@state/deviceIndex';
 import { Combobox } from '@ui/Combobox';
 import { SelectField } from '@ui/SelectField';
 import { t } from '@i18n/index';
-
-type Index = Record<string, OverviewProfile>;
 
 export function DeviceStep() {
   const target = useConfigStore((s) => s.target);
@@ -27,46 +20,32 @@ export function DeviceStep() {
   const fellBackFrom = useConfigStore((s) => s.fellBackFrom);
 
   const versions = useConfigStore((s) => s.versions);
-  const [index, setIndex] = useState<Index | null>(null);
+  const releases = useReleases();
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
-  // The release list, and the release to start on.
+  // The release list, and the release to start on. Held in the store as well as
+  // here, because restoring a build has to find the nearest release it offers.
   useEffect(() => {
-    let live = true;
-    void loadVersions()
-      .then(({ versions: list, stable }) => {
-        if (!live) return;
-        const state = useConfigStore.getState();
-        state.setVersions(list);
-        if (!state.version) state.setVersion(stable);
-      })
-      .catch((e: Error) => live && setError(e.message));
-    return () => {
-      live = false;
-    };
-  }, []);
+    if (!releases.versions.length) return;
+    const state = builderStore.getState();
+    state.setVersions(releases.versions);
+    if (!state.version) state.setVersion(releases.stable);
+  }, [releases]);
 
   // The device index for the chosen release, with the one-step stable fallback
   // when the release advertised as stable has no published index yet (FR-005).
+  const { index, usedVersion, fellBackFrom: fellBack, error: indexError } = useDeviceIndex(
+    version,
+    versions,
+  );
+
   useEffect(() => {
-    if (!version || !versions.length) return;
-    let live = true;
-    setIndex(null);
-    setError(null);
-    void loadOverviewWithFallback(version, versions)
-      .then((res) => {
-        if (!live) return;
-        const state = useConfigStore.getState();
-        setIndex(res.index);
-        state.setFellBackFrom(res.fellBackFrom ?? null);
-        if (res.usedVersion !== version) state.setVersion(res.usedVersion);
-      })
-      .catch((e: Error) => live && setError(t('errorLoadingDevices', { msg: e.message })));
-    return () => {
-      live = false;
-    };
-  }, [version, versions]);
+    if (!index) return;
+    const state = builderStore.getState();
+    state.setFellBackFrom(fellBack);
+    if (usedVersion && usedVersion !== state.version) state.setVersion(usedVersion);
+  }, [index, fellBack, usedVersion]);
 
   const pick = useCallback(
     async (title: string) => {
@@ -76,7 +55,7 @@ export function DeviceStep() {
       setError(null);
       try {
         const resolved = await loadDeviceTarget(version, profile, title);
-        const state = useConfigStore.getState();
+        const state = builderStore.getState();
         state.setTarget(resolved);
 
         // A board and a release together decide which options exist, so a device
@@ -111,7 +90,7 @@ export function DeviceStep() {
           <button
             type="button"
             className="btn btn-quiet"
-            onClick={() => useConfigStore.getState().setTarget(null)}
+            onClick={() => builderStore.getState().setTarget(null)}
           >
             {t('changeDevice')}
           </button>
@@ -136,8 +115,8 @@ export function DeviceStep() {
           onChange={(v) => {
             // The index is release-scoped, so the resolved board no longer
             // applies; the user re-picks against the release they chose.
-            useConfigStore.getState().setTarget(null);
-            useConfigStore.getState().setVersion(v);
+            builderStore.getState().setTarget(null);
+            builderStore.getState().setVersion(v);
           }}
           inline
           mono
@@ -164,9 +143,9 @@ export function DeviceStep() {
           />
         )}
 
-        {error ? (
+        {error ?? indexError ?? releases.error ? (
           <p className="field-error mt-2" role="alert">
-            {error}
+            {error ?? indexError ?? releases.error}
           </p>
         ) : null}
       </div>

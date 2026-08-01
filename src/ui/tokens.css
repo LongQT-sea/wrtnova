@@ -390,6 +390,18 @@
     background: var(--sunken);
   }
 
+  /* Outlined rather than filled: --danger is a pale coral in dark mode, and white
+   * on it does not carry. */
+  .btn-danger {
+    background: transparent;
+    border-color: color-mix(in oklab, var(--danger) 50%, var(--rule));
+    color: var(--danger);
+  }
+
+  .btn-danger:hover:not(:disabled) {
+    background: color-mix(in oklab, var(--danger) 12%, var(--surface));
+  }
+
   .btn-ghost {
     background: transparent;
     color: var(--ink-soft);

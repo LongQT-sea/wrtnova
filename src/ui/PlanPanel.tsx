@@ -18,7 +18,7 @@ import { useConfigStore } from '@state/configStore';
 import { SEGMENT_VAR } from './SegmentGroup';
 import { t, type MessageId } from '@i18n/index';
 
-const SEGMENT_NAME: Record<SegmentId, MessageId> = {
+export const SEGMENT_NAME: Record<SegmentId, MessageId> = {
   lan: 'segLan',
   guest: 'segGuest',
   iot: 'segIot',

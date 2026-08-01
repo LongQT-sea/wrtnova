@@ -13,11 +13,11 @@ import { useState } from 'react';
 import type { SectionId } from '@core/types';
 import { useConfigStore } from '@state/configStore';
 import { planOf } from '@state/plan';
-import { flaggedSections } from '@state/validation';
 import { AppShell, type ShellSection } from '@ui/AppShell';
 import { ConfigDisclosure } from '@ui/ConfigDisclosure';
 import { HistoryPanel } from '@ui/HistoryPanel';
 import { PlanPanel } from '@ui/PlanPanel';
+import { SectionFlag } from '@ui/SectionFlag';
 import { useLocaleTick } from '@ui/useLocale';
 import { Access } from '@sections/Access';
 import { Advanced } from '@sections/Advanced';
@@ -92,19 +92,6 @@ export function App() {
         </>
       )}
     </AppShell>
-  );
-}
-
-/** Owns its own subscription, so the rail can be live without the shell being. */
-function SectionFlag({ id }: { id: SectionId }) {
-  const flagged = useConfigStore((s) => flaggedSections(s.raw).has(id));
-  if (!flagged) return null;
-  return (
-    <span
-      className="size-1.5 flex-none rounded-full bg-danger"
-      role="img"
-      aria-label={t('fixBeforeBuild')}
-    />
   );
 }
 

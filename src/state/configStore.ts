@@ -1,4 +1,4 @@
-// The single source of truth for /builder.
+// The configuration store, and the scope that decides which one a form edits.
 //
 // The store holds one flat `RawConfig` -- exactly what the form writes, with no
 // cross-field gating applied -- and everything the interface shows is a pure
@@ -8,8 +8,18 @@
 //
 // Zustand rather than context, for selector-level subscriptions: typing in one of
 // roughly 110 inputs must not re-render the other 109.
+//
+// There can be more than one store, because /networks edits a NETWORK's shared
+// configuration with the same eight sections /builder uses. Which store a control
+// writes to is a property of where it is mounted, not of what it imports: the
+// hooks below resolve their store through ConfigScopeContext, defaulting to the
+// single-node builder's. That is what lets the sections be reused verbatim rather
+// than copied -- a second copy of a 110-field form is the failure this rewrite
+// exists to prevent (see the note at the top of core/merge.ts about the two
+// derivations that drifted).
 
-import { create } from 'zustand';
+import { createContext, useContext } from 'react';
+import { create, type StoreApi, type UseBoundStore } from 'zustand';
 import { useShallow } from 'zustand/react/shallow';
 import type { DeviceTarget, EmittedConfig, RawConfig } from '@core/types';
 import { derive } from '@core/derive';
@@ -200,25 +210,61 @@ export interface ConfigState {
   setAsuUrl: (url: string) => void;
 }
 
-export const useConfigStore = create<ConfigState>((set) => ({
-  raw: INITIAL_RAW,
-  target: null,
-  version: '',
-  versions: [],
-  fellBackFrom: null,
-  dnsModeTouched: false,
-  asuUrl: ASU_DEFAULT,
+export type ConfigStore = UseBoundStore<StoreApi<ConfigState>>;
 
-  set: (key, value) =>
-    set((s) => (s.raw[key] === value ? s : { raw: { ...s.raw, [key]: value } })),
-  patch: (p) => set((s) => ({ raw: { ...s.raw, ...p } })),
-  setTarget: (target) => set({ target }),
-  setVersion: (version) => set({ version }),
-  setVersions: (versions) => set({ versions }),
-  setFellBackFrom: (fellBackFrom) => set({ fellBackFrom }),
-  markDnsTouched: () => set({ dnsModeTouched: true }),
-  setAsuUrl: (asuUrl) => set({ asuUrl }),
-}));
+export function createConfigStore(): ConfigStore {
+  return create<ConfigState>((set) => ({
+    raw: INITIAL_RAW,
+    target: null,
+    version: '',
+    versions: [],
+    fellBackFrom: null,
+    dnsModeTouched: false,
+    asuUrl: ASU_DEFAULT,
+
+    set: (key, value) =>
+      set((s) => (s.raw[key] === value ? s : { raw: { ...s.raw, [key]: value } })),
+    patch: (p) => set((s) => ({ raw: { ...s.raw, ...p } })),
+    setTarget: (target) => set({ target }),
+    setVersion: (version) => set({ version }),
+    setVersions: (versions) => set({ versions }),
+    setFellBackFrom: (fellBackFrom) => set({ fellBackFrom }),
+    markDnsTouched: () => set({ dnsModeTouched: true }),
+    setAsuUrl: (asuUrl) => set({ asuUrl }),
+  }));
+}
+
+/** The single-node builder's store, and the scope in force where none is provided. */
+export const builderStore = createConfigStore();
+
+// -- the scope ---------------------------------------------------------------
+
+export const ConfigScopeContext = createContext<ConfigStore | null>(null);
+
+/**
+ * The store the last scoped hook resolved.
+ *
+ * `validatorFor` has to reach the configuration without being a hook -- it is
+ * called from sections/bound.tsx, which stays untouched -- so it captures this at
+ * the moment it builds its closure. Every Bound* control calls a scoped hook
+ * immediately before, in the same synchronous render, so the value is that
+ * component's own scope and the closure keeps it for the field's lifetime.
+ */
+let pinnedScope: ConfigStore = builderStore;
+
+export function useScopedStore(): ConfigStore {
+  const store = useContext(ConfigScopeContext) ?? builderStore;
+  pinnedScope = store;
+  return store;
+}
+
+/** The scope in force, for the non-reactive readers described above. */
+export const currentScope = (): ConfigStore => pinnedScope;
+
+/** Every control's subscription, resolved against the scope it is mounted in. */
+export function useConfigStore<T>(selector: (s: ConfigState) => T): T {
+  return useScopedStore()(selector);
+}
 
 // -- derived selectors -------------------------------------------------------
 //
@@ -250,8 +296,9 @@ export function useField<K extends keyof RawConfig>(key: K): RawConfig[K] {
 export function useFieldState<K extends keyof RawConfig>(
   key: K,
 ): [RawConfig[K], (v: RawConfig[K]) => void] {
-  const value = useConfigStore((s) => s.raw[key]);
-  const set = useConfigStore((s) => s.set);
+  const store = useScopedStore();
+  const value = store((s) => s.raw[key]);
+  const set = store((s) => s.set);
   return [value, (v) => set(key, v)];
 }
 
@@ -320,8 +367,5 @@ export function useIfacePlan(): IfaceResult {
 export function useDevice(): { target: DeviceTarget | null; version: string } {
   return useConfigStore(useShallow((s) => ({ target: s.target, version: s.version })));
 }
-
-/** Non-reactive read, for the build path and for tests. */
-export const readState = (): ConfigState => useConfigStore.getState();
 
 export const emittedFrom = emittedOf;

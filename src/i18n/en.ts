@@ -419,4 +419,10 @@ export const en = {
   restoredSecrets: 'Passwords and keys are never stored, so those fields came back empty.',
   restoredRelease: 'OpenWrt {from} is no longer offered, so {to} was selected instead.',
   restoreFailed: 'Could not restore that build: {msg}',
+
+  // -- the fleet page -------------------------------------------------
+  networkName: 'Network name',
+  rename: 'Rename',
+  nodesTitle: 'Nodes',
+  backToNetworks: '← All networks',
 } as const;

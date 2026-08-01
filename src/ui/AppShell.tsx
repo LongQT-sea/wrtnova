@@ -46,6 +46,38 @@ export interface AppShellProps {
   panelTitle: string;
 }
 
+/**
+ * The bar every page wears: the wordmark, what the page is, and the two
+ * preferences. Exported because the fleet's network list is a plain page rather
+ * than the three-region chassis, and it must still be the same product.
+ */
+export function PageBar({
+  title,
+  subtitle,
+  headerExtra,
+}: {
+  title: string;
+  subtitle?: string;
+  headerExtra?: ReactNode;
+}) {
+  return (
+    <div className="mx-auto flex max-w-[1600px] items-center gap-3 px-3 py-2 sm:px-5">
+      <a href="/" className="flex items-baseline gap-1.5 no-underline">
+        <span className="font-display text-lg font-bold tracking-tight text-ink">
+          Wrt<span className="text-seg-lan">Nova</span>
+        </span>
+        {subtitle ? <span className="hidden text-xs text-ink-soft sm:inline">{subtitle}</span> : null}
+      </a>
+      <span className="sr-only">{title}</span>
+      <div className="ml-auto flex items-center gap-1.5">
+        {headerExtra}
+        <LangSwitcher />
+        <ThemeToggle />
+      </div>
+    </div>
+  );
+}
+
 export function AppShell(props: AppShellProps) {
   const { title, subtitle, headerExtra, sections, active, onSelect } = props;
   const { children, panel, panelSummary, panelTitle } = props;
@@ -54,22 +86,11 @@ export function AppShell(props: AppShellProps) {
   return (
     <div className="min-h-dvh">
       <header className="sticky top-0 z-30 border-b border-rule bg-surface/95 backdrop-blur">
-        <div className="mx-auto flex max-w-[1600px] items-center gap-3 px-3 py-2 sm:px-5">
-          <a href="/" className="flex items-baseline gap-1.5 no-underline">
-            <span className="font-display text-lg font-bold tracking-tight text-ink">
-              Wrt<span className="text-seg-lan">Nova</span>
-            </span>
-            {subtitle ? (
-              <span className="hidden text-xs text-ink-soft sm:inline">{subtitle}</span>
-            ) : null}
-          </a>
-          <span className="sr-only">{title}</span>
-          <div className="ml-auto flex items-center gap-1.5">
-            {headerExtra}
-            <LangSwitcher />
-            <ThemeToggle />
-          </div>
-        </div>
+        <PageBar
+          title={title}
+          {...(subtitle === undefined ? {} : { subtitle })}
+          {...(headerExtra === undefined ? {} : { headerExtra })}
+        />
 
         {/* Phone: the rail, as a scrolling tab strip. */}
         <nav

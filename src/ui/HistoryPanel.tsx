@@ -9,17 +9,10 @@
 import { useEffect, useState } from 'react';
 import type { HistoryEntry } from '@core/types';
 import { findBestVersion } from '@core/openwrt';
-import { useConfigStore } from '@state/configStore';
+import { builderStore, useConfigStore } from '@state/configStore';
 import { rawFromEntry, targetFromEntry, useHistoryStore } from '@state/historyStore';
 import { t } from '@i18n/index';
-
-/** Plain-language age, in the terms the catalogue already has. */
-function age(ts: number): string {
-  const days = Math.floor((Date.now() - ts) / 86_400_000);
-  if (days <= 0) return t('today');
-  if (days === 1) return t('yesterday');
-  return t('daysAgo', { n: days });
-}
+import { age } from './age';
 
 export function HistoryPanel() {
   // The releases currently on offer, for the nearest-release fallback (FR-036).
@@ -41,7 +34,7 @@ export function HistoryPanel() {
       // offered and say so rather than failing (FR-036).
       const version = findBestVersion(entry.device.version, versions) ?? entry.device.version;
       const target = await targetFromEntry(entry, version);
-      const state = useConfigStore.getState();
+      const state = builderStore.getState();
       state.setVersion(version);
       state.setTarget(target);
       state.patch(rawFromEntry(entry));

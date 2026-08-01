@@ -420,6 +420,12 @@ const fr: Catalog = {
   restoredSecrets: 'Les mots de passe et les clés ne sont jamais stockés : ces champs reviennent vides.',
   restoredRelease: 'OpenWrt {from} n\'est plus proposé, {to} a donc été sélectionné.',
   restoreFailed: 'Impossible de restaurer cette compilation : {msg}',
+
+  // -- the fleet page -------------------------------------------------
+  networkName: 'Nom du réseau',
+  rename: 'Renommer',
+  nodesTitle: 'Nœuds',
+  backToNetworks: '← Tous les réseaux',
 };
 
 export default fr;

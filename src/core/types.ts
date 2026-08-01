@@ -230,6 +230,12 @@ export interface FleetNode {
   name: string;
   device_target: DeviceTarget;
   overrides: Partial<RawConfig>;
+  /**
+   * A release this node builds at instead of the network's. Absent or empty
+   * means it follows `shared_version`, so raising the fleet default carries every
+   * node that had not pinned one.
+   */
+  version?: string;
   last_build: { ts: number; firmware_url: string | null } | null;
 }
 

@@ -9,8 +9,8 @@ import tailwind from '@tailwindcss/vite';
 // path and keeps serving -- rollup's output wins over the public-dir copy for any
 // path both produce, so adding an entry here is what retires the old page.
 //
-//   /builder/   this phase
-//   /networks/  Phase 9 (US4)
+//   /builder/   Phase 5 (US1)
+//   /networks/  this phase
 //   /           Phase 11 (T083)
 export default defineConfig({
   plugins: [react(), tailwind()],
@@ -29,6 +29,7 @@ export default defineConfig({
     rollupOptions: {
       input: {
         builder: resolve(__dirname, 'builder/index.html'),
+        networks: resolve(__dirname, 'networks/index.html'),
       },
     },
   },

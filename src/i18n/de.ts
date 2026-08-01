@@ -420,6 +420,12 @@ const de: Catalog = {
   restoredSecrets: 'Passwörter und Schlüssel werden nie gespeichert, diese Felder sind daher leer.',
   restoredRelease: 'OpenWrt {from} wird nicht mehr angeboten, daher wurde {to} gewählt.',
   restoreFailed: 'Dieser Build konnte nicht wiederhergestellt werden: {msg}',
+
+  // -- the fleet page -------------------------------------------------
+  networkName: 'Netzwerkname',
+  rename: 'Umbenennen',
+  nodesTitle: 'Knoten',
+  backToNetworks: '← Alle Netzwerke',
 };
 
 export default de;

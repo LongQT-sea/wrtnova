@@ -19,7 +19,7 @@ import {
 import { isStorageError, nextLighterDnsMode } from '@core/dns';
 import { parseAdditionalPackages, resolvePackages, withBase64Pkg } from '@core/packages';
 import { assembleScriptForBuild, fetchScriptBody } from '@core/script';
-import { emissionFor, useConfigStore } from '@state/configStore';
+import { builderStore, emissionFor, useConfigStore } from '@state/configStore';
 import { useHistoryStore } from '@state/historyStore';
 import { sectionOfKey, sweep } from '@state/validation';
 import { revealField } from '@ui/fieldRegistry';
@@ -55,7 +55,7 @@ export function BuildAction({ onNavigate }: BuildActionProps) {
   const retried = useRef(false);
 
   const run = useCallback(async () => {
-    const state = useConfigStore.getState();
+    const state = builderStore.getState();
     const board = state.target;
     if (!board) {
       setError(t('pickDeviceFirst'));
@@ -160,11 +160,11 @@ export function BuildAction({ onNavigate }: BuildActionProps) {
       // Too big for this device's flash: drop to the next-lighter DNS engine,
       // say what changed, and try once more.
       if (isStorageError(message) && !retried.current) {
-        const next = nextLighterDnsMode(useConfigStore.getState().raw.DNS_MODE);
+        const next = nextLighterDnsMode(builderStore.getState().raw.DNS_MODE);
         if (next) {
           retried.current = true;
           const noteId = AUTO_RETRY_MESSAGE[next];
-          useConfigStore.getState().patch({ DNS_MODE: next, ADGUARD_MAIN_DNS: '' });
+          builderStore.getState().patch({ DNS_MODE: next, ADGUARD_MAIN_DNS: '' });
           setRetryNote(message + (noteId ? ' ' + t(noteId) : ''));
           void run();
           return;

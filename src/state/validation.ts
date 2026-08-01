@@ -15,7 +15,7 @@ import { FIELDS } from '@core/schema';
 import { pskVlanIssue, validateField, type FieldIssue } from '@core/validate';
 import { resolveIfaceAssignment, type IfaceConflict } from '@core/vlan';
 import { t, type MessageId } from '@i18n/index';
-import { emittedFrom, readState, useConfigStore } from './configStore';
+import { currentScope, emittedFrom, useConfigStore } from './configStore';
 
 /**
  * Localize an issue. The cast is safe by construction: every message id
@@ -31,10 +31,16 @@ export function messageFor(issue: FieldIssue): string {
  * The validator to hand a TextField, bound to the key it belongs to. Takes a
  * plain string because the UI-only keys are bound to controls too, and
  * core/validate.ts simply has no rule for them.
+ *
+ * The store is captured here rather than read on blur: this is called while the
+ * control renders, so the scope in force is that control's own, and a field on
+ * /networks must keep validating against the configuration it edits even when a
+ * node's preview is mounted afterwards.
  */
 export function validatorFor(key: string): (v: string) => string | null {
+  const store = currentScope();
   return (v) => {
-    const issue = validateField(key, v, readState().raw);
+    const issue = validateField(key, v, store.getState().raw);
     return issue ? messageFor(issue) : null;
   };
 }

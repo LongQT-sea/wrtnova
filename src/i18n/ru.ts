@@ -420,6 +420,12 @@ const ru: Catalog = {
   restoredSecrets: 'Пароли и ключи никогда не сохраняются, поэтому эти поля вернулись пустыми.',
   restoredRelease: 'OpenWrt {from} больше не предлагается, поэтому выбрана {to}.',
   restoreFailed: 'Не удалось восстановить эту сборку: {msg}',
+
+  // -- the fleet page -------------------------------------------------
+  networkName: 'Имя сети',
+  rename: 'Переименовать',
+  nodesTitle: 'Узлы',
+  backToNetworks: '← Все сети',
 };
 
 export default ru;

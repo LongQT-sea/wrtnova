@@ -138,13 +138,13 @@ and the five retired CI gate scripts are re-expressed here (research.md R9).
 
 ## Phase 9: User Story 4 — building a whole home network (P2)
 
-- [ ] T069 [US4] `src/state/networksStore.ts` — create, rename, delete, persist; the three migrations from `core/storage.ts`
-- [ ] T070 [US4] `src/pages/networks/NetworkList.tsx` — networks with summaries, empty state that invites the first one
-- [ ] T071 [US4] Shared-configuration editor reusing every section from Phase 5 unchanged
-- [ ] T072 [US4] Node list with per-node device, role, name, address, build state; AP index auto-allocation *(FR-038, FR-039)*
-- [ ] T073 [US4] Per-node override panel with its own release and package extras
-- [ ] T074 [US4] Per-node plan and generated-config inspection with the same masking *(FR-040)*
-- [ ] T075 [US4] Build one node, and build all with independent per-node progress and isolated failures *(FR-041, SC-006)*
+- [x] T069 [US4] `src/state/networksStore.ts` — create, rename, delete, persist; the three migrations from `core/storage.ts`
+- [x] T070 [US4] `src/pages/networks/NetworkList.tsx` — networks with summaries, empty state that invites the first one
+- [x] T071 [US4] Shared-configuration editor reusing every section from Phase 5 unchanged — the sections are reused **byte-for-byte**: `useConfigStore` and its selectors now resolve their store through `ConfigScopeContext` (`state/configStore.ts`, `state/ConfigScope.tsx`), so a section writes to whichever configuration it is mounted in. `state/sharedScope.ts` is the store behind a network's shared config; it keeps `HOST_NAME` out of `shared_config` and routes it to the router node, which is the invariant `core/storage.ts`'s third migration exists to restore
+- [x] T072 [US4] Node list with per-node device, role, name, address, build state; AP index auto-allocation *(FR-038, FR-039)*
+- [x] T073 [US4] Per-node override panel with its own release and package extras — `FleetNode.version` pins a release; the board is re-resolved at it before building. Node extras are **added to** the shared list rather than replacing it
+- [x] T074 [US4] Per-node plan and generated-config inspection with the same masking *(FR-040)* — a read-only scope over `merge(shared, overrides)` lets `PlanPanel` and `ConfigDisclosure` serve a node unchanged
+- [x] T075 [US4] Build one node, and build all with independent per-node progress and isolated failures *(FR-041, SC-006)* — every node runs its own pre-flight `sweep()`, so a VLAN collision refuses the node before anything is submitted; the storage auto-retry downgrades the *shared* engine once and later siblings rebuild at it rather than each stepping down in turn
 
 ---
 
