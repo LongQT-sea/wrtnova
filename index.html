@@ -1,0 +1,537 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>WrtNova — flash once, everything's already set up</title>
+    <meta
+      name="description"
+      content="Build a fully-configured OpenWrt image in your browser: VLANs, WiFi, VPN and ad-blocking baked in from the first boot. Your secrets never touch a WrtNova backend."
+    />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+
+    <!-- The two fonts on the critical path. The rest load per unicode-range. -->
+    <link
+      rel="preload"
+      href="/fonts/public-sans-latin.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link rel="preload" href="/fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin />
+
+    <script>
+      // Stamp the resolved theme before first paint, so there is no flash of the
+      // wrong one. Kept inline and tiny on purpose; src/ui/theme.ts is the same
+      // logic for everything after this point.
+      (function () {
+        var t = null;
+        try {
+          t = localStorage.getItem('theme');
+        } catch (e) {}
+        if (t !== 'dark' && t !== 'light') {
+          t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+  </head>
+  <body>
+    <!-- The four twisted-pair colours, in T568 order, as the page's top edge.
+         The same four carry the segments everywhere else in the product. -->
+    <div class="flex h-[3px]" aria-hidden="true">
+      <span class="flex-1 bg-seg-lan"></span>
+      <span class="flex-1 bg-seg-guest"></span>
+      <span class="flex-1 bg-seg-iot"></span>
+      <span class="flex-1 bg-seg-vpn"></span>
+    </div>
+
+    <header class="sticky top-0 z-30 border-b border-rule bg-surface/95 backdrop-blur">
+      <div class="mx-auto flex max-w-[76rem] items-center gap-3 px-4 py-2 sm:px-6">
+        <a href="/" class="flex items-baseline gap-1.5 no-underline">
+          <span class="font-display text-lg font-bold tracking-tight text-ink">
+            Wrt<span class="text-seg-lan">Nova</span>
+          </span>
+        </a>
+        <div class="ml-auto flex items-center gap-1.5">
+          <a
+            href="/networks/"
+            class="btn btn-ghost hidden sm:inline-flex"
+            data-i18n="fleetBuilderLink"
+            >Fleet builder →</a
+          >
+          <label class="inline-flex items-center gap-1.5">
+            <span class="sr-only" data-i18n="langLabel">Language</span>
+            <select
+              id="lang-select"
+              class="input w-auto py-1 text-xs"
+              data-i18n-label="langLabel"
+              aria-label="Language"
+            ></select>
+          </label>
+          <button
+            id="theme-toggle"
+            type="button"
+            class="btn btn-ghost px-2"
+            data-i18n-label="themeLabel"
+            aria-label="Theme"
+          >
+            <svg
+              class="icon-sun"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              aria-hidden="true"
+            >
+              <circle cx="12" cy="12" r="4" />
+              <path
+                d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M19 5l-1.5 1.5M6.5 17.5L5 19"
+              />
+            </svg>
+            <svg
+              class="icon-moon"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              aria-hidden="true"
+            >
+              <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <!-- ===== Hero: the promise, and the plan it produces ===== -->
+      <section class="mx-auto max-w-[76rem] px-4 pt-12 pb-14 sm:px-6 md:pt-20 md:pb-20">
+        <div class="grid items-center gap-12 lg:grid-cols-[minmax(0,1fr)_22rem] lg:gap-16">
+          <div class="min-w-0">
+            <p
+              class="font-display mb-5 text-xs font-semibold tracking-widest text-seg-lan uppercase"
+              data-i18n="heroTagline"
+            >
+              OpenWrt · Browser-built · Zero SSH
+            </p>
+            <h1 class="mb-6 text-3xl leading-[1.05] font-bold sm:text-[3rem] lg:text-[3.75rem]">
+              <span class="block text-ink" data-i18n="heroTitleA">Flash once.</span>
+              <span class="block text-ink-soft" data-i18n="heroTitleB"
+                >Everything's already set up.</span
+              >
+            </h1>
+            <p class="mb-8 max-w-md text-base text-ink-soft" data-i18n="heroSubtitle">
+              Build a fully-configured OpenWrt image — VLANs, WiFi, VPN, ad-blocking — in your
+              browser.
+            </p>
+            <div class="flex flex-col items-stretch gap-2.5 sm:flex-row sm:items-center">
+              <a href="/builder/" class="btn btn-primary px-4 py-2.5" data-i18n="singleNodeBuilder"
+                >Single-node builder →</a
+              >
+              <a href="/networks/" class="btn btn-quiet px-4 py-2.5" data-i18n="multiNodeFleetBuilder"
+                >Multi-node fleet builder →</a
+              >
+            </div>
+            <p class="mt-4">
+              <a
+                href="https://github.com/LongQT-sea/wrtnova"
+                target="_blank"
+                rel="noopener"
+                class="text-xs text-ink-soft underline-offset-4 hover:text-ink hover:underline"
+                data-i18n="viewSourceGithub"
+                >View source on GitHub ↗</a
+              >
+            </p>
+          </div>
+
+          <!-- The plan panel, as the product draws it. Decorative here: every
+               value below is also stated in prose further down the page. -->
+          <div class="card p-3" aria-hidden="true">
+            <h2 class="font-display text-sm font-semibold tracking-wide uppercase">Plan</h2>
+            <div class="mt-2 rounded-[var(--radius-field)] border border-rule bg-sunken px-2.5 py-2">
+              <p class="field-help">Router</p>
+              <p class="font-display truncate text-base font-semibold">GL.iNet GL-MT6000</p>
+              <p class="field-help mono">192.168.1.1 · 24.10.4</p>
+            </div>
+            <ul class="mt-2 space-y-2">
+              <li class="lane-enter" style="--seg: var(--seg-lan); animation-delay: 40ms">
+                <div class="flex items-baseline gap-2 border-l-[3px] border-[var(--seg)] py-0.5 pl-2">
+                  <span
+                    class="font-display text-xs font-semibold tracking-wide text-[var(--seg)] uppercase"
+                    >LAN</span
+                  >
+                  <span class="mono ml-auto text-xs text-ink"
+                    >192.168.1.1<span class="text-ink-soft">/24</span></span
+                  >
+                </div>
+                <div class="mt-0.5 flex flex-wrap items-center gap-1 pl-2.5">
+                  <span class="chip">vlan 1</span>
+                  <span class="chip">br-lan</span>
+                  <span class="field-help">Internet</span>
+                </div>
+              </li>
+              <li class="lane-enter" style="--seg: var(--seg-guest); animation-delay: 80ms">
+                <div class="flex items-baseline gap-2 border-l-[3px] border-[var(--seg)] py-0.5 pl-2">
+                  <span
+                    class="font-display text-xs font-semibold tracking-wide text-[var(--seg)] uppercase"
+                    >Guest</span
+                  >
+                  <span class="mono ml-auto text-xs text-ink"
+                    >192.168.5.1<span class="text-ink-soft">/24</span></span
+                  >
+                </div>
+                <div class="mt-0.5 flex flex-wrap items-center gap-1 pl-2.5">
+                  <span class="chip">vlan 5</span>
+                  <span class="chip">guest</span>
+                  <span class="field-help">Internet · isolated</span>
+                </div>
+              </li>
+              <li class="lane-enter" style="--seg: var(--seg-iot); animation-delay: 120ms">
+                <div class="flex items-baseline gap-2 border-l-[3px] border-[var(--seg)] py-0.5 pl-2">
+                  <span
+                    class="font-display text-xs font-semibold tracking-wide text-[var(--seg)] uppercase"
+                    >IoT</span
+                  >
+                  <span class="mono ml-auto text-xs text-ink"
+                    >192.168.10.1<span class="text-ink-soft">/24</span></span
+                  >
+                </div>
+                <div class="mt-0.5 flex flex-wrap items-center gap-1 pl-2.5">
+                  <span class="chip">vlan 10</span>
+                  <span class="chip">iot</span>
+                  <span class="field-help">No internet</span>
+                </div>
+              </li>
+              <li class="lane-enter" style="--seg: var(--seg-vpn); animation-delay: 160ms">
+                <div class="flex items-baseline gap-2 border-l-[3px] border-[var(--seg)] py-0.5 pl-2">
+                  <span
+                    class="font-display text-xs font-semibold tracking-wide text-[var(--seg)] uppercase"
+                    >VPN</span
+                  >
+                  <span class="mono ml-auto text-xs text-ink"
+                    >192.168.15.1<span class="text-ink-soft">/24</span></span
+                  >
+                </div>
+                <div class="mt-0.5 flex flex-wrap items-center gap-1 pl-2.5">
+                  <span class="chip">vlan 15</span>
+                  <span class="chip">wgvpn</span>
+                  <span class="field-help">Via tunnel</span>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== The promise the whole build path is built around ===== -->
+      <section class="mx-auto max-w-[76rem] px-4 pb-14 sm:px-6 md:pb-20">
+        <div class="card border-l-[3px] border-l-seg-iot p-5 md:p-7">
+          <h2 class="font-display text-lg font-bold" data-i18n="secretsTitle">
+            WrtNova never sees your secrets
+          </h2>
+          <p class="mt-2 max-w-3xl text-sm text-ink-soft" data-i18n="secretsText">
+            Root password, WiFi passphrases, WireGuard keys, API tokens: the whole image is assembled
+            in your browser and sent straight to the OpenWrt build server you choose. None of it
+            passes through a WrtNova backend.
+          </p>
+        </div>
+      </section>
+
+      <!-- ===== Stat band ===== -->
+      <section class="border-y border-rule bg-surface">
+        <div class="mx-auto grid max-w-[76rem] grid-cols-2 md:grid-cols-4">
+          <div class="border-b border-rule p-6 md:border-b-0 md:p-8">
+            <div class="font-display text-3xl font-bold">0</div>
+            <p class="field-help mt-1.5" data-i18n="statSsh">SSH sessions</p>
+          </div>
+          <div class="border-b border-l border-rule p-6 md:border-b-0 md:p-8">
+            <div class="font-display text-3xl font-bold">0</div>
+            <p class="field-help mt-1.5" data-i18n="statLuci">LuCI clicks</p>
+          </div>
+          <div class="border-rule p-6 md:border-l md:p-8">
+            <div class="font-display text-3xl font-bold">0</div>
+            <p class="field-help mt-1.5" data-i18n="statSecrets">Secrets sent to us</p>
+          </div>
+          <div class="border-l border-rule p-6 md:p-8">
+            <div class="font-display text-3xl font-bold text-seg-lan">1</div>
+            <p class="field-help mt-1.5" data-i18n="statFlash">Flash</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== Features: datasheet rows, each backed by the real config keys ===== -->
+      <section class="mx-auto max-w-[76rem] px-4 py-14 sm:px-6 md:py-20">
+        <div class="flex items-center gap-2.5 pb-6">
+          <span class="h-2 w-2 bg-seg-lan" aria-hidden="true"></span>
+          <p
+            class="font-display text-xs font-semibold tracking-widest uppercase"
+            data-i18n="featuresHeading"
+          >
+            What first boot configures
+          </p>
+        </div>
+
+        <div class="grid gap-x-10 gap-y-4 border-t border-rule py-8 md:grid-cols-12">
+          <div class="mono pt-1 text-xs font-semibold text-seg-lan md:col-span-1">01</div>
+          <div class="md:col-span-5">
+            <h2 class="mb-2 text-base font-semibold" data-i18n="featureVlansTitle">
+              VLANs without learning VLANs
+            </h2>
+            <p class="max-w-sm text-sm text-ink-soft" data-i18n="featureVlansDesc">
+              Segment into LAN, Guest, and IoT zones. WrtNova detects your switch hardware and wires
+              the tagging correctly — no DSA-vs-swconfig rabbit hole.
+            </p>
+          </div>
+          <div class="min-w-0 md:col-span-6" aria-hidden="true">
+            <pre
+              class="mono overflow-x-auto rounded-[var(--radius-field)] border border-rule bg-sunken p-3 text-xs text-ink"
+            >GUEST_ENABLE=<span class="text-seg-guest">1</span>          <span class="text-ink-soft"># vlan 5</span>
+IOT_ENABLE=<span class="text-seg-iot">1</span>            <span class="text-ink-soft"># vlan 10, lan-only</span>
+ADDITIONAL_VLAN_LIST=<span class="text-seg-lan">"30-50"</span>
+<span class="text-ink-soft"># dsa or swconfig - detected on device</span></pre>
+          </div>
+        </div>
+
+        <div class="grid gap-x-10 gap-y-4 border-t border-rule py-8 md:grid-cols-12">
+          <div class="mono pt-1 text-xs font-semibold text-seg-lan md:col-span-1">02</div>
+          <div class="md:col-span-5">
+            <h2 class="mb-2 text-base font-semibold" data-i18n="featureRoamTitle">
+              Roaming tuned out of the box
+            </h2>
+            <p class="max-w-sm text-sm text-ink-soft" data-i18n="featureRoamDesc">
+              Every SSID ships with 802.11k/v/r fast transition and usteer band steering, thresholds
+              pre-tuned. IoT stays on plain 2.4 GHz so older devices never meet 11r/k/v quirks.
+            </p>
+          </div>
+          <div class="min-w-0 md:col-span-6" aria-hidden="true">
+            <pre
+              class="mono overflow-x-auto rounded-[var(--radius-field)] border border-rule bg-sunken p-3 text-xs text-ink"
+            >DOT11KV=<span class="text-seg-lan">1</span>               <span class="text-ink-soft"># 802.11k/v + usteer</span>
+DOT11R=<span class="text-seg-lan">1</span>                <span class="text-ink-soft"># 802.11r fast transition</span>
+DENSE_ENV=<span class="text-seg-lan">1</span>             <span class="text-ink-soft"># high-interference tuning</span>
+<span class="text-ink-soft"># iot exempt: plain 2.4 GHz, no 11r/k/v</span></pre>
+          </div>
+        </div>
+
+        <div class="grid gap-x-10 gap-y-4 border-t border-rule py-8 md:grid-cols-12">
+          <div class="mono pt-1 text-xs font-semibold text-seg-lan md:col-span-1">03</div>
+          <div class="md:col-span-5">
+            <h2 class="mb-2 text-base font-semibold" data-i18n="featureMeshTitle">
+              Mesh backhaul, VLANs included
+            </h2>
+            <p class="max-w-sm text-sm text-ink-soft" data-i18n="featureMeshDesc">
+              802.11s mesh with SAE encryption and tuned peering, optional batman-adv on top. All
+              VLANs are trunked over the mesh link, so guest stays guest on every node.
+            </p>
+          </div>
+          <div class="min-w-0 md:col-span-6" aria-hidden="true">
+            <pre
+              class="mono overflow-x-auto rounded-[var(--radius-field)] border border-rule bg-sunken p-3 text-xs text-ink"
+            >WIRELESS_MESH=<span class="text-seg-lan">1</span>         <span class="text-ink-soft"># 802.11s + sae backhaul</span>
+BATMAN_ADV=<span class="text-seg-lan">1</span>            <span class="text-ink-soft"># optional, on top</span>
+<span class="text-ink-soft"># vlans trunk over the mesh link</span></pre>
+          </div>
+        </div>
+
+        <div class="grid gap-x-10 gap-y-4 border-t border-rule py-8 md:grid-cols-12">
+          <div class="mono pt-1 text-xs font-semibold text-seg-lan md:col-span-1">04</div>
+          <div class="md:col-span-5">
+            <h2 class="mb-2 text-base font-semibold" data-i18n="featureVpnTitle">
+              VPN built in — or one click to WARP
+            </h2>
+            <p class="max-w-sm text-sm text-ink-soft" data-i18n="featureVpnDesc">
+              Route through your own WireGuard VPN provider, or prefill a free Cloudflare WARP config
+              in one click. It gets its own network and SSID automatically.
+            </p>
+          </div>
+          <div class="min-w-0 md:col-span-6" aria-hidden="true">
+            <pre
+              class="mono overflow-x-auto rounded-[var(--radius-field)] border border-rule bg-sunken p-3 text-xs text-ink"
+            >WG_ENABLE=<span class="text-seg-vpn">1</span>             <span class="text-ink-soft"># own vlan + ssid + watchdog</span>
+IOT_ROUTE_VIA_WG=<span class="text-seg-iot">1</span>      <span class="text-ink-soft"># iot egress via tunnel</span>
+ALLOWED_IPS=<span class="text-seg-vpn">""</span>           <span class="text-ink-soft"># 0.0.0.0/0 ::/0</span>
+<span class="text-ink-soft"># or one-click Cloudflare WARP prefill</span></pre>
+          </div>
+        </div>
+
+        <div class="grid gap-x-10 gap-y-4 border-t border-rule py-8 md:grid-cols-12">
+          <div class="mono pt-1 text-xs font-semibold text-seg-lan md:col-span-1">05</div>
+          <div class="md:col-span-5">
+            <h2 class="mb-2 text-base font-semibold" data-i18n="featureMultiwanTitle">
+              Failover that is already wired
+            </h2>
+            <p class="max-w-sm text-sm text-ink-soft" data-i18n="featureMultiwanDesc">
+              Second WAN, LTE modem, or a phone on USB. mwan3 arrives configured: health-tracked
+              failover, load balancing, sticky HTTPS sessions.
+            </p>
+          </div>
+          <div class="min-w-0 md:col-span-6" aria-hidden="true">
+            <pre
+              class="mono overflow-x-auto rounded-[var(--radius-field)] border border-rule bg-sunken p-3 text-xs text-ink"
+            >WAN_B_ENABLE=<span class="text-seg-lan">1</span>          <span class="text-ink-soft"># second wan, vlan 21</span>
+CELLULAR_MODEM=<span class="text-seg-lan">1</span>        <span class="text-ink-soft"># mbim modem failover</span>
+USB_TETHERING=<span class="text-seg-lan">1</span>         <span class="text-ink-soft"># android / iphone</span>
+<span class="text-ink-soft"># mwan3: balanced + IP-based PBR for WireGuard</span></pre>
+          </div>
+        </div>
+
+        <div class="grid gap-x-10 gap-y-4 border-t border-rule py-8 md:grid-cols-12">
+          <div class="mono pt-1 text-xs font-semibold text-seg-lan md:col-span-1">06</div>
+          <div class="md:col-span-5">
+            <h2 class="mb-2 text-base font-semibold" data-i18n="featurePrivacyTitle">
+              Private and ad-free out of the box
+            </h2>
+            <p class="max-w-sm text-sm text-ink-soft" data-i18n="featurePrivacyDesc">
+              Network-wide ad blocking and encrypted DNS. AdGuard Home on capable hardware, a
+              lightweight fallback on smaller routers.
+            </p>
+          </div>
+          <div class="min-w-0 md:col-span-6" aria-hidden="true">
+            <pre
+              class="mono overflow-x-auto rounded-[var(--radius-field)] border border-rule bg-sunken p-3 text-xs text-ink"
+            >ADGUARD_MAIN_DNS=<span class="text-seg-lan">1</span>      <span class="text-ink-soft"># adguardhome on :53</span>
+BLOCK_DOT_DOQ=<span class="text-seg-lan">1</span>         <span class="text-ink-soft"># reject DoT/DoQ on :853</span>
+DENY_GUEST_NIGHT=<span class="text-seg-guest">1</span>      <span class="text-ink-soft"># guest off 21:00-07:00</span>
+<span class="text-ink-soft"># client DNS hard-redirected to router</span></pre>
+          </div>
+        </div>
+
+        <div class="grid gap-x-10 gap-y-4 border-t border-rule py-8 md:grid-cols-12">
+          <div class="mono pt-1 text-xs font-semibold text-seg-lan md:col-span-1">07</div>
+          <div class="md:col-span-5">
+            <h2 class="mb-2 text-base font-semibold" data-i18n="featureForwardTitle">
+              Port forwards as one-liners
+            </h2>
+            <p class="max-w-sm text-sm text-ink-soft" data-i18n="featureForwardDesc">
+              One line per host creates the static lease and its WAN port forwards together, named in
+              the firewall. The reservation and the redirect can never drift apart.
+            </p>
+          </div>
+          <div class="min-w-0 md:col-span-6" aria-hidden="true">
+            <pre
+              class="mono overflow-x-auto rounded-[var(--radius-field)] border border-rule bg-sunken p-3 text-xs text-ink"
+            ><span class="text-ink-soft"># one line = static lease + wan forwards</span>
+PORT_FORWARD_LIST=<span class="text-seg-lan">"</span>
+  docker-host | 20 | 80 443
+  rdp-server  | 21 | 3389
+<span class="text-seg-lan">"</span></pre>
+          </div>
+        </div>
+
+        <div class="grid gap-x-10 gap-y-4 border-t border-rule py-8 md:grid-cols-12">
+          <div class="mono pt-1 text-xs font-semibold text-seg-lan md:col-span-1">08</div>
+          <div class="md:col-span-5">
+            <h2 class="mb-2 text-base font-semibold" data-i18n="featureIpv6Title">
+              IPv6 servers, no NAT hacks
+            </h2>
+            <p class="max-w-sm text-sm text-ink-soft" data-i18n="featureIpv6Desc">
+              Each host gets a stable ::N address that survives prefix changes, its own Cloudflare
+              DDNS subdomain, and a firewall accept scoped to exactly the ports you list.
+            </p>
+          </div>
+          <div class="min-w-0 md:col-span-6" aria-hidden="true">
+            <pre
+              class="mono overflow-x-auto rounded-[var(--radius-field)] border border-rule bg-sunken p-3 text-xs text-ink"
+            ><span class="text-ink-soft"># per-host AAAA ddns + scoped accept</span>
+IPV6_SERVER_LIST=<span class="text-seg-lan">"</span>
+  docker-host | 20 | 80 443
+  vps-host    | 23 |       <span class="text-ink-soft"># all ports</span>
+<span class="text-seg-lan">"</span></pre>
+          </div>
+        </div>
+
+        <div class="grid gap-x-10 gap-y-4 border-t border-rule py-8 md:grid-cols-12">
+          <div class="mono pt-1 text-xs font-semibold text-seg-lan md:col-span-1">09</div>
+          <div class="md:col-span-5">
+            <h2 class="mb-2 text-base font-semibold" data-i18n="featureFleetTitle">
+              One config, a whole fleet
+            </h2>
+            <p class="max-w-sm text-sm text-ink-soft" data-i18n="featureFleetDesc">
+              Flash the same image with AP_MODE=1 and it becomes an access point and managed switch:
+              same SSIDs, same VLANs, clients roam between nodes. The fleet builder builds router and
+              APs in one session.
+            </p>
+          </div>
+          <div class="min-w-0 md:col-span-6" aria-hidden="true">
+            <pre
+              class="mono overflow-x-auto rounded-[var(--radius-field)] border border-rule bg-sunken p-3 text-xs text-ink"
+            >AP_MODE=<span class="text-seg-lan">1</span>               <span class="text-ink-soft"># ap + managed switch</span>
+AP_INDEX=<span class="text-seg-lan">3</span>              <span class="text-ink-soft"># mgmt ip 192.168.1.3</span>
+<span class="text-ink-soft"># same ssids + 802.11r across nodes</span></pre>
+          </div>
+        </div>
+
+        <div class="grid gap-x-10 gap-y-4 border-y border-rule py-8 md:grid-cols-12">
+          <div class="mono pt-1 text-xs font-semibold text-seg-lan md:col-span-1">10</div>
+          <div class="md:col-span-5">
+            <h2 class="mb-2 text-base font-semibold" data-i18n="featureFlashTitle">
+              Flash once, fully configured
+            </h2>
+            <p class="max-w-sm text-sm text-ink-soft" data-i18n="featureFlashDesc">
+              No LuCI menus, no SSH. WrtNova bakes your whole setup into a first-boot script. Flash
+              the image and the router configures itself.
+            </p>
+          </div>
+          <div class="min-w-0 md:col-span-6" aria-hidden="true">
+            <pre
+              class="mono overflow-x-auto rounded-[var(--radius-field)] border border-rule bg-sunken p-3 text-xs text-ink"
+            ><span class="text-ink-soft"># ===================
+# End config section
+# ===================</span>
+everything below runs itself<span class="text-seg-lan">.</span></pre>
+          </div>
+        </div>
+
+        <p class="field-help mt-6 md:pl-[calc(100%/12+2.5rem)]" data-i18n="featureMoreText">
+          Plus per-network DHCP instances, Cloudflare DDNS, PPPoE, wan-port bridging, NAT offloading,
+          NTP, zram, and more.
+        </p>
+      </section>
+
+      <!-- ===== CTA ===== -->
+      <section class="mx-auto max-w-[76rem] px-4 pb-16 sm:px-6 md:pb-24">
+        <div class="card px-6 py-12 text-center md:py-16">
+          <p
+            class="font-display mb-7 text-sm font-semibold tracking-widest text-ink-soft uppercase"
+            data-i18n="ctaTagline"
+          >
+            Your router, your config — baked in from the first boot.
+          </p>
+          <div
+            class="flex flex-col items-stretch justify-center gap-2.5 sm:flex-row sm:items-center"
+          >
+            <a href="/builder/" class="btn btn-primary px-4 py-2.5" data-i18n="singleNodeBuilder"
+              >Single-node builder →</a
+            >
+            <a href="/networks/" class="btn btn-quiet px-4 py-2.5" data-i18n="multiNodeFleetBuilder"
+              >Multi-node fleet builder →</a
+            >
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="border-t border-rule px-4 py-8 text-center sm:px-6">
+      <p class="field-help">
+        <a href="https://github.com/LongQT-sea/wrtnova" target="_blank" rel="noopener">GitHub</a>
+        ·
+        <a href="https://www.cloudflare.com/terms/" target="_blank" rel="noopener">Cloudflare TOS</a>
+      </p>
+      <p class="field-help mt-1.5" data-i18n="footerNotAffiliated">
+        Not affiliated with or endorsed by Cloudflare, Inc.
+      </p>
+      <p class="field-help" data-i18n="footerTrademark">
+        Cloudflare and WARP are registered trademarks of their respective owners.
+      </p>
+    </footer>
+
+    <script type="module" src="/src/pages/landing/main.ts"></script>
+  </body>
+</html>

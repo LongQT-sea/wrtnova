@@ -48,10 +48,9 @@ router and every access point:
 ## What it does
 
 WrtNova is a static web app (plus three thin Cloudflare Pages Functions) that
-turns the OpenWrt firmware selector into a guided experience. Three pages:
+turns the OpenWrt firmware selector into a guided experience. Two pages:
 
-- **[/builder](https://wrtnova.com/builder/)** - single-node guided builder: full config form, live *Config preview*, WARP prefill, build history.
-- **[/builder/advanced](https://wrtnova.com/builder/advanced)** - a Monaco editor over the raw wrtnova.sh plus a free-form package list, for people who want to own every line of the generated script.
+- **[/builder](https://wrtnova.com/builder/)** - single-node guided builder: full config form, a live plan of the network it will produce, the generated config one disclosure down, WARP prefill, and build history.
 - **[/networks](https://wrtnova.com/networks/)** - fleet builder: one shared config (the same fields as /builder), per-node device and overrides, and build-all orchestration for a router + access points.
 
 ## How it works
@@ -73,9 +72,14 @@ Requires Node 22+.
 
 ```sh
 npm install
-npm run build:css     # Tailwind -> public/style.css
-npm run embed         # copy wrtnova.sh -> public/wrtnova.sh
-npx wrangler pages dev public
+npm run dev           # Vite dev server, all three pages
+```
+
+That covers everything except the Pages Functions. To run those too - which is
+what WARP prefill and the ASU endpoint list need:
+
+```sh
+npm run dev:pages     # build to dist/, then wrangler pages dev dist
 ```
 
 `wrangler.toml` already sets `compatibility_flags = ["nodejs_compat"]`, which
@@ -85,8 +89,8 @@ the WARP keygen needs. Open the printed localhost URL and you have the full app.
 
 Point Cloudflare Pages at a fork of this repo. Build settings:
 
-- Build command: `npm run build:css && npm run embed`
-- Build output directory: `public`
+- Build command: `npm run build`
+- Build output directory: `dist`
 - `compatibility_flags`: `nodejs_compat` (already in `wrangler.toml`)
 
 Environment variables (Pages dashboard -> Settings -> Variables):
@@ -104,26 +108,34 @@ rest of the app works normally.
 ## Project layout
 
 ```
-public/            Cloudflare Pages output (HTML, CSS, JS modules, fonts)
-  builder/         /builder and /builder/advanced
-  networks/        /networks
-  js/              shared ES modules (.mjs) + UI modules
+index.html         /            the landing page
+builder/           /builder/    entry document
+networks/          /networks/   entry document
+src/
+  core/            the typed core: schema, derivation, rendering, ASU, storage
+  state/           Zustand stores and the selectors over them
+  sections/        the eight config sections, shared by both pages
+  ui/              design system, plan panel, shell, tokens.css
+  pages/           one entry per page
+  i18n/            seven locale catalogues, checked against English by tsc
+public/            copied verbatim (fonts, favicon, tzdata.lua, robots.txt, _headers)
 functions/api/     Cloudflare Pages Functions (session, asu-servers, warp)
-scripts/           embed step + CI gate scripts
-test/              node:test unit tests
-src/style.css      Tailwind input
+scripts/           embed step (copies wrtnova.sh into dist/)
+tests/             Vitest unit tests, including the constitutional invariants
 ```
 
 ## Testing and CI
 
 ```sh
-npm run ci
+npm run check
 ```
 
-Runs the type check (`tsc --checkJs`), the unit tests (`node --test`), and the
-four invariant gates (no `'0'` off-state emission, section-marker integrity,
-single-definition shared functions, CSS/JS byte budgets). CI runs the same on
-Node 22.
+Runs the type check (`tsc --noEmit`) and the Vitest suite. The suite carries the
+invariants that used to be separate CI gates: the section marker is present
+exactly once in the real `wrtnova.sh`, no checkbox off-state emits `'0'`, no
+emitted value repeats a `wrtnova.sh` default, every documented config key exists
+in the schema, and the same config assembles byte-identically twice. CI runs the
+same on Node 22.
 
 ## Contributing
 

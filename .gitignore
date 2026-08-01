@@ -6,11 +6,6 @@ node_modules/
 # Vite build output. `npm run embed` also places wrtnova.sh here at deploy time.
 dist/
 
-# Generated artifacts of the previous build pipeline; public/ is removed once
-# the rewritten pages land (specs/001-frontend-rewrite/tasks.md T081).
-public/style.css
-public/wrtnova.sh
-
 # Agent-local settings (may hold credentials)
 .claude/settings.local.json
 

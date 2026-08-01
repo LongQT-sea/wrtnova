@@ -21,7 +21,7 @@ and the five retired CI gate scripts are re-expressed here (research.md R9).
 - [x] T002 [P] `tsconfig.json` with `strict`, `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`; delete `jsconfig.json`
 - [x] T003 [P] `vite.config.ts` with two HTML entries (`builder`, `networks`) plus the landing page, output `dist/`
 - [x] T004 [P] Rewrite `scripts/embed-wrtnova.mjs` to copy `wrtnova.sh` into `dist/`; add `dist/` and `dist/wrtnova.sh` to `.gitignore`
-- [x] T005 [P] Self-host Archivo, Public Sans, JetBrains Mono as subset variable fonts in `public/fonts/`; delete the three IBM Plex Mono files *(fonts self-hosted; Cyrillic served by Noto Sans under the same family names, see plan.md. The IBM Plex files stay until Phase 11: the superseded `public/` pages still reference them.)*
+- [x] T005 [P] Self-host Archivo, Public Sans, JetBrains Mono as subset variable fonts in `public/fonts/`; delete the three IBM Plex Mono files *(fonts self-hosted; Cyrillic served by Noto Sans under the same family names, see plan.md. The IBM Plex files stayed until Phase 11, because the superseded `public/` pages still referenced them; deleted with those pages in T081.)*
 - [x] T006 Replace `npm run ci` with `npm run check` (typecheck + test); delete `scripts/ci/check-{no-zero,marker,no-dupes,budget,no-undef,i18n-html,i18n-locales,i18n-diacritics}.mjs`
 - [x] T007 Update `.github/workflows/ci.yml` to run `npm run check`
 
@@ -158,14 +158,14 @@ and the five retired CI gate scripts are re-expressed here (research.md R9).
 
 ## Phase 11: Removal and cleanup
 
-- [ ] T079 Delete `public/builder/advanced.html`, `public/js/advanced.js`, and the Monaco dependency
-- [ ] T080 Remove every link and route to `/builder/advanced`, including in `README.md`
-- [ ] T081 Delete the superseded `public/js/*.js` and `public/js/*.mjs` modules and `public/{builder,networks}/index.html`
-- [ ] T082 Delete `test/*.test.mjs` superseded by `tests/core/`
-- [ ] T083 Restyle `public/index.html` (the landing page) to the new visual language; drop the advanced-page mention *(clarification)*
-- [ ] T084 Update `README.md`: three pages become two, the CI section becomes `npm run check`, the layout section matches the new tree
-- [ ] T085 Update `.github/CONTRIBUTING.md` to the eight hard requirements
-- [ ] T086 [P] Move `tzdata.lua`, `countries.txt`, `banip-feeds.txt`, `favicon.svg`, `robots.txt`, `_headers` into the new `public/` so they land at the same URLs
+- [x] T079 Delete `public/builder/advanced.html`, `public/js/advanced.js`, and the Monaco dependency — Monaco was never an npm dependency, only a jsdelivr AMD loader in `advanced.html`, so deleting the two files retired it whole
+- [x] T080 Remove every link and route to `/builder/advanced`, including in `README.md`
+- [x] T081 Delete the superseded `public/js/*.js` and `public/js/*.mjs` modules and `public/{builder,networks}/index.html` — with them went `public/style.css` and its Tailwind v3 input `src/style.css`, `tailwind.config.js`, and `scripts/dev/` (three harnesses that drove `#config-form` on the deleted pages). `wrangler.toml`'s `pages_build_output_dir` moves to `dist`, and `public/_headers` drops `/js/*` and `/style.css` for the hashed `/assets/*`
+- [x] T082 Delete `test/*.test.mjs` superseded by `tests/core/`
+- [x] T083 Restyle `public/index.html` (the landing page) to the new visual language *(clarification)* — it becomes the third rollup entry, `index.html` at the repo root, in the same pass that adds `/` to `vite.config.ts`. Vanilla TS rather than React: the page is prose with two preferences on it, and it shares `ui/theme.ts` and the `lang` key with the app but carries its own small seven-locale catalogue (`i18n/landing.ts`) rather than pulling the ~430-key application dictionary onto a marketing page. The hero draws the plan panel, so the first thing a visitor sees is what the product produces
+- [x] T084 Update `README.md`: three pages become two, the CI section becomes `npm run check`, the layout section matches the new tree — `.github/PULL_REQUEST_TEMPLATE.md` and `THIRD_PARTY_LICENSES.md` were stale the same way (bundled `bcrypt.js` and IBM Plex Mono are both gone)
+- [x] T085 Update `.github/CONTRIBUTING.md` to the eight hard requirements
+- [x] T086 [P] Move `tzdata.lua`, `countries.txt`, `banip-feeds.txt`, `favicon.svg`, `robots.txt`, `_headers` into the new `public/` so they land at the same URLs — `public/` *is* Vite's publicDir, so they were already at those URLs; each was verified 200 in the built `dist/`. `public/wrtnova.sh` did not survive: the embed step writes to `dist/` now, so the copy left in `public/` was a stale file that would have been served in preference to the real one, and the dev server reads the canonical root file through a small middleware instead
 
 ---
 

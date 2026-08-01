@@ -10,10 +10,10 @@
 
 ## Checklist
 
-- [ ] `npm run ci` passes (typecheck, tests, invariant gates)
-- [ ] Regenerated artifacts if needed (`npm run build:css`, `npm run embed`)
-- [ ] No `'0'` checkbox off-state (used `checkboxVal()` / `gv()` / `flag()`)
+- [ ] `npm run check` passes (typecheck + Vitest, including the invariants)
+- [ ] `wrtnova.sh` untouched
+- [ ] No `'0'` checkbox off-state, and no value equal to a `wrtnova.sh` default
+- [ ] All seven locales carry any new message id
 - [ ] ASCII-only in code and comments (locale strings excepted)
 - [ ] Mobile layout works at 375px (for UI changes)
-- [ ] Mirrored `/builder` behavior for any `/networks` change
 - [ ] Conventional commit messages, one logical change per commit

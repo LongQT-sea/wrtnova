@@ -1,12 +1,22 @@
 # Cloudflare Pages cache policy.
 
+# The provisioning script is what the image is made of, and it changes without
+# the pages around it changing. Never serve a stale copy.
 /wrtnova.sh
   Cache-Control: no-cache
 
-/js/*
-  Cache-Control: no-cache
-/style.css
-  Cache-Control: no-cache
+# Bundler output, content-hashed: a new build emits new filenames, so these can
+# be held for as long as a browser is willing to.
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
 
+# The three entry documents name the current hashes, so they must be
+# revalidated or a returning visitor keeps loading the previous build.
+/
+  Cache-Control: no-cache
+/builder/
+  Cache-Control: no-cache
+/networks/
+  Cache-Control: no-cache
 /*.html
   Cache-Control: no-cache

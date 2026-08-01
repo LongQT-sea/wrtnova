@@ -1,9 +1,10 @@
 # Contributing to WrtNova
 
-Thanks for your interest. This project is small and deliberately
-framework-free, and it has a handful of invariants that are easy to violate by
-accident. Please skim this whole file before your first PR. The authoritative
-reference is `CLAUDE.md` (the hard rules, restated below).
+Thanks for your interest. Most of this codebase is ordinary: pick whatever
+component shape, naming or layout serves the change. What is *not* negotiable is
+a short list of functional invariants - the ones whose violation breaks the built
+firmware or leaks the user's secrets. Please skim this whole file before your
+first PR. The authoritative reference is `CLAUDE.md`, restated below.
 
 ## Getting set up
 
@@ -11,75 +12,86 @@ Requires Node 22+.
 
 ```sh
 npm install
-npm run build:css
-npm run embed
-npx wrangler pages dev public
+npm run dev           # Vite dev server, all three pages
+npm run dev:pages     # build, then wrangler pages dev dist (adds the Functions)
 ```
 
 ## Run this before every PR
 
 ```sh
-npm run ci
+npm run check
 ```
 
-It must pass. It runs the type check, the unit tests, and the four invariant
-gates described below. CI runs the same on Node 22.
+It must pass: the type check plus the Vitest suite, which carries the invariants
+below that can be checked automatically. CI runs the same on Node 22.
 
-## The invariants (do not violate these)
+## The hard requirements (do not violate these)
 
-These are enforced by CI gates where possible, but several are conventions you
-have to follow by hand.
+1. **`wrtnova.sh` is the user's file.** `wrtnova.sh` at the repo root is the
+   source of truth for the provisioning script, owned and maintained upstream at
+   https://github.com/LongQT-sea/wrtnova.sh. Do not edit, stage or commit it as
+   part of frontend work. If a change is needed there, propose the diff.
 
-1. **`wrtnova.sh` is the source of truth, and it lives in another repo.**
-   Do not edit it as part of frontend work. The canonical copy is at
-   https://github.com/LongQT-sea/wrtnova.sh. After any script change, run
-   `npm run embed` to regenerate `public/wrtnova.sh` (which is git-ignored).
+2. **The section marker is byte-load-bearing.** These exact three lines in
+   `wrtnova.sh`:
 
-2. **The section marker is byte-load-bearing.** The exact three lines
-   `# ===================` / `# End config section` / `# ===================`
-   split the per-build config block from the embedded body. Changing its
-   wording or spacing breaks the build. The `check-marker` gate guards it.
+   ```
+   # ===================
+   # End config section
+   # ===================
+   ```
 
-3. **Checkbox off-state is `''`, never `'0'`.** Use the helpers
-   (`checkboxVal()` in build.js, `gv()` in networks.js, `flag(v)` in merges).
-   The `check-no-zero` gate fails on any `'0'` off-state emission.
+   split the per-build config block from the embedded body, and the browser
+   slices the fetched script on those exact bytes. Do not reformat, re-space or
+   re-generate them. `tests/core/marker.test.ts` guards it.
 
-4. **Shared logic has exactly one definition.** Logic used by more than one
-   page (or by tests) lives in a single typed `.mjs` module and is imported,
-   never copy-pasted. The `check-no-dupes` gate enforces this.
+3. **The build path stays 100% client-side.** Root password, Wi-Fi passphrases,
+   WireGuard keys and API tokens are assembled in the browser and POSTed straight
+   to the user-chosen OpenWrt ASU server as the `defaults` field. They must never
+   pass through a WrtNova backend. This is a published promise in `README.md` and
+   on the landing page.
 
-5. **No framework, no bundler.** Native DOM and native HTML primitives
-   (`<dialog>`, `<details>`, `<select>`) only. Code sharing uses native ES
-   modules loaded with `<script type="module">`. The only build steps are the
-   Tailwind CLI and `embed-wrtnova.mjs`.
+4. **Checkbox off-state emits `''`, never `'0'`.** `KEY='0'` would *set* the
+   variable in `wrtnova.sh` rather than leave it unset. The same applies to
+   boolean flags in any node-config merge. `tests/core/no-zero.test.ts` fails on
+   any `'0'` off-state emission.
 
-6. **Stay within the byte budget.** CSS <= 15 KB gzipped is a hard limit; JS is
-   ratcheted by `check-budget`. Lazy-load heavy assets (e.g. Monaco) only on
-   the page that needs them.
+5. **Never emit a value identical to the `wrtnova.sh` default.** The config block
+   is an override layer; a redundant default is a bug.
+   `tests/core/defaults.test.ts` parses `${KEY:-...}` out of the real script and
+   checks both directions.
 
-7. **ASCII only in code and comments.** The sole exception is locale string
-   values in `i18n.js`. No box-drawing, em dashes, arrows, or other non-ASCII.
+6. **WARP.** `/api/warp/register` requires a session cookie, so any page that can
+   register WARP must hit `/api/session` on init. The endpoint returns UPPERCASE
+   keys: `WG_PRIVATE_KEY`, `PEER_PUBLIC_KEY`, `ENDPOINT`, `ENDPOINT_PORT`,
+   `WG_IPV4`, `WG_IPV6`, `ALLOWED_IPS`. The localStorage key is
+   `wrtnova_warp_refresh`.
 
-8. **Mobile-first.** Every feature must work at 375px width; breakpoint is
-   768px; touch targets >= 44px; input font >= 16px.
+7. **Deploy target is Cloudflare Pages + Pages Functions.** Keep `session`,
+   `asu-servers` and `warp` working. `nodejs_compat` is required for WARP keygen.
+   The build output directory is `dist/`.
 
-9. **`/builder` is the reference implementation.** Before adding or changing a
-   feature on `/networks`, read how `/builder` does the equivalent thing and
-   mirror it.
+8. **Keep all seven locales.** en, de, es, fr, pl, ru, zh. English
+   (`src/i18n/en.ts`) is the shape every other catalogue is checked against by
+   the compiler, so a missing or misspelled key is a build error rather than a
+   blank label. No English-only feature.
 
 ## Architecture in one paragraph
 
-The DOM is a view, never the state. Each page owns one typed config store
-(`store.mjs`); every derived view (config preview, package chips, visibility,
-VLAN-conflict warning) is a pure selector of the store. Build payloads read the
-store, not the form. Programmatic changes go through the store first
-(`applyStorePatch`). Normalize values once, at the store boundary.
+`src/core/` is pure and framework-free: the ordered field schema, derivation and
+gating, POSIX rendering, the ASU client, storage. Everything above it is a view
+of a Zustand store over one `RawConfig`, and every derived surface - the plan
+panel, the package list, the generated-config disclosure, per-node merges - is a
+selector on that store, never a second source of truth. The eight config sections
+are mounted unchanged on both pages: they write through `ConfigScopeContext`, so
+the same component edits the builder's config on `/builder` and a network's
+shared config on `/networks`.
 
 ## Comment style
 
 Comments explain *why*, not *what*. Keep them terse and present-tense, use ASCII
-`->` for mappings, and reserve banners for real section breaks. Match the voice
-of the surrounding code (`wrtnova.sh` is the house standard).
+`->` for mappings, and reserve banners for real section breaks. ASCII only in
+code and comments; locale string values are the exception.
 
 ## Commits and PRs
 

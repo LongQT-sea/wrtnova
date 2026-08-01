@@ -1,19 +1,40 @@
+import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { defineConfig } from 'vite';
+import { defineConfig, type Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwind from '@tailwindcss/vite';
 
-// Multi-page build. Each new page joins `input` in the phase that builds it, and
-// emits at the same URL the previous site used, so links and bookmarks keep
-// working. Until then the superseded page in `public/` is still copied to the same
-// path and keeps serving -- rollup's output wins over the public-dir copy for any
-// path both produce, so adding an entry here is what retires the old page.
+/**
+ * `npm run build` puts wrtnova.sh in dist/ (scripts/embed-wrtnova.mjs); the dev
+ * server has no such step, so it reads the canonical file at the repo root on
+ * every request. It is never copied into public/: a stale copy there would be
+ * served in preference to the real one, and the script is what the image is
+ * made of.
+ */
+function serveWrtnovaSh(): Plugin {
+  return {
+    name: 'wrtnova-sh-dev',
+    apply: 'serve',
+    configureServer(server) {
+      server.middlewares.use('/wrtnova.sh', (_req, res) => {
+        res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+        res.end(readFileSync(resolve(__dirname, 'wrtnova.sh')));
+      });
+    },
+  };
+}
+
+// Multi-page build. Every page emits at the URL the previous site used, so links
+// and bookmarks keep working:
 //
-//   /builder/   Phase 5 (US1)
-//   /networks/  this phase
-//   /           Phase 11 (T083)
+//   /           the landing page
+//   /builder/   the single-node builder
+//   /networks/  the fleet builder
+//
+// `public/` is now static assets only -- the superseded pages it used to carry
+// were removed in Phase 11, once all three entries below existed.
 export default defineConfig({
-  plugins: [react(), tailwind()],
+  plugins: [react(), tailwind(), serveWrtnovaSh()],
   resolve: {
     alias: {
       '@core': resolve(__dirname, 'src/core'),
@@ -28,6 +49,7 @@ export default defineConfig({
     emptyOutDir: true,
     rollupOptions: {
       input: {
+        landing: resolve(__dirname, 'index.html'),
         builder: resolve(__dirname, 'builder/index.html'),
         networks: resolve(__dirname, 'networks/index.html'),
       },
