@@ -6,7 +6,7 @@
 // fields of it -- comes from the shared configuration, which is the whole point of
 // managing a fleet in one place.
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 import type { Flag, FleetNode, Network, RawConfig } from '@core/types';
 import { nodeLanAddress } from '@core/merge';
 import { validateField } from '@core/validate';
@@ -30,6 +30,7 @@ import { ConfigDisclosure } from '@ui/ConfigDisclosure';
 import { ConfirmDialog } from '@ui/ConfirmDialog';
 import { Combobox } from '@ui/Combobox';
 import { PlanPanel } from '@ui/PlanPanel';
+import { Rich } from '@ui/Rich';
 import { SelectField } from '@ui/SelectField';
 import { TextField } from '@ui/TextField';
 import { Toggle } from '@ui/Toggle';
@@ -52,7 +53,7 @@ export function NodePanel({ net, node, asuUrl }: NodePanelProps) {
   const setOverride = <K extends keyof RawConfig>(key: K, value: RawConfig[K]): void =>
     useNetworksStore.getState().patchOverrides(net.id, node.id, { [key]: value });
 
-  const flag = (key: keyof RawConfig, label: string, help?: string) => (
+  const flag = (key: keyof RawConfig, label: ReactNode, help?: string) => (
     <Toggle
       id={`${node.id}-${String(key)}`}
       label={label}
@@ -119,7 +120,10 @@ export function NodePanel({ net, node, asuUrl }: NodePanelProps) {
 
         {configured && hasAth10kCt(board) ? flag('NON_CT_ATH10K', t('nonCtAth10k')) : null}
         {configured && isWedCapable(board) ? flag('WED_ENABLE', t('wedAccel'), t('wedAccelHelp')) : null}
-        {configured ? flag('IRQBALANCE', t('irqbalance'), t('useIrqbalance')) : null}
+        {/* The only label here carrying inline markup, so it is the only one that
+            goes through Rich rather than t() -- otherwise the <code> shows up as
+            literal text in the panel. */}
+        {configured ? flag('IRQBALANCE', <Rich id="irqbalance" />, t('useIrqbalance')) : null}
 
         <TextField
           id={`${node.id}-pkgs`}

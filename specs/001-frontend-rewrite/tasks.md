@@ -171,11 +171,22 @@ and the five retired CI gate scripts are re-expressed here (research.md R9).
 
 ## Phase 12: Verification
 
-- [ ] T087 [P] `tests/e2e/builder.spec.ts` — device, defaults, build, download against a mocked ASU
-- [ ] T088 [P] `tests/e2e/networks.spec.ts` — a router plus three APs, build all, one node failing without stopping the others *(SC-006)*
-- [ ] T089 `tests/e2e/no-secret-egress.spec.ts` — assert no WrtNova-origin request carries a secret during a full build *(Constitution III, SC-004)*
-- [ ] T090 Manual pass at 375 px on both pages *(SC-009)*
-- [ ] T091 Manual pass in all seven locales *(SC-008)*
+The gate is `playwright.config.ts`, written before any spec. Its `webServer` is the
+Vite dev server — which serves the canonical `wrtnova.sh` from the repo root
+through the middleware in `vite.config.ts`, so an e2e build reads the same bytes
+the user maintains — and `testDir` is `tests/e2e`, which vitest's `include`
+(`tests/core`, `tests/state`) does not reach. So `npm run check` stays unit-only
+and `npm run test:e2e` is the separate gate. Two projects: `e2e` is the gate,
+`screens` is T090/T091 and asserts nothing. `tests/e2e/fixtures.ts` mocks
+downloads.openwrt.org and sysupgrade.openwrt.org and aborts everything else
+external, so a spec that starts depending on the real internet fails rather than
+going flaky.
+
+- [x] T087 [P] `tests/e2e/builder.spec.ts` — device, defaults, build, download against a mocked ASU. Also asserts the submitted script: `#!/bin/sh` first, the marker present exactly once, the real body behind it, and no `KEY='0'` anywhere *(Constitution II, IV)*
+- [x] T088 [P] `tests/e2e/networks.spec.ts` — a router plus three APs, build all, one node failing without stopping the others *(SC-006)* — the failing node is a board the mocked server refuses by profile, so the isolation is deterministic rather than order-dependent. `AP_INDEX` is emitted for AP #3 and #4 and *not* for AP #2, because 2 is the script's own default (Constitution V)
+- [x] T089 `tests/e2e/no-secret-egress.spec.ts` — assert no WrtNova-origin request carries a secret during a full build *(Constitution III, SC-004)*. One sentinel per class of secret the constitution names — root password, both Wi-Fi passphrases, both WireGuard keys, the API token — searched in plain, base64 and percent-encoded form across the URL, headers and body of **every** WrtNova-origin request, not just the ASU POST. Two further assertions keep it honest: the ASU POST must be shown to have carried every sentinel (or the audit passes on an empty form), and the set of WrtNova-origin paths reached must be inside a declared list, so a future build-shaped endpoint fails here even with a clean body today. Mutation-tested: a leak via URL, via header, and via base64 body each make it fail
+- [x] T090 Manual pass at 375 px on both pages *(SC-009)* — `tests/e2e/manual-passes.screens.spec.ts`, output in `test-results/screens/`. Landing, builder (device, network, wifi, security, plan sheet) and fleet (list, nodes, node panel, fleet sheet). The tab strip, the summary bar and the bottom sheet all hold up; nothing overflows
+- [x] T091 Manual pass in all seven locales *(SC-008)* — same file, rail driven by position because the rail itself is localized. All seven render fully translated with no overflow, including Cyrillic and Polish diacritics under the self-hosted subsets. **Found and fixed one defect**: `NodePanel` passed `t('irqbalance')` straight to `Toggle`, so its `<code>` markup showed as literal text — the Advanced section renders the same string with `richLabel`. It now goes through `Rich`
 - [ ] T092 Deploy preview to Cloudflare Pages and build one real image end to end
 
 ---
