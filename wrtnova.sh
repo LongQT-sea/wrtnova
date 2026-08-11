@@ -169,6 +169,8 @@ FORCE_DNS=		# 1 = force DNS (redirect port 53 TCP/UDP) from LAN, GUEST, and IOT 
 # AdGuardHome admin passwd in bcrypt hash (default 12345678)
 ADGUARD_PASSWD=''
 ADGUARD_MAIN_DNS=	# 1 = set AdGuardHome as primary DNS resolver
+ADG_QUERY_LOG=		# 1 = enable AdGuardHome query log
+ADG_SAFE_SEARCH=	# 1 = force AdGuardHome safe search
 
 # Separate multiple entries with spaces or newlines
 DOH_UPSTREAMS=
@@ -339,9 +341,10 @@ has_pkg https-dns-proxy && https_dns=1
 has_pkg adblock-fast && adblock_fast=1
 
 has_pkg adguardhome && {
-	# Skip setup Adguard Home if less than 230MB RAM
+	# Skip setup Adguard Home if less than 110MB RAM
 	read -r _ TOTAL_RAM_KB _ < /proc/meminfo
-	if [ "$TOTAL_RAM_KB" -ge 235520 ]; then
+	[ "$TOTAL_RAM_KB" -le 215040 ] && ADG_QUERY_LOG=
+	if [ "$TOTAL_RAM_KB" -ge 112640 ]; then
 		adguardhome=1
 	else
 		/etc/init.d/adguardhome disable
@@ -1207,7 +1210,7 @@ EOF
 setup_dnsmasq_upstream() {
 	for iface in $ifaces_lan; do
 		_uci dhcp dnsmasq "${iface}_dns" \
-			noresolv=1 cachesize=0 +server="127.0.0.1#5354 ::1#5354" ${adguard_main:+port=54}
+			noresolv=1 cachesize=0 +server="127.0.0.1#5354 ::1#5354" ${adg_main:+port=54}
 	done
 }
 
@@ -1260,24 +1263,26 @@ bootstrap_dns="${BOOTSTRAP_DNS:-
 }"
 
 [ "$adguardhome" = 1 ] && {
+	[ -n "$ADG_QUERY_LOG" ] && adg_querylog=true
+	[ -n "$ADG_SAFE_SEARCH" ] && adg_ss=true
 	[ -n "$ADGUARD_MAIN_DNS" ] && {
-		adguard_main=true
-		adguard_bind_host=0.0.0.0
-		adguard_dns_port=53
+		adg_main=true
+		adg_bind_host=0.0.0.0
+		adg_dns_port=53
 		dnsmasq_dns_port=54
-		adguard_upstream="'[/lan/]127.0.0.1:54'"
+		adg_upstream="'[/lan/]127.0.0.1:54'"
 		[ "$WG_ENABLE" = 1 ] && [ "$DNSMASQ_SINGLE_INSTANCE" != 1 ] && \
-			adguard_upstream="$adguard_upstream '[/vpn.lan/]$vpn_net_pfx.1:54'"
+			adg_upstream="$adg_upstream '[/vpn.lan/]$vpn_net_pfx.1:54'"
 	}
 
 	setup_dnsmasq_upstream
-	echo "0 3 1 * * /etc/init.d/adguardhome restart" >> /etc/crontabs/root
+	echo "0 3 * * 1 /etc/init.d/adguardhome restart" >> /etc/crontabs/root
 	echo "sleep 20; /etc/init.d/adguardhome restart &" >> "$hplug_ifup_wan"
 }
 
 _yaml() { for u in $*; do echo "    - $u"; done }
-adguard_upstream=$(_yaml "$doh_upstreams" "$adguard_upstream")
-adguard_bootstrap=$(_yaml "$bootstrap_dns")
+adg_upstream=$(_yaml "$doh_upstreams" "$adg_upstream")
+adg_bootstrap=$(_yaml "$bootstrap_dns")
 
 ADGUARD_PASSWD=${ADGUARD_PASSWD:-\$2y\$10\$aRfh9IbImR8PIf/FWlLvkeW6wiyp47BjY0KqW/FD/F14QloYuV00a}
 [ "$os_version" -ge "25" ] && { mkdir -p /etc/adguardhome; adguard_dir=/etc/adguardhome; }
@@ -1290,22 +1295,23 @@ users:
 dns:
   bind_hosts:
     - 127.0.0.1
-    - ${adguard_bind_host:-::1}
-  port: ${adguard_dns_port:-5354}
+    - ${adg_bind_host:-::1}
+  port: ${adg_dns_port:-5354}
   ratelimit: 500
   upstream_dns:
-$adguard_upstream
+$adg_upstream
   bootstrap_dns:
-$adguard_bootstrap
+$adg_bootstrap
   fallback_dns:
-$adguard_bootstrap
+$adg_bootstrap
   cache_size: 4194304
   cache_optimistic: true
-  use_private_ptr_resolvers: ${adguard_main:-false}
+  use_private_ptr_resolvers: ${adg_main:-false}
   local_ptr_upstreams:
     - 127.0.0.1:${dnsmasq_dns_port:-53}
   use_http3_upstreams: true
 querylog:
+  enabled: ${adg_querylog:-false}
   interval: 24h
   size_memory: 500
   ignored_enabled: true
@@ -1315,9 +1321,12 @@ statistics:
   ignored_enabled: true
   ignored:
     - '*.arpa'
+filtering:
+  safe_search:
+    enabled: ${adg_ss:-false}
 clients:
   runtime_sources:
-    rdns: ${adguard_main:-false}
+    rdns: ${adg_main:-false}
 log:
   enabled: false
 schema_version: 28
