@@ -116,6 +116,8 @@
  * @property {string} [USB_TETHERING]      flag
  * @property {string} [DNS_MODE]           BUILD-ONLY: 'adguardhome' | 'dnsproxy' | 'https-dns-proxy' | 'adblock-fast' | 'none'
  * @property {string} [ADGUARD_MAIN_DNS]   flag
+ * @property {string} [ADG_QUERY_LOG]      flag
+ * @property {string} [ADG_SAFE_SEARCH]    flag
  * @property {string} [DOH_UPSTREAMS]      DoH upstream URLs (space/newline list)
  * @property {string} [BOOTSTRAP_DNS]      bootstrap/fallback IPs (space/newline list)
  * @property {string} [DNSMASQ_MULTI_INSTANCE]  flag (UI-only, default off; inverse drives DNSMASQ_SINGLE_INSTANCE)

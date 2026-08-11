@@ -250,16 +250,17 @@ import { deriveVisibility, deriveNetRows, detectVlanConflict, resolveVlanAssignm
       if (!cfg) return;                       // store not ready (e.g. no network open yet)
       ui.applyVisibility(cfg);
 
-      // ADGUARD_MAIN_DNS only applies in AdGuard Home mode. When the user
-      // switches DNS mode away from AdGuard Home, force the toggle off. Read
-      // straight from the DOM (order-independent of the store-sync listener)
-      // and dispatch a bubbling change so each page's store re-syncs.
-      const agMain = ui.$('#ADGUARD_MAIN_DNS');
-      if (agMain && agMain.checked) {
-        const dnsMode = (ui.$('input[name="DNS_MODE"]:checked') || {}).value;
-        if (dnsMode && dnsMode !== 'adguardhome') {
-          agMain.checked = false;
-          agMain.dispatchEvent(new Event('change', { bubbles: true }));
+      // These toggles only apply in AdGuard Home mode. When the user switches
+      // DNS mode away from AdGuard Home, force them off. Read straight from the
+      // DOM (order-independent of the store-sync listener) and dispatch a
+      // bubbling change so each page's store re-syncs.
+      const dnsMode = (ui.$('input[name="DNS_MODE"]:checked') || {}).value;
+      if (dnsMode && dnsMode !== 'adguardhome') {
+        for (const id of ['ADGUARD_MAIN_DNS', 'ADG_QUERY_LOG', 'ADG_SAFE_SEARCH']) {
+          const el = ui.$('#' + id);
+          if (!el || !el.checked) continue;
+          el.checked = false;
+          el.dispatchEvent(new Event('change', { bubbles: true }));
         }
       }
 

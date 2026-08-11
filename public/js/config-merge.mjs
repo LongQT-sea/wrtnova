@@ -95,6 +95,8 @@ export function mergeNodeConfig(sharedConfig, nodeOverrides) {
     DNS_MODE:         c.DNS_MODE || DNS_DEFAULT,
     // Only meaningful with AdGuard Home; never emit it for dnsproxy/none.
     ADGUARD_MAIN_DNS: isAdguard(c.DNS_MODE) ? flag(c.ADGUARD_MAIN_DNS) : '',
+    ADG_QUERY_LOG:    isAdguard(c.DNS_MODE) ? flag(c.ADG_QUERY_LOG)    : '',
+    ADG_SAFE_SEARCH:  isAdguard(c.DNS_MODE) ? flag(c.ADG_SAFE_SEARCH)  : '',
     // Encrypted-DNS upstreams apply only to the DoH engines, not the plain
     // dnsmasq modes ('none' and 'adblock-fast').
     DOH_UPSTREAMS:    isDohEngine(c.DNS_MODE) ? (c.DOH_UPSTREAMS || '') : '',
