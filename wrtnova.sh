@@ -551,8 +551,8 @@ add_wifi_iface() {
 		set -- "$@" ieee80211r=1 mobility_domain="$(printf '%s' "$ssid" | md5sum | cut -c1-4)"
 
 	[ "$PSK_VLAN" = 1 ] && [ "$mode" = ap ] && {
-		if [ "$band" = 6g ] && [ -z "$BAND_SUFFIX" ]; then
-			set -- "$@" ssid="${ssid} 6G"
+		if [ "$band" = 6g ]; then
+			[ -z "$BAND_SUFFIX" ] && set -- "$@" ssid="${ssid} 6G"
 		elif [ -z "$iot_plain" ]; then
 			[ "$net" != "$lan_if" ] && {
 				_uci wireless wifi-station "" iface="${dev}_$lan_if" vid="$vid" key="$key"
