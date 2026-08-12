@@ -705,7 +705,7 @@ fi
 			min_snr='-80'
 	}
 
-	if [ "$DOT11KV" != 1 ] || [ "$no_wifi" = 1 ]; then
+	if [ "$DOT11KV" != 1 ] || [ "$no_wifi" = 1 ] || [ "$AP_DISABLE" = 1 ]; then
 		/etc/init.d/usteer disable
 	fi
 }
