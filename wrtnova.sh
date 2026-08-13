@@ -456,7 +456,8 @@ EOF
 os_version="$(get_os_version)"
 [ "${os_version:=25}" -ge 25 ] && ZONE_NAME="${ZONE_NAME// /_}"
 [ "$os_version" -le 24 ] && TIME_FORMAT=
-host_name="${HOST_NAME:-WrtNova${AP_MODE:+-${AP_INDEX:=2}}}"
+ap_idx=${AP_INDEX:-2}
+host_name="${HOST_NAME:-WrtNova${AP_MODE:+-$ap_idx}}"
 
 _uci system "" "@system[0]" hostname="$host_name" \
 	"${ZONE_NAME:+zonename=$ZONE_NAME}" "${TIME_ZONE:+timezone=$TIME_ZONE}" "${TIME_FORMAT:+clock_hourcycle=$TIME_FORMAT}"
@@ -537,7 +538,7 @@ add_wifi_iface() {
 	local dev="$1" mode="$2" ssid="$3" key="$4" net="$5" vid="$6" enc="$7" band="$8" iot_plain
 
 	set -- device="$dev" mode="$mode" key="$key" network="$net" encryption="$enc" \
-		ssid="${ssid}${INDEX_SUFFIX:+${AP_MODE:+_$AP_INDEX}}${BAND_SUFFIX:+ ${band%g}G}"
+		ssid="${ssid}${INDEX_SUFFIX:+${AP_MODE:+_$ap_idx}}${BAND_SUFFIX:+ ${band%g}G}"
 
 	[ "$net" = "$guest_if" ] && [ -n "$GUEST_ISOLATE" ] && set -- "$@" isolate=1 bridge_isolate=1
 
@@ -993,9 +994,9 @@ done >/dev/null
 		uci set network."${i}".disabled=1
 	done
 
-	_uci network interface "$lan_if" -ipaddr -ip6assign \
-		+ipaddr="$lan_net_pfx.$AP_INDEX$lan_subnet" \
-		gateway="$lan_net_pfx.1" dns="$lan_net_pfx.1" metric=5
+	_uci network interface "$lan_if" -ipaddr -ip6assign proto=dhcp
+	_uci network interface "${lan_if}_6" proto=dhcpv6 device="br-vlan.$lan_vid" reqprefix=no
+	_uci network interface "${lan_if}_mgmt" proto=static device="br-vlan.$lan_vid" +ipaddr="$lan_net_pfx.$ap_idx/24"
 
 	for i in $ifaces_lan; do
 		[ "$i" = "$lan_if" ] && continue
@@ -1416,7 +1417,7 @@ fw_redirect() {
 		name="$1 $2" src="$1" src_dport="$3" family=any ${4:+proto=$4}
 }
 
-_uci firewall zone @zone[0] -network +network="$lan_if" ~lan
+_uci firewall zone @zone[0] -network +network="$lan_if ${AP_MODE:+${lan_if}_6 ${lan_if}_mgmt}" ~lan
 [ "$FORCE_DNS" ] && fw_redirect lan Intercept-DNS 53
 
 [ "$GUEST_ENABLE" = 1 ] && {
