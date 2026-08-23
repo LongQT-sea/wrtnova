@@ -813,7 +813,7 @@ _uci network interface wan6 device=@wan ~wan_6
 		if [ "$no_mwan3" = 1 ]; then
 			for f in '' 6; do
 				if [ -z "$f" ]; then
-					dns=$WG_DNS_V4 mask=32 split="$SPLIT_TUNNEL_V4 $lan_net_pfx.1$lan_subnet"
+					dns=$WG_DNS_V4 mask=32 split="$SPLIT_TUNNEL_V4 $lan_net_pfx.0$lan_subnet"
 				else
 					dns=$WG_DNS_V6 mask=128 split="$SPLIT_TUNNEL_V6 $ula_prefix"
 				fi
@@ -995,8 +995,8 @@ done >/dev/null
 	done
 
 	_uci network interface "$lan_if" -ipaddr -ip6assign proto=dhcp
-	_uci network interface "${lan_if}_6" proto=dhcpv6 device="br-vlan.$lan_vid" reqprefix=no
-	_uci network interface "${lan_if}_mgmt" proto=static device="br-vlan.$lan_vid" +ipaddr="$lan_net_pfx.$ap_idx/24"
+	_uci network interface "${lan_if}_6" proto=dhcpv6 device="@lan" reqprefix=no
+	_uci network interface "${lan_if}_mgmt" proto=static device="br-vlan.$lan_vid" +ipaddr="$lan_net_pfx.$ap_idx$lan_subnet"
 
 	for i in $ifaces_lan; do
 		[ "$i" = "$lan_if" ] && continue
