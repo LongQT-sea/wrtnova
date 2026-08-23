@@ -1391,14 +1391,11 @@ fw_add_base_rules() {
 	fw_rule "$1" Allow-MLD proto=icmp family=ipv6 src_ip=fe80::/10 \
 		+icmp_type="130/0 131/0 132/0 143/0"
 
-	fw_rule "$1" Allow-ICMPv6-ND proto=icmp family=ipv6 \
-		+icmp_type="neighbour-solicitation neighbour-advertisement
-		router-solicitation router-advertisement"
-
-	fw_rule "$1" Allow-ICMPv6-Input proto=icmp family=ipv6 limit=1000/sec \
+	fw_rule "$1" Allow-ICMPv6-Input proto=icmp family=ipv6 \
 		+icmp_type="bad-header destination-unreachable
-		echo-reply echo-request packet-too-big
-		time-exceeded unknown-header-type"
+		echo-reply echo-request neighbour-advertisement
+		neighbour-solicitation packet-too-big router-advertisement
+		router-solicitation time-exceeded unknown-header-type"
 }
 
 fw_accept_to_lan() {
