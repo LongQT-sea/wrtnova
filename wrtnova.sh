@@ -689,7 +689,7 @@ fi
 
 # https://openwrt.org/docs/guide-user/network/wifi/usteer
 [ -x /sbin/usteerd ] && {
-	_uci usteer "" @usteer[0] \
+	_uci usteer "" @usteer[0] ipv6=1 \
 		network="$lan_if" \
 		roam_scan_snr='-68' \
 		signal_diff_threshold='8' \
